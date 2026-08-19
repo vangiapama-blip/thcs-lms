@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>THCS AMA TRANG LƠNG - Hệ thống LMS chuẩn GDPT 2018</title>
+  <!-- Google Fonts for Perfect Vietnamese Typography & Accents -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css?v=20260809_095200">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <!-- Chart.js for smooth interactive statistics & charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- PeerJS for wireless P2P mobile camera stream -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <!-- Load Scripts in exact synchronous order without type=module for 100% instant execution -->
+  <script src="render_views.js?v=20260809_095200"></script>
+  <script src="database.js?v=20260809_095200"></script>
+  <script src="ai_teaching_tools.js?v=20260809_095200"></script>
+  <script src="app.js?v=20260809_095200"></script>
+</head>
+<body>
+
+  <!-- Glow Background Blobs for Futuristic Design -->
+  <div class="glow-blob glow-blob-1"></div>
+  <div class="glow-blob glow-blob-2"></div>
+
+  <!-- Main Container -->
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-section" onclick="if(window.app) window.app.switchView('info');" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1.5px solid var(--glass-border); padding-bottom: 1.25rem; width: 100%; cursor: pointer;" title="Nhấp vào để quay về Trang chủ">
+        <img src="logo.png" alt="AMTL Logo" style="width: 80px; height: 80px; object-fit: contain; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+        <div>
+          <span class="logo-text" style="font-size: 1.05rem; font-weight: 900; letter-spacing: -0.2px; display: block; color: #1e40af; text-transform: uppercase; white-space: nowrap; width: 100%; text-align: center; line-height: 1.45; padding-top: 4px; padding-bottom: 2px;">CỔNG TRƯỜNG HỌC SỐ</span>
+          <span class="logo-sub" style="font-size: 0.85rem; font-weight: 900; color: #0f172a; display: block; margin-top: 0.15rem; letter-spacing: 0.5px; white-space: nowrap; line-height: 1.35;">THCS AMA TRANG LƠNG</span>
+        </div>
+      </div>
+
+      <ul class="nav-menu" id="nav-menu">
+        <!-- Navigation items will be injected by JavaScript based on Role -->
+      </ul>
+
+      <footer class="sidebar-footer">
+        <p style="font-weight: 800; color: #1e293b; font-size: 0.78rem;">© 2026 THCS AMA TRANG LƠNG</p>
+        <p style="font-size: 0.65rem; margin-top: 0.2rem; color: var(--text-muted);">Phiên bản 3.5-AI Pro</p>
+      </footer>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+        <!-- Top Header Bar -->
+        <header class="top-header">
+      <!-- School Tag -->
+      <div class="school-info-badge" onclick="if(window.app) window.app.switchView('info');" style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer;" title="Nhấp vào để quay về Trang chủ">
+        <img src="logo.png" alt="Logo" style="width: 42px; height: 42px; object-fit: contain; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0;">
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
+          <span class="school-name" id="school-name-text" style="font-size: 1.02rem; font-weight: 900; color: #1e40af; line-height: 1.2;">THCS AMA TRANG LƠNG</span>
+          <span id="school-address-text" style="font-size: 0.78rem; font-weight: 400; color: #475569; line-height: 1.2; margin-top: 0.1rem;">Địa chỉ: Dliê Ya, Đắk Lắk</span>
+          <div id="school-year-custom-wrapper" style="position: relative; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; margin-top: 1px;" onclick="if(window.app) window.app.toggleCustomYearDropdown(event);">
+            <span id="school-year-current-text" style="font-size: 8px !important; font-weight: 400 !important; color: #0284c7 !important; line-height: 1 !important; user-select: none;">2025-2026</span>
+            <svg style="width: 7px; height: 7px; fill: none; stroke: #0284c7; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; pointer-events: none;" viewBox="0 0 24 24">
+              <path d="M6 9l6 6 6-6"></path>
+            </svg>
+
+            <div id="custom-year-menu" style="display: none; position: absolute; top: 100%; left: 0; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; min-width: 90px; padding: 4px 0; margin-top: 2px;">
+              <div onclick="if(window.app) window.app.selectYearCustom('2025-2026');" style="padding: 4px 8px; font-size: 11px; font-weight: 500; color: #1e293b; cursor: pointer;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='transparent';">2025-2026</div>
+              <div onclick="if(window.app) window.app.selectYearCustom('2026-2027');" style="padding: 4px 8px; font-size: 11px; font-weight: 500; color: #1e293b; cursor: pointer;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='transparent';">2026-2027</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Top Horizontal Menu Bar (Chỉ xuất hiện khi đăng nhập tài khoản Admin) -->
+      <div class="role-switcher-container" id="admin-top-role-switcher" style="display: none; align-items: center; gap: 0.4rem; background: #f1f5f9; padding: 0.35rem 0.6rem; border-radius: 12px; border: 1.5px solid rgba(2, 132, 199, 0.2);">
+        <button class="role-btn active" data-role="admin" onclick="if(window.app) window.app.switchRole('admin');" style="font-weight: 400; cursor: pointer; padding: 0.45rem 0.9rem;">🏛️ Trang chủ</button>
+        <button class="role-btn" data-role="teacher" onclick="if(window.app) window.app.switchRole('teacher');" style="font-weight: 400; cursor: pointer; padding: 0.45rem 0.9rem;">👨‍🏫 Giáo viên</button>
+        <button class="role-btn" data-role="student" onclick="if(window.app) window.app.switchRole('student');" style="font-weight: 400; cursor: pointer; padding: 0.45rem 0.9rem;">🎓 Học sinh</button>
+        <button class="role-btn" data-role="parent" onclick="if(window.app) window.app.switchRole('parent');" style="font-weight: 400; cursor: pointer; padding: 0.45rem 0.9rem;">👥 Phụ huynh</button>
+      </div>
+
+      <!-- Profile Widget (Direct Onclick Trigger) -->
+      <div class="user-profile" id="header-user-profile-widget" onclick="if(window.app) window.app.showProfileChoiceModal();" style="cursor: pointer; position: relative;" title="Nhấp vào đây để chọn Xem hoặc Sửa thông tin cá nhân">
+        <div class="avatar" id="header-user-avatar" onclick="if(window.app) window.app.showProfileChoiceModal();" style="overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2.5px solid #2563eb; width: 36px; height: 36px; border-radius: 50%;">A</div>
+        <div class="user-details" onclick="if(window.app) window.app.showProfileChoiceModal();">
+          <span class="user-name" id="header-user-name" style="font-weight: 400; font-family: var(--font-title);">Quản trị viên</span>
+          <span class="user-role" id="header-user-role" style="font-size: 0.72rem; font-weight: 400;">ADMIN</span>
+        </div>
+      </div>
+
+      <!-- Sleek Vector Logout Icon Button -->
+      <button id="btn-header-quick-logout" onclick="if(window.app) window.app.logout();" style="background: rgba(239, 68, 68, 0.08); border: 1.5px solid rgba(239, 68, 68, 0.25); color: #dc2626; width: 42px; height: 42px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 0.75rem; transition: all 0.2s ease-in-out; box-shadow: 0 2px 8px rgba(0,0,0,0.04);" title="Thoát tài khoản (Đăng xuất)" onmouseover="this.style.background='#dc2626'; this.style.color='#ffffff'; this.style.boxShadow='0 4px 12px rgba(220,38,38,0.35)';" onmouseout="this.style.background='rgba(239, 68, 68, 0.08)'; this.style.color='#dc2626'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.04)';">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </button>
+    </header>
+
+      <!-- Page Content Viewport -->
+      <section class="view-viewport" id="viewport">
+        <!-- View content will be injected by JavaScript -->
+      </section>
+
+      <!-- Global Copyright & Author Footer -->
+      <footer id="global-app-author-footer" style="margin-top: 1.25rem; padding: 0.6rem 1rem; background: transparent; border: none; box-shadow: none; text-align: center; font-family: var(--font-title); font-size: 0.74rem; color: #64748b; opacity: 0.85;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; font-weight: 400;">
+          <span>⚡ Hệ thống được phát triển bởi thầy <strong style="color: #0284c7; font-size: 0.76rem;">Chu Văn Giáp</strong></span>
+          <span style="color: #cbd5e1;">|</span>
+          <span>📞 Điện thoại / Zalo: <a href="tel:0397800689" style="color: #16a34a; font-weight: 400; text-decoration: none; font-family: monospace; font-size: 0.78rem;">0397800689</a></span>
+          <span style="color: #cbd5e1;">|</span>
+          <span>🏫 Đơn vị: <strong style="color: #7c3aed;">Trường THCS Ama Trang Lơng, Dliê Ya, Đắk Lắk</strong></span>
+        </div>
+      </footer>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container" style="z-index: 9999999; position: fixed; top: 20px; right: 20px;"></div>
+
+  <!-- Fullscreen Ultra-Stunning Graphic Login Overlay -->
+  <div id="login-overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at top right, #1e1b4b 0%, #0f172a 50%, #0284c7 100%); z-index: 100000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(12px); padding: 1.5rem; overflow-y: auto;">
+    
+    <!-- Background Animated Glowing Blobs for Graphic Wow Factor -->
+    <div style="position: absolute; width: 400px; height: 400px; background: rgba(59, 130, 246, 0.25); filter: blur(90px); border-radius: 50%; top: -100px; left: -100px; pointer-events: none;"></div>
+    <div style="position: absolute; width: 350px; height: 350px; background: rgba(168, 85, 247, 0.2); filter: blur(80px); border-radius: 50%; bottom: -80px; right: -80px; pointer-events: none;"></div>
+
+    <div class="glass-card" style="width: 100%; max-width: 520px; padding: 2.5rem 2.25rem; text-align: center; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45); border: 2px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.96); border-radius: 28px; font-family: var(--font-title); animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); position: relative; backdrop-filter: blur(20px);">
+      <!-- Direct Skip / Close Button -->
+      
+      
+      <!-- School Logo & Header Title -->
+      <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem;">
+        <div style="position: relative; margin-bottom: 0.85rem;">
+          <img src="logo.png" alt="AMTL Logo" style="width: 90px; height: 90px; object-fit: contain; border-radius: 20px; box-shadow: 0 10px 25px rgba(37,99,235,0.35); border: 3px solid #ffffff; background: #ffffff;">
+          <span style="position: absolute; bottom: -5px; right: -5px; background: #10b981; color: white; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.68rem; font-weight: 400; border: 2px solid #ffffff;">2025-2026</span>
+        </div>
+
+        <span style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; padding: 0.3rem 0.95rem; border-radius: 20px; font-size: 0.78rem; font-weight: 400; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 0.4rem; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+          HỆ THỐNG LMS AI THÔNG MINH
+        </span>
+        <h2 style="margin: 0; color: #0f172a; font-weight: 400; font-size: 1.45rem; letter-spacing: -0.5px; line-height: 1.25;">
+          THCS AMA TRANG LƠNG
+        </h2>
+        <p style="font-size: 0.84rem; color: #64748b; margin: 0.3rem 0 0 0; font-weight: 400;">
+          Dliê Ya, Đắk Lắk
+        </p>
+      </div>
+
+      <!-- 3 Role Tabs Selection (Giáo viên, Học sinh & Phụ huynh) -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.35rem; background: #f1f5f9; padding: 0.35rem; border-radius: 16px; border: 1.5px solid #cbd5e1; margin-bottom: 1.5rem;">
+        <button type="button" id="login-tab-teacher" class="login-role-tab active" onclick="if(window.app) window.app.switchLoginTab('teacher');" style="padding: 0.75rem 0.3rem; border-radius: 12px; font-weight: 700; font-family: var(--font-title); font-size: 0.8rem; border: none; cursor: pointer; transition: all 0.25s ease; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; box-shadow: 0 4px 14px rgba(37,99,235,0.35); display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+          👨‍🏫 GIÁO VIÊN
+        </button>
+        <button type="button" id="login-tab-student" class="login-role-tab" onclick="if(window.app) window.app.switchLoginTab('student');" style="padding: 0.75rem 0.3rem; border-radius: 12px; font-weight: 700; font-family: var(--font-title); font-size: 0.8rem; border: none; cursor: pointer; transition: all 0.25s ease; background: transparent; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+          🎓 HỌC SINH
+        </button>
+        <button type="button" id="login-tab-parent" class="login-role-tab" onclick="if(window.app) window.app.switchLoginTab('parent');" style="padding: 0.75rem 0.3rem; border-radius: 12px; font-weight: 700; font-family: var(--font-title); font-size: 0.8rem; border: none; cursor: pointer; transition: all 0.25s ease; background: transparent; color: #64748b; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+          👨‍👩‍👧 PHỤ HUYNH
+        </button>
+      </div>
+
+      <!-- Error Message Box -->
+      <div id="login-error-msg" style="display: none; margin-bottom: 1.25rem; padding: 0.85rem 1rem; background: #fef2f2; border: 1.8px solid #ef4444; color: #dc2626; border-radius: 12px; font-weight: 400; font-size: 0.88rem; text-align: center; line-height: 1.4; animation: shake 0.3s ease-in-out;">
+        ⚠️ Bạn đã nhập sai tên đăng nhập và mật khẩu hãy đăng nhập lại hoặc liên hệ Admin.
+      </div>
+
+      <!-- Form Login Panel -->
+      <form id="main-login-form" onsubmit="event.preventDefault(); if(typeof window.handleLoginSubmit==='function') { window.app.handleLoginSubmit(event); } else if(window.app && window.app.handleLoginSubmit) { window.app.handleLoginSubmit(event); } return false;">
+        <input type="hidden" id="login-active-role" value="teacher">
+
+        <!-- Input 1: Tên đăng nhập -->
+        <div style="text-align: left; margin-bottom: 1.15rem;">
+          <label style="font-weight: 400; color: #1e293b; font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+            <span>👤</span> Tên đăng nhập:
+          </label>
+          <div style="position: relative;">
+            <input type="text" id="login-username-input" class="form-control" placeholder="Nhập tên đăng nhập của bạn..." style="height: 46px; font-weight: 400; color: #0f172a; border-radius: 12px; border: 1.5px solid #cbd5e1; padding: 0 1rem; font-size: 0.95rem; width: 100%; font-family: var(--font-body);" required>
+          </div>
+        </div>
+
+        <!-- Input 2: Mật khẩu -->
+        <div style="text-align: left; margin-bottom: 1.5rem;">
+          <label style="font-weight: 400; color: #1e293b; font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+            <span>🔑</span> Mật khẩu truy cập:
+          </label>
+          <div style="display: flex; align-items: center; gap: 0.4rem; background: #ffffff; border-radius: 12px; border: 1.5px solid #cbd5e1; padding: 0 0.4rem 0 1rem; height: 46px;">
+            <input type="password" id="login-password-input" placeholder="Nhập mật khẩu của bạn..." style="height: 100%; border: none; outline: none; font-weight: 400; color: #0f172a; flex: 1; font-size: 0.95rem; font-family: var(--font-body); background: transparent;" required>
+            <button type="button" id="btn-toggle-login-pwd-vis" onclick="if(window.app) window.app.toggleLoginPasswordVisibility();" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem; color: #64748b;" title="Hiện / Ẩn mật khẩu">👁️</button>
+          </div>
+        </div>
+
+        <!-- Vivid Interactive Login Button -->
+        <button type="submit" id="btn-submit-login" class="btn btn-primary icon-only-btn" style="width: 100%; padding: 0.95rem; font-weight: 400; font-family: var(--font-title); font-size: 1.1rem; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: none; border-radius: 14px; cursor: pointer; color: white; box-shadow: 0 8px 24px rgba(37,99,235,0.4); display: flex; align-items: center; justify-content: center; gap: 0.6rem; transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;" onmouseover="this.style.transform='scale(1.03) translateY(-2px)';this.style.boxShadow='0 14px 32px rgba(37,99,235,0.55)';" onmouseout="this.style.transform='scale(1) translateY(0)';this.style.boxShadow='0 8px 24px rgba(37,99,235,0.4)';">
+          <span>🚀</span> ĐĂNG NHẬP TRANG QUẢN TRỊ GIÁO VIÊN
+        </button>
+      </form>
+
+      <!-- Author Copyright Footer -->
+      <div style="margin-top: 1.75rem; font-size: 0.76rem; color: #64748b; font-weight: 400; border-top: 1.5px solid #e2e8f0; padding-top: 1rem; font-family: var(--font-title);">
+        <div style="display: flex; flex-direction: column; gap: 0.3rem; align-items: center;">
+          <div>⚡ Hệ thống được phát triển bởi thầy <strong style="color: #0284c7; font-size: 0.8rem;">Chu Văn Giáp</strong></div>
+          <div>📞 Điện thoại / Zalo: <a href="tel:0397800689" style="color: #16a34a; font-weight: 400; text-decoration: none; font-family: monospace; font-size: 0.82rem;">0397800689</a></div>
+          <div>🏫 Đơn vị: <strong style="color: #7c3aed;">Trường THCS Ama Trang Lơng, Dliê Ya, Đắk Lắk</strong></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bridge: Wait for window.app then bind login events -->
+  <script>
+    (function() {
+      function bindLoginEvents() {
+        if (!window.app || typeof window.app.handleLoginSubmit !== 'function') return;
+        var form = document.getElementById('main-login-form');
+        if (!form) return;
+        // Override onsubmit directly - most reliable method
+        form.onsubmit = function(e) {
+          e.preventDefault();
+          window.app.handleLoginSubmit(e);
+        };
+        // Intelligent restore of remembered credentials from local storage
+        if (window.app && typeof window.app.restoreRememberedCredentials === 'function') {
+          window.app.restoreRememberedCredentials();
+        }
+      }
+      // Listen for app-ready event from app.js module
+      window.addEventListener('lms-app-ready', bindLoginEvents);
+      // Fallback: try after delays to ensure app.js module is loaded
+      setTimeout(bindLoginEvents, 300);
+      setTimeout(bindLoginEvents, 800);
+      setTimeout(bindLoginEvents, 2000);
+      setTimeout(bindLoginEvents, 4000);
+    })();
+  </script>
+
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        if (window.app && typeof window.app.switchView === 'function') {
+          window.app.switchView('info');
+        }
+      }, 50);
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+{
+  "name": "thcs-lms",
+  "version": "2.0.0",
+  "description": "Hệ thống Quản lý Học tập & Khảo thí Trực tuyến THCS Ama Trang Lơng",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "lms",
+    "thcs",
+    "education",
+    "online-exam"
+  ],
+  "author": "THCS LMS",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
