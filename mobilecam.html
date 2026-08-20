@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>THCS Ama Trang Lơng - Live Phone Camera Remote</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #0f172a; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 1rem; text-align: center; overflow-x: hidden; }
+    .header { width: 100%; max-width: 480px; margin-top: 0.5rem; }
+    .badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; padding: 0.4rem 1rem; border-radius: 20px; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.5px; }
+    .pulse { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; animation: blink 1.2s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    h1 { font-size: 1.3rem; margin-top: 0.6rem; color: #f8fafc; font-weight: 900; }
+    .status-msg { font-size: 0.85rem; color: #94a3b8; margin-top: 0.4rem; font-weight: 600; padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.05); border-radius: 10px; display: inline-block; }
+    .cam-box { width: 100%; max-width: 480px; height: 52vh; border-radius: 24px; overflow: hidden; background: #1e293b; position: relative; border: 2px solid #3b82f6; box-shadow: 0 12px 35px rgba(59, 130, 246, 0.25); margin: 0.8rem 0; display: flex; justify-content: center; align-items: center; }
+    video, img { width: 100%; height: 100%; object-fit: cover; border-radius: 22px; }
+    .scanner-line { position: absolute; left: 0; right: 0; height: 3px; background: #10b981; box-shadow: 0 0 15px #10b981; animation: scan 2.5s infinite ease-in-out; z-index: 10; }
+    @keyframes scan { 0% { top: 5%; } 50% { top: 92%; } 100% { top: 5%; } }
+    .controls { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .btn-action { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border: none; padding: 0.9rem 1.5rem; border-radius: 16px; font-weight: 800; font-size: 1rem; width: 100%; cursor: pointer; box-shadow: 0 6px 20px rgba(37,99,235,0.35); display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.2s; }
+    .btn-secondary { background: #334155; color: #f8fafc; border: 1px solid #475569; padding: 0.75rem 1.2rem; border-radius: 14px; font-weight: 700; font-size: 0.88rem; width: 100%; cursor: pointer; }
+    .fallback-box { display: none; background: #1e293b; padding: 1.2rem; border-radius: 18px; border: 1px solid #475569; font-size: 0.85rem; color: #cbd5e1; text-align: left; line-height: 1.5; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="badge"><span class="pulse"></span> THU PHÁT HÌNH ẢNH DI ĐỘNG LIVE</div>
+    <h1>THCS AMA TRANG LƠNG - KHUÔN MẶT AI</h1>
+    <div id="status-display" class="status-msg">⏳ Đang kết nối Camera điện thoại...</div>
+  </div>
+
+  <div class="cam-box" id="cam-box-container">
+    <video id="remote-video" autoplay playsinline muted></video>
+    <img id="fallback-img" src="./real_classroom.png" style="display: none;" alt="Ảnh xem trước lớp học">
+    <div class="scanner-line"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn-action" onclick="toggleCamera()">🔄 Đổi Camera Trước / Sau</button>
+    <label class="btn-secondary" style="text-align: center; display: block; cursor: pointer;">
+      📸 Chụp & Tải Ảnh Trực Tiếp Lớp Học
+      <input type="file" accept="image/*" capture="environment" style="display: none;" onchange="handleFileInput(this)">
+    </label>
+  </div>
+
+  <div id="fallback-box" class="fallback-box">
+    <strong style="color: #60a5fa; display: block; margin-bottom: 0.4rem;">💡 Hướng dẫn cấp quyền Camera trên Điện thoại:</strong>
+    1. Bấm vào biểu tượng 🔒 hoặc ⚙️ bên cạnh địa chỉ web trên trình duyệt điện thoại.<br>
+    2. Chọn <strong>Cho phép truy cập Máy ảnh (Camera)</strong>.<br>
+    3. Tải lại trang này để phát hình ảnh trực tiếp lên máy tính giáo viên!
+  </div>
+
+  <script>
+    let currentStream = null;
+    let currentFacingMode = 'environment';
+    const statusDisp = document.getElementById('status-display');
+    const videoElem = document.getElementById('remote-video');
+    const fallbackImg = document.getElementById('fallback-img');
+    const fallbackBox = document.getElementById('fallback-box');
+
+    function startCam() {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+      
+      statusDisp.innerHTML = '⏳ Đang yêu cầu quyền mở Camera...';
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showCamError('Trình duyệt điện thoại không hỗ trợ mở camera trực tiếp.');
+        return;
+      }
+
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      }).then(stream => {
+        currentStream = stream;
+        videoElem.style.display = 'block';
+        fallbackImg.style.display = 'none';
+        videoElem.srcObject = stream;
+        videoElem.play();
+        statusDisp.innerHTML = '🟢 ĐÃ PHÁT CAMERA DI ĐỘNG TRỰC TIẾP CHUẨN HD';
+        statusDisp.style.background = 'rgba(16, 185, 129, 0.2)';
+        statusDisp.style.color = '#10b981';
+      }).catch(err => {
+        console.warn('getUserMedia error:', err);
+        showCamError('⚠️ Trình duyệt chặn mở Camera trên kết nối HTTP.');
+      });
+    }
+
+    function showCamError(msg) {
+      statusDisp.innerHTML = msg;
+      statusDisp.style.background = 'rgba(239, 68, 68, 0.2)';
+      statusDisp.style.color = '#f87171';
+      videoElem.style.display = 'none';
+      fallbackImg.style.display = 'block';
+      fallbackBox.style.display = 'block';
+    }
+
+    function toggleCamera() {
+      currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+      startCam();
+    }
+
+    function handleFileInput(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          fallbackImg.src = e.target.result;
+          videoElem.style.display = 'none';
+          fallbackImg.style.display = 'block';
+          statusDisp.innerHTML = '🟢 ĐÃ TẢI ẢNH CHỤP TRỰC TIẾP TỪ ĐIỆN THOẠI';
+          statusDisp.style.background = 'rgba(16, 185, 129, 0.2)';
+          statusDisp.style.color = '#10b981';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // Auto start on page load
+    window.addEventListener('load', startCam);
+  </script>
+</body>
+</html>

@@ -1,0 +1,4515 @@
+{
+  "schoolInfo": {
+    "name": "TH-THCS AMA TRANG LƠNG",
+    "address": "Dliê Ya, Đắk Lắk",
+    "principal": "Thầy Y Krơr Niê",
+    "phone": "0500.3871234",
+    "email": "amatranglong.thcs@daklak.edu.vn"
+  },
+  "academicYears": [
+    {
+      "id": "2025-2026",
+      "name": "Năm học 2025-2026",
+      "current": true
+    },
+    {
+      "id": "2026-2027",
+      "name": "Năm học 2026-2027",
+      "current": false
+    }
+  ],
+  "semesters": [
+    {
+      "id": "HK1",
+      "name": "Học kỳ I",
+      "current": true
+    },
+    {
+      "id": "HK2",
+      "name": "Học kỳ II",
+      "current": false
+    }
+  ],
+  "grades": [
+    6,
+    7,
+    8,
+    9
+  ],
+  "classes": [
+    {
+      "id": "6A",
+      "grade": 6,
+      "room": "Phòng 101",
+      "homeroomTeacherId": "gv_huong"
+    },
+    {
+      "id": "6B",
+      "grade": 6,
+      "room": "Phòng 102",
+      "homeroomTeacherId": "gv_lan"
+    },
+    {
+      "id": "7A",
+      "grade": 7,
+      "room": "Phòng 201",
+      "homeroomTeacherId": "gv_nam"
+    },
+    {
+      "id": "8A",
+      "grade": 8,
+      "room": "Phòng 301",
+      "homeroomTeacherId": null
+    },
+    {
+      "id": "9A",
+      "grade": 9,
+      "room": "Phòng 401",
+      "homeroomTeacherId": null
+    }
+  ],
+  "subjects": [
+    {
+      "id": "toan",
+      "name": "Toán học",
+      "icon": "📐"
+    },
+    {
+      "id": "van",
+      "name": "Ngữ văn",
+      "icon": "📖"
+    },
+    {
+      "id": "anh",
+      "name": "Tiếng Anh",
+      "icon": "🇬🇧"
+    },
+    {
+      "id": "khtn",
+      "name": "Khoa học Tự nhiên",
+      "icon": "🔬"
+    },
+    {
+      "id": "lsdl",
+      "name": "Lịch sử và Địa lý",
+      "icon": "🗺️"
+    },
+    {
+      "id": "tin",
+      "name": "Tin học",
+      "icon": "💻"
+    },
+    {
+      "id": "gdcd",
+      "name": "Giáo dục Công dân",
+      "icon": "⚖️"
+    },
+    {
+      "id": "congnghe",
+      "name": "Công nghệ",
+      "icon": "🛠️"
+    },
+    {
+      "id": "nghethuat",
+      "name": "Nghệ thuật (Âm nhạc / Mỹ thuật)",
+      "icon": "🎨"
+    },
+    {
+      "id": "gdtc",
+      "name": "Giáo dục Thể chất",
+      "icon": "⚽"
+    },
+    {
+      "id": "hn_trainghiem",
+      "name": "HĐ Trải nghiệm, Hướng nghiệp",
+      "icon": "🌟"
+    }
+  ],
+  "teachers": [
+    {
+      "id": "gv_huong",
+      "name": "Nguyễn Thị Hương",
+      "username": "thcsamtl_huongnt",
+      "password": "gv123456",
+      "email": "huong.nt@school.edu.vn",
+      "phone": "0987654321",
+      "subjectId": "toan",
+      "classes": [
+        "6A",
+        "6B",
+        "7A"
+      ],
+      "isHomeroom": "6A",
+      "dob": ""
+    },
+    {
+      "id": "gv_nam",
+      "name": "Trần Hải Nam",
+      "username": "thcsamtl_namth",
+      "password": "gv123456",
+      "email": "nam.th@school.edu.vn",
+      "phone": "0912345678",
+      "subjectId": "van",
+      "classes": [
+        "6A",
+        "7A",
+        "8A"
+      ],
+      "isHomeroom": "7A",
+      "dob": ""
+    },
+    {
+      "id": "gv_lan",
+      "name": "Lê Thu Lan",
+      "username": "thcsamtl_lanlt",
+      "password": "gv123456",
+      "email": "lan.lt@school.edu.vn",
+      "phone": "0934567890",
+      "subjectId": "anh",
+      "classes": [
+        "6A",
+        "6B",
+        "8A"
+      ],
+      "isHomeroom": null,
+      "dob": ""
+    },
+    {
+      "id": "gv_cuong",
+      "name": "Phạm Quốc Cường",
+      "username": "thcsamtl_cuongpq",
+      "password": "gv123456",
+      "email": "cuong.pq@school.edu.vn",
+      "phone": "0945678901",
+      "subjectId": "khtn",
+      "classes": [
+        "6A",
+        "7A",
+        "9A"
+      ],
+      "isHomeroom": null,
+      "dob": ""
+    }
+  ],
+  "students": [
+    {
+      "id": "hs_6a_1",
+      "name": "Trần Đức Đức",
+      "classId": "6A",
+      "dob": "2014-02-02",
+      "gender": "Nam",
+      "parentName": "Trần Minh Dũng",
+      "parentPhone": "0914101234",
+      "username": "hs_6a_1",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_2",
+      "name": "Lê Ngọc Ngọc",
+      "classId": "6A",
+      "dob": "2014-03-03",
+      "gender": "Nữ",
+      "parentName": "Lê Quốc Nam",
+      "parentPhone": "0935102468",
+      "username": "hs_6a_2",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_3",
+      "name": "Phạm Gia Hùng",
+      "classId": "6A",
+      "dob": "2014-04-04",
+      "gender": "Nam",
+      "parentName": "Phạm Đức Hải",
+      "parentPhone": "0983103702",
+      "username": "hs_6a_3",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_4",
+      "name": "Hoàng Khánh Trang",
+      "classId": "6A",
+      "dob": "2014-05-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Hải Tuấn",
+      "parentPhone": "0972104936",
+      "username": "hs_6a_4",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_5",
+      "name": "Vũ Hải Phong",
+      "classId": "6A",
+      "dob": "2014-06-06",
+      "gender": "Nam",
+      "parentName": "Vũ Văn Hà",
+      "parentPhone": "0905106170",
+      "username": "hs_6a_5",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_6",
+      "name": "Đặng Gia Anh",
+      "classId": "6A",
+      "dob": "2014-07-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Minh Cường",
+      "parentPhone": "0914107404",
+      "username": "hs_6a_6",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_7",
+      "name": "Bùi Văn Bình",
+      "classId": "6A",
+      "dob": "2014-08-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Quốc Thành",
+      "parentPhone": "0935108638",
+      "username": "hs_6a_7",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_8",
+      "name": "Đỗ Trúc Nhi",
+      "classId": "6A",
+      "dob": "2014-09-09",
+      "gender": "Nữ",
+      "parentName": "Trần Đức Sơn",
+      "parentPhone": "0983109872",
+      "username": "hs_6a_8",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_9",
+      "name": "Hồ Hoàng Phúc",
+      "classId": "6A",
+      "dob": "2014-10-10",
+      "gender": "Nam",
+      "parentName": "Lê Hải Bình",
+      "parentPhone": "0972111106",
+      "username": "hs_6a_9",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_10",
+      "name": "Y Thị Quỳnh",
+      "classId": "6A",
+      "dob": "2014-11-11",
+      "gender": "Nữ",
+      "parentName": "Phạm Văn Hùng",
+      "parentPhone": "0905112340",
+      "username": "hs_6a_10",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_11",
+      "name": "Nông Đức Huy",
+      "classId": "6A",
+      "dob": "2014-12-12",
+      "gender": "Nam",
+      "parentName": "Hoàng Minh Dũng",
+      "parentPhone": "0914113574",
+      "username": "hs_6a_11",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_12",
+      "name": "Nguyễn Ngọc Yến",
+      "classId": "6A",
+      "dob": "2014-01-13",
+      "gender": "Nữ",
+      "parentName": "Vũ Quốc Nam",
+      "parentPhone": "0935114808",
+      "username": "hs_6a_12",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_13",
+      "name": "Trần Gia Sơn",
+      "classId": "6A",
+      "dob": "2014-02-14",
+      "gender": "Nam",
+      "parentName": "Đặng Đức Hải",
+      "parentPhone": "0983116042",
+      "username": "hs_6a_13",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_14",
+      "name": "Lê Khánh Lam",
+      "classId": "6A",
+      "dob": "2014-03-15",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Hải Tuấn",
+      "parentPhone": "0972117276",
+      "username": "hs_6a_14",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_15",
+      "name": "Phạm Hải Triết",
+      "classId": "6A",
+      "dob": "2014-04-16",
+      "gender": "Nam",
+      "parentName": "Trần Văn Hà",
+      "parentPhone": "0905118510",
+      "username": "hs_6a_15",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_16",
+      "name": "Hoàng Gia Vân",
+      "classId": "6A",
+      "dob": "2014-05-17",
+      "gender": "Nữ",
+      "parentName": "Lê Minh Cường",
+      "parentPhone": "0914119744",
+      "username": "hs_6a_16",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_17",
+      "name": "Vũ Văn Lâm",
+      "classId": "6A",
+      "dob": "2014-06-18",
+      "gender": "Nam",
+      "parentName": "Phạm Quốc Thành",
+      "parentPhone": "0935120978",
+      "username": "hs_6a_17",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_18",
+      "name": "Đặng Trúc Mai",
+      "classId": "6A",
+      "dob": "2014-07-19",
+      "gender": "Nữ",
+      "parentName": "Hoàng Đức Sơn",
+      "parentPhone": "0983122212",
+      "username": "hs_6a_18",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_19",
+      "name": "Bùi Hoàng Tâm",
+      "classId": "6A",
+      "dob": "2014-08-20",
+      "gender": "Nam",
+      "parentName": "Vũ Hải Bình",
+      "parentPhone": "0972123446",
+      "username": "hs_6a_19",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_20",
+      "name": "Đỗ Thị Vy",
+      "classId": "6A",
+      "dob": "2014-09-21",
+      "gender": "Nữ",
+      "parentName": "Đặng Văn Hùng",
+      "parentPhone": "0905124680",
+      "username": "hs_6a_20",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_21",
+      "name": "Hồ Đức Đức",
+      "classId": "6A",
+      "dob": "2014-10-22",
+      "gender": "Nam",
+      "parentName": "Nguyễn Minh Dũng",
+      "parentPhone": "0914125914",
+      "username": "hs_6a_21",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_22",
+      "name": "Y Ngọc Ngọc",
+      "classId": "6A",
+      "dob": "2014-11-23",
+      "gender": "Nữ",
+      "parentName": "Trần Quốc Nam",
+      "parentPhone": "0935127148",
+      "username": "hs_6a_22",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_23",
+      "name": "Nông Gia Hùng",
+      "classId": "6A",
+      "dob": "2014-12-24",
+      "gender": "Nam",
+      "parentName": "Lê Đức Hải",
+      "parentPhone": "0983128382",
+      "username": "hs_6a_23",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_24",
+      "name": "Nguyễn Khánh Trang",
+      "classId": "6A",
+      "dob": "2014-01-25",
+      "gender": "Nữ",
+      "parentName": "Phạm Hải Tuấn",
+      "parentPhone": "0972129616",
+      "username": "hs_6a_24",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_25",
+      "name": "Trần Hải Phong",
+      "classId": "6A",
+      "dob": "2014-02-26",
+      "gender": "Nam",
+      "parentName": "Hoàng Văn Hà",
+      "parentPhone": "0905130850",
+      "username": "hs_6a_25",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_26",
+      "name": "Lê Gia Anh",
+      "classId": "6A",
+      "dob": "2014-03-27",
+      "gender": "Nữ",
+      "parentName": "Vũ Minh Cường",
+      "parentPhone": "0914132084",
+      "username": "hs_6a_26",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_27",
+      "name": "Phạm Văn Bình",
+      "classId": "6A",
+      "dob": "2014-04-28",
+      "gender": "Nam",
+      "parentName": "Đặng Quốc Thành",
+      "parentPhone": "0935133318",
+      "username": "hs_6a_27",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_28",
+      "name": "Hoàng Trúc Nhi",
+      "classId": "6A",
+      "dob": "2014-05-01",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Đức Sơn",
+      "parentPhone": "0983134552",
+      "username": "hs_6a_28",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_29",
+      "name": "Vũ Hoàng Phúc",
+      "classId": "6A",
+      "dob": "2014-06-02",
+      "gender": "Nam",
+      "parentName": "Trần Hải Bình",
+      "parentPhone": "0972135786",
+      "username": "hs_6a_29",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_30",
+      "name": "Đặng Thị Quỳnh",
+      "classId": "6A",
+      "dob": "2014-07-03",
+      "gender": "Nữ",
+      "parentName": "Lê Văn Hùng",
+      "parentPhone": "0905137020",
+      "username": "hs_6a_30",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_31",
+      "name": "Bùi Đức Huy",
+      "classId": "6A",
+      "dob": "2014-08-04",
+      "gender": "Nam",
+      "parentName": "Phạm Minh Dũng",
+      "parentPhone": "0914138254",
+      "username": "hs_6a_31",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_32",
+      "name": "Đỗ Ngọc Yến",
+      "classId": "6A",
+      "dob": "2014-09-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Quốc Nam",
+      "parentPhone": "0935139488",
+      "username": "hs_6a_32",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_33",
+      "name": "Hồ Gia Sơn",
+      "classId": "6A",
+      "dob": "2014-10-06",
+      "gender": "Nam",
+      "parentName": "Vũ Đức Hải",
+      "parentPhone": "0983140722",
+      "username": "hs_6a_33",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_34",
+      "name": "Y Khánh Lam",
+      "classId": "6A",
+      "dob": "2014-11-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Hải Tuấn",
+      "parentPhone": "0972141956",
+      "username": "hs_6a_34",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6a_35",
+      "name": "Nông Hải Triết",
+      "classId": "6A",
+      "dob": "2014-12-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Văn Hà",
+      "parentPhone": "0905143190",
+      "username": "hs_6a_35",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_1",
+      "name": "Trần Đức Đức",
+      "classId": "6B",
+      "dob": "2014-02-02",
+      "gender": "Nam",
+      "parentName": "Trần Minh Dũng",
+      "parentPhone": "0914101234",
+      "username": "hs_6b_1",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_2",
+      "name": "Lê Ngọc Ngọc",
+      "classId": "6B",
+      "dob": "2014-03-03",
+      "gender": "Nữ",
+      "parentName": "Lê Quốc Nam",
+      "parentPhone": "0935102468",
+      "username": "hs_6b_2",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_3",
+      "name": "Phạm Gia Hùng",
+      "classId": "6B",
+      "dob": "2014-04-04",
+      "gender": "Nam",
+      "parentName": "Phạm Đức Hải",
+      "parentPhone": "0983103702",
+      "username": "hs_6b_3",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_4",
+      "name": "Hoàng Khánh Trang",
+      "classId": "6B",
+      "dob": "2014-05-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Hải Tuấn",
+      "parentPhone": "0972104936",
+      "username": "hs_6b_4",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_5",
+      "name": "Vũ Hải Phong",
+      "classId": "6B",
+      "dob": "2014-06-06",
+      "gender": "Nam",
+      "parentName": "Vũ Văn Hà",
+      "parentPhone": "0905106170",
+      "username": "hs_6b_5",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_6",
+      "name": "Đặng Gia Anh",
+      "classId": "6B",
+      "dob": "2014-07-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Minh Cường",
+      "parentPhone": "0914107404",
+      "username": "hs_6b_6",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_7",
+      "name": "Bùi Văn Bình",
+      "classId": "6B",
+      "dob": "2014-08-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Quốc Thành",
+      "parentPhone": "0935108638",
+      "username": "hs_6b_7",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_8",
+      "name": "Đỗ Trúc Nhi",
+      "classId": "6B",
+      "dob": "2014-09-09",
+      "gender": "Nữ",
+      "parentName": "Trần Đức Sơn",
+      "parentPhone": "0983109872",
+      "username": "hs_6b_8",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_9",
+      "name": "Hồ Hoàng Phúc",
+      "classId": "6B",
+      "dob": "2014-10-10",
+      "gender": "Nam",
+      "parentName": "Lê Hải Bình",
+      "parentPhone": "0972111106",
+      "username": "hs_6b_9",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_10",
+      "name": "Y Thị Quỳnh",
+      "classId": "6B",
+      "dob": "2014-11-11",
+      "gender": "Nữ",
+      "parentName": "Phạm Văn Hùng",
+      "parentPhone": "0905112340",
+      "username": "hs_6b_10",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_11",
+      "name": "Nông Đức Huy",
+      "classId": "6B",
+      "dob": "2014-12-12",
+      "gender": "Nam",
+      "parentName": "Hoàng Minh Dũng",
+      "parentPhone": "0914113574",
+      "username": "hs_6b_11",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_12",
+      "name": "Nguyễn Ngọc Yến",
+      "classId": "6B",
+      "dob": "2014-01-13",
+      "gender": "Nữ",
+      "parentName": "Vũ Quốc Nam",
+      "parentPhone": "0935114808",
+      "username": "hs_6b_12",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_13",
+      "name": "Trần Gia Sơn",
+      "classId": "6B",
+      "dob": "2014-02-14",
+      "gender": "Nam",
+      "parentName": "Đặng Đức Hải",
+      "parentPhone": "0983116042",
+      "username": "hs_6b_13",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_14",
+      "name": "Lê Khánh Lam",
+      "classId": "6B",
+      "dob": "2014-03-15",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Hải Tuấn",
+      "parentPhone": "0972117276",
+      "username": "hs_6b_14",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_15",
+      "name": "Phạm Hải Triết",
+      "classId": "6B",
+      "dob": "2014-04-16",
+      "gender": "Nam",
+      "parentName": "Trần Văn Hà",
+      "parentPhone": "0905118510",
+      "username": "hs_6b_15",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_16",
+      "name": "Hoàng Gia Vân",
+      "classId": "6B",
+      "dob": "2014-05-17",
+      "gender": "Nữ",
+      "parentName": "Lê Minh Cường",
+      "parentPhone": "0914119744",
+      "username": "hs_6b_16",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_17",
+      "name": "Vũ Văn Lâm",
+      "classId": "6B",
+      "dob": "2014-06-18",
+      "gender": "Nam",
+      "parentName": "Phạm Quốc Thành",
+      "parentPhone": "0935120978",
+      "username": "hs_6b_17",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_18",
+      "name": "Đặng Trúc Mai",
+      "classId": "6B",
+      "dob": "2014-07-19",
+      "gender": "Nữ",
+      "parentName": "Hoàng Đức Sơn",
+      "parentPhone": "0983122212",
+      "username": "hs_6b_18",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_19",
+      "name": "Bùi Hoàng Tâm",
+      "classId": "6B",
+      "dob": "2014-08-20",
+      "gender": "Nam",
+      "parentName": "Vũ Hải Bình",
+      "parentPhone": "0972123446",
+      "username": "hs_6b_19",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_20",
+      "name": "Đỗ Thị Vy",
+      "classId": "6B",
+      "dob": "2014-09-21",
+      "gender": "Nữ",
+      "parentName": "Đặng Văn Hùng",
+      "parentPhone": "0905124680",
+      "username": "hs_6b_20",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_21",
+      "name": "Hồ Đức Đức",
+      "classId": "6B",
+      "dob": "2014-10-22",
+      "gender": "Nam",
+      "parentName": "Nguyễn Minh Dũng",
+      "parentPhone": "0914125914",
+      "username": "hs_6b_21",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_22",
+      "name": "Y Ngọc Ngọc",
+      "classId": "6B",
+      "dob": "2014-11-23",
+      "gender": "Nữ",
+      "parentName": "Trần Quốc Nam",
+      "parentPhone": "0935127148",
+      "username": "hs_6b_22",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_23",
+      "name": "Nông Gia Hùng",
+      "classId": "6B",
+      "dob": "2014-12-24",
+      "gender": "Nam",
+      "parentName": "Lê Đức Hải",
+      "parentPhone": "0983128382",
+      "username": "hs_6b_23",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_24",
+      "name": "Nguyễn Khánh Trang",
+      "classId": "6B",
+      "dob": "2014-01-25",
+      "gender": "Nữ",
+      "parentName": "Phạm Hải Tuấn",
+      "parentPhone": "0972129616",
+      "username": "hs_6b_24",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_25",
+      "name": "Trần Hải Phong",
+      "classId": "6B",
+      "dob": "2014-02-26",
+      "gender": "Nam",
+      "parentName": "Hoàng Văn Hà",
+      "parentPhone": "0905130850",
+      "username": "hs_6b_25",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_26",
+      "name": "Lê Gia Anh",
+      "classId": "6B",
+      "dob": "2014-03-27",
+      "gender": "Nữ",
+      "parentName": "Vũ Minh Cường",
+      "parentPhone": "0914132084",
+      "username": "hs_6b_26",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_27",
+      "name": "Phạm Văn Bình",
+      "classId": "6B",
+      "dob": "2014-04-28",
+      "gender": "Nam",
+      "parentName": "Đặng Quốc Thành",
+      "parentPhone": "0935133318",
+      "username": "hs_6b_27",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_28",
+      "name": "Hoàng Trúc Nhi",
+      "classId": "6B",
+      "dob": "2014-05-01",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Đức Sơn",
+      "parentPhone": "0983134552",
+      "username": "hs_6b_28",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_29",
+      "name": "Vũ Hoàng Phúc",
+      "classId": "6B",
+      "dob": "2014-06-02",
+      "gender": "Nam",
+      "parentName": "Trần Hải Bình",
+      "parentPhone": "0972135786",
+      "username": "hs_6b_29",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_30",
+      "name": "Đặng Thị Quỳnh",
+      "classId": "6B",
+      "dob": "2014-07-03",
+      "gender": "Nữ",
+      "parentName": "Lê Văn Hùng",
+      "parentPhone": "0905137020",
+      "username": "hs_6b_30",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_31",
+      "name": "Bùi Đức Huy",
+      "classId": "6B",
+      "dob": "2014-08-04",
+      "gender": "Nam",
+      "parentName": "Phạm Minh Dũng",
+      "parentPhone": "0914138254",
+      "username": "hs_6b_31",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_32",
+      "name": "Đỗ Ngọc Yến",
+      "classId": "6B",
+      "dob": "2014-09-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Quốc Nam",
+      "parentPhone": "0935139488",
+      "username": "hs_6b_32",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_33",
+      "name": "Hồ Gia Sơn",
+      "classId": "6B",
+      "dob": "2014-10-06",
+      "gender": "Nam",
+      "parentName": "Vũ Đức Hải",
+      "parentPhone": "0983140722",
+      "username": "hs_6b_33",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_34",
+      "name": "Y Khánh Lam",
+      "classId": "6B",
+      "dob": "2014-11-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Hải Tuấn",
+      "parentPhone": "0972141956",
+      "username": "hs_6b_34",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_6b_35",
+      "name": "Nông Hải Triết",
+      "classId": "6B",
+      "dob": "2014-12-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Văn Hà",
+      "parentPhone": "0905143190",
+      "username": "hs_6b_35",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_1",
+      "name": "Trần Đức Đức",
+      "classId": "7A",
+      "dob": "2013-02-02",
+      "gender": "Nam",
+      "parentName": "Trần Minh Dũng",
+      "parentPhone": "0914101234",
+      "username": "hs_7a_1",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_2",
+      "name": "Lê Ngọc Ngọc",
+      "classId": "7A",
+      "dob": "2013-03-03",
+      "gender": "Nữ",
+      "parentName": "Lê Quốc Nam",
+      "parentPhone": "0935102468",
+      "username": "hs_7a_2",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_3",
+      "name": "Phạm Gia Hùng",
+      "classId": "7A",
+      "dob": "2013-04-04",
+      "gender": "Nam",
+      "parentName": "Phạm Đức Hải",
+      "parentPhone": "0983103702",
+      "username": "hs_7a_3",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_4",
+      "name": "Hoàng Khánh Trang",
+      "classId": "7A",
+      "dob": "2013-05-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Hải Tuấn",
+      "parentPhone": "0972104936",
+      "username": "hs_7a_4",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_5",
+      "name": "Vũ Hải Phong",
+      "classId": "7A",
+      "dob": "2013-06-06",
+      "gender": "Nam",
+      "parentName": "Vũ Văn Hà",
+      "parentPhone": "0905106170",
+      "username": "hs_7a_5",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_6",
+      "name": "Đặng Gia Anh",
+      "classId": "7A",
+      "dob": "2013-07-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Minh Cường",
+      "parentPhone": "0914107404",
+      "username": "hs_7a_6",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_7",
+      "name": "Bùi Văn Bình",
+      "classId": "7A",
+      "dob": "2013-08-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Quốc Thành",
+      "parentPhone": "0935108638",
+      "username": "hs_7a_7",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_8",
+      "name": "Đỗ Trúc Nhi",
+      "classId": "7A",
+      "dob": "2013-09-09",
+      "gender": "Nữ",
+      "parentName": "Trần Đức Sơn",
+      "parentPhone": "0983109872",
+      "username": "hs_7a_8",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_9",
+      "name": "Hồ Hoàng Phúc",
+      "classId": "7A",
+      "dob": "2013-10-10",
+      "gender": "Nam",
+      "parentName": "Lê Hải Bình",
+      "parentPhone": "0972111106",
+      "username": "hs_7a_9",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_10",
+      "name": "Y Thị Quỳnh",
+      "classId": "7A",
+      "dob": "2013-11-11",
+      "gender": "Nữ",
+      "parentName": "Phạm Văn Hùng",
+      "parentPhone": "0905112340",
+      "username": "hs_7a_10",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_11",
+      "name": "Nông Đức Huy",
+      "classId": "7A",
+      "dob": "2013-12-12",
+      "gender": "Nam",
+      "parentName": "Hoàng Minh Dũng",
+      "parentPhone": "0914113574",
+      "username": "hs_7a_11",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_12",
+      "name": "Nguyễn Ngọc Yến",
+      "classId": "7A",
+      "dob": "2013-01-13",
+      "gender": "Nữ",
+      "parentName": "Vũ Quốc Nam",
+      "parentPhone": "0935114808",
+      "username": "hs_7a_12",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_13",
+      "name": "Trần Gia Sơn",
+      "classId": "7A",
+      "dob": "2013-02-14",
+      "gender": "Nam",
+      "parentName": "Đặng Đức Hải",
+      "parentPhone": "0983116042",
+      "username": "hs_7a_13",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_14",
+      "name": "Lê Khánh Lam",
+      "classId": "7A",
+      "dob": "2013-03-15",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Hải Tuấn",
+      "parentPhone": "0972117276",
+      "username": "hs_7a_14",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_15",
+      "name": "Phạm Hải Triết",
+      "classId": "7A",
+      "dob": "2013-04-16",
+      "gender": "Nam",
+      "parentName": "Trần Văn Hà",
+      "parentPhone": "0905118510",
+      "username": "hs_7a_15",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_16",
+      "name": "Hoàng Gia Vân",
+      "classId": "7A",
+      "dob": "2013-05-17",
+      "gender": "Nữ",
+      "parentName": "Lê Minh Cường",
+      "parentPhone": "0914119744",
+      "username": "hs_7a_16",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_17",
+      "name": "Vũ Văn Lâm",
+      "classId": "7A",
+      "dob": "2013-06-18",
+      "gender": "Nam",
+      "parentName": "Phạm Quốc Thành",
+      "parentPhone": "0935120978",
+      "username": "hs_7a_17",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_18",
+      "name": "Đặng Trúc Mai",
+      "classId": "7A",
+      "dob": "2013-07-19",
+      "gender": "Nữ",
+      "parentName": "Hoàng Đức Sơn",
+      "parentPhone": "0983122212",
+      "username": "hs_7a_18",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_19",
+      "name": "Bùi Hoàng Tâm",
+      "classId": "7A",
+      "dob": "2013-08-20",
+      "gender": "Nam",
+      "parentName": "Vũ Hải Bình",
+      "parentPhone": "0972123446",
+      "username": "hs_7a_19",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_20",
+      "name": "Đỗ Thị Vy",
+      "classId": "7A",
+      "dob": "2013-09-21",
+      "gender": "Nữ",
+      "parentName": "Đặng Văn Hùng",
+      "parentPhone": "0905124680",
+      "username": "hs_7a_20",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_21",
+      "name": "Hồ Đức Đức",
+      "classId": "7A",
+      "dob": "2013-10-22",
+      "gender": "Nam",
+      "parentName": "Nguyễn Minh Dũng",
+      "parentPhone": "0914125914",
+      "username": "hs_7a_21",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_22",
+      "name": "Y Ngọc Ngọc",
+      "classId": "7A",
+      "dob": "2013-11-23",
+      "gender": "Nữ",
+      "parentName": "Trần Quốc Nam",
+      "parentPhone": "0935127148",
+      "username": "hs_7a_22",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_23",
+      "name": "Nông Gia Hùng",
+      "classId": "7A",
+      "dob": "2013-12-24",
+      "gender": "Nam",
+      "parentName": "Lê Đức Hải",
+      "parentPhone": "0983128382",
+      "username": "hs_7a_23",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_24",
+      "name": "Nguyễn Khánh Trang",
+      "classId": "7A",
+      "dob": "2013-01-25",
+      "gender": "Nữ",
+      "parentName": "Phạm Hải Tuấn",
+      "parentPhone": "0972129616",
+      "username": "hs_7a_24",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_25",
+      "name": "Trần Hải Phong",
+      "classId": "7A",
+      "dob": "2013-02-26",
+      "gender": "Nam",
+      "parentName": "Hoàng Văn Hà",
+      "parentPhone": "0905130850",
+      "username": "hs_7a_25",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_26",
+      "name": "Lê Gia Anh",
+      "classId": "7A",
+      "dob": "2013-03-27",
+      "gender": "Nữ",
+      "parentName": "Vũ Minh Cường",
+      "parentPhone": "0914132084",
+      "username": "hs_7a_26",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_27",
+      "name": "Phạm Văn Bình",
+      "classId": "7A",
+      "dob": "2013-04-28",
+      "gender": "Nam",
+      "parentName": "Đặng Quốc Thành",
+      "parentPhone": "0935133318",
+      "username": "hs_7a_27",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_28",
+      "name": "Hoàng Trúc Nhi",
+      "classId": "7A",
+      "dob": "2013-05-01",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Đức Sơn",
+      "parentPhone": "0983134552",
+      "username": "hs_7a_28",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_29",
+      "name": "Vũ Hoàng Phúc",
+      "classId": "7A",
+      "dob": "2013-06-02",
+      "gender": "Nam",
+      "parentName": "Trần Hải Bình",
+      "parentPhone": "0972135786",
+      "username": "hs_7a_29",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_30",
+      "name": "Đặng Thị Quỳnh",
+      "classId": "7A",
+      "dob": "2013-07-03",
+      "gender": "Nữ",
+      "parentName": "Lê Văn Hùng",
+      "parentPhone": "0905137020",
+      "username": "hs_7a_30",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_31",
+      "name": "Bùi Đức Huy",
+      "classId": "7A",
+      "dob": "2013-08-04",
+      "gender": "Nam",
+      "parentName": "Phạm Minh Dũng",
+      "parentPhone": "0914138254",
+      "username": "hs_7a_31",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_32",
+      "name": "Đỗ Ngọc Yến",
+      "classId": "7A",
+      "dob": "2013-09-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Quốc Nam",
+      "parentPhone": "0935139488",
+      "username": "hs_7a_32",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_33",
+      "name": "Hồ Gia Sơn",
+      "classId": "7A",
+      "dob": "2013-10-06",
+      "gender": "Nam",
+      "parentName": "Vũ Đức Hải",
+      "parentPhone": "0983140722",
+      "username": "hs_7a_33",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_34",
+      "name": "Y Khánh Lam",
+      "classId": "7A",
+      "dob": "2013-11-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Hải Tuấn",
+      "parentPhone": "0972141956",
+      "username": "hs_7a_34",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_7a_35",
+      "name": "Nông Hải Triết",
+      "classId": "7A",
+      "dob": "2013-12-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Văn Hà",
+      "parentPhone": "0905143190",
+      "username": "hs_7a_35",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_1",
+      "name": "Trần Đức Đức",
+      "classId": "8A",
+      "dob": "2012-02-02",
+      "gender": "Nam",
+      "parentName": "Trần Minh Dũng",
+      "parentPhone": "0914101234",
+      "username": "hs_8a_1",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_2",
+      "name": "Lê Ngọc Ngọc",
+      "classId": "8A",
+      "dob": "2012-03-03",
+      "gender": "Nữ",
+      "parentName": "Lê Quốc Nam",
+      "parentPhone": "0935102468",
+      "username": "hs_8a_2",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_3",
+      "name": "Phạm Gia Hùng",
+      "classId": "8A",
+      "dob": "2012-04-04",
+      "gender": "Nam",
+      "parentName": "Phạm Đức Hải",
+      "parentPhone": "0983103702",
+      "username": "hs_8a_3",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_4",
+      "name": "Hoàng Khánh Trang",
+      "classId": "8A",
+      "dob": "2012-05-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Hải Tuấn",
+      "parentPhone": "0972104936",
+      "username": "hs_8a_4",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_5",
+      "name": "Vũ Hải Phong",
+      "classId": "8A",
+      "dob": "2012-06-06",
+      "gender": "Nam",
+      "parentName": "Vũ Văn Hà",
+      "parentPhone": "0905106170",
+      "username": "hs_8a_5",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_6",
+      "name": "Đặng Gia Anh",
+      "classId": "8A",
+      "dob": "2012-07-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Minh Cường",
+      "parentPhone": "0914107404",
+      "username": "hs_8a_6",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_7",
+      "name": "Bùi Văn Bình",
+      "classId": "8A",
+      "dob": "2012-08-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Quốc Thành",
+      "parentPhone": "0935108638",
+      "username": "hs_8a_7",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_8",
+      "name": "Đỗ Trúc Nhi",
+      "classId": "8A",
+      "dob": "2012-09-09",
+      "gender": "Nữ",
+      "parentName": "Trần Đức Sơn",
+      "parentPhone": "0983109872",
+      "username": "hs_8a_8",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_9",
+      "name": "Hồ Hoàng Phúc",
+      "classId": "8A",
+      "dob": "2012-10-10",
+      "gender": "Nam",
+      "parentName": "Lê Hải Bình",
+      "parentPhone": "0972111106",
+      "username": "hs_8a_9",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_10",
+      "name": "Y Thị Quỳnh",
+      "classId": "8A",
+      "dob": "2012-11-11",
+      "gender": "Nữ",
+      "parentName": "Phạm Văn Hùng",
+      "parentPhone": "0905112340",
+      "username": "hs_8a_10",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_11",
+      "name": "Nông Đức Huy",
+      "classId": "8A",
+      "dob": "2012-12-12",
+      "gender": "Nam",
+      "parentName": "Hoàng Minh Dũng",
+      "parentPhone": "0914113574",
+      "username": "hs_8a_11",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_12",
+      "name": "Nguyễn Ngọc Yến",
+      "classId": "8A",
+      "dob": "2012-01-13",
+      "gender": "Nữ",
+      "parentName": "Vũ Quốc Nam",
+      "parentPhone": "0935114808",
+      "username": "hs_8a_12",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_13",
+      "name": "Trần Gia Sơn",
+      "classId": "8A",
+      "dob": "2012-02-14",
+      "gender": "Nam",
+      "parentName": "Đặng Đức Hải",
+      "parentPhone": "0983116042",
+      "username": "hs_8a_13",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_14",
+      "name": "Lê Khánh Lam",
+      "classId": "8A",
+      "dob": "2012-03-15",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Hải Tuấn",
+      "parentPhone": "0972117276",
+      "username": "hs_8a_14",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_15",
+      "name": "Phạm Hải Triết",
+      "classId": "8A",
+      "dob": "2012-04-16",
+      "gender": "Nam",
+      "parentName": "Trần Văn Hà",
+      "parentPhone": "0905118510",
+      "username": "hs_8a_15",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_16",
+      "name": "Hoàng Gia Vân",
+      "classId": "8A",
+      "dob": "2012-05-17",
+      "gender": "Nữ",
+      "parentName": "Lê Minh Cường",
+      "parentPhone": "0914119744",
+      "username": "hs_8a_16",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_17",
+      "name": "Vũ Văn Lâm",
+      "classId": "8A",
+      "dob": "2012-06-18",
+      "gender": "Nam",
+      "parentName": "Phạm Quốc Thành",
+      "parentPhone": "0935120978",
+      "username": "hs_8a_17",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_18",
+      "name": "Đặng Trúc Mai",
+      "classId": "8A",
+      "dob": "2012-07-19",
+      "gender": "Nữ",
+      "parentName": "Hoàng Đức Sơn",
+      "parentPhone": "0983122212",
+      "username": "hs_8a_18",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_19",
+      "name": "Bùi Hoàng Tâm",
+      "classId": "8A",
+      "dob": "2012-08-20",
+      "gender": "Nam",
+      "parentName": "Vũ Hải Bình",
+      "parentPhone": "0972123446",
+      "username": "hs_8a_19",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_20",
+      "name": "Đỗ Thị Vy",
+      "classId": "8A",
+      "dob": "2012-09-21",
+      "gender": "Nữ",
+      "parentName": "Đặng Văn Hùng",
+      "parentPhone": "0905124680",
+      "username": "hs_8a_20",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_21",
+      "name": "Hồ Đức Đức",
+      "classId": "8A",
+      "dob": "2012-10-22",
+      "gender": "Nam",
+      "parentName": "Nguyễn Minh Dũng",
+      "parentPhone": "0914125914",
+      "username": "hs_8a_21",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_22",
+      "name": "Y Ngọc Ngọc",
+      "classId": "8A",
+      "dob": "2012-11-23",
+      "gender": "Nữ",
+      "parentName": "Trần Quốc Nam",
+      "parentPhone": "0935127148",
+      "username": "hs_8a_22",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_23",
+      "name": "Nông Gia Hùng",
+      "classId": "8A",
+      "dob": "2012-12-24",
+      "gender": "Nam",
+      "parentName": "Lê Đức Hải",
+      "parentPhone": "0983128382",
+      "username": "hs_8a_23",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_24",
+      "name": "Nguyễn Khánh Trang",
+      "classId": "8A",
+      "dob": "2012-01-25",
+      "gender": "Nữ",
+      "parentName": "Phạm Hải Tuấn",
+      "parentPhone": "0972129616",
+      "username": "hs_8a_24",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_25",
+      "name": "Trần Hải Phong",
+      "classId": "8A",
+      "dob": "2012-02-26",
+      "gender": "Nam",
+      "parentName": "Hoàng Văn Hà",
+      "parentPhone": "0905130850",
+      "username": "hs_8a_25",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_26",
+      "name": "Lê Gia Anh",
+      "classId": "8A",
+      "dob": "2012-03-27",
+      "gender": "Nữ",
+      "parentName": "Vũ Minh Cường",
+      "parentPhone": "0914132084",
+      "username": "hs_8a_26",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_27",
+      "name": "Phạm Văn Bình",
+      "classId": "8A",
+      "dob": "2012-04-28",
+      "gender": "Nam",
+      "parentName": "Đặng Quốc Thành",
+      "parentPhone": "0935133318",
+      "username": "hs_8a_27",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_28",
+      "name": "Hoàng Trúc Nhi",
+      "classId": "8A",
+      "dob": "2012-05-01",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Đức Sơn",
+      "parentPhone": "0983134552",
+      "username": "hs_8a_28",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_29",
+      "name": "Vũ Hoàng Phúc",
+      "classId": "8A",
+      "dob": "2012-06-02",
+      "gender": "Nam",
+      "parentName": "Trần Hải Bình",
+      "parentPhone": "0972135786",
+      "username": "hs_8a_29",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_30",
+      "name": "Đặng Thị Quỳnh",
+      "classId": "8A",
+      "dob": "2012-07-03",
+      "gender": "Nữ",
+      "parentName": "Lê Văn Hùng",
+      "parentPhone": "0905137020",
+      "username": "hs_8a_30",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_31",
+      "name": "Bùi Đức Huy",
+      "classId": "8A",
+      "dob": "2012-08-04",
+      "gender": "Nam",
+      "parentName": "Phạm Minh Dũng",
+      "parentPhone": "0914138254",
+      "username": "hs_8a_31",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_32",
+      "name": "Đỗ Ngọc Yến",
+      "classId": "8A",
+      "dob": "2012-09-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Quốc Nam",
+      "parentPhone": "0935139488",
+      "username": "hs_8a_32",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_33",
+      "name": "Hồ Gia Sơn",
+      "classId": "8A",
+      "dob": "2012-10-06",
+      "gender": "Nam",
+      "parentName": "Vũ Đức Hải",
+      "parentPhone": "0983140722",
+      "username": "hs_8a_33",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_34",
+      "name": "Y Khánh Lam",
+      "classId": "8A",
+      "dob": "2012-11-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Hải Tuấn",
+      "parentPhone": "0972141956",
+      "username": "hs_8a_34",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_8a_35",
+      "name": "Nông Hải Triết",
+      "classId": "8A",
+      "dob": "2012-12-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Văn Hà",
+      "parentPhone": "0905143190",
+      "username": "hs_8a_35",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_1",
+      "name": "Trần Đức Đức",
+      "classId": "9A",
+      "dob": "2011-02-02",
+      "gender": "Nam",
+      "parentName": "Trần Minh Dũng",
+      "parentPhone": "0914101234",
+      "username": "hs_9a_1",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_2",
+      "name": "Lê Ngọc Ngọc",
+      "classId": "9A",
+      "dob": "2011-03-03",
+      "gender": "Nữ",
+      "parentName": "Lê Quốc Nam",
+      "parentPhone": "0935102468",
+      "username": "hs_9a_2",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_3",
+      "name": "Phạm Gia Hùng",
+      "classId": "9A",
+      "dob": "2011-04-04",
+      "gender": "Nam",
+      "parentName": "Phạm Đức Hải",
+      "parentPhone": "0983103702",
+      "username": "hs_9a_3",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_4",
+      "name": "Hoàng Khánh Trang",
+      "classId": "9A",
+      "dob": "2011-05-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Hải Tuấn",
+      "parentPhone": "0972104936",
+      "username": "hs_9a_4",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_5",
+      "name": "Vũ Hải Phong",
+      "classId": "9A",
+      "dob": "2011-06-06",
+      "gender": "Nam",
+      "parentName": "Vũ Văn Hà",
+      "parentPhone": "0905106170",
+      "username": "hs_9a_5",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_6",
+      "name": "Đặng Gia Anh",
+      "classId": "9A",
+      "dob": "2011-07-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Minh Cường",
+      "parentPhone": "0914107404",
+      "username": "hs_9a_6",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_7",
+      "name": "Bùi Văn Bình",
+      "classId": "9A",
+      "dob": "2011-08-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Quốc Thành",
+      "parentPhone": "0935108638",
+      "username": "hs_9a_7",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_8",
+      "name": "Đỗ Trúc Nhi",
+      "classId": "9A",
+      "dob": "2011-09-09",
+      "gender": "Nữ",
+      "parentName": "Trần Đức Sơn",
+      "parentPhone": "0983109872",
+      "username": "hs_9a_8",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_9",
+      "name": "Hồ Hoàng Phúc",
+      "classId": "9A",
+      "dob": "2011-10-10",
+      "gender": "Nam",
+      "parentName": "Lê Hải Bình",
+      "parentPhone": "0972111106",
+      "username": "hs_9a_9",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_10",
+      "name": "Y Thị Quỳnh",
+      "classId": "9A",
+      "dob": "2011-11-11",
+      "gender": "Nữ",
+      "parentName": "Phạm Văn Hùng",
+      "parentPhone": "0905112340",
+      "username": "hs_9a_10",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_11",
+      "name": "Nông Đức Huy",
+      "classId": "9A",
+      "dob": "2011-12-12",
+      "gender": "Nam",
+      "parentName": "Hoàng Minh Dũng",
+      "parentPhone": "0914113574",
+      "username": "hs_9a_11",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_12",
+      "name": "Nguyễn Ngọc Yến",
+      "classId": "9A",
+      "dob": "2011-01-13",
+      "gender": "Nữ",
+      "parentName": "Vũ Quốc Nam",
+      "parentPhone": "0935114808",
+      "username": "hs_9a_12",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_13",
+      "name": "Trần Gia Sơn",
+      "classId": "9A",
+      "dob": "2011-02-14",
+      "gender": "Nam",
+      "parentName": "Đặng Đức Hải",
+      "parentPhone": "0983116042",
+      "username": "hs_9a_13",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_14",
+      "name": "Lê Khánh Lam",
+      "classId": "9A",
+      "dob": "2011-03-15",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Hải Tuấn",
+      "parentPhone": "0972117276",
+      "username": "hs_9a_14",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_15",
+      "name": "Phạm Hải Triết",
+      "classId": "9A",
+      "dob": "2011-04-16",
+      "gender": "Nam",
+      "parentName": "Trần Văn Hà",
+      "parentPhone": "0905118510",
+      "username": "hs_9a_15",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_16",
+      "name": "Hoàng Gia Vân",
+      "classId": "9A",
+      "dob": "2011-05-17",
+      "gender": "Nữ",
+      "parentName": "Lê Minh Cường",
+      "parentPhone": "0914119744",
+      "username": "hs_9a_16",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_17",
+      "name": "Vũ Văn Lâm",
+      "classId": "9A",
+      "dob": "2011-06-18",
+      "gender": "Nam",
+      "parentName": "Phạm Quốc Thành",
+      "parentPhone": "0935120978",
+      "username": "hs_9a_17",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_18",
+      "name": "Đặng Trúc Mai",
+      "classId": "9A",
+      "dob": "2011-07-19",
+      "gender": "Nữ",
+      "parentName": "Hoàng Đức Sơn",
+      "parentPhone": "0983122212",
+      "username": "hs_9a_18",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_19",
+      "name": "Bùi Hoàng Tâm",
+      "classId": "9A",
+      "dob": "2011-08-20",
+      "gender": "Nam",
+      "parentName": "Vũ Hải Bình",
+      "parentPhone": "0972123446",
+      "username": "hs_9a_19",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_20",
+      "name": "Đỗ Thị Vy",
+      "classId": "9A",
+      "dob": "2011-09-21",
+      "gender": "Nữ",
+      "parentName": "Đặng Văn Hùng",
+      "parentPhone": "0905124680",
+      "username": "hs_9a_20",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_21",
+      "name": "Hồ Đức Đức",
+      "classId": "9A",
+      "dob": "2011-10-22",
+      "gender": "Nam",
+      "parentName": "Nguyễn Minh Dũng",
+      "parentPhone": "0914125914",
+      "username": "hs_9a_21",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_22",
+      "name": "Y Ngọc Ngọc",
+      "classId": "9A",
+      "dob": "2011-11-23",
+      "gender": "Nữ",
+      "parentName": "Trần Quốc Nam",
+      "parentPhone": "0935127148",
+      "username": "hs_9a_22",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_23",
+      "name": "Nông Gia Hùng",
+      "classId": "9A",
+      "dob": "2011-12-24",
+      "gender": "Nam",
+      "parentName": "Lê Đức Hải",
+      "parentPhone": "0983128382",
+      "username": "hs_9a_23",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_24",
+      "name": "Nguyễn Khánh Trang",
+      "classId": "9A",
+      "dob": "2011-01-25",
+      "gender": "Nữ",
+      "parentName": "Phạm Hải Tuấn",
+      "parentPhone": "0972129616",
+      "username": "hs_9a_24",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_25",
+      "name": "Trần Hải Phong",
+      "classId": "9A",
+      "dob": "2011-02-26",
+      "gender": "Nam",
+      "parentName": "Hoàng Văn Hà",
+      "parentPhone": "0905130850",
+      "username": "hs_9a_25",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_26",
+      "name": "Lê Gia Anh",
+      "classId": "9A",
+      "dob": "2011-03-27",
+      "gender": "Nữ",
+      "parentName": "Vũ Minh Cường",
+      "parentPhone": "0914132084",
+      "username": "hs_9a_26",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_27",
+      "name": "Phạm Văn Bình",
+      "classId": "9A",
+      "dob": "2011-04-28",
+      "gender": "Nam",
+      "parentName": "Đặng Quốc Thành",
+      "parentPhone": "0935133318",
+      "username": "hs_9a_27",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_28",
+      "name": "Hoàng Trúc Nhi",
+      "classId": "9A",
+      "dob": "2011-05-01",
+      "gender": "Nữ",
+      "parentName": "Nguyễn Đức Sơn",
+      "parentPhone": "0983134552",
+      "username": "hs_9a_28",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_29",
+      "name": "Vũ Hoàng Phúc",
+      "classId": "9A",
+      "dob": "2011-06-02",
+      "gender": "Nam",
+      "parentName": "Trần Hải Bình",
+      "parentPhone": "0972135786",
+      "username": "hs_9a_29",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_30",
+      "name": "Đặng Thị Quỳnh",
+      "classId": "9A",
+      "dob": "2011-07-03",
+      "gender": "Nữ",
+      "parentName": "Lê Văn Hùng",
+      "parentPhone": "0905137020",
+      "username": "hs_9a_30",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_31",
+      "name": "Bùi Đức Huy",
+      "classId": "9A",
+      "dob": "2011-08-04",
+      "gender": "Nam",
+      "parentName": "Phạm Minh Dũng",
+      "parentPhone": "0914138254",
+      "username": "hs_9a_31",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_32",
+      "name": "Đỗ Ngọc Yến",
+      "classId": "9A",
+      "dob": "2011-09-05",
+      "gender": "Nữ",
+      "parentName": "Hoàng Quốc Nam",
+      "parentPhone": "0935139488",
+      "username": "hs_9a_32",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_33",
+      "name": "Hồ Gia Sơn",
+      "classId": "9A",
+      "dob": "2011-10-06",
+      "gender": "Nam",
+      "parentName": "Vũ Đức Hải",
+      "parentPhone": "0983140722",
+      "username": "hs_9a_33",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_34",
+      "name": "Y Khánh Lam",
+      "classId": "9A",
+      "dob": "2011-11-07",
+      "gender": "Nữ",
+      "parentName": "Đặng Hải Tuấn",
+      "parentPhone": "0972141956",
+      "username": "hs_9a_34",
+      "password": "hs123456"
+    },
+    {
+      "id": "hs_9a_35",
+      "name": "Nông Hải Triết",
+      "classId": "9A",
+      "dob": "2011-12-08",
+      "gender": "Nam",
+      "parentName": "Nguyễn Văn Hà",
+      "parentPhone": "0905143190",
+      "username": "hs_9a_35",
+      "password": "hs123456"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "toan_c1",
+      "subjectId": "toan",
+      "title": "Chủ đề 1: Số tự nhiên & Các phép tính"
+    },
+    {
+      "id": "toan_c2",
+      "subjectId": "toan",
+      "title": "Chủ đề 2: Tính chia hết trong tập hợp N"
+    },
+    {
+      "id": "toan_c3",
+      "subjectId": "toan",
+      "title": "Chủ đề 3: Phân số và Số thập phân"
+    },
+    {
+      "id": "van_c1",
+      "subjectId": "van",
+      "title": "Chủ đề 1: Truyện dân gian (Truyền thuyết & Cổ tích)"
+    },
+    {
+      "id": "van_c2",
+      "subjectId": "van",
+      "title": "Chủ đề 2: Thơ và Thơ trữ tình"
+    },
+    {
+      "id": "anh_c1",
+      "subjectId": "anh",
+      "title": "Unit 1: My New School"
+    },
+    {
+      "id": "anh_c2",
+      "subjectId": "anh",
+      "title": "Unit 2: My House"
+    },
+    {
+      "id": "tin_c1",
+      "subjectId": "tin",
+      "title": "Chủ đề A: Máy tính và Cộng đồng"
+    },
+    {
+      "id": "tin_c2",
+      "subjectId": "tin",
+      "title": "Chủ đề B: Mạng máy tính và Internet"
+    },
+    {
+      "id": "khtn_c1",
+      "subjectId": "khtn",
+      "title": "Chủ đề 1: Các phép đo & Tế bào - Đơn vị của sự sống"
+    },
+    {
+      "id": "lsdl_c1",
+      "subjectId": "lsdl",
+      "title": "Chủ đề 1: Lịch sử và Địa lý THCS"
+    },
+    {
+      "id": "gdcd_c1",
+      "subjectId": "gdcd",
+      "title": "Chủ đề 1: Tự hào về truyền thống gia đình"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "toan_c1_b1",
+      "chapterId": "toan_c1",
+      "subjectId": "toan",
+      "title": "Bài 1: Tập hợp. Phần tử của tập hợp"
+    },
+    {
+      "id": "toan_c1_b2",
+      "chapterId": "toan_c1",
+      "subjectId": "toan",
+      "title": "Bài 2: Các phép tính cộng, trừ, nhân, chia số tự nhiên"
+    },
+    {
+      "id": "toan_c2_b1",
+      "chapterId": "toan_c2",
+      "subjectId": "toan",
+      "title": "Bài 1: Quan hệ chia hết và Tính chất chia hết"
+    },
+    {
+      "id": "van_c1_b1",
+      "chapterId": "van_c1",
+      "subjectId": "van",
+      "title": "Bài 1: Truyền thuyết Thánh Gióng"
+    },
+    {
+      "id": "van_c1_b2",
+      "chapterId": "van_c1",
+      "subjectId": "van",
+      "title": "Bài 2: Truyện cổ tích Thạch Sanh"
+    },
+    {
+      "id": "anh_c1_b1",
+      "chapterId": "anh_c1",
+      "subjectId": "anh",
+      "title": "Lesson 1: Vocabulary & Grammar (Present Simple)"
+    },
+    {
+      "id": "tin_c1_b1",
+      "chapterId": "tin_c1",
+      "subjectId": "tin",
+      "title": "Bài 1: Thông tin và Dữ liệu"
+    },
+    {
+      "id": "tin_c2_b1",
+      "chapterId": "tin_c2",
+      "subjectId": "tin",
+      "title": "Bài 1: Khái niệm Mạng máy tính và Internet"
+    },
+    {
+      "id": "khtn_c1_b1",
+      "chapterId": "khtn_c1",
+      "subjectId": "khtn",
+      "title": "Bài 1: Giới thiệu về Khoa học Tự nhiên và Phép đo"
+    }
+  ],
+  "uploadedFiles": [
+    {
+      "id": "khbd_toan6_tap_hop",
+      "name": "1+2-ThongTin-va-DuLieu.docx",
+      "fileType": "khbd",
+      "ext": ".docx",
+      "subjectId": "toan",
+      "grade": 6,
+      "author": "Nguyễn Thị Hương",
+      "uploadDate": "2026-07-20",
+      "isShared": true,
+      "description": "Kế hoạch bài dạy chi tiết môn Toán/Tin học lớp 6 - Thông tin và Dữ liệu (Theo CV 5512/BGDĐT)",
+      "content": "<div style=\"font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a; padding:0.5rem;\">\n  <p style=\"margin:0 0 1rem 0; font-size:1.05rem; color:#1e293b; border-bottom:1.5px solid #cbd5e1; padding-bottom:0.75rem;\">\n    <strong>Môn học:</strong> TIN HỌC - Khối 6 | <strong>Tên bài dạy:</strong> THÔNG TIN VÀ DỮ LIỆU\n  </p>\n  \n  <h3 style=\"color:#0369a1; margin-top:1.2rem;\">I. MỤC TIÊU BÀI HỌC</h3>\n  <p><strong>1. Về kiến thức:</strong></p>\n  <ul>\n    <li>Nhận biết và phân biệt được khái niệm Thông tin, Dữ liệu và Vật mang tin.</li>\n    <li>Nêu được các dạng dữ liệu cơ bản: dữ liệu số, dữ liệu chữ, dữ liệu hình ảnh, âm thanh.</li>\n    <li>Hiểu được vai trò quan trọng của thông tin trong đời sống và học tập.</li>\n  </ul>\n  \n  <p><strong>2. Về năng lực:</strong></p>\n  <ul>\n    <li>Năng lực tự chủ và tự học: Tự nghiên cứu bài học SGK và làm bài tập theo hướng dẫn.</li>\n    <li>Năng lực giao tiếp và hợp tác: Thảo luận nhóm 4 người giải quyết tình huống bài học.</li>\n    <li>Năng lực giải quyết vấn đề: Phân tích các ví dụ thông tin thực tế từ môi trường xung quanh.</li>\n  </ul>\n  \n  <p><strong>3. Về phẩm chất:</strong></p>\n  <ul>\n    <li>Chăm chỉ, trung thực, có tinh thần trách nhiệm cao khi tham gia làm việc nhóm.</li>\n  </ul>\n  \n  <h3 style=\"color:#0369a1; margin-top:1.5rem;\">II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU</h3>\n  <p><strong>1. Giáo viên:</strong> Máy tính, máy chiếu, bài giảng PowerPoint, phiếu học tập nhóm số 1 & 2.</p>\n  <p><strong>2. Học sinh:</strong> Sách giáo khoa, vở ghi bài, dụng cụ học tập.</p>\n  \n  <h3 style=\"color:#0369a1; margin-top:1.5rem;\">III. TIẾN TRÌNH DẠY HỌC CHI TIẾT (4 HOẠT ĐỘNG DẠY HỌC TRỌNG TÂM)</h3>\n  \n  <h4 style=\"color:#047857; margin-top:1.2rem;\">1. HOẠT ĐỘNG 1: MỞ ĐẦU (KHỞI ĐỘNG - 5 PHÚT)</h4>\n  <p><strong>a) Mục tiêu:</strong> Tạo tâm thế hứng thú học tập, kết nối tri thức thực tế của học sinh dẫn dắt vào bài học mới.</p>\n  <p><strong>b) Nội dung:</strong> GV chiếu hình ảnh bảng tin trường và đặt câu hỏi gợi mở: <em>\"Em nhìn thấy những thông tin gì trên bảng tin?\"</em>.</p>\n  <p><strong>c) Sản phẩm:</strong> Câu trả lời cá nhân của học sinh về các thông tin bài đăng, hình ảnh và số liệu trên bảng tin.</p>\n  <p><strong>d) Tổ chức thực hiện:</strong></p>\n  <ul>\n    <li><em>Bước 1: Chuyển giao nhiệm vụ:</em> GV chiếu màn hình, chia lớp thành các nhóm đôi và yêu cầu quan sát trả lời câu hỏi.</li>\n    <li><em>Bước 2: Thực hiện nhiệm vụ:</em> Học sinh thảo luận theo cặp đôi trong thời gian 2 phút.</li>\n    <li><em>Bước 3: Báo cáo, thảo luận:</em> GV gọi đại diện 2-3 học sinh xung phong trả lời. Học sinh khác lắng nghe, nhận xét.</li>\n    <li><em>Bước 4: Kết luận, nhận xét:</em> GV đánh giá câu trả lời, chốt lại ý kiến đúng và dẫn dắt trực tiếp vào Bài 1: Thông tin và Dữ liệu.</li>\n  </ul>\n  \n  <h4 style=\"color:#047857; margin-top:1.5rem;\">2. HOẠT ĐỘNG 2: HÌNH THÀNH KIẾN THỨC MỚI (25 PHÚT)</h4>\n  <p style=\"color:#0284c7; font-weight: 400;\">Mục 1: Tìm hiểu khái niệm Thông tin và Dữ liệu</p>\n  <p><strong>a) Mục tiêu:</strong> Học sinh phân biệt rõ ràng khái niệm Thông tin, Dữ liệu và Vật mang tin.</p>\n  <p><strong>b) Nội dung:</strong> HS nghiên cứu SGK trang 5, 6 và làm việc nhóm 4 người hoàn thành Phiếu học tập số 1.</p>\n  <p><strong>c) Sản phẩm:</strong> Phiếu học tập số 1 đã hoàn thành phân loại các dạng dữ liệu số, chữ, hình ảnh, âm thanh.</p>\n  <p><strong>d) Tổ chức thực hiện:</strong></p>\n  <ul>\n    <li><em>Bước 1 (Giao nhiệm vụ):</em> GV chia lớp thành 4 nhóm, phát Phiếu học tập số 1 cho các nhóm.</li>\n    <li><em>Bước 2 (Thực hiện):</em> Các nhóm thảo luận thống nhất đáp án trong 7 phút. GV di chuyển giữa các nhóm hỗ trợ.</li>\n    <li><em>Bước 3 (Báo cáo):</em> Đại diện Nhóm 1 trình bày kết quả, Nhóm 2 phản biện, bổ sung ý kiến.</li>\n    <li><em>Bước 4 (Đánh giá):</em> GV chiếu đáp án chuẩn, nhận xét tinh thần làm việc của các nhóm và kết luận kiến thức trọng tâm.</li>\n  </ul>\n\n  <p style=\"color:#0284c7; font-weight: 400; margin-top:1rem;\">Mục 2: Tìm hiểu khái niệm Vật mang tin</p>\n  <p><strong>a) Mục tiêu:</strong> Hiểu được thế nào là vật mang tin và kể tên được các vật mang tin thông dụng.</p>\n  <p><strong>b) Nội dung:</strong> HS làm việc cá nhân quan sát các vật dụng xung quanh lớp học (sách, thẻ nhớ, USB, bảng tin).</p>\n  <p><strong>c) Sản phẩm:</strong> Danh sách các vật mang tin được ghi vào vở cá nhân.</p>\n  <p><strong>d) Tổ chức thực hiện:</strong> GV tổ chức trò chơi \"Ai nhanh hơn\", HS nêu tên vật mang tin ➔ GV chốt khái niệm Vật mang tin.</p>\n  \n  <h4 style=\"color:#047857; margin-top:1.5rem;\">3. HOẠT ĐỘNG 3: LUYỆN TẬP (10 PHÚT)</h4>\n  <p><strong>a) Mục tiêu:</strong> Củng cố kiến thức đã học, rèn luyện kỹ năng nhận biết thông tin và dữ liệu qua bài tập thực hành.</p>\n  <p><strong>b) Nội dung:</strong> Học sinh giải Bài tập 1, Bài tập 2 trong SGK trang 7 và trả lời câu hỏi trắc nghiệm nhanh trên máy chiếu.</p>\n  <p><strong>c) Sản phẩm:</strong> Đáp án bài tập 1, 2 vào vở và kết quả phiếu trắc nghiệm cá nhân.</p>\n  <p><strong>d) Tổ chức thực hiện:</strong></p>\n  <ul>\n    <li>GV chiếu 4 câu hỏi trắc nghiệm củng cố ➔ Học sinh suy nghĩ làm bài cá nhân trong 5 phút.</li>\n    <li>GV gọi 3 HS đọc đáp án ➔ Chữa bài trực tiếp trên máy chiếu ➔ Tuyên dương học sinh làm tốt.</li>\n  </ul>\n  \n  <h4 style=\"color:#047857; margin-top:1.5rem;\">4. HOẠT ĐỘNG 4: VẬN DỤNG & DẶN DÒ (5 PHÚT)</h4>\n  <p><strong>a) Mục tiêu:</strong> Vận dụng kiến thức bài học vào xử lý các tình huống thực tiễn hàng ngày.</p>\n  <p><strong>b) Nội dung:</strong> Yêu cầu học sinh tìm 3 ví dụ về dữ liệu và thông tin mà em tiếp nhận được khi đi từ nhà đến trường.</p>\n  <p><strong>c) Sản phẩm:</strong> Bài thu hoạch cá nhân viết vào vở bài tập.</p>\n  <p><strong>d) Tổ chức thực hiện:</strong> GV dặn dò học sinh hoàn thành bài tập vận dụng ở nhà, truy cập hệ thống THCS LMS làm bài kiểm tra 10 phút và đọc trước bài học mới.</p>\n</div>"
+    },
+    {
+      "id": "khbd_mang_may_tinh",
+      "name": "7+8-MangMayTinh.docx",
+      "fileType": "khbd",
+      "ext": ".docx",
+      "subjectId": "tin",
+      "grade": 6,
+      "author": "Chu Văn Giáp",
+      "uploadDate": "2026-07-25",
+      "isShared": true,
+      "description": "Kế hoạch bài dạy môn Tin học 6 - Bài 7 & 8: Mạng máy tính và Internet (Chuẩn CV 5512)",
+      "content": "<div style=\"font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a;\">\n        <h2 style=\"text-align:center; color:#1e3a8a; font-weight: 400; margin-bottom:0.2rem;\">KẾ HOẠCH BÀI DẠY (GIÁO ÁN THEO CÔNG VĂN 5512/BGDĐT)</h2>\n        <p style=\"text-align:center; font-weight: 400; margin-top:0;\">Trường TH-THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>\n        <hr style=\"border:none; border-top:1.5px solid #cbd5e1; margin:1rem 0;\">\n        \n        <p><strong>Môn học:</strong> TOÁN HỌC / TIN HỌC / NGỮ VĂN | <strong>Khối lớp:</strong> Khối 6 - THCS</p>\n        <p><strong>Tên bài dạy:</strong> BÀI HỌC VÀ TIẾN TRÌNH DẠY HỌC TRỌNG TÂM</p>\n        <p><strong>Thời lượng thực hiện:</strong> 02 Tiết (90 phút)</p>\n        \n        <h3 style=\"color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;\">I. MỤC TIÊU BÀI HỌC</h3>\n        <p><strong>1. Về kiến thức:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li>Học sinh nhận biết và nắm vững các khái niệm, định nghĩa và nguyên lý cốt lõi của bài học.</li>\n          <li>Phân biệt rõ ràng các khái niệm trọng tâm, ứng dụng lý thuyết vào giải quyết các bài tập thực hành.</li>\n          <li>Hiểu được vai trò và ý nghĩa thực tiễn của bài học trong đời sống xã hội và học tập.</li>\n        </ul>\n        \n        <p><strong>2. Về năng lực:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li><em>Năng lực chung:</em> Năng lực tự chủ và tự học (chủ động đọc SGK, hoàn thành phiếu học tập cá nhân); Năng lực giao tiếp và hợp tác (thảo luận nhóm tích cực); Năng lực giải quyết vấn đề và sáng tạo.</li>\n          <li><em>Năng lực đặc thù môn học:</em> Năng lực tư duy logic, phân tích tổng hợp dữ liệu, năng lực ứng dụng công nghệ và thực hành trực quan.</li>\n        </ul>\n        \n        <p><strong>3. Về phẩm chất:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li>Chăm chỉ, trung thực, có tinh thần trách nhiệm cao trong các hoạt động học tập tập thể.</li>\n          <li>Yêu thích môn học, có ý thức vận dụng tri thức vào thực tiễn cuộc sống hàng ngày.</li>\n        </ul>\n        \n        <h3 style=\"color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;\">II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU</h3>\n        <p><strong>1. Giáo viên:</strong> Bài giảng điện tử PowerPoint sinh động, máy tính kết nối máy chiếu, các hình ảnh và video minh họa trực quan, phiếu học tập nhóm, thước thẳng, bảng phụ.</p>\n        <p><strong>2. Học sinh:</strong> Sách giáo khoa, vở ghi bài, đồ dùng học tập cá nhân, đọc trước nội dung bài mới theo dặn dò của giáo viên.</p>\n        \n        <h3 style=\"color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;\">III. TIẾN TRÌNH DẠY HỌC CHI TIẾT (CÁC HOẠT ĐỘNG DẠY HỌC)</h3>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem;\">1. HOẠT ĐỘNG 1: MỞ ĐẦU (KHỞI ĐỘNG - 7 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Tạo tâm thế hứng thú học tập, kết nối tri thức thực tế của học sinh dẫn dắt vào bài học mới.</p>\n        <p><strong>b) Nội dung:</strong> GV chiếu hình ảnh tình huống thực tế và đặt câu hỏi gợi mở yêu cầu học sinh quan sát, suy nghĩ trả lời.</p>\n        <p><strong>c) Sản phẩm:</strong> Câu trả lời cá nhân của học sinh và sự tò mò khám phá nội dung bài mới.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li><em>Bước 1: Chuyển giao nhiệm vụ:</em> GV phổ biến câu hỏi và yêu cầu HS quan sát màn hình chiếu.</li>\n          <li><em>Bước 2: Thực hiện nhiệm vụ:</em> HS làm việc cá nhân trong 2 phút.</li>\n          <li><em>Bước 3: Báo cáo thảo luận:</em> GV mời 2-3 HS trình bày ý kiến trước lớp.</li>\n          <li><em>Bước 4: Kết luận, nhận xét:</em> GV đánh giá ý kiến HS và dẫn dắt trực tiếp vào bài học mới.</li>\n        </ul>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;\">2. HOẠT ĐỘNG 2: HÌNH THÀNH KIẾN THỨC MỚI (25 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Học sinh tự khám phá, thảo luận và hình thành nên các khái niệm, quy tắc trọng tâm của bài học.</p>\n        <p><strong>b) Nội dung:</strong> HS đọc SGK, hoạt động nhóm 4 người hoàn thành Phiếu học tập số 1 và số 2.</p>\n        <p><strong>c) Sản phẩm:</strong> Kết quả điền trên Phiếu học tập của các nhóm và nội dung ghi vở của học sinh.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li><em>Nội dung 1 (Tìm hiểu khái niệm cốt lõi):</em> GV chia nhóm ➔ Các nhóm thảo luận 7 phút ➔ Đại diện nhóm 1 và nhóm 3 báo cáo ➔ Các nhóm khác nhận xét phản biện ➔ GV chốt đáp án chuẩn.</li>\n          <li><em>Nội dung 2 (Phân tích tính chất & quy tắc):</em> GV hướng dẫn HS phân tích các ví dụ mẫu SGK ➔ Rút ra định lý/quy tắc trọng tâm ➔ HS ghi bài vào vở.</li>\n        </ul>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;\">3. HOẠT ĐỘNG 3: LUYỆN TẬP (10 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Củng cố và nâng cao kỹ năng vận dụng lý thuyết vừa học vào giải các bài tập thực hành.</p>\n        <p><strong>b) Nội dung:</strong> Giải Bài tập 1, Bài tập 2 trong SGK theo hình thức cá nhân và cặp đôi.</p>\n        <p><strong>c) Sản phẩm:</strong> Bài giải hoàn chỉnh trong vở bài tập của học sinh.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong> GV phát phiếu trắc nghiệm nhanh ➔ HS làm bài ➔ GV thu bài ngẫu nhiên 5 HS để chấm điểm và gọi HS lên bảng chữa bài ➔ GV nhận xét bài làm.</li>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;\">4. HOẠT ĐỘNG 4: VẬN DỤNG & DẶN DÒ (3 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Vận dụng tri thức đã học vào thực tiễn cuộc sống và rèn luyện tự học ở nhà.</p>\n        <p><strong>b) Nội dung:</strong> GV giao thử thách tìm 2 ví dụ thực tế liên quan đến bài học và chuẩn bị bài mới.</p>\n        <p><strong>c) Sản phẩm:</strong> Bài làm nộp trên hệ thống THCS LMS của học sinh.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong> GV dặn dò HS ôn tập lý thuyết, hoàn thành bài tập về nhà và làm kiểm tra trực tuyến trên Cổng trường học số LMS.</p>\n      </div>"
+    },
+    {
+      "id": "khbd_van7_truyen_co_tich",
+      "name": "GiaoAn_NguVan7_TruyenCoTich.pdf",
+      "fileType": "khbd",
+      "ext": ".pdf",
+      "subjectId": "van",
+      "grade": 7,
+      "author": "Lê Thu Lan",
+      "uploadDate": "2026-07-22",
+      "isShared": true,
+      "description": "Giáo án Ngữ văn 7 - Chủ đề Truyện cổ tích Việt Nam & Thế giới (Định dạng PDF)",
+      "content": "<div style=\"font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a;\">\n        <h2 style=\"text-align:center; color:#1e3a8a; font-weight: 400; margin-bottom:0.2rem;\">KẾ HOẠCH BÀI DẠY (GIÁO ÁN THEO CÔNG VĂN 5512/BGDĐT)</h2>\n        <p style=\"text-align:center; font-weight: 400; margin-top:0;\">Trường TH-THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>\n        <hr style=\"border:none; border-top:1.5px solid #cbd5e1; margin:1rem 0;\">\n        \n        <p><strong>Môn học:</strong> TOÁN HỌC / TIN HỌC / NGỮ VĂN | <strong>Khối lớp:</strong> Khối 6 - THCS</p>\n        <p><strong>Tên bài dạy:</strong> BÀI HỌC VÀ TIẾN TRÌNH DẠY HỌC TRỌNG TÂM</p>\n        <p><strong>Thời lượng thực hiện:</strong> 02 Tiết (90 phút)</p>\n        \n        <h3 style=\"color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;\">I. MỤC TIÊU BÀI HỌC</h3>\n        <p><strong>1. Về kiến thức:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li>Học sinh nhận biết và nắm vững các khái niệm, định nghĩa và nguyên lý cốt lõi của bài học.</li>\n          <li>Phân biệt rõ ràng các khái niệm trọng tâm, ứng dụng lý thuyết vào giải quyết các bài tập thực hành.</li>\n          <li>Hiểu được vai trò và ý nghĩa thực tiễn của bài học trong đời sống xã hội và học tập.</li>\n        </ul>\n        \n        <p><strong>2. Về năng lực:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li><em>Năng lực chung:</em> Năng lực tự chủ và tự học (chủ động đọc SGK, hoàn thành phiếu học tập cá nhân); Năng lực giao tiếp và hợp tác (thảo luận nhóm tích cực); Năng lực giải quyết vấn đề và sáng tạo.</li>\n          <li><em>Năng lực đặc thù môn học:</em> Năng lực tư duy logic, phân tích tổng hợp dữ liệu, năng lực ứng dụng công nghệ và thực hành trực quan.</li>\n        </ul>\n        \n        <p><strong>3. Về phẩm chất:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li>Chăm chỉ, trung thực, có tinh thần trách nhiệm cao trong các hoạt động học tập tập thể.</li>\n          <li>Yêu thích môn học, có ý thức vận dụng tri thức vào thực tiễn cuộc sống hàng ngày.</li>\n        </ul>\n        \n        <h3 style=\"color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;\">II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU</h3>\n        <p><strong>1. Giáo viên:</strong> Bài giảng điện tử PowerPoint sinh động, máy tính kết nối máy chiếu, các hình ảnh và video minh họa trực quan, phiếu học tập nhóm, thước thẳng, bảng phụ.</p>\n        <p><strong>2. Học sinh:</strong> Sách giáo khoa, vở ghi bài, đồ dùng học tập cá nhân, đọc trước nội dung bài mới theo dặn dò của giáo viên.</p>\n        \n        <h3 style=\"color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;\">III. TIẾN TRÌNH DẠY HỌC CHI TIẾT (CÁC HOẠT ĐỘNG DẠY HỌC)</h3>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem;\">1. HOẠT ĐỘNG 1: MỞ ĐẦU (KHỞI ĐỘNG - 7 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Tạo tâm thế hứng thú học tập, kết nối tri thức thực tế của học sinh dẫn dắt vào bài học mới.</p>\n        <p><strong>b) Nội dung:</strong> GV chiếu hình ảnh tình huống thực tế và đặt câu hỏi gợi mở yêu cầu học sinh quan sát, suy nghĩ trả lời.</p>\n        <p><strong>c) Sản phẩm:</strong> Câu trả lời cá nhân của học sinh và sự tò mò khám phá nội dung bài mới.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li><em>Bước 1: Chuyển giao nhiệm vụ:</em> GV phổ biến câu hỏi và yêu cầu HS quan sát màn hình chiếu.</li>\n          <li><em>Bước 2: Thực hiện nhiệm vụ:</em> HS làm việc cá nhân trong 2 phút.</li>\n          <li><em>Bước 3: Báo cáo thảo luận:</em> GV mời 2-3 HS trình bày ý kiến trước lớp.</li>\n          <li><em>Bước 4: Kết luận, nhận xét:</em> GV đánh giá ý kiến HS và dẫn dắt trực tiếp vào bài học mới.</li>\n        </ul>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;\">2. HOẠT ĐỘNG 2: HÌNH THÀNH KIẾN THỨC MỚI (25 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Học sinh tự khám phá, thảo luận và hình thành nên các khái niệm, quy tắc trọng tâm của bài học.</p>\n        <p><strong>b) Nội dung:</strong> HS đọc SGK, hoạt động nhóm 4 người hoàn thành Phiếu học tập số 1 và số 2.</p>\n        <p><strong>c) Sản phẩm:</strong> Kết quả điền trên Phiếu học tập của các nhóm và nội dung ghi vở của học sinh.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li><em>Nội dung 1 (Tìm hiểu khái niệm cốt lõi):</em> GV chia nhóm ➔ Các nhóm thảo luận 7 phút ➔ Đại diện nhóm 1 và nhóm 3 báo cáo ➔ Các nhóm khác nhận xét phản biện ➔ GV chốt đáp án chuẩn.</li>\n          <li><em>Nội dung 2 (Phân tích tính chất & quy tắc):</em> GV hướng dẫn HS phân tích các ví dụ mẫu SGK ➔ Rút ra định lý/quy tắc trọng tâm ➔ HS ghi bài vào vở.</li>\n        </ul>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;\">3. HOẠT ĐỘNG 3: LUYỆN TẬP (10 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Củng cố và nâng cao kỹ năng vận dụng lý thuyết vừa học vào giải các bài tập thực hành.</p>\n        <p><strong>b) Nội dung:</strong> Giải Bài tập 1, Bài tập 2 trong SGK theo hình thức cá nhân và cặp đôi.</p>\n        <p><strong>c) Sản phẩm:</strong> Bài giải hoàn chỉnh trong vở bài tập của học sinh.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong> GV phát phiếu trắc nghiệm nhanh ➔ HS làm bài ➔ GV thu bài ngẫu nhiên 5 HS để chấm điểm và gọi HS lên bảng chữa bài ➔ GV nhận xét bài làm.</li>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;\">4. HOẠT ĐỘNG 4: VẬN DỤNG & DẶN DÒ (3 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Vận dụng tri thức đã học vào thực tiễn cuộc sống và rèn luyện tự học ở nhà.</p>\n        <p><strong>b) Nội dung:</strong> GV giao thử thách tìm 2 ví dụ thực tế liên quan đến bài học và chuẩn bị bài mới.</p>\n        <p><strong>c) Sản phẩm:</strong> Bài làm nộp trên hệ thống THCS LMS của học sinh.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong> GV dặn dò HS ôn tập lý thuyết, hoàn thành bài tập về nhà và làm kiểm tra trực tuyến trên Cổng trường học số LMS.</p>\n      </div>"
+    },
+    {
+      "id": "khbd_anh8_unit1",
+      "name": "LessonPlan_English8_Unit1.doc",
+      "fileType": "khbd",
+      "ext": ".doc",
+      "subjectId": "anh",
+      "grade": 8,
+      "author": "Trần Hải Nam",
+      "uploadDate": "2026-07-24",
+      "isShared": true,
+      "description": "Lesson Plan English Grade 8 - Unit 1: Leisure Time & Hobbies (Doc Format)",
+      "content": "<div style=\"font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a;\">\n        <h2 style=\"text-align:center; color:#1e3a8a; font-weight: 400; margin-bottom:0.2rem;\">KẾ HOẠCH BÀI DẠY (GIÁO ÁN THEO CÔNG VĂN 5512/BGDĐT)</h2>\n        <p style=\"text-align:center; font-weight: 400; margin-top:0;\">Trường TH-THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>\n        <hr style=\"border:none; border-top:1.5px solid #cbd5e1; margin:1rem 0;\">\n        \n        <p><strong>Môn học:</strong> TOÁN HỌC / TIN HỌC / NGỮ VĂN | <strong>Khối lớp:</strong> Khối 6 - THCS</p>\n        <p><strong>Tên bài dạy:</strong> BÀI HỌC VÀ TIẾN TRÌNH DẠY HỌC TRỌNG TÂM</p>\n        <p><strong>Thời lượng thực hiện:</strong> 02 Tiết (90 phút)</p>\n        \n        <h3 style=\"color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;\">I. MỤC TIÊU BÀI HỌC</h3>\n        <p><strong>1. Về kiến thức:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li>Học sinh nhận biết và nắm vững các khái niệm, định nghĩa và nguyên lý cốt lõi của bài học.</li>\n          <li>Phân biệt rõ ràng các khái niệm trọng tâm, ứng dụng lý thuyết vào giải quyết các bài tập thực hành.</li>\n          <li>Hiểu được vai trò và ý nghĩa thực tiễn của bài học trong đời sống xã hội và học tập.</li>\n        </ul>\n        \n        <p><strong>2. Về năng lực:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li><em>Năng lực chung:</em> Năng lực tự chủ và tự học (chủ động đọc SGK, hoàn thành phiếu học tập cá nhân); Năng lực giao tiếp và hợp tác (thảo luận nhóm tích cực); Năng lực giải quyết vấn đề và sáng tạo.</li>\n          <li><em>Năng lực đặc thù môn học:</em> Năng lực tư duy logic, phân tích tổng hợp dữ liệu, năng lực ứng dụng công nghệ và thực hành trực quan.</li>\n        </ul>\n        \n        <p><strong>3. Về phẩm chất:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li>Chăm chỉ, trung thực, có tinh thần trách nhiệm cao trong các hoạt động học tập tập thể.</li>\n          <li>Yêu thích môn học, có ý thức vận dụng tri thức vào thực tiễn cuộc sống hàng ngày.</li>\n        </ul>\n        \n        <h3 style=\"color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;\">II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU</h3>\n        <p><strong>1. Giáo viên:</strong> Bài giảng điện tử PowerPoint sinh động, máy tính kết nối máy chiếu, các hình ảnh và video minh họa trực quan, phiếu học tập nhóm, thước thẳng, bảng phụ.</p>\n        <p><strong>2. Học sinh:</strong> Sách giáo khoa, vở ghi bài, đồ dùng học tập cá nhân, đọc trước nội dung bài mới theo dặn dò của giáo viên.</p>\n        \n        <h3 style=\"color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;\">III. TIẾN TRÌNH DẠY HỌC CHI TIẾT (CÁC HOẠT ĐỘNG DẠY HỌC)</h3>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem;\">1. HOẠT ĐỘNG 1: MỞ ĐẦU (KHỞI ĐỘNG - 7 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Tạo tâm thế hứng thú học tập, kết nối tri thức thực tế của học sinh dẫn dắt vào bài học mới.</p>\n        <p><strong>b) Nội dung:</strong> GV chiếu hình ảnh tình huống thực tế và đặt câu hỏi gợi mở yêu cầu học sinh quan sát, suy nghĩ trả lời.</p>\n        <p><strong>c) Sản phẩm:</strong> Câu trả lời cá nhân của học sinh và sự tò mò khám phá nội dung bài mới.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li><em>Bước 1: Chuyển giao nhiệm vụ:</em> GV phổ biến câu hỏi và yêu cầu HS quan sát màn hình chiếu.</li>\n          <li><em>Bước 2: Thực hiện nhiệm vụ:</em> HS làm việc cá nhân trong 2 phút.</li>\n          <li><em>Bước 3: Báo cáo thảo luận:</em> GV mời 2-3 HS trình bày ý kiến trước lớp.</li>\n          <li><em>Bước 4: Kết luận, nhận xét:</em> GV đánh giá ý kiến HS và dẫn dắt trực tiếp vào bài học mới.</li>\n        </ul>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;\">2. HOẠT ĐỘNG 2: HÌNH THÀNH KIẾN THỨC MỚI (25 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Học sinh tự khám phá, thảo luận và hình thành nên các khái niệm, quy tắc trọng tâm của bài học.</p>\n        <p><strong>b) Nội dung:</strong> HS đọc SGK, hoạt động nhóm 4 người hoàn thành Phiếu học tập số 1 và số 2.</p>\n        <p><strong>c) Sản phẩm:</strong> Kết quả điền trên Phiếu học tập của các nhóm và nội dung ghi vở của học sinh.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong></p>\n        <ul style=\"margin-top:0.2rem;\">\n          <li><em>Nội dung 1 (Tìm hiểu khái niệm cốt lõi):</em> GV chia nhóm ➔ Các nhóm thảo luận 7 phút ➔ Đại diện nhóm 1 và nhóm 3 báo cáo ➔ Các nhóm khác nhận xét phản biện ➔ GV chốt đáp án chuẩn.</li>\n          <li><em>Nội dung 2 (Phân tích tính chất & quy tắc):</em> GV hướng dẫn HS phân tích các ví dụ mẫu SGK ➔ Rút ra định lý/quy tắc trọng tâm ➔ HS ghi bài vào vở.</li>\n        </ul>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;\">3. HOẠT ĐỘNG 3: LUYỆN TẬP (10 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Củng cố và nâng cao kỹ năng vận dụng lý thuyết vừa học vào giải các bài tập thực hành.</p>\n        <p><strong>b) Nội dung:</strong> Giải Bài tập 1, Bài tập 2 trong SGK theo hình thức cá nhân và cặp đôi.</p>\n        <p><strong>c) Sản phẩm:</strong> Bài giải hoàn chỉnh trong vở bài tập của học sinh.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong> GV phát phiếu trắc nghiệm nhanh ➔ HS làm bài ➔ GV thu bài ngẫu nhiên 5 HS để chấm điểm và gọi HS lên bảng chữa bài ➔ GV nhận xét bài làm.</li>\n        \n        <h4 style=\"color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;\">4. HOẠT ĐỘNG 4: VẬN DỤNG & DẶN DÒ (3 PHÚT)</h4>\n        <p><strong>a) Mục tiêu:</strong> Vận dụng tri thức đã học vào thực tiễn cuộc sống và rèn luyện tự học ở nhà.</p>\n        <p><strong>b) Nội dung:</strong> GV giao thử thách tìm 2 ví dụ thực tế liên quan đến bài học và chuẩn bị bài mới.</p>\n        <p><strong>c) Sản phẩm:</strong> Bài làm nộp trên hệ thống THCS LMS của học sinh.</p>\n        <p><strong>d) Tổ chức thực hiện:</strong> GV dặn dò HS ôn tập lý thuyết, hoàn thành bài tập về nhà và làm kiểm tra trực tuyến trên Cổng trường học số LMS.</p>\n      </div>"
+    },
+    {
+      "id": "slide_powerpoint_toan6",
+      "name": "Slide_BaiGiang_PowerPoint_Toan6.pptx",
+      "fileType": "slide",
+      "ext": ".pptx",
+      "subjectId": "toan",
+      "grade": 6,
+      "author": "Chu Văn Giáp",
+      "uploadDate": "2026-07-25",
+      "isShared": true,
+      "description": "Slide bài giảng PowerPoint môn Toán 6 - Thiết kế trình chiếu 3D tương tác",
+      "content": "SLIDE_TITLE: 🎯 BÀI GIẢNG ĐIỆN TỬ TOÁN HỌC KHỐI 6\nSUBTITLE: Bài giảng Trực quan & Trò chơi Học tập Tương tác THCS LMS\nPRESENTER: Giáo viên: Chu Văn Giáp | Trường TH-THCS Ama Trang Lơng\nSUBJECT: Môn: TOÁN HỌC - KHỐI 6\n\n--- SLIDE_BREAK ---\n\nSLIDE_HEADER: 🎯 1. Mục tiêu Bài học & Chuẩn bị\n• Nắm vững kiến thức trọng tâm của bài học và vận dụng giải bài tập\n• Rèn luyện kỹ năng phát biểu, tư duy nhóm và giải quyết vấn đề\n• Tạo không khí thi đua sôi nổi, hứng thú học tập cao cho học sinh cả lớp\n\n--- SLIDE_BREAK ---\n\nSLIDE_HEADER: 📚 2. Nội dung Lý thuyết Trọng tâm\n• Khái niệm 1: Định nghĩa và các ví dụ minh họa trực quan\n• Tính chất 2: Phân tích công thức và sơ đồ tư duy hệ thống\n• Lưu ý: Các dạng bài tập dễ nhầm lẫn và phương pháp khắc phục hiệu quả\n\n--- SLIDE_BREAK ---\n\nSLIDE_HEADER: ✍️ 3. Bài tập Luyện tập & Thử thách Nhanh\n• Thử thách 1: Giải nhanh câu hỏi trắc nghiệm củng cố lý thuyết\n• Thử thách 2: Bài tập tình huống thực tế ứng dụng trong đời sống\n• Hướng dẫn giải đáp thắc mắc và chấm điểm trực tiếp cho học sinh\n\n--- SLIDE_BREAK ---\n\nSLIDE_HEADER: 💡 4. Củng cố Tiết học & Dặn dò Về nhà\n• Tuyên dương các cá nhân và nhóm học sinh tích cực phát biểu\n• Hoàn thành các bài tập về nhà trên hệ thống THCS LMS\n• Ôn tập và đọc trước nội dung bài học mới cho tiết tiếp theo"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "grade": 6,
+      "topic": "So tu nhien",
+      "lesson": "Tap hop va phan tu",
+      "subjectId": "toan",
+      "chapterId": "toan_c1",
+      "type": "trac_nghiem",
+      "difficulty": "nhan_biet",
+      "questionText": "Cho tập hợp A = {x ∈ N | x < 5}. Tập hợp A viết dưới dạng liệt kê phần tử là:",
+      "options": [
+        "A = {1; 2; 3; 4}",
+        "A = {0; 1; 2; 3; 4}",
+        "A = {1; 2; 3; 4; 5}",
+        "A = {0; 1; 2; 3; 4; 5}"
+      ],
+      "correctAnswer": 1,
+      "explanation": "Tập hợp các số tự nhiên N bắt đầu từ số 0. Do đó, các số tự nhiên nhỏ hơn 5 là: 0, 1, 2, 3, 4.",
+      "approved": true
+    },
+    {
+      "id": "q2",
+      "grade": 6,
+      "topic": "So tu nhien",
+      "lesson": "Tap hop va phan tu",
+      "subjectId": "toan",
+      "chapterId": "toan_c1",
+      "type": "trac_nghiem",
+      "difficulty": "thong_hieu",
+      "questionText": "Cho tập hợp B = {2; 4; 6; 8}. Phát biểu nào sau đây là SAI?",
+      "options": [
+        "2 ∈ B",
+        "5 ∉ B",
+        "{4; 6} ⊂ B",
+        "8 ∉ B"
+      ],
+      "correctAnswer": 3,
+      "explanation": "Số 8 rõ ràng nằm trong tập hợp B, vì vậy phát biểu \"8 không thuộc B\" (8 ∉ B) là sai.",
+      "approved": true
+    },
+    {
+      "id": "q_tf_1",
+      "grade": 6,
+      "topic": "So tu nhien",
+      "lesson": "Uoc va boi",
+      "subjectId": "toan",
+      "chapterId": "toan_c1",
+      "type": "dung_sai",
+      "difficulty": "thong_hieu",
+      "questionText": "Cho tập hợp M = {x ∈ N* | x là số chẵn nhỏ hơn 10}. Xét tính Đúng/Sai của các nhận định sau:",
+      "subQuestions": [
+        "a) Tập hợp M có 4 phần tử.",
+        "b) Số 0 là một phần tử thuộc tập hợp M.",
+        "c) Số 8 thuộc tập hợp M.",
+        "d) Viết tập hợp M dưới dạng liệt kê là M = {2; 4; 6; 8}."
+      ],
+      "correctAnswers": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "explanation": "Môn Toán học: N* không chứa số 0. Số chẵn dương bé hơn 10 là {2; 4; 6; 8}. Do đó, M có 4 phần tử. 8 thuộc M. 0 không thuộc M.",
+      "approved": true
+    },
+    {
+      "id": "q_sa_1",
+      "grade": 6,
+      "topic": "So tu nhien",
+      "lesson": "Uoc va boi",
+      "subjectId": "toan",
+      "chapterId": "toan_c1",
+      "type": "tra_loi_ngan",
+      "difficulty": "van_dung",
+      "questionText": "Tìm số tự nhiên x lớn nhất biết rằng 120 chia hết cho x và 200 chia hết cho x.",
+      "correctAnswer": "40",
+      "explanation": "x là ước chung lớn nhất của 120 và 200. ƯCLN(120, 200) = 40.",
+      "approved": true
+    },
+    {
+      "id": "q_essay_1",
+      "grade": 6,
+      "topic": "So tu nhien",
+      "lesson": "Uoc va boi",
+      "subjectId": "toan",
+      "chapterId": "toan_c1",
+      "type": "tu_luan",
+      "difficulty": "van_dung_cao",
+      "questionText": "Một trường THCS tổ chức cho học sinh đi tham quan bằng xe ô tô. Nếu xếp 30 học sinh hay 45 học sinh lên một xe thì đều vừa đủ. Tính số học sinh đi tham quan, biết số học sinh nằm trong khoảng từ 500 đến 600 em.",
+      "options": [],
+      "correctAnswer": null,
+      "explanation": "Số học sinh là bội chung của 30 và 45. BCNN(30, 45) = 90. Các bội của 90 trong khoảng từ 500 đến 600 là 540. Vậy số học sinh đi tham quan là 540 em.",
+      "approved": true
+    },
+    {
+      "id": "q_van_1",
+      "grade": 6,
+      "topic": "Truyen dan gian",
+      "lesson": "Thanh Giong",
+      "subjectId": "van",
+      "chapterId": "van_c1",
+      "type": "trac_nghiem",
+      "difficulty": "nhan_biet",
+      "questionText": "Văn bản \"Thánh Gióng\" thuộc thể loại truyện dân gian nào?",
+      "options": [
+        "Truyền thuyết",
+        "Truyện cổ tích",
+        "Truyện ngụ ngôn",
+        "Truyện cười"
+      ],
+      "correctAnswer": 0,
+      "explanation": "Văn bản Thánh Gióng kể về người anh hùng giữ nước thời Hùng Vương, chứa các yếu tố kỳ ảo và liên quan đến lịch sử nên thuộc thể loại truyền thuyết.",
+      "approved": true
+    },
+    {
+      "id": "q_tf_van",
+      "grade": 6,
+      "topic": "Truyen dan gian",
+      "lesson": "Son Tinh Thuy Tinh",
+      "subjectId": "van",
+      "chapterId": "van_c1",
+      "type": "dung_sai",
+      "difficulty": "thong_hieu",
+      "questionText": "Xét các phát biểu sau đây về nội dung tác phẩm \"Sơn Tinh, Thủy Tinh\":",
+      "subQuestions": [
+        "a) Thủy Tinh đại diện cho sức mạnh tàn phá của thiên tai, lũ lụt.",
+        "b) Sơn Tinh đại diện cho sức mạnh và ước vọng chế ngự bão lũ của nhân dân.",
+        "c) Kết thúc truyện, Sơn Tinh đã cưới Mỵ Nương và Thủy Tinh rút quân về hoàn toàn không quay lại.",
+        "d) Truyện Sơn Tinh Thủy Tinh giải thích hiện tượng bão lũ xảy ra hằng năm ở miền Bắc nước ta."
+      ],
+      "correctAnswers": [
+        true,
+        true,
+        false,
+        true
+      ],
+      "explanation": "Ý c) sai vì Thủy Tinh năm nào cũng dâng nước đánh Sơn Tinh chứ không phải rút quân vĩnh viễn.",
+      "approved": true
+    },
+    {
+      "id": "q_sa_van",
+      "grade": 6,
+      "topic": "Truyen dan gian",
+      "lesson": "Thanh Giong",
+      "subjectId": "van",
+      "chapterId": "van_c1",
+      "type": "tra_loi_ngan",
+      "difficulty": "van_dung",
+      "questionText": "Điền từ còn thiếu vào chỗ trống: \"Truyền thuyết là loại truyện dân gian kể về các nhân vật và sự kiện có liên quan đến [...] thời quá khứ.\"",
+      "correctAnswer": "lịch sử",
+      "explanation": "Truyền thuyết luôn gắn với các sự kiện hoặc nhân vật lịch sử.",
+      "approved": true
+    },
+    {
+      "id": "q_essay_van",
+      "grade": 6,
+      "topic": "Truyen dan gian",
+      "lesson": "Thanh Giong",
+      "subjectId": "van",
+      "chapterId": "van_c1",
+      "type": "tu_luan",
+      "difficulty": "van_dung_cao",
+      "questionText": "Viết một đoạn văn ngắn (5 - 7 câu) phát biểu cảm nghĩ của em về người anh hùng Thánh Gióng.",
+      "options": [],
+      "correctAnswer": null,
+      "explanation": "Học sinh cần nêu được lòng yêu nước, ý chí kiên cường chống giặc và vẻ đẹp tráng lệ của hình tượng Thánh Gióng.",
+      "approved": true
+    }
+  ],
+  "assignments": [
+    {
+      "id": "asm_1",
+      "title": "Bài tập tuần 1: Tập hợp & Phần tử",
+      "subjectId": "toan",
+      "classId": "6A",
+      "dueDate": "2026-07-20T23:59",
+      "description": "Yêu cầu các em làm bài tập 1, 2, 3 trang 8 SGK Toán 6 (Tập 1). Chụp ảnh bài làm trong vở và đính kèm file ảnh tại đây để cô chấm điểm.",
+      "teacherId": "gv_huong"
+    }
+  ],
+  "submissions": [
+    {
+      "id": "sub_1",
+      "assignmentId": "asm_1",
+      "studentId": "hs_khoi",
+      "submitDate": "2026-07-13T10:30",
+      "content": "Em thưa cô, em đã hoàn thành bài tập tuần 1 trong vở bài tập Toán ạ. Em gửi cô file ảnh bài làm.",
+      "fileUrl": "bai_lam_toan_khoi.jpg",
+      "score": 9,
+      "comment": "Bài làm rất sạch sẽ, giải đúng tất cả các câu hỏi tập hợp. Trình bày rõ ràng. Cố gắng phát huy nhé!",
+      "gradedBy": "gv_huong"
+    },
+    {
+      "id": "sub_2",
+      "assignmentId": "asm_1",
+      "studentId": "hs_vy",
+      "submitDate": "2026-07-13T11:15",
+      "content": "Em gửi bài tập về nhà ạ.",
+      "fileUrl": "bai_lam_toan_vy.jpg",
+      "score": null,
+      "comment": "",
+      "gradedBy": null
+    }
+  ],
+  "exams": [
+    {
+      "id": "exam_1",
+      "title": "Bài kiểm tra Định kỳ Giữa kỳ I - Toán 6 (Theo CV 7991)",
+      "subjectId": "toan",
+      "classId": "6A",
+      "durationMinutes": 15,
+      "dueDate": "2026-07-28T12:00",
+      "questionIds": [
+        "q1",
+        "q2",
+        "q_tf_1",
+        "q_sa_1",
+        "q_essay_1"
+      ],
+      "teacherId": "gv_huong",
+      "published": true,
+      "isOfficial": true,
+      "examCategory": "midterm",
+      "examSubType": "regular"
+    },
+    {
+      "id": "exam_quizizz_sample",
+      "title": "🎮 Đấu Trường Quizizz TX1 - Ôn Tập & Đánh Giá Toán 6",
+      "subjectId": "toan",
+      "classIds": [
+        "6A1"
+      ],
+      "questionIds": [
+        "q_1",
+        "q_2"
+      ],
+      "questions": [
+        {
+          "id": "q_1",
+          "type": "trac_nghiem",
+          "questionText": "Tập hợp các số tự nhiên được kí hiệu là gì?",
+          "options": [
+            "N",
+            "Z",
+            "Q",
+            "R"
+          ],
+          "correctAnswer": 0
+        },
+        {
+          "id": "q_2",
+          "type": "trac_nghiem",
+          "questionText": "Số nguyên tố chẵn duy nhất là số nào?",
+          "options": [
+            "0",
+            "1",
+            "2",
+            "4"
+          ],
+          "correctAnswer": 2
+        }
+      ],
+      "timeLimit": 15,
+      "maxAttempts": 99,
+      "mode": "thi_thu",
+      "examCategory": "tx",
+      "examSubType": "quizizz",
+      "format": "quizizz",
+      "isQuizizz": true,
+      "published": true,
+      "createdAt": 1787190744908
+    }
+  ],
+  "examAttempts": [
+    {
+      "id": "att_1",
+      "examId": "exam_1",
+      "studentId": "hs_khoi",
+      "startTime": "2026-07-13T09:00",
+      "submitTime": "2026-07-13T09:12",
+      "answers": {
+        "q1": 1,
+        "q2": 1,
+        "q_tf_1": [
+          true,
+          false,
+          true,
+          true
+        ],
+        "q_sa_1": "40",
+        "q_essay_1": "Bài làm tự luận tự động sinh của Khôi."
+      },
+      "score": 8.5,
+      "details": "Trắc nghiệm: Đúng 2/2. Đúng-Sai: Đúng 4/4. Trả lời ngắn: Đúng."
+    }
+  ],
+  "attendance": [
+    {
+      "date": "2026-07-13",
+      "studentId": "hs_khoi",
+      "status": "present"
+    },
+    {
+      "date": "2026-07-13",
+      "studentId": "hs_vy",
+      "status": "present"
+    },
+    {
+      "date": "2026-07-13",
+      "studentId": "hs_duc",
+      "status": "absent_excused"
+    },
+    {
+      "date": "2026-07-13",
+      "studentId": "hs_chi",
+      "status": "present"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg_1",
+      "senderId": "hs_khoi_parent",
+      "receiverId": "gv_huong",
+      "content": "Thưa cô, tôi muốn hỏi thăm về tình hình học tập môn Toán của cháu Khôi ở lớp dạo này thế nào ạ?",
+      "timestamp": "2026-07-13T08:30:00+07:00"
+    },
+    {
+      "id": "msg_2",
+      "senderId": "gv_huong",
+      "receiverId": "hs_khoi_parent",
+      "content": "Chào anh, cháu Khôi học tập rất tốt, bài tập về nhà nộp đầy đủ và làm đúng. Điểm thi giữa kì của cháu vừa rồi là 8.5 điểm, cháu tiếp thu bài rất nhanh.",
+      "timestamp": "2026-07-13T09:30:00+07:00"
+    }
+  ],
+  "parents": [
+    {
+      "id": "hs_khoi_parent",
+      "name": "Nguyễn Minh Hùng",
+      "phone": "0905123456",
+      "studentId": "hs_khoi"
+    },
+    {
+      "id": "hs_vy_parent",
+      "name": "Lê Mai Vy",
+      "phone": "0905111222",
+      "studentId": "hs_vy"
+    },
+    {
+      "id": "hs_duc_parent",
+      "name": "Phạm Văn Nam",
+      "phone": "0905333444",
+      "studentId": "hs_duc"
+    },
+    {
+      "id": "hs_chi_parent",
+      "name": "Trần Thị Hà",
+      "phone": "0905555666",
+      "studentId": "hs_chi"
+    }
+  ],
+  "rolesPermissions": {
+    "admin": [
+      "full_access"
+    ],
+    "teacher": [
+      "manage_lessons",
+      "manage_questions",
+      "manage_exams",
+      "grade_submissions",
+      "chat_parents",
+      "use_ai"
+    ],
+    "student": [
+      "view_lessons",
+      "submit_assignments",
+      "take_exams",
+      "view_grades"
+    ],
+    "parent": [
+      "view_grades",
+      "view_attendance",
+      "chat_teachers"
+    ]
+  },
+  "roleGroups": [
+    {
+      "id": "admin_super",
+      "name": "Admin Cấp Cao",
+      "description": "Quản trị viên toàn quyền hệ thống",
+      "isSystem": true,
+      "permissions": {
+        "info": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "academicYear": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "classes": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "subjects": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "teachers": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "students": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "parents": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "reports": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "backup": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "permissions": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "lessons": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "questions": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "exams": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "gradebook": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        }
+      }
+    },
+    {
+      "id": "bgh",
+      "name": "Ban Giám Hiệu (Hiệu trưởng / Phó HT)",
+      "description": "Ban Giám hiệu nhà trường - Quản lý tổng thể",
+      "isSystem": false,
+      "permissions": {
+        "info": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "academicYear": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "classes": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "subjects": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "teachers": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "students": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "parents": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "reports": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "backup": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        },
+        "permissions": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "lessons": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "questions": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "exams": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "gradebook": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        }
+      }
+    },
+    {
+      "id": "to_truong",
+      "name": "Tổ Trưởng Bộ Môn",
+      "description": "Quản lý chuyên môn & kiểm tra bộ môn",
+      "isSystem": false,
+      "permissions": {
+        "lessons": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "questions": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "exams": {
+          "read": true,
+          "edit": true,
+          "delete": true
+        },
+        "gradebook": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "reports": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        },
+        "students": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        }
+      }
+    },
+    {
+      "id": "giao_vien",
+      "name": "Giáo Viên Bộ Môn",
+      "description": "Giảng dạy, ra đề, chấm điểm & quản lý học sinh",
+      "isSystem": false,
+      "permissions": {
+        "lessons": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "questions": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "exams": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "gradebook": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "students": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        }
+      }
+    },
+    {
+      "id": "hoc_sinh",
+      "name": "Học Sinh",
+      "description": "Học sinh làm bài, luyện tập & xem kết quả",
+      "isSystem": false,
+      "permissions": {
+        "student_lessons": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        },
+        "student_exams": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "student_practice": {
+          "read": true,
+          "edit": true,
+          "delete": false
+        },
+        "student_grades": {
+          "read": true,
+          "edit": false,
+          "delete": false
+        }
+      }
+    }
+  ],
+  "subjectsList": [
+    {
+      "id": "sub_toan",
+      "code": "TOAN",
+      "name": "Toán học",
+      "periodsPerWeek": 4,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_van",
+      "code": "VAN",
+      "name": "Ngữ văn",
+      "periodsPerWeek": 4,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_anh",
+      "code": "ANH",
+      "name": "Tiếng Anh (Ngoại ngữ 1)",
+      "periodsPerWeek": 3,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_khtn",
+      "code": "KHTN",
+      "name": "Khoa học tự nhiên",
+      "periodsPerWeek": 4,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_lsdl",
+      "code": "LSDL",
+      "name": "Lịch sử và Địa lí",
+      "periodsPerWeek": 3,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_gddc",
+      "code": "GDCD",
+      "name": "Giáo dục công dân",
+      "periodsPerWeek": 1,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_tin",
+      "code": "TIN",
+      "name": "Tin học",
+      "periodsPerWeek": 1,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_congnghe",
+      "code": "CN",
+      "name": "Công nghệ",
+      "periodsPerWeek": 1,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_gdtc",
+      "code": "GDTC",
+      "name": "Giáo dục thể chất",
+      "periodsPerWeek": 2,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_nghethuat",
+      "code": "NT",
+      "name": "Nghệ thuật (Âm nhạc, Mĩ thuật)",
+      "periodsPerWeek": 2,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_hdtung",
+      "code": "HDTN",
+      "name": "Hoạt động trải nghiệm, hướng nghiệp",
+      "periodsPerWeek": 3,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    },
+    {
+      "id": "sub_gddp",
+      "code": "GDDP",
+      "name": "Nội dung giáo dục địa phương",
+      "periodsPerWeek": 1,
+      "type": "Bắt buộc",
+      "grades": "6,7,8,9"
+    }
+  ],
+  "classesList": [
+    {
+      "id": "cls_6a",
+      "grade": "6",
+      "name": "6A",
+      "homeroomTeacher": "Chu Văn Giáp",
+      "studentCount": 35
+    },
+    {
+      "id": "cls_6b",
+      "grade": "6",
+      "name": "6B",
+      "homeroomTeacher": "Cao Thị Ngọc Châu",
+      "studentCount": 36
+    },
+    {
+      "id": "cls_7a",
+      "grade": "7",
+      "name": "7A",
+      "homeroomTeacher": "Trần Thanh Xuân",
+      "studentCount": 34
+    },
+    {
+      "id": "cls_8a",
+      "grade": "8",
+      "name": "8A",
+      "homeroomTeacher": "Lê Thị Liên Hương",
+      "studentCount": 35
+    },
+    {
+      "id": "cls_9a",
+      "grade": "9",
+      "name": "9A",
+      "homeroomTeacher": "Nông Văn Dũng",
+      "studentCount": 35
+    }
+  ],
+  "userGroups": [
+    {
+      "id": "admin",
+      "name": "Quản trị hệ thống (Admin)",
+      "code": "ADMIN",
+      "description": "Quyền tối cao toàn hệ thống"
+    },
+    {
+      "id": "bgh",
+      "name": "Ban Giám Hiệu (BGH)",
+      "code": "BGH",
+      "description": "Chỉ đạo & Giám sát dạy học"
+    },
+    {
+      "id": "totruong",
+      "name": "Tổ trưởng chuyên môn",
+      "code": "TOTRUONG",
+      "description": "Quản lý tổ bộ môn & duyệt KHBD"
+    },
+    {
+      "id": "giaovien",
+      "name": "Giáo viên bộ môn",
+      "code": "GIAOVIEN",
+      "description": "Giảng dạy, giao bài tập & chấm điểm"
+    },
+    {
+      "id": "nhanvien",
+      "name": "Nhân viên văn phòng",
+      "code": "NHANVIEN",
+      "description": "Quản lý hồ sơ & thiết bị"
+    },
+    {
+      "id": "hocsinh",
+      "name": "Học sinh",
+      "code": "HOCSINH",
+      "description": "Học tập & làm bài thi"
+    },
+    {
+      "id": "phuhuynh",
+      "name": "Phụ huynh học sinh",
+      "code": "PHUHUYNH",
+      "description": "Theo dõi kết quả & điểm danh"
+    }
+  ],
+  "groupPermissions": {
+    "admin": {
+      "years": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "school_info_view": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "user_groups": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "user_management": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "classes": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "subjects": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "teachers": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "students": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "parents": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "reports": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "backup": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "lessons": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "questions": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "assignments": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "exams": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "grading": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_picker": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "attendance": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "messages": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_hub": {
+        "view": true,
+        "edit": true,
+        "delete": true,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      }
+    },
+    "bgh": {
+      "years": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "school_info_view": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "user_groups": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "user_management": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "classes": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "subjects": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "teachers": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "students": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "parents": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "reports": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "backup": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "lessons": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "questions": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "assignments": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "exams": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "grading": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_picker": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "attendance": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "messages": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_hub": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": true,
+        "export": true,
+        "showMenu": true
+      }
+    },
+    "totruong": {
+      "years": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "school_info_view": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_groups": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_management": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "classes": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "subjects": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "teachers": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "students": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "parents": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "reports": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "backup": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "lessons": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "questions": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "assignments": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "exams": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "grading": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_picker": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "attendance": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "messages": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_hub": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      }
+    },
+    "giaovien": {
+      "years": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "school_info_view": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_groups": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_management": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "classes": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "subjects": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "teachers": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "students": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "parents": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "reports": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "backup": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "lessons": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "questions": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "assignments": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "exams": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "grading": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_picker": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "attendance": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "messages": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_hub": {
+        "view": true,
+        "edit": true,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      }
+    },
+    "nhanvien": {
+      "years": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "school_info_view": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_groups": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_management": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "classes": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "subjects": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "teachers": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "students": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "parents": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "reports": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "backup": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "lessons": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "questions": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "assignments": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "exams": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "grading": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_picker": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "attendance": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "messages": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_hub": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      }
+    },
+    "hocsinh": {
+      "years": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "school_info_view": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_groups": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_management": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "classes": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "subjects": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "teachers": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "students": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "parents": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "reports": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "backup": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "lessons": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "questions": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "assignments": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "exams": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "grading": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_picker": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "attendance": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "messages": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_hub": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      }
+    },
+    "phuhuynh": {
+      "years": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "school_info_view": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_groups": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "user_management": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "classes": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "subjects": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "teachers": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "students": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "parents": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "reports": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "backup": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "lessons": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "questions": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "assignments": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "exams": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "grading": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_picker": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "attendance": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "messages": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      },
+      "ai_hub": {
+        "view": true,
+        "edit": false,
+        "delete": false,
+        "import": false,
+        "export": true,
+        "showMenu": true
+      }
+    }
+  },
+  "users": [
+    {
+      "id": "usr_1",
+      "name": "Cao Thị Ngọc Châu",
+      "username": "thcsamtl_chau",
+      "groupId": "giaovien",
+      "status": "active",
+      "phone": "0912345671",
+      "email": "chau.ctn@amatranglong.edu.vn"
+    },
+    {
+      "id": "usr_2",
+      "name": "Trần Thanh Xuân",
+      "username": "thcsamtl_xuan",
+      "groupId": "giaovien",
+      "status": "active",
+      "phone": "0912345672",
+      "email": "xuan.tt@amatranglong.edu.vn"
+    },
+    {
+      "id": "usr_3",
+      "name": "Lê Thị Liên Hương",
+      "username": "thcsamtl_lienhuong",
+      "groupId": "bgh",
+      "status": "active",
+      "phone": "0912345673",
+      "email": "huong.ltl@amatranglong.edu.vn"
+    },
+    {
+      "id": "usr_4",
+      "name": "Chu Văn Giáp",
+      "username": "thcsamtl_giap",
+      "groupId": "admin",
+      "status": "active",
+      "phone": "0397800689",
+      "email": "giap.cv@amatranglong.edu.vn"
+    },
+    {
+      "id": "usr_5",
+      "name": "Nguyễn Thị Hương",
+      "username": "thcsamtl_gv_huong",
+      "groupId": "giaovien",
+      "status": "active",
+      "phone": "0987654321",
+      "email": "thcsamtl_gv_huong@amatranglong.edu.vn"
+    },
+    {
+      "id": "usr_6",
+      "name": "Trần Hải Nam",
+      "username": "thcsamtl_gv_nam",
+      "groupId": "giaovien",
+      "status": "active",
+      "phone": "0912345678",
+      "email": "thcsamtl_gv_nam@amatranglong.edu.vn"
+    },
+    {
+      "id": "usr_7",
+      "name": "Lê Thu Lan",
+      "username": "thcsamtl_gv_lan",
+      "groupId": "giaovien",
+      "status": "active",
+      "phone": "0934567890",
+      "email": "thcsamtl_gv_lan@amatranglong.edu.vn"
+    },
+    {
+      "id": "usr_8",
+      "name": "Phạm Quốc Cường",
+      "username": "thcsamtl_gv_cuong",
+      "groupId": "giaovien",
+      "status": "active",
+      "phone": "0945678901",
+      "email": "thcsamtl_gv_cuong@amatranglong.edu.vn"
+    }
+  ],
+  "visitCount": 1,
+  "teachingTools": [
+    {
+      "id": "tool_1",
+      "toolKey": "luckywheel",
+      "toolName": "Vòng Quay Kỳ Diệu",
+      "title": "Bài 1: Ôn tập phép tính lũy thừa với số mũ tự nhiên",
+      "subjectId": "toan",
+      "subjectName": "Toán học",
+      "grade": "6",
+      "chapter": "Chương I: Số tự nhiên",
+      "creatorId": "gv_1",
+      "creatorName": "Nguyễn Thị Hương",
+      "createdAt": "2026-08-19T08:30:00Z",
+      "updatedAt": "2026-08-19T08:30:00Z",
+      "isShared": true,
+      "playCount": 18,
+      "payload": {
+        "questions": [
+          {
+            "q": "2 mũ 3 bằng bao nhiêu?",
+            "options": [
+              "8",
+              "6",
+              "9",
+              "4"
+            ],
+            "correctAnswer": 0,
+            "points": 100
+          },
+          {
+            "q": "Phép tính 5 mũ 2 có giá trị là bao nhiêu?",
+            "options": [
+              "25",
+              "10",
+              "15",
+              "20"
+            ],
+            "correctAnswer": 0,
+            "points": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool_2",
+      "toolKey": "goldminer",
+      "toolName": "Game Đào Vàng",
+      "title": "Bài 1: Tập hợp các số tự nhiên & Ước - Bội",
+      "subjectId": "toan",
+      "subjectName": "Toán học",
+      "grade": "6",
+      "chapter": "Chương I: Số tự nhiên",
+      "creatorId": "gv_1",
+      "creatorName": "Nguyễn Thị Hương",
+      "createdAt": "2026-08-19T09:15:00Z",
+      "updatedAt": "2026-08-19T09:15:00Z",
+      "isShared": true,
+      "playCount": 25,
+      "payload": {
+        "questions": [
+          {
+            "q": "Số nguyên tố nhỏ nhất là số nào?",
+            "left": "Số 2",
+            "right": "Số 0",
+            "correct": "left",
+            "points": 100
+          },
+          {
+            "q": "Số nào sau đây là bội của 6?",
+            "left": "Số 24",
+            "right": "Số 15",
+            "correct": "left",
+            "points": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool_3",
+      "toolKey": "headtilt",
+      "toolName": "Nghiêng Đầu AI",
+      "title": "Unit 1: Local Environment - Vocabulary & Grammar Challenge",
+      "subjectId": "anh",
+      "subjectName": "Tiếng Anh",
+      "grade": "7",
+      "chapter": "Unit 1",
+      "creatorId": "gv_2",
+      "creatorName": "Lê Thu Lan",
+      "createdAt": "2026-08-19T10:00:00Z",
+      "updatedAt": "2026-08-19T10:00:00Z",
+      "isShared": true,
+      "playCount": 42,
+      "payload": {
+        "questions": [
+          {
+            "q": "Choose the correct form: She (live/lives) in Hanoi.",
+            "left": "lives",
+            "right": "live",
+            "correct": "left",
+            "points": 100
+          },
+          {
+            "q": "Is pottery a traditional craft in Bat Trang?",
+            "left": "Yes, it is",
+            "right": "No, it isn't",
+            "correct": "left",
+            "points": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool_4",
+      "toolKey": "duckrace",
+      "toolName": "Game Đua Vịt",
+      "title": "Bài 2: Nguyên tử và Bảng tuần hoàn các nguyên tố hóa học",
+      "subjectId": "khtn",
+      "subjectName": "Khoa học Tự nhiên",
+      "grade": "7",
+      "chapter": "Chương I: Nguyên tử",
+      "creatorId": "gv_3",
+      "creatorName": "Phạm Quốc Cường",
+      "createdAt": "2026-08-19T14:20:00Z",
+      "updatedAt": "2026-08-19T14:20:00Z",
+      "isShared": true,
+      "playCount": 30,
+      "payload": {
+        "questions": [
+          {
+            "q": "Hạt mang điện tích dương trong nguyên tử là gì?",
+            "left": "Proton",
+            "right": "Electron",
+            "correct": "left",
+            "points": 100
+          },
+          {
+            "q": "Kí hiệu hóa học của nguyên tố Oxi là gì?",
+            "left": "O",
+            "right": "Ox",
+            "correct": "left",
+            "points": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "tool_5",
+      "toolKey": "crossword",
+      "toolName": "Ô Chữ Khóa Bí Mật",
+      "title": "Bài 14: Nhà nước Văn Lang - Âu Lạc",
+      "subjectId": "lsdl",
+      "subjectName": "Lịch sử và Địa lý",
+      "grade": "6",
+      "chapter": "Chương 4: Việt Nam từ thế kỉ VII TCN",
+      "creatorId": "gv_4",
+      "creatorName": "Trần Hải Nam",
+      "createdAt": "2026-08-19T16:00:00Z",
+      "updatedAt": "2026-08-19T16:00:00Z",
+      "isShared": true,
+      "playCount": 15,
+      "payload": {
+        "keyword": "VĂNLANG",
+        "clues": [
+          {
+            "row": 1,
+            "clue": "Kinh đô đầu tiên của nước Văn Lang đặt tại đâu?",
+            "answer": "PHONGCHAU"
+          },
+          {
+            "row": 2,
+            "clue": "Vị vua đầu tiên của nước Văn Lang là ai?",
+            "answer": "HUNGVUONG"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ống Kính May Mắn - Điều Khiển Camera</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, #090d16 0%, #0f172a 100%);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .header {
+      padding: 1rem 0;
+    }
+    .header h1 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #2dd4bf;
+      margin-bottom: .3rem;
+    }
+    .header p {
+      font-size: .85rem;
+      color: #94a3b8;
+    }
+
+    .preview-box {
+      background: rgba(15, 23, 42, 0.8);
+      border: 3px dashed #0d9488;
+      border-radius: 24px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+      box-shadow: 0 10px 30px rgba(13, 148, 136, 0.2);
+    }
+    #preview-img {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 16px;
+      display: none;
+      object-fit: cover;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .btn-big-snap {
+      display: block;
+      background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.35rem;
+      padding: 1.4rem;
+      border-radius: 24px;
+      border: 2.5px solid #2dd4bf;
+      box-shadow: 0 12px 35px rgba(13, 148, 136, 0.5);
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .15s;
+    }
+    .btn-big-snap:active { transform: scale(0.96); }
+
+    .status-badge {
+      display: inline-block;
+      background: #064e3b;
+      color: #34d399;
+      padding: .4rem 1.25rem;
+      border-radius: 14px;
+      font-size: .9rem;
+      font-weight: 800;
+      border: 1px solid #10b981;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>📷 ỐNG KÍNH QUÉT LỚP HỌC</h1>
+    <p>Chụp ảnh học sinh để khóa mục tiêu lên màn hình lớn</p>
+  </div>
+
+  <div class="preview-box">
+    <img id="preview-img" alt="Ảnh học sinh" />
+    <div id="empty-state">
+      <div style="font-size: 4rem; margin-bottom: .5rem; animation: pulse 1.5s infinite;">🎯📸</div>
+      <div style="font-size: 1rem; font-weight: 800; color: #5eead4;">Sẵn Sàng Chụp Quét Học Sinh</div>
+      <div style="font-size: .8rem; color: #64748b; margin-top: .2rem;">Bấm nút bên dưới để mở máy ảnh</div>
+    </div>
+  </div>
+
+  <div style="margin: 1.5rem 0;">
+    <div class="status-badge" id="status-badge">🟢 ĐÃ KẾT NỐI MÁY CHIẾU</div>
+  </div>
+
+  <!-- NÚT BẤM DUY NHẤT - 1 CHẠM LÀ MỞ MÁY ẢNH CHỤP NGAY -->
+  <label for="camera-input" class="btn-big-snap">
+    📸 CHỤP & KHÓA MỤC TIÊU NGAY
+  </label>
+  <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none;" />
+
+  <script>
+    const input = document.getElementById('camera-input');
+    const preview = document.getElementById('preview-img');
+    const emptyState = document.getElementById('empty-state');
+    const statusBadge = document.getElementById('status-badge');
+
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      statusBadge.innerText = '⏳ ĐANG TRUYỀN ẢNH LÊN MÀN HÌNH...';
+      statusBadge.style.background = '#78350f';
+      statusBadge.style.color = '#fde047';
+
+      // Nén ảnh nhẹ và hiển thị preview
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+            else { w = Math.round((w * maxDim) / h); h = maxDim; }
+          }
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+
+          preview.src = compressedDataUrl;
+          preview.style.display = 'block';
+          emptyState.style.display = 'none';
+
+          // Gửi lên server
+          try {
+            await fetch('/api/cam-stream/push', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ image: compressedDataUrl })
+            });
+
+            statusBadge.innerText = '🎉 ĐÃ TRUYỀN THÀNH CÔNG!';
+            statusBadge.style.background = '#064e3b';
+            statusBadge.style.color = '#34d399';
+
+            setTimeout(() => {
+              statusBadge.innerText = '🟢 SẴN SÀNG CHỤP BẠN TIẾP THEO';
+            }, 3000);
+          } catch (err) {
+            statusBadge.innerText = '❌ LỖI KẾT NỐI MÁY CHỦ';
+          }
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+  </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Database module for Junior High School LMS (Cấp THCS) - THCS Ama Trang Lơng
+// Database module for Junior High School LMS (Cấp THCS) - TH-THCS Ama Trang Lơng
 // Handles mock database state persisted in LocalStorage
 
 if (typeof localStorage === 'undefined') {
@@ -1879,16 +1879,73 @@ const DEFAULT_SUBMISSIONS = [
 
 const DEFAULT_EXAMS = [
   {
-    id: 'exam_1',
-    title: 'Bài kiểm tra Định kỳ Giữa kỳ I - Toán 6 (Theo CV 7991)',
+    id: 'exam_tx_1',
+    title: 'Kiểm tra Thường Xuyên số 1 - Toán 6 (Tập hợp & Số tự nhiên)',
     subjectId: 'toan',
     classId: '6A',
+    classIds: ['6A'],
+    targetClasses: ['6A'],
     durationMinutes: 15,
+    timeLimit: 15,
+    maxAttempts: 1,
     dueDate: '2026-07-28T12:00',
     questionIds: ['q1', 'q2', 'q_tf_1', 'q_sa_1', 'q_essay_1'],
     teacherId: 'gv_huong',
     published: true,
-    isOfficial: true // Thi giữa kì/cuối kì có proctoring
+    isOfficial: false,
+    examCategory: 'tx',
+    category: 'tx',
+    examSubType: 'regular',
+    format: 'standard',
+    targetGradeColumn: 'TX1',
+    mode: 'thi_that',
+    createdAt: Date.now() - 86400000 * 2
+  },
+  {
+    id: 'exam_1',
+    title: 'Bài kiểm tra Định kỳ Giữa kỳ I - Toán 6 (Theo CV 7991)',
+    subjectId: 'toan',
+    classId: '6A',
+    classIds: ['6A'],
+    targetClasses: ['6A'],
+    durationMinutes: 45,
+    timeLimit: 45,
+    maxAttempts: 1,
+    dueDate: '2026-07-28T12:00',
+    questionIds: ['q1', 'q2', 'q_tf_1', 'q_sa_1', 'q_essay_1'],
+    teacherId: 'gv_huong',
+    published: true,
+    isOfficial: true,
+    examCategory: 'midterm',
+    category: 'midterm',
+    examSubType: 'regular',
+    format: 'standard',
+    targetGradeColumn: 'GK',
+    mode: 'thi_that',
+    createdAt: Date.now() - 86400000
+  },
+  {
+    id: 'exam_ck_1',
+    title: 'Bài kiểm tra Định kỳ Cuối kỳ II - Toán 6 (Tổng hợp kiến thức cả năm)',
+    subjectId: 'toan',
+    classId: '6A',
+    classIds: ['6A'],
+    targetClasses: ['6A'],
+    durationMinutes: 60,
+    timeLimit: 60,
+    maxAttempts: 1,
+    dueDate: '2026-07-28T12:00',
+    questionIds: ['q1', 'q2', 'q_tf_1', 'q_sa_1', 'q_essay_1'],
+    teacherId: 'gv_huong',
+    published: true,
+    isOfficial: true,
+    examCategory: 'final',
+    category: 'final',
+    examSubType: 'regular',
+    format: 'standard',
+    targetGradeColumn: 'CK',
+    mode: 'thi_that',
+    createdAt: Date.now()
   }
 ];
 
@@ -2022,7 +2079,7 @@ const DEFAULT_FILES = [
     description: 'Kế hoạch bài dạy môn Tin học 6 - Bài 7 & 8: Mạng máy tính và Internet (Chuẩn CV 5512)',
     content: `<div style="font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a;">
         <h2 style="text-align:center; color:#1e3a8a; font-weight: 400; margin-bottom:0.2rem;">KẾ HOẠCH BÀI DẠY (GIÁO ÁN THEO CÔNG VĂN 5512/BGDĐT)</h2>
-        <p style="text-align:center; font-weight: 400; margin-top:0;">Trường THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>
+        <p style="text-align:center; font-weight: 400; margin-top:0;">Trường TH-THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>
         <hr style="border:none; border-top:1.5px solid #cbd5e1; margin:1rem 0;">
         
         <p><strong>Môn học:</strong> TOÁN HỌC / TIN HỌC / NGỮ VĂN | <strong>Khối lớp:</strong> Khối 6 - THCS</p>
@@ -2103,7 +2160,7 @@ const DEFAULT_FILES = [
     description: 'Giáo án Ngữ văn 7 - Chủ đề Truyện cổ tích Việt Nam & Thế giới (Định dạng PDF)',
     content: `<div style="font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a;">
         <h2 style="text-align:center; color:#1e3a8a; font-weight: 400; margin-bottom:0.2rem;">KẾ HOẠCH BÀI DẠY (GIÁO ÁN THEO CÔNG VĂN 5512/BGDĐT)</h2>
-        <p style="text-align:center; font-weight: 400; margin-top:0;">Trường THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>
+        <p style="text-align:center; font-weight: 400; margin-top:0;">Trường TH-THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>
         <hr style="border:none; border-top:1.5px solid #cbd5e1; margin:1rem 0;">
         
         <p><strong>Môn học:</strong> TOÁN HỌC / TIN HỌC / NGỮ VĂN | <strong>Khối lớp:</strong> Khối 6 - THCS</p>
@@ -2184,7 +2241,7 @@ const DEFAULT_FILES = [
     description: 'Lesson Plan English Grade 8 - Unit 1: Leisure Time & Hobbies (Doc Format)',
     content: `<div style="font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a;">
         <h2 style="text-align:center; color:#1e3a8a; font-weight: 400; margin-bottom:0.2rem;">KẾ HOẠCH BÀI DẠY (GIÁO ÁN THEO CÔNG VĂN 5512/BGDĐT)</h2>
-        <p style="text-align:center; font-weight: 400; margin-top:0;">Trường THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>
+        <p style="text-align:center; font-weight: 400; margin-top:0;">Trường TH-THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>
         <hr style="border:none; border-top:1.5px solid #cbd5e1; margin:1rem 0;">
         
         <p><strong>Môn học:</strong> TOÁN HỌC / TIN HỌC / NGỮ VĂN | <strong>Khối lớp:</strong> Khối 6 - THCS</p>
@@ -2265,7 +2322,7 @@ const DEFAULT_FILES = [
     description: 'Slide bài giảng PowerPoint môn Toán 6 - Thiết kế trình chiếu 3D tương tác',
     content: `SLIDE_TITLE: 🎯 BÀI GIẢNG ĐIỆN TỬ TOÁN HỌC KHỐI 6
 SUBTITLE: Bài giảng Trực quan & Trò chơi Học tập Tương tác THCS LMS
-PRESENTER: Giáo viên: Chu Văn Giáp | Trường THCS Ama Trang Lơng
+PRESENTER: Giáo viên: Chu Văn Giáp | Trường TH-THCS Ama Trang Lơng
 SUBJECT: Môn: TOÁN HỌC - KHỐI 6
 
 --- SLIDE_BREAK ---
@@ -2301,7 +2358,7 @@ SLIDE_HEADER: 💡 4. Củng cố Tiết học & Dặn dò Về nhà
 
 const INITIAL_STATE = {
   schoolInfo: {
-    name: 'THCS AMA TRANG LƠNG',
+    name: 'TH-THCS AMA TRANG LƠNG',
     address: 'Dliê Ya, Đắk Lắk',
     principal: 'Thầy Y Krơr Niê',
     phone: '0500.3871234',
@@ -2729,6 +2786,7 @@ class LMSDatabase {
     // Migration: ensure all students have username & password saved
     this._migrateStudentCredentials();
     this._migrateUploadedFiles();
+    this._migrateDefaultExams();
   }
 
   _migrateTeacherCredentials() {
@@ -2755,6 +2813,36 @@ class LMSDatabase {
         changed = true;
       }
       return t;
+    });
+    if (changed) this.save();
+  }
+
+  _migrateDefaultExams() {
+    if (!this.state.exams || !Array.isArray(this.state.exams)) {
+      this.state.exams = JSON.parse(JSON.stringify(DEFAULT_EXAMS));
+      this.save();
+      return;
+    }
+    const existingIds = new Set(this.state.exams.map(e => e.id));
+    let changed = false;
+    DEFAULT_EXAMS.forEach(de => {
+      if (!existingIds.has(de.id)) {
+        this.state.exams.push(JSON.parse(JSON.stringify(de)));
+        changed = true;
+      }
+    });
+    // Ensure all exams have examCategory
+    this.state.exams.forEach(e => {
+      if (!e.examCategory) {
+        if (e.targetGradeColumn === 'CK' || (e.title && e.title.toLowerCase().includes('cuối'))) e.examCategory = 'final';
+        else if (e.targetGradeColumn === 'GK' || (e.title && e.title.toLowerCase().includes('giữa')) || e.isOfficial) e.examCategory = 'midterm';
+        else e.examCategory = 'tx';
+        changed = true;
+      }
+      if (!e.examSubType) {
+        e.examSubType = (e.format === 'quizizz' || e.isQuizizz) ? 'quizizz' : 'regular';
+        changed = true;
+      }
     });
     if (changed) this.save();
   }
@@ -3369,10 +3457,27 @@ class LMSDatabase {
     }
   }
 
-  getExams() { return this.state.exams || []; }
+  getExams() { 
+    if (!this.state.exams) this.state.exams = [];
+    return this.state.exams; 
+  }
   addExam(exam) {
-    this.state.exams.push(exam);
+    if (!this.state.exams) this.state.exams = [];
+    const idx = this.state.exams.findIndex(e => String(e.id) === String(exam.id));
+    if (idx !== -1) {
+      this.state.exams[idx] = { ...this.state.exams[idx], ...exam };
+    } else {
+      this.state.exams.unshift(exam);
+    }
     this.save();
+  }
+  updateExam(id, updatedData) {
+    if (!this.state.exams) this.state.exams = [];
+    const idx = this.state.exams.findIndex(e => String(e.id) === String(id));
+    if (idx !== -1) {
+      this.state.exams[idx] = { ...this.state.exams[idx], ...updatedData };
+      this.save();
+    }
   }
 
   getExamAttempts() { return this.state.examAttempts || []; }
@@ -3844,6 +3949,220 @@ class LMSDatabase {
 
     if (this.save) this.save();
     return { success: true, ...resultInfo, record: record };
+  }
+
+
+  // =========================================================================
+  // KHO CÔNG CỤ & GAME GIẢNG DẠY DÙNG CHUNG (TEACHING TOOLS & GAMES REPOSITORY)
+  // =========================================================================
+  getTeachingTools() {
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.teachingTools)) this.state.teachingTools = [];
+    return this.state.teachingTools;
+  }
+
+  getTeachingToolById(id) {
+    return this.getTeachingTools().find(t => t.id === id) || null;
+  }
+
+  addTeachingTool(tool) {
+    if (!tool) return null;
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.teachingTools)) this.state.teachingTools = [];
+
+    if (!tool.id) tool.id = 'tool_' + Date.now();
+    if (!tool.createdAt) tool.createdAt = new Date().toISOString();
+    tool.updatedAt = new Date().toISOString();
+    if (tool.isShared === undefined) tool.isShared = true;
+    if (tool.playCount === undefined) tool.playCount = 0;
+
+    const existingIdx = this.state.teachingTools.findIndex(t => t.id === tool.id);
+    if (existingIdx !== -1) {
+      this.state.teachingTools[existingIdx] = { ...this.state.teachingTools[existingIdx], ...tool };
+    } else {
+      this.state.teachingTools.unshift(tool);
+    }
+
+    if (this.save) this.save();
+    return tool;
+  }
+
+  updateTeachingTool(id, updateData) {
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.teachingTools)) this.state.teachingTools = [];
+    const idx = this.state.teachingTools.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      this.state.teachingTools[idx] = {
+        ...this.state.teachingTools[idx],
+        ...updateData,
+        updatedAt: new Date().toISOString()
+      };
+      if (this.save) this.save();
+      return this.state.teachingTools[idx];
+    }
+    return null;
+  }
+
+  deleteTeachingTool(id) {
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.teachingTools)) this.state.teachingTools = [];
+    const initialLen = this.state.teachingTools.length;
+    this.state.teachingTools = this.state.teachingTools.filter(t => String(t.id) !== String(id));
+    if (this.state.teachingTools.length !== initialLen) {
+      if (this.save) this.save();
+      return true;
+    }
+    return false;
+  }
+
+  // =========================================================================
+  // 🌟 QUẢN LÝ SỔ LIÊN LẠC & TIN NHẮN PHỤ HUYNH (MESSAGES)
+  // =========================================================================
+  getMessages() {
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.messages)) {
+      this.state.messages = [
+        {
+          id: 'msg_sample_1',
+          senderRole: 'teacher',
+          senderName: 'GVCN Lớp 6A',
+          teacherId: 'gv_toan',
+          classId: '6A',
+          studentId: 'all',
+          title: 'Thông báo: Lịch kiểm tra Giữa học kỳ 2 năm học 2025-2026',
+          content: 'Kính gửi Quý phụ huynh lớp 6A, nhà trường tổ chức kiểm tra Giữa kỳ 2 từ ngày 25/03. Kính mong Quý phụ huynh đôn đốc các em ôn tập đầy đủ.',
+          type: 'announcement',
+          createdAt: Date.now() - 86400000 * 2,
+          read: true
+        },
+        {
+          id: 'msg_sample_2',
+          senderRole: 'teacher',
+          senderName: 'Thầy Chu Văn Giáp (GV Toán)',
+          teacherId: 'gv_toan',
+          classId: '6A',
+          studentId: 'hs_01',
+          title: 'Khen ngợi: Em có tiến bộ vượt bậc môn Toán',
+          content: 'Chào phụ huynh, tuần này em học sinh đã đạt điểm 10 kiểm tra thường xuyên và rất tích cực phát biểu xây dựng bài!',
+          type: 'praise',
+          createdAt: Date.now() - 86400000,
+          read: false
+        }
+      ];
+      if (this.save) this.save();
+    }
+    return this.state.messages;
+  }
+
+  addMessage(msg) {
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.messages)) this.state.messages = [];
+    const newMsg = {
+      id: msg.id || ('msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4)),
+      createdAt: msg.createdAt || Date.now(),
+      read: false,
+      ...msg
+    };
+    this.state.messages.unshift(newMsg);
+    if (this.save) this.save();
+    return newMsg;
+  }
+
+  deleteMessage(id) {
+    if (!this.state || !Array.isArray(this.state.messages)) return false;
+    const prevLen = this.state.messages.length;
+    this.state.messages = this.state.messages.filter(m => String(m.id) !== String(id));
+    if (this.state.messages.length !== prevLen) {
+      if (this.save) this.save();
+      return true;
+    }
+    return false;
+  }
+
+  markMessageRead(id) {
+    if (!this.state || !Array.isArray(this.state.messages)) return false;
+    const msg = this.state.messages.find(m => String(m.id) === String(id));
+    if (msg) {
+      msg.read = true;
+      if (this.save) this.save();
+      return true;
+    }
+    return false;
+  }
+
+  // =========================================================================
+  // 🌟 QUẢN LÝ TÀI KHOẢN PHỤ HUYNH TỰ ĐỘNG
+  // =========================================================================
+  autoGenerateParentAccounts() {
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.parents)) this.state.parents = [];
+    const students = this.getStudents ? this.getStudents() : (this.state.students || []);
+    let countAdded = 0;
+
+    students.forEach(st => {
+      const phone = st.parentPhone || st.phone || ('0905' + String(st.id || '').replace(/[^0-9]/g, '').padStart(6, '0'));
+      const existing = this.state.parents.find(p => p.phone === phone || p.studentId === st.id);
+      if (!existing) {
+        this.state.parents.push({
+          id: (st.id || 'hs') + '_parent',
+          name: st.parentName || ('Phụ huynh em ' + (st.name || 'Học sinh')),
+          phone: phone,
+          studentId: st.id,
+          studentName: st.name,
+          classId: st.classId || '6A',
+          password: '123456',
+          role: 'parent',
+          createdAt: Date.now()
+        });
+        countAdded++;
+      }
+    });
+
+    if (countAdded > 0 && this.save) this.save();
+    return countAdded;
+  }
+
+  // =========================================================================
+  // 🌟 LỊCH SỬ SAO LƯU & CẬP NHẬT CSDL PHỤ TRỢ
+  // =========================================================================
+  getBackupHistory() {
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.backupHistory)) {
+      this.state.backupHistory = [
+        { id: 'bk_1', name: 'Bản sao lưu CSDL Hệ thống Chuẩn GDPT 2018', timestamp: Date.now() - 86400000 * 3, size: '2.4 MB', type: 'auto' }
+      ];
+    }
+    return this.state.backupHistory;
+  }
+
+  addBackupHistory(item) {
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.backupHistory)) this.state.backupHistory = [];
+    this.state.backupHistory.unshift({
+      id: 'bk_' + Date.now(),
+      timestamp: Date.now(),
+      ...item
+    });
+    if (this.save) this.save();
+  }
+
+  updateStudentScore(scoreObj) {
+    return this.addOrUpdateGrade ? this.addOrUpdateGrade(scoreObj) : null;
+  }
+
+  addStudentScore(scoreObj) {
+    return this.addOrUpdateGrade ? this.addOrUpdateGrade(scoreObj) : null;
+  }
+
+  updateClass(classObj) {
+    if (!this.state || !Array.isArray(this.state.classesList)) return null;
+    const idx = this.state.classesList.findIndex(c => c.id === classObj.id || c.name === classObj.name);
+    if (idx !== -1) {
+      this.state.classesList[idx] = { ...this.state.classesList[idx], ...classObj };
+      if (this.save) this.save();
+      return this.state.classesList[idx];
+    }
+    return null;
   }
 
 }

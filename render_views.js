@@ -96,378 +96,634 @@ function attachRenderMethods(LMSApp) {
 
 
 
-          // 1.0 TRANG CHỦ / DASHBOARD TỔNG QUAN NHA TRƯỜNG THCS AMA TRANG LƠNG
+          // 1.0 TRANG CHỦ / DASHBOARD TỔNG QUAN DÀNH CHO ADMIN VÀ GIÁO VIÊN
   LMSApp.prototype.render_info = function(dom) {
-  if (db.initUserGroupsAndPermissions) db.initUserGroupsAndPermissions();
+    if (db.initUserGroupsAndPermissions) db.initUserGroupsAndPermissions();
 
-  const classesList = db.state.classesList || [];
-  const classesCount = classesList.length || 5;
-  const teachersList = db.getTeachers ? db.getTeachers() : [];
-  const teachersCount = teachersList.length || 4;
-  const studentsList = db.getStudents ? db.getStudents() : [];
-  const studentsCount = studentsList.length || 175;
-  const subjectsList = db.state.subjectsList || [];
-  const subjectsCount = subjectsList.length || 6;
+    const isTeacherRole = (this.currentRole === 'teacher' || (this.currentUser && this.currentUser.role === 'teacher'));
 
-  const examAttempts = (typeof db !== 'undefined' && db.getExamAttempts) ? db.getExamAttempts() : [];
-  const homeworkSubmissions = (typeof db !== 'undefined' && db.getSubmissions) ? db.getSubmissions() : [];
-  const totalSubmissionsDisplay = examAttempts.length + homeworkSubmissions.length;
+    // =========================================================================
+    // 🌟 GIAO DIỆN BẢNG ĐIỀU KHIỂN & THỐNG KÊ TOÀN DIỆN CHO GIÁO VIÊN
+    // =========================================================================
+    if (isTeacherRole) {
+      const teacher = this.currentUser || { name: 'Thầy/Cô Giáo Viên', subjectId: 'toan', classes: ['6A', '6B', '7A'] };
+      const teacherName = teacher.name || teacher.fullName || 'Thầy/Cô Giáo Viên';
+      const subjectId = teacher.subjectId || 'toan';
+      
+      const allSubjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
+      const subObj = allSubjects.find(s => s.id === subjectId) || { name: 'Toán học', icon: '📐' };
+      
+      const assignedClasses = (teacher.classes && teacher.classes.length > 0) ? teacher.classes : ['6A', '6B', '7A'];
+      const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
+      const homeroomClass = allClasses.find(c => c.homeroomTeacherId === teacher.id || c.homeroomTeacher === teacherName);
+      
+      const allStudents = (typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : [];
+      const teacherStudents = allStudents.filter(s => assignedClasses.includes(s.classId));
+      const totalStudentsCount = teacherStudents.length || (assignedClasses.length * 35);
 
-  const visitCount = (typeof db !== 'undefined' && db.getVisitCount) ? db.getVisitCount() : 0;
-  const visitDisplay = visitCount > 0 ? visitCount.toLocaleString('vi-VN') : '1,248';
-  const submissionsDisplay = totalSubmissionsDisplay > 0 ? totalSubmissionsDisplay.toLocaleString('vi-VN') : '856';
+      const allLessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons() : [];
+      const teacherLessons = allLessons.filter(l => l.subjectId === subjectId || l.teacherId === teacher.id);
+      const allUploadedFiles = (typeof db !== 'undefined' && db.getUploadedFiles) ? db.getUploadedFiles() : [];
+      const totalLessonCount = teacherLessons.length + allUploadedFiles.length;
 
-  const totCount = Math.round(studentsCount * 0.35);
-  const khaCount = Math.round(studentsCount * 0.45);
-  const datCount = Math.round(studentsCount * 0.16);
-  const chuaDatCount = Math.max(0, studentsCount - (totCount + khaCount + datCount));
+      const allQuestions = (typeof db !== 'undefined' && db.getQuestions) ? db.getQuestions() : [];
+      const teacherQuestions = allQuestions.filter(q => q.subjectId === subjectId || !q.subjectId);
 
-  const subjectStats = [
-    { name: 'Toán học', avg: 7.8, icon: '📐', color: 'linear-gradient(90deg,#2563eb,#3b82f6)' },
-    { name: 'Ngữ văn', avg: 7.5, icon: '📖', color: 'linear-gradient(90deg,#7c3aed,#8b5cf6)' },
-    { name: 'Tiếng Anh', avg: 8.1, icon: '🔤', color: 'linear-gradient(90deg,#059669,#10b981)' },
-    { name: 'Khoa học Tự nhiên', avg: 7.9, icon: '🔬', color: 'linear-gradient(90deg,#0284c7,#38bdf8)' },
-    { name: 'Lịch sử & Địa lý', avg: 8.2, icon: '🌍', color: 'linear-gradient(90deg,#d97706,#f59e0b)' },
-    { name: 'Tin học', avg: 8.6, icon: '💻', color: 'linear-gradient(90deg,#dc2626,#ef4444)' }
-  ];
+      const allExams = (typeof db !== 'undefined' && db.getExams) ? db.getExams() : [];
+      const teacherExams = allExams.filter(e => e.subjectId === subjectId || e.teacherId === teacher.id);
 
-  dom.innerHTML = `
-    <div style="display: flex; flex-direction: column; gap: 1.6rem; max-width: 1280px; margin: 0 auto; padding-bottom: 2.5rem; font-family: var(--font-body); animation: fadeIn 0.25s ease-out;">
+      const allSubmissions = (typeof db !== 'undefined' && db.getSubmissions) ? db.getSubmissions() : [];
+      const allAttempts = (typeof db !== 'undefined' && db.getExamAttempts) ? db.getExamAttempts() : [];
+      const teacherSubmissionsCount = allSubmissions.length + allAttempts.length;
 
-      <!-- SECTION 1: HERO BANNER VỚI ĐỒ HỌA MESH GRADIENT SANG TRỌNG -->
-      <div style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 40%, #e0f2fe 100%); border-radius: 24px; padding: 1.8rem 2rem; color: #0f172a; box-shadow: 0 12px 30px rgba(37,99,235,0.22); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.2rem; position: relative; overflow: hidden;">
-        <div style="position: absolute; right: -50px; top: -50px; width: 220px; height: 220px; background: rgba(255,255,255,0.06); border-radius: 50%; pointer-events: none;"></div>
-        <div style="position: absolute; right: 120px; bottom: -80px; width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%; pointer-events: none;"></div>
+      const totCount = Math.round(totalStudentsCount * 0.38);
+      const khaCount = Math.round(totalStudentsCount * 0.44);
+      const datCount = Math.round(totalStudentsCount * 0.15);
+      const chuaDatCount = Math.max(0, totalStudentsCount - (totCount + khaCount + datCount));
 
-        <div style="position: relative; z-index: 2;">
-          <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.28); color: #0f172a; font-weight: 700; padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.78rem; margin-bottom: 0.6rem; backdrop-filter: blur(6px);">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 8px #10b981;"></span>
-            TRUNG TÂM BÁO CÁO THỐNG KÊ TOÀN TRƯỜNG GDPT 2018
-          </div>
-          <h1 style="margin: 0; font-family: var(--font-title); font-size: 1.7rem; font-weight: 900; letter-spacing: -0.3px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
-            Hệ Thống Quản Lý Giáo Dục Số THCS AMA TRANG LƠNG
-          </h1>
-          <p style="margin: 0.4rem 0 0 0; font-size: 0.9rem; color: #475569; font-weight: 400; opacity: 0.95; max-width: 680px; line-height: 1.45;">
-            Trực quan hóa số liệu chất lượng giảng dạy, phân bổ học lực, kết quả các môn học và diễn biến chuyên cần năm học 2025 - 2026.
-          </p>
-        </div>
+      dom.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:1.6rem; max-width:1280px; margin:0 auto; padding-bottom:2.5rem; font-family:var(--font-body); animation:fadeIn 0.25s ease-out;">
 
-        <div style="display: flex; align-items: center; gap: 0.75rem; position: relative; z-index: 2;">
-          <button onclick="if(window.app && window.app.exportReportsToExcel) window.app.exportReportsToExcel(); else if(window.app) window.app.switchView('reports');" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #0f172a; border: none; padding: 0.75rem 1.4rem; border-radius: 14px; font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 6px 18px rgba(16,185,129,0.3); display: flex; align-items: center; gap: 0.45rem;">
-            <span>📥 Xuất Báo Cáo Excel</span>
-          </button>
-        </div>
-      </div>
+          <!-- SECTION 1: HERO BANNER GIÁO VIÊN (ĐỒ HỌA TRONG SÁNG & SANG TRỌNG) -->
+          <div style="background:linear-gradient(135deg, #ffffff 0%, #f0f9ff 40%, #e0f2fe 100%); border-radius:24px; padding:1.8rem 2rem; color:#0f172a; box-shadow:0 10px 30px rgba(37,99,235,0.1); border:1.8px solid #93c5fd; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem; position:relative; overflow:hidden;">
+            <div style="position:absolute; right:-50px; top:-50px; width:220px; height:220px; background:rgba(37,99,235,0.04); border-radius:50%; pointer-events:none;"></div>
+            <div style="position:absolute; right:120px; bottom:-80px; width:180px; height:180px; background:rgba(16,185,129,0.04); border-radius:50%; pointer-events:none;"></div>
 
-      <!-- SECTION 2: 6 THẺ THỐNG KÊ KPI HIỆN ĐẠI -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 1.1rem;">
-        
-        <div onclick="if(window.app) window.app.switchView('classes');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
-            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Số Lớp Học</span>
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🏫</div>
-          </div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${classesCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">lớp</span></div>
-          <div style="font-size: 0.76rem; color: #2563eb; font-weight: 700; margin-top: 0.45rem;">${classesList.map(c => c.name).join(', ') || '6A, 6B, 7A, 8A, 9A'}</div>
-        </div>
-
-        <div onclick="if(window.app) window.app.switchView('classes');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
-            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Khối Áp Dụng</span>
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #fefce8 0%, #fef08a 100%); color: #ca8a04; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">📊</div>
-          </div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">4 <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">khối</span></div>
-          <div style="font-size: 0.76rem; color: #ca8a04; font-weight: 700; margin-top: 0.45rem;">Khối 6, 7, 8, 9</div>
-        </div>
-
-        <div onclick="if(window.app) window.app.switchView('teachers');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
-            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Tổng Giáo Viên</span>
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">👨‍🏫</div>
-          </div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${teachersCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">cán bộ</span></div>
-          <div style="font-size: 0.76rem; color: #16a34a; font-weight: 700; margin-top: 0.45rem;">100% Đạt chuẩn</div>
-        </div>
-
-        <div onclick="if(window.app) window.app.switchView('students');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
-            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Tổng Học Sinh</span>
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%); color: #9333ea; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🎓</div>
-          </div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${studentsCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">em</span></div>
-          <div style="font-size: 0.76rem; color: #9333ea; font-weight: 700; margin-top: 0.45rem;">TB 35 HS / lớp</div>
-        </div>
-
-        <div style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
-            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Lượt Truy Cập</span>
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%); color: #0891b2; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">👁️</div>
-          </div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${visitDisplay} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">lượt</span></div>
-          <div style="font-size: 0.76rem; color: #0891b2; font-weight: 700; margin-top: 0.45rem;">▲ +18% tuần này</div>
-        </div>
-
-        <div style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
-            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Lượt Làm Bài</span>
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); color: #e11d48; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">📝</div>
-          </div>
-          <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${submissionsDisplay} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">bài</span></div>
-          <div style="font-size: 0.76rem; color: #e11d48; font-weight: 700; margin-top: 0.45rem;">Kiểm tra & Bài tập</div>
-        </div>
-
-      </div>
-
-      <!-- BIỂU ĐỒ 1 & BIỂU ĐỒ 2 -->
-      <div style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 1.4rem;">
-
-        <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04);">
-          <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.85rem; margin-bottom: 1.2rem;">
-            <div>
-              <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.45rem;">
-                <span>📊</span> THỐNG KÊ XẾP LOẠI HỌC LỰC (GDPT 2018)
-              </h3>
-              <div style="font-size: 0.8rem; color: #64748b; font-weight: 400; margin-top: 0.2rem;">Phân loại chất lượng học tập toàn trường</div>
-            </div>
-            <span style="font-size: 0.78rem; font-weight: 700; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.25rem 0.7rem; border-radius: 10px;">Toàn trường</span>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 1.1rem;">
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
-                <span style="color: #059669; display: flex; align-items: center; gap: 0.35rem;">🥇 Mức Tốt (Giỏi): 35%</span>
-                <span style="color: #475569; font-weight: 700;">${totCount} học sinh</span>
+            <div style="position:relative; z-index:2;">
+              <div style="display:inline-flex; align-items:center; gap:0.45rem; background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-weight:800; padding:0.3rem 0.85rem; border-radius:20px; font-size:0.8rem; margin-bottom:0.6rem;">
+                <span style="width:8px; height:8px; border-radius:50%; background:#10b981; display:inline-block; box-shadow:0 0 8px #10b981;"></span>
+                KHÔNG GIAN GIẢNG DẠY SỐ — NĂM HỌC 2025-2026
               </div>
-              <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                <div style="width: 35%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);"></div>
-              </div>
+              <h1 style="margin:0; font-family:var(--font-title); font-size:1.75rem; font-weight:900; letter-spacing:-0.3px; color:#1e3a8a;">
+                Xin chào, <span style="color:#2563eb;">${teacherName}</span>! 👨‍🏫
+              </h1>
+              <p style="margin:0.45rem 0 0 0; font-size:0.92rem; color:#475569; font-weight:500; max-width:720px; line-height:1.5;">
+                Môn phụ trách: <strong style="color:#1e3a8a;">${subObj.name}</strong> &nbsp;|&nbsp; 
+                Lớp giảng dạy: <strong style="color:#2563eb;">${assignedClasses.map(c => 'Lớp ' + c).join(', ')}</strong>
+                ${homeroomClass ? ` &nbsp;|&nbsp; Chủ nhiệm: <strong style="color:#059669;">Lớp ${homeroomClass.name || homeroomClass.id}</strong>` : ''}
+              </p>
             </div>
 
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
-                <span style="color: #2563eb; display: flex; align-items: center; gap: 0.35rem;">🥈 Mức Khá: 45%</span>
-                <span style="color: #475569; font-weight: 700;">${khaCount} học sinh</span>
-              </div>
-              <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                <div style="width: 45%; height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);"></div>
-              </div>
-            </div>
-
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
-                <span style="color: #d97706; display: flex; align-items: center; gap: 0.35rem;">🥉 Mức Đạt (Trung Bình): 16%</span>
-                <span style="color: #475569; font-weight: 700;">${datCount} học sinh</span>
-              </div>
-              <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                <div style="width: 16%; height: 100%; background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(245,158,11,0.3);"></div>
-              </div>
-            </div>
-
-            <div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
-                <span style="color: #dc2626; display: flex; align-items: center; gap: 0.35rem;">⚠️ Chưa Đạt (Yếu): 4%</span>
-                <span style="color: #475569; font-weight: 700;">${chuaDatCount} học sinh</span>
-              </div>
-              <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                <div style="width: 4%; height: 100%; background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(239,68,68,0.3);"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
-          <div style="border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.85rem; margin-bottom: 0.85rem;">
-            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.45rem;">
-              <span>🎯</span> SƠ ĐỒ HÌNH QUẠT TỶ LỆ HỌC LỰC
-            </h3>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 400; margin-top: 0.2rem;">Tỷ lệ phần trăm tổng hợp 4 mức xếp loại</div>
-          </div>
-
-          <div style="display: flex; justify-content: center; align-items: center; margin: 0.6rem 0;">
-            <div style="width: 145px; height: 145px; border-radius: 50%; background: conic-gradient(#10b981 0% 35%, #3b82f6 35% 80%, #f59e0b 80% 96%, #ef4444 96% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.1); position: relative;">
-              <div style="width: 95px; height: 95px; background: #ffffff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);">
-                <div style="font-weight: 900; font-size: 1.35rem; color: #0f172a;">80%</div>
-                <div style="font-size: 0.68rem; color: #64748b; font-weight: 700;">Tốt & Khá</div>
-              </div>
+            <div style="display:flex; align-items:center; gap:0.75rem; position:relative; z-index:2; flex-wrap:wrap;">
+              <button onclick="if(window.app) window.app.switchView('lessons');" style="background:#ffffff; color:#2563eb; border:1.5px solid #bfdbfe; padding:0.75rem 1.25rem; border-radius:14px; font-weight:700; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:0 2px 8px rgba(37,99,235,0.08); transition:all 0.2s;" onmouseover="this.style.background='#eff6ff';" onmouseout="this.style.background='#ffffff';">
+                <span>📝 Soạn KHBD Mới</span>
+              </button>
+              <button onclick="if(window.app) window.app.switchView('exams');" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#ffffff; border:none; padding:0.75rem 1.35rem; border-radius:14px; font-weight:800; font-size:0.88rem; cursor:pointer; box-shadow:0 4px 14px rgba(16,185,129,0.3); display:flex; align-items:center; gap:0.45rem;">
+                <span>➕ Tạo Đề Kiểm Tra</span>
+              </button>
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; font-size: 0.78rem; font-weight: 700;">
-            <div style="background: #f0fdf4; padding: 0.45rem 0.6rem; border-radius: 9px; color: #166534; border: 1px solid #bbf7d0;">🥇 Tốt: 35% (${totCount} em)</div>
-            <div style="background: #eff6ff; padding: 0.45rem 0.6rem; border-radius: 9px; color: #1e40af; border: 1px solid #bfdbfe;">🥈 Khá: 45% (${khaCount} em)</div>
-            <div style="background: #fffbe8; padding: 0.45rem 0.6rem; border-radius: 9px; color: #92400e; border: 1px solid #fef08a;">🥉 Đạt: 16% (${datCount} em)</div>
-            <div style="background: #fef2f2; padding: 0.45rem 0.6rem; border-radius: 9px; color: #991b1b; border: 1px solid #fecaca;">⚠️ Chưa đạt: 4% (${chuaDatCount} em)</div>
+          <!-- SECTION 2: 6 THẺ KPI THỐNG KÊ TOÀN DIỆN CHO GIÁO VIÊN -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(185px, 1fr)); gap:1.1rem;">
+            
+            <!-- KPI 1: Lớp Phụ Trách -->
+            <div onclick="if(window.app) window.app.switchView('grading');" style="background:#ffffff; border-radius:18px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 15px rgba(0,0,0,0.03); cursor:pointer; transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.65rem;">
+                <span style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Lớp Phụ Trách</span>
+                <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:1.25rem;">🏫</div>
+              </div>
+              <div style="font-size:1.8rem; font-weight:900; color:#0f172a; line-height:1;">${assignedClasses.length} <span style="font-size:0.85rem; font-weight:600; color:#64748b;">lớp</span></div>
+              <div style="font-size:0.76rem; color:#2563eb; font-weight:700; margin-top:0.45rem;">${assignedClasses.map(c => 'Lớp ' + c).join(', ')}</div>
+            </div>
+
+            <!-- KPI 2: Tổng Học Sinh -->
+            <div onclick="if(window.app) window.app.switchView('grading');" style="background:#ffffff; border-radius:18px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 15px rgba(0,0,0,0.03); cursor:pointer; transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.65rem;">
+                <span style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Học Sinh Giảng Dạy</span>
+                <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%); color:#9333ea; display:flex; align-items:center; justify-content:center; font-size:1.25rem;">🎓</div>
+              </div>
+              <div style="font-size:1.8rem; font-weight:900; color:#0f172a; line-height:1;">${totalStudentsCount} <span style="font-size:0.85rem; font-weight:600; color:#64748b;">học sinh</span></div>
+              <div style="font-size:0.76rem; color:#9333ea; font-weight:700; margin-top:0.45rem;">100% Đồng bộ CSDL</div>
+            </div>
+
+            <!-- KPI 3: KHBD & Bài Giảng -->
+            <div onclick="if(window.app) window.app.switchView('lessons');" style="background:#ffffff; border-radius:18px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 15px rgba(0,0,0,0.03); cursor:pointer; transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.65rem;">
+                <span style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">KHBD & Bài Giảng</span>
+                <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); color:#16a34a; display:flex; align-items:center; justify-content:center; font-size:1.25rem;">📝</div>
+              </div>
+              <div style="font-size:1.8rem; font-weight:900; color:#0f172a; line-height:1;">${totalLessonCount} <span style="font-size:0.85rem; font-weight:600; color:#64748b;">tài liệu</span></div>
+              <div style="font-size:0.76rem; color:#16a34a; font-weight:700; margin-top:0.45rem;">Chuẩn CV 5512 & Slide</div>
+            </div>
+
+            <!-- KPI 4: Ngân Hàng Câu Hỏi -->
+            <div onclick="if(window.app) window.app.switchView('questions');" style="background:#ffffff; border-radius:18px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 15px rgba(0,0,0,0.03); cursor:pointer; transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.65rem;">
+                <span style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Ngân Hàng Câu Hỏi</span>
+                <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #fefce8 0%, #fef08a 100%); color:#ca8a04; display:flex; align-items:center; justify-content:center; font-size:1.25rem;">❓</div>
+              </div>
+              <div style="font-size:1.8rem; font-weight:900; color:#0f172a; line-height:1;">${teacherQuestions.length} <span style="font-size:0.85rem; font-weight:600; color:#64748b;">câu</span></div>
+              <div style="font-size:0.76rem; color:#ca8a04; font-weight:700; margin-top:0.45rem;">Đầy đủ 4 nhóm GDPT 2018</div>
+            </div>
+
+            <!-- KPI 5: Đề Kiểm Tra Đã Tạo -->
+            <div onclick="if(window.app) window.app.switchView('exams');" style="background:#ffffff; border-radius:18px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 15px rgba(0,0,0,0.03); cursor:pointer; transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.65rem;">
+                <span style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Đề Kiểm Tra</span>
+                <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #ecfeff 0%, #cffafe 100%); color:#0891b2; display:flex; align-items:center; justify-content:center; font-size:1.25rem;">⏱️</div>
+              </div>
+              <div style="font-size:1.8rem; font-weight:900; color:#0f172a; line-height:1;">${teacherExams.length} <span style="font-size:0.85rem; font-weight:600; color:#64748b;">bộ đề</span></div>
+              <div style="font-size:0.76rem; color:#0891b2; font-weight:700; margin-top:0.45rem;">TX, Giữa kỳ & Cuối kỳ</div>
+            </div>
+
+            <!-- KPI 6: Lượt Nộp & Chấm Điểm -->
+            <div onclick="if(window.app) window.app.switchView('grading');" style="background:#ffffff; border-radius:18px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 15px rgba(0,0,0,0.03); cursor:pointer; transition:all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.65rem;">
+                <span style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Bài Nộp Học Sinh</span>
+                <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); color:#e11d48; display:flex; align-items:center; justify-content:center; font-size:1.25rem;">💯</div>
+              </div>
+              <div style="font-size:1.8rem; font-weight:900; color:#0f172a; line-height:1;">${teacherSubmissionsCount} <span style="font-size:0.85rem; font-weight:600; color:#64748b;">lượt</span></div>
+              <div style="font-size:0.76rem; color:#e11d48; font-weight:700; margin-top:0.45rem;">Đã chấm & Vào điểm tự động</div>
+            </div>
+
           </div>
-        </div>
 
-      </div>
+          <!-- SECTION 3: BIỂU ĐỒ HỌC LỰC & TIẾN ĐỘ THEO LỚP -->
+          <div style="display:grid; grid-template-columns:1.25fr 1fr; gap:1.4rem;">
 
-      <!-- BIỂU ĐỒ 3 & BIỂU ĐỒ 4 -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem;">
-
-        <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04);">
-          <div style="border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.85rem; margin-bottom: 1.1rem;">
-            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.45rem;">
-              <span>📚</span> ĐIỂM TRUNG BÌNH MÔN HỌC TOÀN TRƯỜNG
-            </h3>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 400; margin-top: 0.2rem;">So sánh kết quả điểm bình quân theo môn</div>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-            ${subjectStats.map(s => `
-              <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 0.3rem;">
-                  <span style="color: #1e293b; display: flex; align-items: center; gap: 0.4rem;">${s.icon} ${s.name}</span>
-                  <span style="font-weight: 800; color: #1e40af;">${s.avg} / 10</span>
+            <!-- Biểu đồ 1: Xếp loại học lực môn phụ trách -->
+            <div style="background:#ffffff; border-radius:20px; border:1.5px solid #cbd5e1; padding:1.5rem; box-shadow:0 4px 18px rgba(0,0,0,0.04);">
+              <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1.5px solid #f1f5f9; padding-bottom:0.85rem; margin-bottom:1.2rem;">
+                <div>
+                  <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.45rem;">
+                    <span>📊</span> XẾP LOẠI HỌC LỰC MÔN ${subObj.name.toUpperCase()} (GDPT 2018)
+                  </h3>
+                  <div style="font-size:0.8rem; color:#64748b; font-weight:400; margin-top:0.2rem;">Thống kê trên toàn bộ ${totalStudentsCount} học sinh các lớp phụ trách</div>
                 </div>
-                <div style="width: 100%; height: 9px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                  <div style="width: ${Math.round(s.avg * 10)}%; height: 100%; background: ${s.color}; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);"></div>
+                <span style="font-size:0.78rem; font-weight:700; color:#2563eb; background:#eff6ff; border:1px solid #bfdbfe; padding:0.25rem 0.7rem; border-radius:10px;">${subObj.name}</span>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:1.1rem;">
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">
+                    <span style="color:#059669; display:flex; align-items:center; gap:0.35rem;">🥇 Mức Tốt (8.0 - 10.0đ): 38%</span>
+                    <span style="color:#475569; font-weight:700;">${totCount} học sinh</span>
+                  </div>
+                  <div style="width:100%; height:12px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
+                    <div style="width:38%; height:100%; background:linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius:10px; box-shadow:0 2px 6px rgba(16,185,129,0.3);"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">
+                    <span style="color:#2563eb; display:flex; align-items:center; gap:0.35rem;">🥈 Mức Khá (6.5 - 7.9đ): 44%</span>
+                    <span style="color:#475569; font-weight:700;">${khaCount} học sinh</span>
+                  </div>
+                  <div style="width:100%; height:12px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
+                    <div style="width:44%; height:100%; background:linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); border-radius:10px; box-shadow:0 2px 6px rgba(37,99,235,0.3);"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">
+                    <span style="color:#d97706; display:flex; align-items:center; gap:0.35rem;">🥉 Mức Đạt (5.0 - 6.4đ): 15%</span>
+                    <span style="color:#475569; font-weight:700;">${datCount} học sinh</span>
+                  </div>
+                  <div style="width:100%; height:12px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
+                    <div style="width:15%; height:100%; background:linear-gradient(90deg, #f59e0b 0%, #d97706 100%); border-radius:10px; box-shadow:0 2px 6px rgba(245,158,11,0.3);"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">
+                    <span style="color:#dc2626; display:flex; align-items:center; gap:0.35rem;">⚠️ Chưa Đạt (< 5.0đ): 3%</span>
+                    <span style="color:#475569; font-weight:700;">${chuaDatCount} học sinh</span>
+                  </div>
+                  <div style="width:100%; height:12px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
+                    <div style="width:3%; height:100%; background:linear-gradient(90deg, #ef4444 0%, #b91c1c 100%); border-radius:10px; box-shadow:0 2px 6px rgba(239,68,68,0.3);"></div>
+                  </div>
                 </div>
               </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
-          <div style="border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.85rem; margin-bottom: 0.85rem;">
-            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.45rem;">
-              <span>⏱️</span> DIỄN BIẾN CHUYÊN CẦN TRONG TUẦN
-            </h3>
-            <div style="font-size: 0.8rem; color: #64748b; font-weight: 400; margin-top: 0.2rem;">Tỷ lệ chuyên cần học sinh đi học các ngày</div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem; height: 155px; align-items: flex-end; padding-bottom: 0.5rem; border-bottom: 1.5px solid #cbd5e1;">
-            ${[
-              { day: 'T2', val: '99%' },
-              { day: 'T3', val: '98%' },
-              { day: 'T4', val: '99.5%' },
-              { day: 'T5', val: '97.5%' },
-              { day: 'T6', val: '98.8%' },
-              { day: 'T7', val: '96%' }
-            ].map(d => `
-              <div style="display: flex; flex-direction: column; align-items: center; gap: 0.3rem; height: 100%; justify-content: flex-end;">
-                <div style="font-size: 0.7rem; font-weight: 800; color: #2563eb;">${d.val}</div>
-                <div style="width: 100%; height: ${Math.round(parseFloat(d.val) * 1.12)}px; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 7px 7px 0 0; box-shadow: 0 3px 8px rgba(37,99,235,0.25);"></div>
-                <div style="font-size: 0.78rem; font-weight: 800; color: #334155; margin-top: 0.35rem;">${d.day}</div>
-              </div>
-            `).join('')}
-          </div>
-
-          <div style="font-size: 0.82rem; color: #059669; font-weight: 700; background: #f0fdf4; padding: 0.5rem 0.85rem; border-radius: 10px; text-align: center; margin-top: 0.75rem; border: 1.5px solid #bbf7d0; box-shadow: 0 2px 6px rgba(16,185,129,0.1);">
-            ✅ Tỷ lệ chuyên cần bình quân toàn trường đạt 98.5%
-          </div>
-        </div>
-
-      </div>
-
-      <!-- BẢNG MẪU THỐNG KÊ CHI TIẾT THEO LỚP -->
-      <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.1rem; padding-bottom: 0.85rem; border-bottom: 1.5px solid #f1f5f9;">
-          <div>
-            <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; font-weight: 700; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.76rem; margin-bottom: 0.3rem;">
-              📋 MẪU THỐNG KÊ CHUẨN THÔNG TƯ 22 (GDPT 2018)
             </div>
-            <h3 style="margin: 0; font-family: var(--font-title); font-weight: 800; color: #0f172a; font-size: 1.15rem;">
-              Bảng Mẫu Thống Kê Chi Tiết Học Lực & Chuyên Cần Theo Từng Lớp
-            </h3>
-            <p style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: #64748b;">Tổng hợp số liệu chất lượng giáo dục toàn trường năm học 2025 - 2026</p>
+
+            <!-- Biểu đồ 2: Sơ đồ hình quạt tỷ lệ học lực -->
+            <div style="background:#ffffff; border-radius:20px; border:1.5px solid #cbd5e1; padding:1.5rem; box-shadow:0 4px 18px rgba(0,0,0,0.04); display:flex; flex-direction:column; justify-content:space-between;">
+              <div style="border-bottom:1.5px solid #f1f5f9; padding-bottom:0.85rem; margin-bottom:0.85rem;">
+                <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.45rem;">
+                  <span>🎯</span> TỶ LỆ HỌC LỰC HỌC SINH CỦA THẦY/CÔ
+                </h3>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:400; margin-top:0.2rem;">Tổng hợp tỷ lệ 4 mức chất lượng môn học</div>
+              </div>
+
+              <div style="display:flex; justify-content:center; align-items:center; margin:0.6rem 0;">
+                <div style="width:145px; height:145px; border-radius:50%; background:conic-gradient(#10b981 0% 38%, #3b82f6 38% 82%, #f59e0b 82% 97%, #ef4444 97% 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(0,0,0,0.1); position:relative;">
+                  <div style="width:95px; height:95px; background:#ffffff; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:inset 0 2px 8px rgba(0,0,0,0.06);">
+                    <div style="font-weight:900; font-size:1.35rem; color:#0f172a;">82%</div>
+                    <div style="font-size:0.68rem; color:#64748b; font-weight:700;">Tốt & Khá</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem; font-size:0.78rem; font-weight:700;">
+                <div style="background:#f0fdf4; padding:0.45rem 0.6rem; border-radius:9px; color:#166534; border:1px solid #bbf7d0;">🥇 Tốt: 38% (${totCount} em)</div>
+                <div style="background:#eff6ff; padding:0.45rem 0.6rem; border-radius:9px; color:#1e40af; border:1px solid #bfdbfe;">🥈 Khá: 44% (${khaCount} em)</div>
+                <div style="background:#fffbe8; padding:0.45rem 0.6rem; border-radius:9px; color:#92400e; border:1px solid #fef08a;">🥉 Đạt: 15% (${datCount} em)</div>
+                <div style="background:#fef2f2; padding:0.45rem 0.6rem; border-radius:9px; color:#991b1b; border:1px solid #fecaca;">⚠️ Chưa đạt: 3% (${chuaDatCount} em)</div>
+              </div>
+            </div>
+
           </div>
 
-          <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <button onclick="if(window.app && window.app.exportReportsToExcel) window.app.exportReportsToExcel(); else if(window.app) window.app.switchView('reports');" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; padding: 0.55rem 1.1rem; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; box-shadow: 0 3px 10px rgba(16,185,129,0.3); display: flex; align-items: center; gap: 0.4rem;">
-              📥 Xuất Báo Cáo Excel
+          <!-- SECTION 4: TIẾN ĐỘ TỪNG LỚP & KHỐI TÁC VỤ 1 CHẠM -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.4rem;">
+            
+            <!-- Danh sách từng lớp giảng dạy -->
+            <div style="background:#ffffff; border-radius:20px; border:1.5px solid #cbd5e1; padding:1.5rem; box-shadow:0 4px 18px rgba(0,0,0,0.04);">
+              <div style="border-bottom:1.5px solid #f1f5f9; padding-bottom:0.85rem; margin-bottom:1.1rem;">
+                <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.45rem;">
+                  <span>🏫</span> TIẾN ĐỘ & ĐIỂM TRUNG BÌNH THEO TỪNG LỚP
+                </h3>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:400; margin-top:0.2rem;">Kết quả đánh giá thường xuyên & nộp bài của các lớp</div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:0.85rem;">
+                ${assignedClasses.map((clsName, idx) => {
+                  const baseAvg = [8.1, 7.8, 8.4, 7.6, 8.2][idx % 5];
+                  const colors = ['linear-gradient(90deg,#2563eb,#3b82f6)', 'linear-gradient(90deg,#10b981,#059669)', 'linear-gradient(90deg,#8b5cf6,#7c3aed)', 'linear-gradient(90deg,#f59e0b,#d97706)'];
+                  return `
+                    <div>
+                      <div style="display:flex; justify-content:space-between; font-size:0.84rem; font-weight:700; margin-bottom:0.3rem;">
+                        <span style="color:#1e293b; display:flex; align-items:center; gap:0.4rem;">🏫 Lớp ${clsName}</span>
+                        <span style="font-weight:800; color:#1e40af;">Điểm TB: ${baseAvg} / 10 &nbsp;|&nbsp; <span style="color:#059669;">98% Nộp bài</span></span>
+                      </div>
+                      <div style="width:100%; height:9px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
+                        <div style="width:${Math.round(baseAvg * 10)}%; height:100%; background:${colors[idx % colors.length]}; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15);"></div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Khối Lối Tắt Thao Tác Nhanh -->
+            <div style="background:#ffffff; border-radius:20px; border:1.5px solid #cbd5e1; padding:1.5rem; box-shadow:0 4px 18px rgba(0,0,0,0.04); display:flex; flex-direction:column; justify-content:space-between;">
+              <div style="border-bottom:1.5px solid #f1f5f9; padding-bottom:0.85rem; margin-bottom:1rem;">
+                <h3 style="margin:0; font-size:1.1rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:0.45rem;">
+                  <span>⚡</span> LỐI TẮT TÁC VỤ GIẢNG DẠY 1 CHẠM
+                </h3>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:400; margin-top:0.2rem;">Truy cập nhanh các công cụ cốt lõi của giáo viên</div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.85rem;">
+                <button onclick="if(window.app) window.app.switchView('lessons');" style="background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:14px; padding:1rem; text-align:left; cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                  <div style="font-size:1.6rem; margin-bottom:0.35rem;">📝</div>
+                  <div style="font-weight:700; font-size:0.9rem; color:#166534;">Soạn KHBD / Slide</div>
+                  <div style="font-size:0.75rem; color:#4b5563; margin-top:0.15rem;">Kế hoạch bài dạy 5512</div>
+                </button>
+
+                <button onclick="if(window.app) window.app.switchView('exams');" style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:14px; padding:1rem; text-align:left; cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                  <div style="font-size:1.6rem; margin-bottom:0.35rem;">⏱️</div>
+                  <div style="font-weight:700; font-size:0.9rem; color:#1e40af;">Tạo Đề Kiểm Tra</div>
+                  <div style="font-size:0.75rem; color:#4b5563; margin-top:0.15rem;">TX, GK, CK & Quizizz</div>
+                </button>
+
+                <button onclick="if(window.app) window.app.switchView('grading');" style="background:#faf5ff; border:1.5px solid #e9d5ff; border-radius:14px; padding:1rem; text-align:left; cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                  <div style="font-size:1.6rem; margin-bottom:0.35rem;">💯</div>
+                  <div style="font-weight:700; font-size:0.9rem; color:#7e22ce;">Chấm Điểm & Sổ Điểm</div>
+                  <div style="font-size:0.75rem; color:#4b5563; margin-top:0.15rem;">Vào điểm tự động</div>
+                </button>
+
+                <button onclick="if(window.app) window.app.switchView('ai_hub');" style="background:#fffbe8; border:1.5px solid #fef08a; border-radius:14px; padding:1rem; text-align:left; cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                  <div style="font-size:1.6rem; margin-bottom:0.35rem;">🤖</div>
+                  <div style="font-weight:700; font-size:0.9rem; color:#854d0e;">Trợ Lý AI & Game</div>
+                  <div style="font-size:0.75rem; color:#4b5563; margin-top:0.15rem;">15 Game & Trợ giảng AI</div>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      `;
+      return;
+    }
+
+    // =========================================================================
+    // 🌟 GIAO DIỆN BẢNG ĐIỀU KHIỂN & THỐNG KÊ DÀNH CHO ADMIN / TOÀN TRƯỜNG
+    // =========================================================================
+    const classesList = db.state.classesList || [];
+    const classesCount = classesList.length || 5;
+    const teachersList = db.getTeachers ? db.getTeachers() : [];
+    const teachersCount = teachersList.length || 4;
+    const studentsList = db.getStudents ? db.getStudents() : [];
+    const studentsCount = studentsList.length || 175;
+    const subjectsList = db.state.subjectsList || [];
+    const subjectsCount = subjectsList.length || 6;
+
+    const examAttempts = (typeof db !== 'undefined' && db.getExamAttempts) ? db.getExamAttempts() : [];
+    const homeworkSubmissions = (typeof db !== 'undefined' && db.getSubmissions) ? db.getSubmissions() : [];
+    const totalSubmissionsDisplay = examAttempts.length + homeworkSubmissions.length;
+
+    const visitCount = (typeof db !== 'undefined' && db.getVisitCount) ? db.getVisitCount() : 0;
+    const visitDisplay = visitCount > 0 ? visitCount.toLocaleString('vi-VN') : '1,248';
+    const submissionsDisplay = totalSubmissionsDisplay > 0 ? totalSubmissionsDisplay.toLocaleString('vi-VN') : '856';
+
+    const totCount = Math.round(studentsCount * 0.35);
+    const khaCount = Math.round(studentsCount * 0.45);
+    const datCount = Math.round(studentsCount * 0.16);
+    const chuaDatCount = Math.max(0, studentsCount - (totCount + khaCount + datCount));
+
+    const subjectStats = [
+      { name: 'Toán học', avg: 7.8, icon: '📐', color: 'linear-gradient(90deg,#2563eb,#3b82f6)' },
+      { name: 'Ngữ văn', avg: 7.5, icon: '📖', color: 'linear-gradient(90deg,#7c3aed,#8b5cf6)' },
+      { name: 'Tiếng Anh', avg: 8.1, icon: '🔤', color: 'linear-gradient(90deg,#059669,#10b981)' },
+      { name: 'Khoa học Tự nhiên', avg: 7.9, icon: '🔬', color: 'linear-gradient(90deg,#0284c7,#38bdf8)' },
+      { name: 'Lịch sử & Địa lý', avg: 8.2, icon: '🌍', color: 'linear-gradient(90deg,#d97706,#f59e0b)' },
+      { name: 'Tin học', avg: 8.6, icon: '💻', color: 'linear-gradient(90deg,#dc2626,#ef4444)' }
+    ];
+
+    dom.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 1.6rem; max-width: 1280px; margin: 0 auto; padding-bottom: 2.5rem; font-family: var(--font-body); animation: fadeIn 0.25s ease-out;">
+
+        <!-- SECTION 1: HERO BANNER VỚI ĐỒ HỌA MESH GRADIENT SANG TRỌNG -->
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 40%, #e0f2fe 100%); border-radius: 24px; padding: 1.8rem 2rem; color: #0f172a; box-shadow: 0 12px 30px rgba(37,99,235,0.22); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.2rem; position: relative; overflow: hidden;">
+          <div style="position: absolute; right: -50px; top: -50px; width: 220px; height: 220px; background: rgba(255,255,255,0.06); border-radius: 50%; pointer-events: none;"></div>
+          <div style="position: absolute; right: 120px; bottom: -80px; width: 180px; height: 180px; background: rgba(255,255,255,0.04); border-radius: 50%; pointer-events: none;"></div>
+
+          <div style="position: relative; z-index: 2;">
+            <div style="display: inline-flex; align-items: center; gap: 0.45rem; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.28); color: #0f172a; font-weight: 700; padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.78rem; margin-bottom: 0.6rem; backdrop-filter: blur(6px);">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; box-shadow: 0 0 8px #10b981;"></span>
+              TRUNG TÂM BÁO CÁO THỐNG KÊ TOÀN TRƯỜNG GDPT 2018
+            </div>
+            <h1 style="margin: 0; font-family: var(--font-title); font-size: 1.7rem; font-weight: 900; letter-spacing: -0.3px; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+              Hệ Thống Quản Lý Giáo Dục Số <span style="color:#059669;">TH</span>-<span style="color:#2563eb;">THCS</span> <span style="color:#dc2626;">AMA TRANG LƠNG</span>
+            </h1>
+            <p style="margin: 0.4rem 0 0 0; font-size: 0.9rem; color: #475569; font-weight: 400; opacity: 0.95; max-width: 680px; line-height: 1.45;">
+              Trực quan hóa số liệu chất lượng giảng dạy, phân bổ học lực, kết quả các môn học và diễn biến chuyên cần năm học 2025 - 2026.
+            </p>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.75rem; position: relative; z-index: 2;">
+            <button onclick="if(window.app && window.app.exportReportsToExcel) window.app.exportReportsToExcel(); else if(window.app) window.app.switchView('reports');" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #0f172a; border: none; padding: 0.75rem 1.4rem; border-radius: 14px; font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 6px 18px rgba(16,185,129,0.3); display: flex; align-items: center; gap: 0.45rem;">
+              <span>📥 Xuất Báo Cáo Excel</span>
             </button>
           </div>
         </div>
 
-        <div style="overflow-x: auto;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-            <thead>
-              <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1; text-align: center; color: #334155; font-weight: 700;">
-                <th style="padding: 0.65rem; width: 50px;">STT</th>
-                <th style="padding: 0.65rem; text-align: left;">Tên Lớp Học</th>
-                <th style="padding: 0.65rem; width: 85px;">Sĩ Số</th>
-                <th style="padding: 0.65rem; width: 110px; background: #eff6ff; color: #1d4ed8;">Mức Tốt (Giỏi)</th>
-                <th style="padding: 0.65rem; width: 110px; background: #eff6ff; color: #1d4ed8;">Mức Khá</th>
-                <th style="padding: 0.65rem; width: 110px; background: #fffbe8; color: #d97706;">Mức Đạt</th>
-                <th style="padding: 0.65rem; width: 100px; background: #fee2e2; color: #dc2626;">Chưa Đạt</th>
-                <th style="padding: 0.65rem; width: 115px; background: #d1fae5; color: #059669;">TBM Toàn Lớp</th>
-                <th style="padding: 0.65rem; width: 110px;">Chuyên Cần</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${classesList.map((cls, idx) => {
-                const clsStudents = studentsList.filter(s => (s.classId || '6A') === (cls.name || cls.id));
-                const siSo = clsStudents.length || 35;
-                const tot = Math.round(siSo * 0.35);
-                const kha = Math.round(siSo * 0.45);
-                const dat = Math.round(siSo * 0.16);
-                const chuaDat = Math.max(0, siSo - (tot + kha + dat));
+        <!-- SECTION 2: 6 THẺ THỐNG KÊ KPI HIỆN ĐẠI -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 1.1rem;">
+          
+          <div onclick="if(window.app) window.app.switchView('classes');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Số Lớp Học</span>
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🏫</div>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${classesCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">lớp</span></div>
+            <div style="font-size: 0.76rem; color: #2563eb; font-weight: 700; margin-top: 0.45rem;">${classesList.map(c => c.name).join(', ') || '6A, 6B, 7A, 8A, 9A'}</div>
+          </div>
 
-                return `
-                  <tr style="border-bottom: 1px solid #f1f5f9; text-align: center; font-weight: 500; color: #0f172a;">
-                    <td style="padding: 0.6rem; color: #64748b;">${idx + 1}</td>
-                    <td style="padding: 0.6rem; text-align: left; font-weight: 700; color: #2563eb;">Lớp ${cls.name || cls.id}</td>
-                    <td style="padding: 0.6rem; font-weight: 700;">${siSo} em</td>
-                    <td style="padding: 0.6rem; background: #f8fafc; color: #15803d; font-weight: 700;">${tot} (${Math.round((tot/siSo)*100)}%)</td>
-                    <td style="padding: 0.6rem; background: #f8fafc; color: #1d4ed8; font-weight: 700;">${kha} (${Math.round((kha/siSo)*100)}%)</td>
-                    <td style="padding: 0.6rem; background: #fffbe8; color: #d97706;">${dat} (${Math.round((dat/siSo)*100)}%)</td>
-                    <td style="padding: 0.6rem; background: #fff5f5; color: #dc2626;">${chuaDat} (${Math.round((chuaDat/siSo)*100)}%)</td>
-                    <td style="padding: 0.6rem; background: #f0fdf4; color: #166534; font-size: 0.92rem; font-weight: 700;">7.85</td>
-                    <td style="padding: 0.6rem; color: #059669; font-weight: 700;">98.8%</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
+          <div onclick="if(window.app) window.app.switchView('classes');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Khối Áp Dụng</span>
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #fefce8 0%, #fef08a 100%); color: #ca8a04; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">📊</div>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">4 <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">khối</span></div>
+            <div style="font-size: 0.76rem; color: #ca8a04; font-weight: 700; margin-top: 0.45rem;">Khối 6, 7, 8, 9</div>
+          </div>
+
+          <div onclick="if(window.app) window.app.switchView('teachers');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Tổng Giáo Viên</span>
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">👨‍🏫</div>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${teachersCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">cán bộ</span></div>
+            <div style="font-size: 0.76rem; color: #16a34a; font-weight: 700; margin-top: 0.45rem;">100% Đạt chuẩn</div>
+          </div>
+
+          <div onclick="if(window.app) window.app.switchView('students');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Tổng Học Sinh</span>
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%); color: #9333ea; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🎓</div>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${studentsCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">em</span></div>
+            <div style="font-size: 0.76rem; color: #9333ea; font-weight: 700; margin-top: 0.45rem;">TB 35 HS / lớp</div>
+          </div>
+
+          <div style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Lượt Truy Cập</span>
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%); color: #0891b2; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">👁️</div>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${visitDisplay} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">lượt</span></div>
+            <div style="font-size: 0.76rem; color: #0891b2; font-weight: 700; margin-top: 0.45rem;">▲ +18% tuần này</div>
+          </div>
+
+          <div style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Lượt Làm Bài</span>
+              <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); color: #e11d48; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">📝</div>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${submissionsDisplay} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">bài</span></div>
+            <div style="font-size: 0.76rem; color: #e11d48; font-weight: 700; margin-top: 0.45rem;">Kiểm tra & Bài tập</div>
+          </div>
+
         </div>
+
+        <!-- BIỂU ĐỒ 1 & BIỂU ĐỒ 2 -->
+        <div style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 1.4rem;">
+
+          <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04);">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.85rem; margin-bottom: 1.2rem;">
+              <div>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.45rem;">
+                  <span>📊</span> THỐNG KÊ XẾP LOẠI HỌC LỰC (GDPT 2018)
+                </h3>
+                <div style="font-size: 0.8rem; color: #64748b; font-weight: 400; margin-top: 0.2rem;">Phân loại chất lượng học tập toàn trường</div>
+              </div>
+              <span style="font-size: 0.78rem; font-weight: 700; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.25rem 0.7rem; border-radius: 10px;">Toàn trường</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1.1rem;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
+                  <span style="color: #059669; display: flex; align-items: center; gap: 0.35rem;">🥇 Mức Tốt (Giỏi): 35%</span>
+                  <span style="color: #475569; font-weight: 700;">${totCount} học sinh</span>
+                </div>
+                <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
+                  <div style="width: 35%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
+                  <span style="color: #2563eb; display: flex; align-items: center; gap: 0.35rem;">🥈 Mức Khá: 45%</span>
+                  <span style="color: #475569; font-weight: 700;">${khaCount} học sinh</span>
+                </div>
+                <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
+                  <div style="width: 45%; height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
+                  <span style="color: #d97706; display: flex; align-items: center; gap: 0.35rem;">🥉 Mức Đạt (Trung Bình): 16%</span>
+                  <span style="color: #475569; font-weight: 700;">${datCount} học sinh</span>
+                </div>
+                <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
+                  <div style="width: 16%; height: 100%; background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(245,158,11,0.3);"></div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
+                  <span style="color: #dc2626; display: flex; align-items: center; gap: 0.35rem;">⚠️ Chưa Đạt (Yếu): 4%</span>
+                  <span style="color: #475569; font-weight: 700;">${chuaDatCount} học sinh</span>
+                </div>
+                <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
+                  <div style="width: 4%; height: 100%; background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(239,68,68,0.3);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.85rem; margin-bottom: 0.85rem;">
+              <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.45rem;">
+                <span>🎯</span> SƠ ĐỒ HÌNH QUẠT TỶ LỆ HỌC LỰC
+              </h3>
+              <div style="font-size: 0.8rem; color: #64748b; font-weight: 400; margin-top: 0.2rem;">Tỷ lệ phần trăm tổng hợp 4 mức xếp loại</div>
+            </div>
+
+            <div style="display: flex; justify-content: center; align-items: center; margin: 0.6rem 0;">
+              <div style="width: 145px; height: 145px; border-radius: 50%; background: conic-gradient(#10b981 0% 35%, #3b82f6 35% 80%, #f59e0b 80% 96%, #ef4444 96% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.1); position: relative;">
+                <div style="width: 95px; height: 95px; background: #ffffff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);">
+                  <div style="font-weight: 900; font-size: 1.35rem; color: #0f172a;">80%</div>
+                  <div style="font-size: 0.68rem; color: #64748b; font-weight: 700;">Tốt & Khá</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; font-size: 0.78rem; font-weight: 700;">
+              <div style="background: #f0fdf4; padding: 0.45rem 0.6rem; border-radius: 9px; color: #166534; border: 1px solid #bbf7d0;">🥇 Tốt: 35% (${totCount} em)</div>
+              <div style="background: #eff6ff; padding: 0.45rem 0.6rem; border-radius: 9px; color: #1e40af; border: 1px solid #bfdbfe;">🥈 Khá: 45% (${khaCount} em)</div>
+              <div style="background: #fffbe8; padding: 0.45rem 0.6rem; border-radius: 9px; color: #92400e; border: 1px solid #fef08a;">🥉 Đạt: 16% (${datCount} em)</div>
+              <div style="background: #fef2f2; padding: 0.45rem 0.6rem; border-radius: 9px; color: #991b1b; border: 1px solid #fecaca;">⚠️ Chưa đạt: 4% (${chuaDatCount} em)</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BIỂU ĐỒ 3 & BIỂU ĐỒ 4 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem;">
+
+          <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04);">
+            <div style="border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.85rem; margin-bottom: 1.1rem;">
+              <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.45rem;">
+                <span>📚</span> ĐIỂM TRUNG BÌNH MÔN HỌC TOÀN TRƯỜNG
+              </h3>
+              <div style="font-size: 0.8rem; color: #64748b; font-weight: 400; margin-top: 0.2rem;">So sánh kết quả điểm bình quân theo môn</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+              ${subjectStats.map(s => `
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.84rem; font-weight: 700; margin-bottom: 0.3rem;">
+                    <span style="color: #1e293b; display: flex; align-items: center; gap: 0.4rem;">${s.icon} ${s.name}</span>
+                    <span style="font-weight: 800; color: #1e40af;">${s.avg} / 10</span>
+                  </div>
+                  <div style="width: 100%; height: 9px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
+                    <div style="width: ${Math.round(s.avg * 10)}%; height: 100%; background: ${s.color}; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.85rem; margin-bottom: 0.85rem;">
+              <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 0.45rem;">
+                <span>⏱️</span> DIỄN BIẾN CHUYÊN CẦN TRONG TUẦN
+              </h3>
+              <div style="font-size: 0.8rem; color: #64748b; font-weight: 400; margin-top: 0.2rem;">Tỷ lệ chuyên cần học sinh đi học các ngày</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem; height: 155px; align-items: flex-end; padding-bottom: 0.5rem; border-bottom: 1.5px solid #cbd5e1;">
+              ${[
+                { day: 'T2', val: '99%' },
+                { day: 'T3', val: '98%' },
+                { day: 'T4', val: '99.5%' },
+                { day: 'T5', val: '97.5%' },
+                { day: 'T6', val: '98.8%' },
+                { day: 'T7', val: '96%' }
+              ].map(d => `
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.3rem; height: 100%; justify-content: flex-end;">
+                  <div style="font-size: 0.7rem; font-weight: 800; color: #2563eb;">${d.val}</div>
+                  <div style="width: 100%; height: ${Math.round(parseFloat(d.val) * 1.12)}px; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 7px 7px 0 0; box-shadow: 0 3px 8px rgba(37,99,235,0.25);"></div>
+                  <div style="font-size: 0.78rem; font-weight: 800; color: #334155; margin-top: 0.35rem;">${d.day}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div style="font-size: 0.82rem; color: #059669; font-weight: 700; background: #f0fdf4; padding: 0.5rem 0.85rem; border-radius: 10px; text-align: center; margin-top: 0.75rem; border: 1.5px solid #bbf7d0; box-shadow: 0 2px 6px rgba(16,185,129,0.1);">
+              ✅ Tỷ lệ chuyên cần bình quân toàn trường đạt 98.5%
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BẢNG MẪU THỐNG KÊ CHI TIẾT THEO LỚP -->
+        <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.5rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.1rem; padding-bottom: 0.85rem; border-bottom: 1.5px solid #f1f5f9;">
+            <div>
+              <div style="display: inline-flex; align-items: center; gap: 0.35rem; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; font-weight: 700; padding: 0.2rem 0.65rem; border-radius: 20px; font-size: 0.76rem; margin-bottom: 0.3rem;">
+                📋 MẪU THỐNG KÊ CHUẨN THÔNG TƯ 22 (GDPT 2018)
+              </div>
+              <h3 style="margin: 0; font-family: var(--font-title); font-weight: 800; color: #0f172a; font-size: 1.15rem;">
+                Bảng Mẫu Thống Kê Chi Tiết Học Lực & Chuyên Cần Theo Từng Lớp
+              </h3>
+              <p style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: #64748b;">Tổng hợp số liệu chất lượng giáo dục toàn trường năm học 2025 - 2026</p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <button onclick="if(window.app && window.app.exportReportsToExcel) window.app.exportReportsToExcel(); else if(window.app) window.app.switchView('reports');" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; padding: 0.55rem 1.1rem; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; box-shadow: 0 3px 10px rgba(16,185,129,0.3); display: flex; align-items: center; gap: 0.4rem;">
+                📥 Xuất Báo Cáo Excel
+              </button>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1; text-align: center; color: #334155; font-weight: 700;">
+                  <th style="padding: 0.65rem; width: 50px;">STT</th>
+                  <th style="padding: 0.65rem; text-align: left;">Tên Lớp Học</th>
+                  <th style="padding: 0.65rem; width: 85px;">Sĩ Số</th>
+                  <th style="padding: 0.65rem; width: 110px; background: #eff6ff; color: #1d4ed8;">Mức Tốt (Giỏi)</th>
+                  <th style="padding: 0.65rem; width: 110px; background: #f0fdf4; color: #166534;">Mức Khá</th>
+                  <th style="padding: 0.65rem; width: 110px; background: #fffbe8; color: #92400e;">Mức Đạt</th>
+                  <th style="padding: 0.65rem; width: 110px; background: #fef2f2; color: #991b1b;">Chưa Đạt</th>
+                  <th style="padding: 0.65rem; width: 120px;">Chuyên Cần</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${classesList.map((cls, idx) => {
+                  const sCount = cls.studentCount || 35;
+                  const cTot = Math.round(sCount * 0.35);
+                  const cKha = Math.round(sCount * 0.45);
+                  const cDat = Math.round(sCount * 0.16);
+                  const cChuaDat = Math.max(0, sCount - (cTot + cKha + cDat));
+                  return `
+                    <tr style="border-bottom: 1px solid #f1f5f9; text-align: center; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
+                      <td style="padding: 0.6rem; color: #64748b;">${idx + 1}</td>
+                      <td style="padding: 0.6rem; text-align: left; font-weight: 700; color: #1e293b;">Lớp ${cls.name}</td>
+                      <td style="padding: 0.6rem; font-weight: 600;">${sCount}</td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #1d4ed8; background: #f8fafc;">${cTot} <span style="font-size:0.75rem; color:#64748b;">(35%)</span></td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #166534;">${cKha} <span style="font-size:0.75rem; color:#64748b;">(45%)</span></td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #92400e; background: #f8fafc;">${cDat} <span style="font-size:0.75rem; color:#64748b;">(16%)</span></td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #991b1b;">${cChuaDat} <span style="font-size:0.75rem; color:#64748b;">(4%)</span></td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #059669;">98.${5 + (idx % 4)}%</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
-
-      <!-- LỐI TẮT TRUY CẬP NHANH HỆ THỐNG -->
-      <div style="background: #ffffff; border-radius: 20px; border: 1.5px solid #cbd5e1; padding: 1.4rem; box-shadow: 0 4px 18px rgba(0,0,0,0.04);">
-        <div style="font-size: 0.95rem; font-weight: 800; color: #1e3a8a; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.45rem;">
-          <span>⚡</span> LỐI TẮT TRUY CẬP NHANH HỆ THỐNG
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem;">
-          <button onclick="if(window.app) window.app.switchView('years');" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.2s;">
-            <span style="font-size: 1.4rem;">📅</span>
-            <span style="font-size: 0.78rem; font-weight: 700; color: #334155;">Năm học & Kỳ</span>
-          </button>
-          <button onclick="if(window.app) window.app.switchView('classes');" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.2s;">
-            <span style="font-size: 1.4rem;">🏫</span>
-            <span style="font-size: 0.78rem; font-weight: 700; color: #334155;">Lớp THCS</span>
-          </button>
-          <button onclick="if(window.app) window.app.switchView('subjects');" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.2s;">
-            <span style="font-size: 1.4rem;">📚</span>
-            <span style="font-size: 0.78rem; font-weight: 700; color: #334155;">Môn học 2018</span>
-          </button>
-          <button onclick="if(window.app) window.app.switchView('teachers');" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.2s;">
-            <span style="font-size: 1.4rem;">👨‍🏫</span>
-            <span style="font-size: 0.78rem; font-weight: 700; color: #334155;">Giáo viên</span>
-          </button>
-          <button onclick="if(window.app) window.app.switchView('students');" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.2s;">
-            <span style="font-size: 1.4rem;">🎓</span>
-            <span style="font-size: 0.78rem; font-weight: 700; color: #334155;">Học sinh</span>
-          </button>
-          <button onclick="if(window.app) window.app.switchView('user_groups');" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.2s;">
-            <span style="font-size: 1.4rem;">👥</span>
-            <span style="font-size: 0.78rem; font-weight: 700; color: #334155;">Phân quyền</span>
-          </button>
-          <button onclick="if(window.app) window.app.switchView('reports');" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.2s;">
-            <span style="font-size: 1.4rem;">📊</span>
-            <span style="font-size: 0.78rem; font-weight: 700; color: #334155;">Báo cáo</span>
-          </button>
-          <button onclick="if(window.app) window.app.switchView('ai_hub');" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0.75rem 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; cursor: pointer; transition: all 0.2s;">
-            <span style="font-size: 1.4rem;">🤖</span>
-            <span style="font-size: 0.78rem; font-weight: 700; color: #334155;">Trợ lý AI</span>
-          </button>
-        </div>
-      </div>
-
-    </div>
-  `;
-};
-
+    `;
+  };
   // 1.1 Khai báo Năm học & Học kỳ
   LMSApp.prototype.render_years = function(dom) {
     if (db.initUserGroupsAndPermissions) db.initUserGroupsAndPermissions();
@@ -572,7 +828,7 @@ function attachRenderMethods(LMSApp) {
   // 1.2 Thông tin nhà trường
   LMSApp.prototype.render_school_info_view = function(dom) {
     const info = (db.state && db.state.schoolInfo) ? db.state.schoolInfo : {
-      name: 'THCS AMA TRANG LƠNG',
+      name: 'TH-THCS AMA TRANG LƠNG',
       address: 'Dliê Ya, Krông Năng, Đắk Lắk',
       principal: 'Chu Văn Giáp',
       phone: '0397800689',
@@ -584,7 +840,7 @@ function attachRenderMethods(LMSApp) {
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem;">
           <div>
             <h2 style="margin: 0; color: #1e3a8a; font-size: 1.5rem; font-weight: 900; display: flex; align-items: center; gap: 0.6rem;">
-              🏛️ THÔNG TIN TRƯỜNG HỌC THCS AMA TRANG LƠNG
+              🏛️ THÔNG TIN TRƯỜNG HỌC TH-THCS AMA TRANG LƠNG
             </h2>
             <p style="margin: 0.25rem 0 0 0; color: #64748b; font-size: 0.88rem; font-weight: 600;">Khai báo thông tin chung chuẩn hồ sơ Giáo dục & Đào tạo</p>
           </div>
@@ -595,7 +851,7 @@ function attachRenderMethods(LMSApp) {
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
             <div class="form-group">
               <label style="font-weight: 800; color: #0f172a; display: block; margin-bottom: 0.4rem; font-size: 0.9rem;">Tên Trường Hợp Quy:</label>
-              <input type="text" name="name" class="form-control" value="${info.name || 'THCS AMA TRANG LƠNG'}" required style="font-weight: bold; height: 42px; border-radius: 10px;">
+              <input type="text" name="name" class="form-control" value="${info.name || 'TH-THCS AMA TRANG LƠNG'}" required style="font-weight: bold; height: 42px; border-radius: 10px;">
             </div>
 
             <div class="form-group">
@@ -649,7 +905,6 @@ function attachRenderMethods(LMSApp) {
       { id: 'assignments', name: '14. Giao bài tập' },
       { id: 'exams', name: '15. Tạo đề kiểm tra' },
       { id: 'grading', name: '16. Chấm điểm học sinh' },
-      { id: 'ai_picker', name: '17. Quét AI gọi học sinh' },
       { id: 'attendance', name: '18. Điểm danh chuyên cần' },
       { id: 'messages', name: '19. Liên lạc Phụ huynh' },
       { id: 'ai_hub', name: '20. Trợ lý KHBD AI' }
@@ -1541,6 +1796,417 @@ LMSApp.prototype.selectAiStudent = function(studentId) {
     } else {
       if (this.showToast) this.showToast(res ? res.message : '❌ Không thể đẩy điểm vào CSDL!');
     }
+  };
+
+
+  // =========================================================================
+  // 🌟 1. SỔ LIÊN LẠC & TIN NHẮN PHỤ HUYNH CHO GIÁO VIÊN (render_messages)
+  // =========================================================================
+  LMSApp.prototype.render_messages = function(dom) {
+    const classes = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
+    const selectedClassId = this._messagesSelectedClass || (classes.length > 0 ? (classes[0].name || classes[0].id) : '6A');
+    const allStudents = (typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : [];
+    const classStudents = allStudents.filter(s => (s.classId === selectedClassId || s.classId === selectedClassId.replace('Lớp ', '')));
+
+    const messages = (typeof db !== 'undefined' && db.getMessages) ? db.getMessages() : [];
+    const classMessages = messages.filter(m => m.classId === selectedClassId || m.classId === 'all');
+
+    dom.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:1.5rem; max-width:1280px; margin:0 auto; padding-bottom:2.5rem; font-family:var(--font-body); animation:fadeIn 0.25s ease-out;">
+        
+        <!-- HEADER SỔ LIÊN LẠC (ĐỒ HỌA TRONG SÁNG & SANG TRỌNG) -->
+        <div style="background:linear-gradient(135deg, #ffffff 0%, #eff6ff 40%, #e0e7ff 100%); border-radius:22px; padding:1.6rem 2rem; color:#0f172a; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 10px 30px rgba(67,56,202,0.1); border:1.8px solid #c7d2fe;">
+          <div>
+            <div style="display:inline-flex; align-items:center; gap:0.4rem; background:#e0e7ff; border:1px solid #c7d2fe; color:#4338ca; padding:0.25rem 0.85rem; border-radius:20px; font-size:0.78rem; font-weight:800; margin-bottom:0.5rem;">
+              <span>💬</span> SỔ LIÊN LẠC ĐIỆN TỬ VÀ TIN NHẮN PHỤ HUYNH
+            </div>
+            <h1 style="margin:0; font-family:var(--font-title); font-size:1.65rem; font-weight:900; color:#1e1b4b;">
+              Trung Tâm Liên Lạc Phụ Huynh — <span style="color:#4338ca;">Lớp ${selectedClassId}</span>
+            </h1>
+            <p style="margin:0.35rem 0 0 0; color:#475569; font-size:0.9rem; font-weight:500;">Gửi thông báo học tập, chuyên cần, họp phụ huynh & nhận xét định kỳ 2 chiều</p>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <select id="msg-select-class" style="padding:0.6rem 1rem; border-radius:12px; border:1.5px solid #cbd5e1; background:#ffffff; color:#1e1b4b; font-weight:800; font-size:0.9rem; cursor:pointer;">
+              ${classes.map(c => `<option value="${c.name || c.id}" ${c.name === selectedClassId || c.id === selectedClassId ? 'selected' : ''}>Lớp ${c.name || c.id}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
+        <!-- GRID 2 CỘT: FORM GỬI TIN NHẮN & DANH SÁCH TIN ĐÃ GỬI -->
+        <div style="display:grid; grid-template-columns:1.15fr 1fr; gap:1.4rem;">
+          
+          <!-- KHỐI 1: SOẠN & GỬI THÔNG BÁO / NHẬN XÉT -->
+          <div style="background:#ffffff; border-radius:20px; border:1.5px solid #cbd5e1; padding:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.04);">
+            <h3 style="margin:0 0 1rem 0; font-size:1.1rem; font-weight:800; color:#1e293b; display:flex; align-items:center; gap:0.4rem;">
+              <span>✉️</span> Soạn Thông Báo & Nhận Xét Mới
+            </h3>
+
+            <div style="display:flex; flex-direction:column; gap:1rem;">
+              <div>
+                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:0.35rem;">Người Nhận / Đối Tượng:</label>
+                <select id="msg-recipient-select" style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:700; color:#0f172a; font-size:0.88rem;">
+                  <option value="all">📢 Toàn thể Phụ huynh Lớp ${selectedClassId} (Gửi cả lớp)</option>
+                  ${classStudents.map(s => `<option value="${s.id}">👤 PH em ${s.name} (${s.parentPhone || s.phone || 'Chưa có SĐT'})</option>`).join('')}
+                </select>
+              </div>
+
+              <div>
+                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:0.35rem;">Loại Thông Báo:</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                  <label style="display:flex; align-items:center; gap:0.4rem; padding:0.5rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; font-size:0.82rem; cursor:pointer; font-weight:600;">
+                    <input type="radio" name="msg-type" value="announcement" checked> 📢 Thông báo chung
+                  </label>
+                  <label style="display:flex; align-items:center; gap:0.4rem; padding:0.5rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; font-size:0.82rem; cursor:pointer; font-weight:600;">
+                    <input type="radio" name="msg-type" value="praise"> 🥇 Khen ngợi học tập
+                  </label>
+                  <label style="display:flex; align-items:center; gap:0.4rem; padding:0.5rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; font-size:0.82rem; cursor:pointer; font-weight:600;">
+                    <input type="radio" name="msg-type" value="reminder"> ⚠️ Nhắc nhở chuyên cần
+                  </label>
+                  <label style="display:flex; align-items:center; gap:0.4rem; padding:0.5rem; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; font-size:0.82rem; cursor:pointer; font-weight:600;">
+                    <input type="radio" name="msg-type" value="meeting"> 📅 Mời họp phụ huynh
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:0.35rem;">Tiêu Đề:</label>
+                <input type="text" id="msg-input-title" placeholder="VD: Thông báo kiểm tra giữa kỳ 2 / Khen ngợi em..." style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:600; font-size:0.88rem; box-sizing:border-box;">
+              </div>
+
+              <div>
+                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:0.35rem;">Nội Dung Tin Nhắn / Nhận Xét:</label>
+                <textarea id="msg-input-content" rows="4" placeholder="Nhập nội dung thông báo gửi đến phụ huynh..." style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-family:var(--font-body); font-size:0.88rem; box-sizing:border-box;"></textarea>
+              </div>
+
+              <button id="btn-send-message-submit" style="width:100%; background:linear-gradient(135deg, #4338ca 0%, #3730a3 100%); color:#fff; border:none; padding:0.8rem; border-radius:12px; font-weight:800; font-size:0.95rem; cursor:pointer; box-shadow:0 4px 14px rgba(67,56,202,0.3); display:flex; align-items:center; justify-content:center; gap:0.4rem;">
+                <span>🚀</span> GỬI TIN NHẮN ĐẾN PHỤ HUYNH
+              </button>
+            </div>
+          </div>
+
+          <!-- KHỐI 2: HỘP THƯ LỊCH SỬ TIN NHẮN -->
+          <div style="background:#ffffff; border-radius:20px; border:1.5px solid #cbd5e1; padding:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.04); display:flex; flex-direction:column;">
+            <h3 style="margin:0 0 1rem 0; font-size:1.1rem; font-weight:800; color:#1e293b; display:flex; align-items:center; gap:0.4rem;">
+              <span>📬</span> Lịch Sử Thông Báo Lớp ${selectedClassId} (${classMessages.length})
+            </h3>
+
+            <div style="display:flex; flex-direction:column; gap:0.75rem; overflow-y:auto; max-height:480px; padding-right:0.25rem;">
+              ${classMessages.length === 0 ? `
+                <div style="text-align:center; padding:2.5rem 1rem; color:#64748b;">
+                  <div style="font-size:2.5rem; margin-bottom:0.5rem;">📭</div>
+                  <p style="font-weight:600; font-size:0.9rem;">Chưa có thông báo nào được gửi cho Lớp ${selectedClassId}</p>
+                </div>
+              ` : classMessages.map(m => {
+                const dateStr = new Date(m.createdAt || Date.now()).toLocaleDateString('vi-VN', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' });
+                const typeIcon = m.type === 'praise' ? '🥇' : m.type === 'reminder' ? '⚠️' : m.type === 'meeting' ? '📅' : '📢';
+                const recipientText = m.studentId === 'all' ? `📢 Toàn lớp ${m.classId}` : `👤 PH: ${m.studentId}`;
+                return `
+                  <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:1rem; position:relative;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                      <span style="font-size:0.75rem; font-weight:800; color:#4338ca; background:#e0e7ff; padding:0.15rem 0.55rem; border-radius:8px;">${typeIcon} ${recipientText}</span>
+                      <span style="font-size:0.72rem; color:#94a3b8;">${dateStr}</span>
+                    </div>
+                    <h4 style="margin:0 0 0.35rem 0; font-size:0.9rem; font-weight:800; color:#1e293b;">${m.title || 'Thông báo'}</h4>
+                    <p style="margin:0; font-size:0.82rem; color:#475569; line-height:1.45;">${m.content || ''}</p>
+                    <div style="display:flex; justify-content:flex-end; margin-top:0.5rem;">
+                      <button onclick="if(confirm('Xóa thông báo này?')){ db.deleteMessage('${m.id}'); window.app.render_messages(document.getElementById('viewport')); }" style="background:none; border:none; color:#ef4444; font-size:0.76rem; font-weight:700; cursor:pointer; padding:0.2rem 0.4rem;">✕ Xóa</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    // Events
+    const clsSel = dom.querySelector('#msg-select-class');
+    if (clsSel) {
+      clsSel.onchange = (e) => {
+        this._messagesSelectedClass = e.target.value;
+        this.render_messages(dom);
+      };
+    }
+
+    const btnSend = dom.querySelector('#btn-send-message-submit');
+    if (btnSend) {
+      btnSend.onclick = () => {
+        const title = (dom.querySelector('#msg-input-title')?.value || '').trim();
+        const content = (dom.querySelector('#msg-input-content')?.value || '').trim();
+        const studentId = dom.querySelector('#msg-recipient-select')?.value || 'all';
+        const typeEl = dom.querySelector('input[name="msg-type"]:checked');
+        const type = typeEl ? typeEl.value : 'announcement';
+
+        if (!title || !content) {
+          if (this.showToast) this.showToast('⚠️ Vui lòng nhập đầy đủ Tiêu đề và Nội dung tin nhắn!', 'error');
+          return;
+        }
+
+        db.addMessage({
+          senderRole: 'teacher',
+          senderName: this.currentUser ? (this.currentUser.name || 'Giáo viên') : 'Giáo viên',
+          teacherId: this.currentUser?.id || 'gv_toan',
+          classId: selectedClassId,
+          studentId: studentId,
+          title: title,
+          content: content,
+          type: type
+        });
+
+        if (this.showToast) this.showToast('✅ Đã gửi tin nhắn đến Phụ huynh thành công!');
+        this.render_messages(dom);
+      };
+    }
+  };
+
+  // =========================================================================
+  // 🌟 2. SỔ LIÊN LẠC & TIN NHẮN PHỤ HUYNH CHO PHỤ HUYNH (render_parent_messages)
+  // =========================================================================
+  LMSApp.prototype.render_parent_messages = function(dom) {
+    const parent = this.currentUser || { name: 'Phụ huynh', studentId: 'hs_01', classId: '6A' };
+    const studentId = parent.studentId || 'hs_01';
+    const classId = parent.classId || '6A';
+
+    const messages = (typeof db !== 'undefined' && db.getMessages) ? db.getMessages() : [];
+    const myMessages = messages.filter(m => m.classId === classId && (m.studentId === 'all' || m.studentId === studentId));
+
+    dom.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:1.5rem; max-width:1100px; margin:0 auto; padding-bottom:2.5rem; font-family:var(--font-body); animation:fadeIn 0.25s ease-out;">
+        
+        <!-- HEADER PHỤ HUYNH (ĐỒ HỌA TRONG SÁNG & SANG TRỌNG) -->
+        <div style="background:linear-gradient(135deg, #ffffff 0%, #faf5ff 40%, #f3e8ff 100%); border-radius:22px; padding:1.6rem 2rem; color:#0f172a; box-shadow:0 10px 30px rgba(168,85,247,0.1); border:1.8px solid #d8b4fe; position:relative; overflow:hidden;">
+          <div style="display:inline-flex; align-items:center; gap:0.4rem; background:#f5f3ff; border:1px solid #d8b4fe; color:#7c3aed; padding:0.25rem 0.85rem; border-radius:20px; font-size:0.78rem; font-weight:800; margin-bottom:0.5rem;">
+            <span>👨‍👩‍👧</span> SỔ LIÊN LẠC ĐIỆN TỬ GIA ĐÌNH & NHÀ TRƯỜNG
+          </div>
+          <h1 style="margin:0; font-family:var(--font-title); font-size:1.65rem; font-weight:900; color:#1e1b4b;">
+            Hộp Thư Liên Lạc — <span style="color:#7c3aed;">${parent.name}</span>
+          </h1>
+          <p style="margin:0.35rem 0 0 0; color:#475569; font-size:0.9rem; font-weight:500;">Học sinh: <strong style="color:#0f172a;">${parent.studentName || 'Con em'}</strong> &nbsp;|&nbsp; Lớp: <strong style="color:#7c3aed;">${classId}</strong></p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:1.4rem;">
+          
+          <!-- KHỐI 1: THÔNG BÁO TỪ NHÀ TRƯỜNG & THẦY CÔ -->
+          <div style="background:#ffffff; border-radius:20px; border:1.5px solid #cbd5e1; padding:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.04);">
+            <h3 style="margin:0 0 1rem 0; font-size:1.1rem; font-weight:800; color:#1e293b; display:flex; align-items:center; gap:0.4rem;">
+              <span>📬</span> Thông Báo Từ Nhà Trường & Giáo Viên (${myMessages.length})
+            </h3>
+
+            <div style="display:flex; flex-direction:column; gap:0.85rem;">
+              ${myMessages.length === 0 ? `
+                <div style="text-align:center; padding:2rem 1rem; color:#64748b;">
+                  <div style="font-size:2.5rem; margin-bottom:0.5rem;">📭</div>
+                  <p style="font-weight:600;">Hiện chưa có thông báo mới.</p>
+                </div>
+              ` : myMessages.map(m => {
+                const dateStr = new Date(m.createdAt || Date.now()).toLocaleDateString('vi-VN', { hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit' });
+                const typeBadge = m.type === 'praise' ? '🥇 Khen ngợi' : m.type === 'reminder' ? '⚠️ Nhắc nhở' : m.type === 'meeting' ? '📅 Họp phụ huynh' : '📢 Thông báo';
+                const bgType = m.type === 'praise' ? '#f0fdf4' : m.type === 'reminder' ? '#fffbe8' : '#eff6ff';
+                return `
+                  <div style="background:${bgType}; border:1.5px solid #cbd5e1; border-radius:14px; padding:1.1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                      <span style="font-size:0.75rem; font-weight:800; color:#4338ca; background:#ffffff; padding:0.2rem 0.6rem; border-radius:8px; border:1px solid #cbd5e1;">${typeBadge}</span>
+                      <span style="font-size:0.75rem; color:#64748b;">${dateStr}</span>
+                    </div>
+                    <h4 style="margin:0 0 0.4rem 0; font-size:0.95rem; font-weight:800; color:#1e293b;">${m.title || 'Thông báo'}</h4>
+                    <p style="margin:0; font-size:0.86rem; color:#334155; line-height:1.5;">${m.content || ''}</p>
+                    <div style="margin-top:0.6rem; font-size:0.75rem; font-weight:700; color:#64748b;">Gửi từ: ${m.senderName || 'Ban Giám Hiệu & GVCN'}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- KHỐI 2: PHỤ HUYNH GỬI ĐƠN NGHỈ HỌC / TRAO ĐỔI VỚI GVCN -->
+          <div style="background:#ffffff; border-radius:20px; border:1.5px solid #cbd5e1; padding:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.04);">
+            <h3 style="margin:0 0 1rem 0; font-size:1.1rem; font-weight:800; color:#1e293b; display:flex; align-items:center; gap:0.4rem;">
+              <span>📝</span> Gửi Tin Nhắn / Đơn Xin Nghỉ Học
+            </h3>
+
+            <div style="display:flex; flex-direction:column; gap:0.9rem;">
+              <div>
+                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:0.35rem;">Mục đích liên hệ:</label>
+                <select id="parent-msg-topic" style="width:100%; padding:0.6rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:700; color:#0f172a; font-size:0.88rem;">
+                  <option value="Đơn xin phép nghỉ học">🏥 Đơn xin phép nghỉ học trực tuyến</option>
+                  <option value="Trao đổi tình hình học tập">📚 Trao đổi tình hình học tập với GVCN</option>
+                  <option value="Liên hệ khác">💬 Ý kiến đóng góp & Liên hệ khác</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display:block; font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:0.35rem;">Nội dung gửi Giáo viên chủ nhiệm:</label>
+                <textarea id="parent-msg-text" rows="5" placeholder="Kính gửi Thầy/Cô chủ nhiệm, gia đình xin phép cho em nghỉ học ngày... vì lý do..." style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-family:var(--font-body); font-size:0.88rem; box-sizing:border-box;"></textarea>
+              </div>
+
+              <button id="btn-parent-submit-msg" style="width:100%; background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color:#fff; border:none; padding:0.8rem; border-radius:12px; font-weight:800; font-size:0.95rem; cursor:pointer; box-shadow:0 4px 14px rgba(124,58,237,0.3); display:flex; align-items:center; justify-content:center; gap:0.4rem;">
+                <span>📨</span> GỬI TRỰC TUYẾN ĐẾN GVCN
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    const btnParentSend = dom.querySelector('#btn-parent-submit-msg');
+    if (btnParentSend) {
+      btnParentSend.onclick = () => {
+        const topic = dom.querySelector('#parent-msg-topic')?.value || 'Liên hệ';
+        const txt = (dom.querySelector('#parent-msg-text')?.value || '').trim();
+        if (!txt) {
+          if (this.showToast) this.showToast('⚠️ Vui lòng nhập nội dung cần gửi đến Giáo viên!', 'error');
+          return;
+        }
+
+        db.addMessage({
+          senderRole: 'parent',
+          senderName: parent.name,
+          studentId: studentId,
+          classId: classId,
+          title: `[PH gửi] ${topic}`,
+          content: txt,
+          type: 'parent_reply'
+        });
+
+        if (this.showToast) this.showToast('✅ Đã gửi tin nhắn đến Giáo viên chủ nhiệm thành công!');
+        const txtArea = dom.querySelector('#parent-msg-text');
+        if (txtArea) txtArea.value = '';
+      };
+    }
+  };
+
+  // =========================================================================
+  // 🌟 3. HỌC BẠ ĐIỆN TỬ & BẢNG ĐIỂM CÁ NHÂN HỌC SINH (render_student_grades)
+  // =========================================================================
+  LMSApp.prototype.render_student_grades = function(dom) {
+    const student = this.currentUser || { name: 'Học sinh', classId: '6A', id: 'hs_01' };
+    const studentId = student.id || 'hs_01';
+    const classId = student.classId || '6A';
+
+    const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
+    const defaultSubs = [
+      { id:'toan', name:'Toán học', icon:'📐' },
+      { id:'van', name:'Ngữ văn', icon:'📖' },
+      { id:'anh', name:'Tiếng Anh', icon:'🔤' },
+      { id:'khtn', name:'Khoa học Tự nhiên', icon:'🔬' },
+      { id:'lsdl', name:'Lịch sử & Địa lý', icon:'🌍' },
+      { id:'tin', name:'Tin học', icon:'💻' },
+      { id:'gdcd', name:'GD Công dân', icon:'⚖️' },
+      { id:'congnghe', name:'Công nghệ', icon:'⚙️' },
+      { id:'nghethuat', name:'Nghệ thuật', icon:'🎨' },
+      { id:'gdtc', name:'GD Thể chất', icon:'🏃' }
+    ];
+    const subList = subjects.length > 0 ? subjects : defaultSubs;
+
+    const grades = (typeof db !== 'undefined' && db.getGrades) ? db.getGrades() : [];
+    const myGrades = grades.filter(g => g.studentId === studentId);
+
+    dom.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:1.5rem; max-width:1280px; margin:0 auto; padding-bottom:2.5rem; font-family:var(--font-body); animation:fadeIn 0.25s ease-out;">
+        
+        <!-- HEADER HỌC BẠ (ĐỒ HỌA TRONG SÁNG & SANG TRỌNG) -->
+        <div style="background:linear-gradient(135deg, #ffffff 0%, #f0fdf4 40%, #dcfce7 100%); border-radius:22px; padding:1.6rem 2rem; color:#0f172a; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 10px 30px rgba(16,185,129,0.1); border:1.8px solid #86efac;">
+          <div>
+            <div style="display:inline-flex; align-items:center; gap:0.4rem; background:#dcfce7; border:1px solid #86efac; color:#059669; padding:0.25rem 0.85rem; border-radius:20px; font-size:0.78rem; font-weight:800; margin-bottom:0.5rem;">
+              <span>🎓</span> HỌC BẠ ĐIỆN TỬ & KẾT QUẢ ĐÁNH GIÁ THÔNG TƯ 22
+            </div>
+            <h1 style="margin:0; font-family:var(--font-title); font-size:1.65rem; font-weight:900; color:#064e3b;">
+              Phiếu Điểm Học Tập — <span style="color:#059669;">${student.name}</span>
+            </h1>
+            <p style="margin:0.35rem 0 0 0; color:#475569; font-size:0.9rem; font-weight:500;">Mã HS: <strong style="color:#0f172a;">${student.maHS || student.id}</strong> &nbsp;|&nbsp; Lớp: <strong style="color:#059669;">${classId}</strong> &nbsp;|&nbsp; Năm học: <strong>2025 - 2026</strong></p>
+          </div>
+
+          <div style="display:flex; gap:0.75rem;">
+            <button onclick="window.print();" style="background:#059669; color:#ffffff; border:none; padding:0.75rem 1.35rem; border-radius:12px; font-weight:800; font-size:0.88rem; cursor:pointer; box-shadow:0 4px 14px rgba(5,150,105,0.3); display:flex; align-items:center; gap:0.4rem;">
+              <span>🖨️</span> In Phiếu Điểm
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 THẺ TỔNG KẾT HỌC LỰC & RÈN LUYỆN -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem;">
+          <div style="background:#ffffff; border-radius:16px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+            <div style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Kết Quả Học Tập</div>
+            <div style="font-size:1.6rem; font-weight:900; color:#059669; margin-top:0.3rem;">🥇 MỨC TỐT</div>
+            <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Theo chuẩn Thông tư 22</div>
+          </div>
+          <div style="background:#ffffff; border-radius:16px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+            <div style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Kết Quả Rèn Luyện</div>
+            <div style="font-size:1.6rem; font-weight:900; color:#2563eb; margin-top:0.3rem;">🥇 MỨC TỐT</div>
+            <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Chuyên cần & Kỷ luật</div>
+          </div>
+          <div style="background:#ffffff; border-radius:16px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+            <div style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Điểm TB Chung</div>
+            <div style="font-size:1.6rem; font-weight:900; color:#7c3aed; margin-top:0.3rem;">8.6 <span style="font-size:0.85rem; color:#64748b;">/ 10</span></div>
+            <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Toàn bộ 10 môn học</div>
+          </div>
+          <div style="background:#ffffff; border-radius:16px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+            <div style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Xếp Hạng Trong Lớp</div>
+            <div style="font-size:1.6rem; font-weight:900; color:#d97706; margin-top:0.3rem;">Top 5 <span style="font-size:0.85rem; color:#64748b;">/ 35 HS</span></div>
+            <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Lớp ${classId}</div>
+          </div>
+        </div>
+
+        <!-- BẢNG ĐIỂM CHI TIẾT TỪNG MÔN CHUẨN THÔNG TƯ 22 -->
+        <div style="background:#ffffff; border-radius:20px; border:1.5px solid #cbd5e1; padding:1.5rem; box-shadow:0 4px 18px rgba(0,0,0,0.04);">
+          <h3 style="margin:0 0 1rem 0; font-size:1.15rem; font-weight:800; color:#1e293b; display:flex; align-items:center; gap:0.4rem;">
+            <span>📋</span> Bảng Điểm Chi Tiết Các Môn Học Học Kỳ 2 (GDPT 2018)
+          </h3>
+
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+              <thead>
+                <tr style="background:#f8fafc; border-bottom:2px solid #cbd5e1; text-align:center; color:#334155; font-weight:700;">
+                  <th style="padding:0.75rem; text-align:left;">Môn Học</th>
+                  <th style="padding:0.75rem; width:80px;">ĐĐGtx 1</th>
+                  <th style="padding:0.75rem; width:80px;">ĐĐGtx 2</th>
+                  <th style="padding:0.75rem; width:80px;">ĐĐGtx 3</th>
+                  <th style="padding:0.75rem; width:80px;">ĐĐGtx 4</th>
+                  <th style="padding:0.75rem; width:90px; background:#eff6ff; color:#1d4ed8;">Giữa kỳ (x2)</th>
+                  <th style="padding:0.75rem; width:90px; background:#f0fdf4; color:#166534;">Cuối kỳ (x3)</th>
+                  <th style="padding:0.75rem; width:95px; background:#fffbe8; color:#92400e;">ĐTB Môn</th>
+                  <th style="padding:0.75rem; width:110px;">Xếp Loại</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${subList.map((s, idx) => {
+                  const g = myGrades.find(gr => gr.subjectId === s.id) || {};
+                  const tx1 = g.tx1 !== undefined ? g.tx1 : [8.5, 9.0, 8.0, 9.5, 8.0, 9.0, 8.5, 8.0, 9.0, 8.5][idx % 10];
+                  const tx2 = g.tx2 !== undefined ? g.tx2 : [9.0, 8.5, 8.5, 9.0, 8.5, 9.5, 8.0, 8.5, 9.0, 9.0][idx % 10];
+                  const tx3 = g.tx3 !== undefined ? g.tx3 : [8.0, 9.0, 8.0, 8.5, 9.0, 8.5, 9.0, 8.0, 8.5, 8.5][idx % 10];
+                  const tx4 = g.tx4 !== undefined ? g.tx4 : [9.5, 8.0, 9.0, 9.0, 8.0, 9.0, 8.5, 9.0, 8.5, 9.0][idx % 10];
+                  const gk = g.gk !== undefined ? g.gk : [8.5, 8.0, 8.5, 9.0, 8.5, 9.0, 8.0, 8.5, 9.0, 8.5][idx % 10];
+                  const ck = g.ck !== undefined ? g.ck : [9.0, 8.5, 9.0, 9.5, 8.5, 9.5, 8.5, 9.0, 9.0, 9.0][idx % 10];
+                  
+                  const tbm = parseFloat(((tx1 + tx2 + tx3 + tx4 + gk * 2 + ck * 3) / 9).toFixed(1));
+                  const xlBadge = tbm >= 8.0 ? '<span style="color:#059669; font-weight:800;">🥇 Tốt</span>' : tbm >= 6.5 ? '<span style="color:#2563eb; font-weight:800;">🥈 Khá</span>' : '<span style="color:#d97706; font-weight:800;">🥉 Đạt</span>';
+
+                  return `
+                    <tr style="border-bottom:1px solid #f1f5f9; text-align:center; transition:background 0.15s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
+                      <td style="padding:0.7rem; text-align:left; font-weight:700; color:#1e293b;">${s.icon || '📚'} ${s.name}</td>
+                      <td style="padding:0.7rem;">${tx1}</td>
+                      <td style="padding:0.7rem;">${tx2}</td>
+                      <td style="padding:0.7rem;">${tx3}</td>
+                      <td style="padding:0.7rem;">${tx4}</td>
+                      <td style="padding:0.7rem; font-weight:700; color:#1d4ed8; background:#f8fafc;">${gk}</td>
+                      <td style="padding:0.7rem; font-weight:700; color:#166534; background:#f8fafc;">${ck}</td>
+                      <td style="padding:0.7rem; font-weight:900; color:#b45309; background:#fffdf5; font-size:0.95rem;">${tbm}</td>
+                      <td style="padding:0.7rem;">${xlBadge}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    `;
   };
 
 }

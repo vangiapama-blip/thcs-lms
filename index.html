@@ -6,23 +6,25 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>THCS AMA TRANG LƠNG - Hệ thống LMS chuẩn GDPT 2018</title>
+  <title>TH-THCS AMA TRANG LƠNG - Hệ thống LMS chuẩn GDPT 2018</title>
   <!-- Google Fonts for Perfect Vietnamese Typography & Accents -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="app.css?v=20260809_095200">
+  <link rel="stylesheet" href="app.css?v=20260819_210828">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <!-- Chart.js for smooth interactive statistics & charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- PeerJS for wireless P2P mobile camera stream -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <!-- Load Scripts in exact synchronous order without type=module for 100% instant execution -->
-  <script src="render_views.js?v=20260809_095200"></script>
-  <script src="database.js?v=20260809_095200"></script>
-  <script src="ai_teaching_tools.js?v=20260809_095200"></script>
-  <script src="app.js?v=20260809_095200"></script>
+  <script src="render_views.js?v=1787208323342"></script>
+  <script src="database.js?v=1787208323342"></script>
+  <script src="ai_teaching_tools.js?v=1787208399999"></script>
+  <script src="app.js?v=1787208323342"></script>
 </head>
 <body>
 
@@ -39,7 +41,7 @@
         <img src="logo.png" alt="AMTL Logo" style="width: 80px; height: 80px; object-fit: contain; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
         <div>
           <span class="logo-text" style="font-size: 1.05rem; font-weight: 900; letter-spacing: -0.2px; display: block; color: #1e40af; text-transform: uppercase; white-space: nowrap; width: 100%; text-align: center; line-height: 1.45; padding-top: 4px; padding-bottom: 2px;">CỔNG TRƯỜNG HỌC SỐ</span>
-          <span class="logo-sub" style="font-size: 0.85rem; font-weight: 900; color: #0f172a; display: block; margin-top: 0.15rem; letter-spacing: 0.5px; white-space: nowrap; line-height: 1.35;">THCS AMA TRANG LƠNG</span>
+          <span class="logo-sub" style="font-size: 0.85rem; font-weight: 900; display: block; margin-top: 0.15rem; letter-spacing: 0.5px; white-space: nowrap; line-height: 1.35;"><span style="color:#059669;">TH</span>-<span style="color:#2563eb;">THCS</span> <span style="color:#dc2626;">AMA TRANG LƠNG</span></span>
         </div>
       </div>
 
@@ -48,7 +50,7 @@
       </ul>
 
       <footer class="sidebar-footer">
-        <p style="font-weight: 800; color: #1e293b; font-size: 0.78rem;">© 2026 THCS AMA TRANG LƠNG</p>
+        <p style="font-weight: 800; font-size: 0.78rem;">© 2026 <span style="color:#059669;">TH</span>-<span style="color:#2563eb;">THCS</span> <span style="color:#dc2626;">AMA TRANG LƠNG</span></p>
         <p style="font-size: 0.65rem; margin-top: 0.2rem; color: var(--text-muted);">Phiên bản 3.5-AI Pro</p>
       </footer>
     </aside>
@@ -62,7 +64,7 @@
       <div class="school-info-badge" onclick="if(window.app) window.app.switchView('info');" style="display: flex; align-items: center; gap: 0.65rem; cursor: pointer;" title="Nhấp vào để quay về Trang chủ">
         <img src="logo.png" alt="Logo" style="width: 42px; height: 42px; object-fit: contain; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0;">
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
-          <span class="school-name" id="school-name-text" style="font-size: 1.02rem; font-weight: 900; color: #1e40af; line-height: 1.2;">THCS AMA TRANG LƠNG</span>
+          <span class="school-name" id="school-name-text" style="font-size: 1.02rem; font-weight: 900; line-height: 1.2;"><span style="color:#059669;">TH</span>-<span style="color:#2563eb;">THCS</span> <span style="color:#dc2626;">AMA TRANG LƠNG</span></span>
           <span id="school-address-text" style="font-size: 0.78rem; font-weight: 400; color: #475569; line-height: 1.2; margin-top: 0.1rem;">Địa chỉ: Dliê Ya, Đắk Lắk</span>
           <div id="school-year-custom-wrapper" style="position: relative; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; margin-top: 1px;" onclick="if(window.app) window.app.toggleCustomYearDropdown(event);">
             <span id="school-year-current-text" style="font-size: 8px !important; font-weight: 400 !important; color: #0284c7 !important; line-height: 1 !important; user-select: none;">2025-2026</span>
@@ -117,7 +119,7 @@
           <span style="color: #cbd5e1;">|</span>
           <span>📞 Điện thoại / Zalo: <a href="tel:0397800689" style="color: #16a34a; font-weight: 400; text-decoration: none; font-family: monospace; font-size: 0.78rem;">0397800689</a></span>
           <span style="color: #cbd5e1;">|</span>
-          <span>🏫 Đơn vị: <strong style="color: #7c3aed;">Trường THCS Ama Trang Lơng, Dliê Ya, Đắk Lắk</strong></span>
+          <span>🏫 Đơn vị: <strong style="color: #7c3aed;">Trường TH-THCS Ama Trang Lơng, Dliê Ya, Đắk Lắk</strong></span>
         </div>
       </footer>
 
@@ -149,8 +151,8 @@
         <span style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; padding: 0.3rem 0.95rem; border-radius: 20px; font-size: 0.78rem; font-weight: 400; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 0.4rem; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
           HỆ THỐNG LMS AI THÔNG MINH
         </span>
-        <h2 style="margin: 0; color: #0f172a; font-weight: 400; font-size: 1.45rem; letter-spacing: -0.5px; line-height: 1.25;">
-          THCS AMA TRANG LƠNG
+        <h2 style="margin: 0; font-weight: 800; font-size: 1.45rem; letter-spacing: -0.5px; line-height: 1.25;">
+          <span style="color:#059669;">TH</span>-<span style="color:#2563eb;">THCS</span> <span style="color:#dc2626;">AMA TRANG LƠNG</span>
         </h2>
         <p style="font-size: 0.84rem; color: #64748b; margin: 0.3rem 0 0 0; font-weight: 400;">
           Dliê Ya, Đắk Lắk
@@ -175,27 +177,27 @@
         ⚠️ Bạn đã nhập sai tên đăng nhập và mật khẩu hãy đăng nhập lại hoặc liên hệ Admin.
       </div>
 
-      <!-- Form Login Panel -->
-      <form id="main-login-form" onsubmit="event.preventDefault(); if(typeof window.handleLoginSubmit==='function') { window.app.handleLoginSubmit(event); } else if(window.app && window.app.handleLoginSubmit) { window.app.handleLoginSubmit(event); } return false;">
+      <!-- Form Login Panel (Anti-Autofill & Clean Empty Inputs) -->
+      <form id="main-login-form" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onsubmit="event.preventDefault(); if(typeof window.handleLoginSubmit==='function') { window.app.handleLoginSubmit(event); } else if(window.app && window.app.handleLoginSubmit) { window.app.handleLoginSubmit(event); } return false;">
         <input type="hidden" id="login-active-role" value="teacher">
 
         <!-- Input 1: Tên đăng nhập -->
         <div style="text-align: left; margin-bottom: 1.15rem;">
-          <label style="font-weight: 400; color: #1e293b; font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+          <label style="font-weight: 500; color: #1e293b; font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
             <span>👤</span> Tên đăng nhập:
           </label>
           <div style="position: relative;">
-            <input type="text" id="login-username-input" class="form-control" placeholder="Nhập tên đăng nhập của bạn..." style="height: 46px; font-weight: 400; color: #0f172a; border-radius: 12px; border: 1.5px solid #cbd5e1; padding: 0 1rem; font-size: 0.95rem; width: 100%; font-family: var(--font-body);" required>
+            <input type="text" id="login-username-input" name="amtl_user_field" class="form-control" placeholder="Nhập tên đăng nhập của bạn..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 46px; font-weight: 400; color: #0f172a; border-radius: 12px; border: 1.5px solid #cbd5e1; padding: 0 1rem; font-size: 0.95rem; width: 100%; font-family: var(--font-body);" required>
           </div>
         </div>
 
         <!-- Input 2: Mật khẩu -->
         <div style="text-align: left; margin-bottom: 1.5rem;">
-          <label style="font-weight: 400; color: #1e293b; font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
+          <label style="font-weight: 500; color: #1e293b; font-size: 0.88rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;">
             <span>🔑</span> Mật khẩu truy cập:
           </label>
           <div style="display: flex; align-items: center; gap: 0.4rem; background: #ffffff; border-radius: 12px; border: 1.5px solid #cbd5e1; padding: 0 0.4rem 0 1rem; height: 46px;">
-            <input type="password" id="login-password-input" placeholder="Nhập mật khẩu của bạn..." style="height: 100%; border: none; outline: none; font-weight: 400; color: #0f172a; flex: 1; font-size: 0.95rem; font-family: var(--font-body); background: transparent;" required>
+            <input type="password" id="login-password-input" name="amtl_pwd_field" placeholder="Nhập mật khẩu..." autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" style="height: 100%; border: none; outline: none; font-weight: 400; color: #0f172a; flex: 1; font-size: 0.95rem; font-family: var(--font-body); background: transparent;" required>
             <button type="button" id="btn-toggle-login-pwd-vis" onclick="if(window.app) window.app.toggleLoginPasswordVisibility();" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem; color: #64748b;" title="Hiện / Ẩn mật khẩu">👁️</button>
           </div>
         </div>
@@ -211,7 +213,7 @@
         <div style="display: flex; flex-direction: column; gap: 0.3rem; align-items: center;">
           <div>⚡ Hệ thống được phát triển bởi thầy <strong style="color: #0284c7; font-size: 0.8rem;">Chu Văn Giáp</strong></div>
           <div>📞 Điện thoại / Zalo: <a href="tel:0397800689" style="color: #16a34a; font-weight: 400; text-decoration: none; font-family: monospace; font-size: 0.82rem;">0397800689</a></div>
-          <div>🏫 Đơn vị: <strong style="color: #7c3aed;">Trường THCS Ama Trang Lơng, Dliê Ya, Đắk Lắk</strong></div>
+          <div>🏫 Đơn vị: <strong style="color: #7c3aed;">Trường TH-THCS Ama Trang Lơng, Dliê Ya, Đắk Lắk</strong></div>
         </div>
       </div>
 

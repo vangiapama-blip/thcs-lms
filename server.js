@@ -79,6 +79,79 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+
+  // =========================================================================
+  // API: Wireless Mobile Camera Streaming & QR Code Endpoint
+  // =========================================================================
+  if (reqPath === '/api/server-ip' && req.method === 'GET') {
+    const os = require('os');
+    const nets = os.networkInterfaces();
+    let localIp = '127.0.0.1';
+    for (const name of Object.keys(nets)) {
+      for (const net of nets[name]) {
+        if (net.family === 'IPv4' && !net.internal) {
+          localIp = net.address;
+          break;
+        }
+      }
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ ip: localIp, port: PORT, url: `http://${localIp}:${PORT}/mobile-cam.html` }));
+    return;
+  }
+
+  // Real-time camera frames in memory
+  if (!global.cameraStreamStore) {
+    global.cameraStreamStore = {
+      latestFrame: null,
+      lastUpdate: 0,
+      activeClients: new Set()
+    };
+  }
+
+  if (reqPath === '/api/cam-stream/push' && req.method === 'POST') {
+    try {
+      const raw = await getRequestBody(req, 10 * 1024 * 1024);
+      const data = JSON.parse(raw.toString('utf8'));
+      global.cameraStreamStore.latestFrame = data.image;
+      global.cameraStreamStore.lastUpdate = Date.now();
+      
+      // Notify any waiting SSE clients
+      global.cameraStreamStore.activeClients.forEach(clientRes => {
+        try {
+          clientRes.write(`data: ${JSON.stringify({ image: data.image, ts: global.cameraStreamStore.lastUpdate })}\n\n`);
+        } catch(e) {}
+      });
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch(e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
+  if (reqPath === '/api/cam-stream/live' && req.method === 'GET') {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    });
+    
+    global.cameraStreamStore.activeClients.add(res);
+
+    if (global.cameraStreamStore.latestFrame) {
+      res.write(`data: ${JSON.stringify({ image: global.cameraStreamStore.latestFrame, ts: global.cameraStreamStore.lastUpdate })}\n\n`);
+    }
+
+    req.on('close', () => {
+      global.cameraStreamStore.activeClients.delete(res);
+    });
+    return;
+  }
+
   // =========================================================================
   // API 1: File Upload (PDF, Word, PPTX, Video, Images) -> Save to /uploads/
   // =========================================================================

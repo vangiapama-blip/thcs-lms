@@ -56,38 +56,8 @@ class LMSApp {
     try {
       const uInput = document.getElementById('login-username-input');
       const pInput = document.getElementById('login-password-input');
-      const chkRemember = document.getElementById('chk-remember-credentials');
-      
-      const saved = localStorage.getItem('THCS_LMS_REMEMBER_CREDENTIALS');
-      if (saved) {
-        const creds = JSON.parse(saved);
-        if (creds && creds.remember && creds.username) {
-          if (uInput) uInput.value = creds.username;
-          if (pInput) pInput.value = creds.password || '';
-          if (chkRemember) chkRemember.checked = true;
-
-          if (creds.role) {
-            const roleInput = document.getElementById('login-active-role');
-            if (roleInput) roleInput.value = creds.role;
-
-            const tTab = document.getElementById('login-tab-teacher');
-            const sTab = document.getElementById('login-tab-student');
-            if (creds.role === 'student') {
-              if (tTab) tTab.classList.remove('active');
-              if (sTab) sTab.classList.add('active');
-            } else {
-              if (sTab) sTab.classList.remove('active');
-              if (tTab) tTab.classList.add('active');
-            }
-          }
-          return;
-        }
-      }
-      
-      // If no remembered credentials on this device, leave fields blank
-      if (uInput && !uInput.value) uInput.value = '';
-      if (pInput && !pInput.value) pInput.value = '';
-      if (chkRemember) chkRemember.checked = false;
+      if (uInput) uInput.value = '';
+      if (pInput) pInput.value = '';
     } catch(e) {}
   }
 
@@ -162,15 +132,18 @@ class LMSApp {
     const secs = timeDiffSec % 60;
     const timeSpentText = `${mins} phút ${secs} giây`;
     
-    const finalScore = parseFloat(((this.quizizzCorrectCount / this.quizizzQuestions.length) * 10).toFixed(1));
+    // 🌟 QUY ĐỔI ĐIỂM: 100 điểm Quizizz -> 10 điểm Bảng điểm (10đ Quizizz = 1.0đ, 20đ Quizizz = 2.0đ, ..., 100đ Quizizz = 10.0đ)
+    const quizizzScore100 = parseFloat(((this.quizizzCorrectCount / this.quizizzQuestions.length) * 100).toFixed(1));
+    const gradebookScore10 = parseFloat((quizizzScore100 / 10).toFixed(1));
 
     db.addSubmission({
       id: `sub_${Date.now()}`,
       assignmentId: 'kt_thuong_xuyen_quizizz',
       studentId: this.currentUser.id,
-      content: `Đã hoàn thành đấu trường Quizizz. Điểm tích lũy game: ${this.quizizzScore}đ. Thời gian làm: ${timeSpentText}.`,
-      score: finalScore,
-      comment: `Đấu trường Quizizz AI: Đúng ${this.quizizzCorrectCount}/${this.quizizzQuestions.length} câu`,
+      content: `Đã hoàn thành Đấu trường Quizizz Arena. Điểm Quizizz: ${quizizzScore100}/100đ ➔ Điểm nạp vào Bảng điểm: ${gradebookScore10}/10đ. Thời gian làm: ${timeSpentText}.`,
+      score: gradebookScore10,
+      quizizzScore: quizizzScore100,
+      comment: `Đấu trường Quizizz: ${quizizzScore100}/100 điểm (Quy đổi Bảng điểm: ${gradebookScore10}/10 điểm) - Đúng ${this.quizizzCorrectCount}/${this.quizizzQuestions.length} câu`,
       timestamp: Date.now()
     });
 
@@ -178,23 +151,23 @@ class LMSApp {
     
     this.triggerVictoryFireworks('tx-game-arena-viewport', () => {
       arena.innerHTML = `
-        <div class="quizizz-mode-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); max-width:550px; margin:0 auto; animation: zoomIn 0.3s ease-out; text-align: center;">
-          <h2 style="font-family:var(--font-title); ; font-weight: 400; color: #0f172a; margin:0;">🎉 KẾT QUẢ ĐẤU TRƯỜNG QUIZIZZ:</h2>
-          <h1 style="font-size:3rem; margin:1rem 0; color:#fbbf24; font-weight: 400;">${this.quizizzScore}đ</h1>
+        <div class="quizizz-mode-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); max-width:560px; margin:0 auto; animation: zoomIn 0.3s ease-out; text-align: center; border-radius:24px; padding:2rem; box-shadow:0 25px 60px rgba(0,0,0,0.5);">
+          <h2 style="font-family:var(--font-title); font-weight: 800; color: #0f172a; margin:0;">🎉 KẾT QUẢ ĐẤU TRƯỜNG QUIZIZZ:</h2>
+          <h1 style="font-size:3.2rem; margin:0.75rem 0; color:#fbbf24; font-weight: 800; text-shadow:0 2px 10px rgba(0,0,0,0.2);">${this.quizizzScore}đ</h1>
           
-          <div style="background: rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: left; font-size: 0.95rem; font-family:var(--font-body); color: #0f172a; display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+          <div style="background: rgba(255,255,255,0.2); padding: 1.25rem; border-radius: 16px; margin-bottom: 1.5rem; text-align: left; font-size: 0.95rem; font-family:var(--font-body); color: #0f172a; display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; border:1px solid rgba(255,255,255,0.3);">
             <div>⏱️ <strong>Thời gian:</strong> ${timeSpentText}</div>
-            <div>🎯 <strong>Điểm số quy đổi:</strong> ${finalScore}/10 điểm</div>
-            <div>✅ <strong>Số câu đúng:</strong> ${this.quizizzCorrectCount}</div>
-            <div>❌ <strong>Số câu sai:</strong> ${this.quizizzWrongCount}</div>
+            <div>✅ <strong>Số câu đúng:</strong> ${this.quizizzCorrectCount}/${this.quizizzQuestions.length}</div>
+            <div>🎮 <strong>Điểm Quizizz:</strong> <strong style="color:#b45309; font-size:1.05rem;">${quizizzScore100}/100đ</strong></div>
+            <div>📊 <strong>Điểm nạp Bảng điểm:</strong> <strong style="color:#047857; font-size:1.15rem;">${gradebookScore10}/10đ</strong></div>
           </div>
 
-          <button class="btn btn-secondary" onclick="document.getElementById('tx-game-arena-viewport').style.display='none'; window.app.stopBackgroundMusic(); window.app.exitFullscreen(); window.app.stopGlobalExamProctoring();" style="font-weight: 500; font-family:var(--font-title); cursor:pointer;">Đóng & Hoàn tất</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('tx-game-arena-viewport').style.display='none'; window.app.stopBackgroundMusic(); window.app.exitFullscreen(); window.app.stopGlobalExamProctoring();" style="font-weight: 700; font-family:var(--font-title); font-size:1rem; padding:0.65rem 1.75rem; border-radius:12px; cursor:pointer;">Đóng & Hoàn tất</button>
         </div>
       `;
     });
     
-    this.showToast(`Hoàn thành Quizizz! Điểm quy đổi: ${finalScore}/10`);
+    this.showToast(`✅ Hoàn thành Quizizz! Điểm Quizizz: ${quizizzScore100}/100đ ➔ Nạp vào Bảng điểm: ${gradebookScore10}/10đ`);
   }
 
   constructor() {
@@ -310,7 +283,7 @@ class LMSApp {
         this.currentUser = sessionUser;
         this.authenticatedUserRole = sessionRole || sessionUser.role || 'teacher';
         this.currentRole = this.authenticatedUserRole;
-        this.currentView = (this.authenticatedUserRole === 'admin' ? 'info' : (this.authenticatedUserRole === 'student' ? 'study' : 'lessons'));
+        this.currentView = (this.authenticatedUserRole === 'student' ? 'study' : (this.authenticatedUserRole === 'parent' ? 'parent_grades' : 'info'));
 
         if (loginOverlay) loginOverlay.style.display = 'none';
         this.showHeaderForUser(this.currentUser, this.authenticatedUserRole);
@@ -374,10 +347,11 @@ class LMSApp {
         id: firstTeacher.id, 
         name: firstTeacher.name, 
         role: 'teacher', 
+        classes: firstTeacher.classes || ['6A', '6B', '7A'],
         groupId: userGroupId, 
         subjectId: firstTeacher.subjectId || 'toan' 
       };
-      this.currentView = 'lessons';
+      this.currentView = 'info';
     } else if (role === 'student') {
       const students = (typeof db !== 'undefined' && db.getStudents) ? (db.getStudents() || []) : [];
       const firstStudent = students.length > 0 ? students[0] : { id: 'hs_demo', name: 'Học sinh THCS', classId: '6A' };
@@ -451,7 +425,7 @@ class LMSApp {
       // Default fallback teacher menu items if not explicitly customized
       const defaultTeacherMenuIds = [
         'lessons', 'questions', 'assignments', 'exams', 'grades', 'grading', 
-        'ai_picker', 'attendance', 'messages', 'ai_hub'
+        'attendance', 'messages', 'ai_hub'
       ];
 
       if (userGroupId === 'bgh' || userGroupId === 'to_truong') {
@@ -492,7 +466,8 @@ class LMSApp {
 
     // Master List of Teacher-capable operational and management menus
     const allTeacherCapableItems = [
-      { id: 'school_info_view', label: 'Thông tin nhà trường', icon: '🏛️' },
+      { id: 'info', label: 'Trang chủ & Thống kê', icon: '🏛️' },
+      { id: 'school_info_view', label: 'Thông tin nhà trường', icon: '🏫' },
       { id: 'years', label: 'Năm học & Học kỳ', icon: '📅' },
       { id: 'classes', label: 'Lớp học THCS', icon: '🏫' },
       { id: 'subjects', label: 'Khai báo môn học', icon: '📚' },
@@ -506,8 +481,7 @@ class LMSApp {
       { id: 'assignments', label: 'Giao bài tập', icon: '✍️' },
       { id: 'exams', label: 'Tạo đề kiểm tra', icon: '⏱️' },
       { id: 'grading', label: 'Chấm điểm học sinh', icon: '💯' },
-      { id: 'ai_hub', label: 'Trợ lý KHBD AI', icon: '✨' },
-      { id: 'ai_picker', label: 'Quét AI gọi học sinh', icon: '📸' },
+      { id: 'ai_hub', label: 'Trợ lý AI & Kho Game Trường', icon: '🤖' },
       { id: 'attendance', label: 'Điểm danh chuyên cần', icon: '✓' },
       { id: 'messages', label: 'Liên lạc Phụ huynh', icon: '💬' }
     ];
@@ -529,13 +503,13 @@ class LMSApp {
     ];
 
     const teacherOpsChildren = [
+      { id: 'info', label: 'Trang chủ & Thống kê', icon: '🏛️' },
       { id: 'lessons', label: 'KHBD và Bài giảng', icon: '📝' },
       { id: 'questions', label: 'Ngân hàng Câu hỏi', icon: '❓' },
       { id: 'assignments', label: 'Giao bài tập', icon: '✍️' },
       { id: 'exams', label: 'Tạo đề kiểm tra', icon: '⏱️' },
       { id: 'grading', label: 'Chấm điểm học sinh', icon: '💯' },
-      { id: 'ai_hub', label: 'Trợ lý KHBD AI', icon: '✨' },
-      { id: 'ai_picker', label: 'Quét AI gọi học sinh', icon: '📸' },
+      { id: 'ai_hub', label: 'Trợ lý AI & Kho Game Trường', icon: '🤖' },
       { id: 'attendance', label: 'Điểm danh chuyên cần', icon: '✓' },
       { id: 'messages', label: 'Liên lạc Phụ huynh', icon: '💬' }
     ];
@@ -545,11 +519,13 @@ class LMSApp {
         { id: 'study', label: 'Lớp học của tôi', icon: '📖' },
         { id: 'student_assignments', label: 'Bài tập cần nộp', icon: '✏️' },
         { id: 'student_exams', label: 'Kiểm tra trực tuyến', icon: '✍️' },
-        { id: 'quizizz_practice', label: 'Ôn tập & Luyện tập AI', icon: '🎮' }
+        { id: 'quizizz_practice', label: 'Ôn tập & Luyện tập AI', icon: '🎮' },
+        { id: 'student_grades', label: 'Học bạ & Sổ điểm cá nhân', icon: '📊' }
       ],
       parent: [
         { id: 'parent_grades', label: 'Kết quả học tập con', icon: '📊' },
-        { id: 'parent_attendance', label: 'Theo dõi chuyên cần', icon: '📅' }
+        { id: 'parent_attendance', label: 'Theo dõi chuyên cần', icon: '📅' },
+        { id: 'parent_messages', label: 'Sổ liên lạc & Nhắn tin GV', icon: '💬' }
       ]
     };
 
@@ -1565,7 +1541,7 @@ class LMSApp {
                       ${sub.name}
                     </h3>
                     <p style="margin:0; font-size:0.82rem; color:#475569; font-weight:400; font-size:0.88rem;">
-                      Môn học khối THCS Ama Trang Lơng
+                      Môn học khối TH-THCS Ama Trang Lơng
                     </p>
                   </div>
 
@@ -1917,14 +1893,26 @@ class LMSApp {
                       ${q.questionText || q.question || ''}
                     </div>
 
+                    ${q.imageUrl ? `
+                      <div style="margin-top:0.6rem; margin-bottom:0.85rem; text-align:center; background:#f8fafc; padding:0.6rem; border-radius:12px; border:1px solid #e2e8f0;">
+                        <img src="${q.imageUrl}" style="max-height:360px; max-width:100%; object-fit:contain; border-radius:8px; border:1.5px solid #cbd5e1; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.06);" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${q.imageUrl}')" title="Bấm để phóng to ảnh câu hỏi" />
+                      </div>
+                    ` : ''}
+
                     <!-- Sub-items or Options -->
                     ${(q.type === 'trac_nghiem' && q.options) ? `
-                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; margin-bottom:0.5rem;">
-                        ${q.options.map((opt, optIdx) => `
-                          <div style="padding:0.45rem 0.75rem; border-radius:8px; border:1px solid ${optIdx === q.correctAnswer ? '#10b981' : '#e2e8f0'}; background:${optIdx === q.correctAnswer ? '#ecfdf5' : '#f8fafc'}; font-size:0.88rem; color:${optIdx === q.correctAnswer ? '#047857' : '#334155'}; font-weight:${optIdx === q.correctAnswer ? '800' : '500'};">
-                            <strong>${String.fromCharCode(65 + optIdx)}.</strong> ${opt} ${optIdx === q.correctAnswer ? '✅' : ''}
+                      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-bottom:0.6rem;">
+                        ${q.options.map((opt, optIdx) => {
+                          const optImg = (q.optionImages && q.optionImages[optIdx]) ? q.optionImages[optIdx] : '';
+                          return `
+                          <div style="padding:0.6rem 0.85rem; border-radius:10px; border:1.5px solid ${optIdx === q.correctAnswer ? '#10b981' : '#e2e8f0'}; background:${optIdx === q.correctAnswer ? '#ecfdf5' : '#f8fafc'}; font-size:0.9rem; color:${optIdx === q.correctAnswer ? '#047857' : '#334155'}; font-weight:${optIdx === q.correctAnswer ? '800' : '500'};">
+                            <div><strong>${String.fromCharCode(65 + optIdx)}.</strong> ${opt} ${optIdx === q.correctAnswer ? '✅' : ''}</div>
+                            ${optImg ? `
+                              <div style="margin-top:0.5rem; text-align:center; background:#fff; padding:0.4rem; border-radius:8px; border:1px solid #cbd5e1;">
+                                <img src="${optImg}" style="max-height:180px; max-width:100%; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${optImg}')" title="Bấm để xem ảnh đáp án" />
+                              </div>` : ''}
                           </div>
-                        `).join('')}
+                        `;}).join('')}
                       </div>
                     ` : ''}
 
@@ -2935,6 +2923,76 @@ class LMSApp {
     render();
   }
 
+  // 🌟 NÂNG CẤP MỚI: BỘ HỖ TRỢ XỬ LÝ & THỦ THUẬT ẢNH CHO CÂU HỎI & ĐÁP ÁN (CV 7991)
+  _renderQuestionImagePreview(imgUrl, containerId, removeCallbackName) {
+    if (!imgUrl) return '';
+    return `
+      <div style="position:relative; display:inline-block; margin-top:0.6rem; border:1.5px solid #cbd5e1; border-radius:12px; padding:0.45rem; background:#ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <img src="${imgUrl}" style="max-height:280px; max-width:100%; object-fit:contain; border-radius:8px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${imgUrl}')" title="Bấm để xem ảnh to rõ nét" />
+        <button type="button" onclick="${removeCallbackName}('${containerId}')" style="position:absolute; top:-10px; right:-10px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:26px; height:26px; font-size:14px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.35);" title="Xóa ảnh">&times;</button>
+      </div>
+    `;
+  }
+
+  _zoomImage(imgUrl) {
+    if (!imgUrl) return;
+    const oldZoom = document.getElementById('lms-img-zoom-modal');
+    if (oldZoom) oldZoom.remove();
+
+    let currentScale = 1;
+    let currentRotate = 0;
+
+    const modal = document.createElement('div');
+    modal.id = 'lms-img-zoom-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.9); backdrop-filter:blur(10px); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999999; padding:1rem; animation:fadeIn 0.2s ease-out;';
+    modal.innerHTML = `
+      <!-- Toolbar -->
+      <div style="display:flex; align-items:center; gap:0.6rem; background:rgba(0,0,0,0.55); backdrop-filter:blur(8px); padding:0.45rem 1.1rem; border-radius:30px; border:1px solid rgba(255,255,255,0.25); margin-bottom:0.75rem; z-index:10; box-shadow:0 10px 25px rgba(0,0,0,0.4);">
+        <button id="lms-zoom-out" style="background:rgba(255,255,255,0.18); color:#fff; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:1.15rem; display:flex; align-items:center; justify-content:center;" title="Thu nhỏ">🔍−</button>
+        <span id="lms-zoom-scale-text" style="color:#fff; font-weight:700; font-size:0.9rem; min-width:50px; text-align:center;">100%</span>
+        <button id="lms-zoom-in" style="background:rgba(255,255,255,0.18); color:#fff; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:1.15rem; display:flex; align-items:center; justify-content:center;" title="Phóng to">🔍+</button>
+        <button id="lms-zoom-reset" style="background:rgba(255,255,255,0.18); color:#fff; border:none; border-radius:12px; padding:0.3rem 0.65rem; cursor:pointer; font-size:0.82rem; font-weight:600;" title="Về kích thước chuẩn">100%</button>
+        <button id="lms-zoom-rotate" style="background:rgba(255,255,255,0.18); color:#fff; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center;" title="Xoay 90°">🔄</button>
+        <a href="${imgUrl}" download="hinh-anh-lms.png" target="_blank" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; text-decoration:none; border-radius:12px; padding:0.35rem 0.8rem; font-size:0.82rem; font-weight:700; display:flex; align-items:center; gap:0.35rem;" title="Tải ảnh về máy">📥 Tải về</a>
+        <button id="lms-zoom-close" style="background:#ef4444; color:#fff; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer; font-size:1.15rem; font-weight:bold; margin-left:0.4rem; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(239,68,68,0.4);" title="Đóng (ESC)">✕</button>
+      </div>
+
+      <!-- Image Area -->
+      <div id="lms-zoom-img-container" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; overflow:auto; padding:1rem; cursor:grab;">
+        <img id="lms-zoom-target-img" src="${imgUrl}" style="max-width:92vw; max-height:82vh; object-fit:contain; border-radius:14px; border:2.5px solid rgba(255,255,255,0.8); box-shadow:0 30px 80px rgba(0,0,0,0.6); transition:transform 0.15s ease-out; transform:scale(1) rotate(0deg); background:#fff;" />
+      </div>
+    `;
+
+    const imgEl = modal.querySelector('#lms-zoom-target-img');
+    const scaleText = modal.querySelector('#lms-zoom-scale-text');
+
+    const updateTransform = () => {
+      if (!imgEl) return;
+      imgEl.style.transform = `scale(${currentScale}) rotate(${currentRotate}deg)`;
+      if (scaleText) scaleText.textContent = `${Math.round(currentScale * 100)}%`;
+    };
+
+    modal.querySelector('#lms-zoom-in').onclick = (e) => { e.stopPropagation(); currentScale = Math.min(currentScale + 0.25, 4); updateTransform(); };
+    modal.querySelector('#lms-zoom-out').onclick = (e) => { e.stopPropagation(); currentScale = Math.max(currentScale - 0.25, 0.4); updateTransform(); };
+    modal.querySelector('#lms-zoom-reset').onclick = (e) => { e.stopPropagation(); currentScale = 1; currentRotate = 0; updateTransform(); };
+    modal.querySelector('#lms-zoom-rotate').onclick = (e) => { e.stopPropagation(); currentRotate = (currentRotate + 90) % 360; updateTransform(); };
+    modal.querySelector('#lms-zoom-close').onclick = (e) => { e.stopPropagation(); modal.remove(); };
+
+    modal.querySelector('#lms-zoom-img-container').onclick = (e) => {
+      if (e.target === modal.querySelector('#lms-zoom-img-container')) modal.remove();
+    };
+
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        modal.remove();
+        window.removeEventListener('keydown', escHandler);
+      }
+    };
+    window.addEventListener('keydown', escHandler);
+
+    document.body.appendChild(modal);
+  }
+
   showAddQuestionModal(subjectId, parentDom) {
     const oldModal = document.getElementById('add-question-modal');
     if (oldModal) oldModal.remove();
@@ -2996,18 +3054,37 @@ class LMSApp {
           </div>
 
           <div>
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Nội Dung Câu Hỏi:</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+              <label style="font-weight: 500; font-size:0.88rem; color:#1e293b;">Nội Dung Câu Hỏi:</label>
+              <label for="new-q-img-input" style="background:#e0f2fe; color:#0284c7; font-weight:800; font-size:0.78rem; padding:0.25rem 0.6rem; border-radius:8px; cursor:pointer; border:1px solid #bae6fd; display:inline-flex; align-items:center; gap:0.3rem;">
+                🖼️ Đính kèm ảnh câu hỏi
+              </label>
+              <input type="file" id="new-q-img-input" accept="image/*" style="display:none;" />
+            </div>
             <textarea id="new-q-text" rows="3" placeholder="Nhập nội dung câu hỏi..." required style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-family:var(--font-body);"></textarea>
+            <div id="new-q-img-preview"></div>
           </div>
 
-          <!-- Dynamic Options Panel -->
+          <!-- Dynamic Options Panel with Image Upload Support -->
           <div id="q-options-container">
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Các Lựa Chọn A, B, C, D (Nhập đáp án đúng vào ô tương ứng):</label>
-            <div style="display:flex; flex-direction:column; gap:0.4rem;">
-              <input type="text" class="new-opt" placeholder="Lựa chọn A..." style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1;">
-              <input type="text" class="new-opt" placeholder="Lựa chọn B..." style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1;">
-              <input type="text" class="new-opt" placeholder="Lựa chọn C..." style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1;">
-              <input type="text" class="new-opt" placeholder="Lựa chọn D..." style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1;">
+            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Các Lựa Chọn A, B, C, D (Nhập nội dung & Đính kèm ảnh từng lựa chọn):</label>
+            <div style="display:flex; flex-direction:column; gap:0.6rem;">
+              ${[0, 1, 2, 3].map(i => {
+                const label = String.fromCharCode(65 + i);
+                return `
+                  <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:0.6rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                      <span style="font-weight:900; color:#1e40af; min-width:24px;">${label}.</span>
+                      <input type="text" class="new-opt" placeholder="Lựa chọn ${label}..." style="flex:1; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1; font-size:0.9rem;">
+                      <label for="new-opt-img-input-${i}" style="background:#f1f5f9; color:#475569; font-weight:800; font-size:0.75rem; padding:0.3rem 0.55rem; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1; white-space:nowrap;">
+                        🖼️ Ảnh ${label}
+                      </label>
+                      <input type="file" class="new-opt-img-file" data-idx="${i}" id="new-opt-img-input-${i}" accept="image/*" style="display:none;" />
+                    </div>
+                    <div class="new-opt-img-preview" id="new-opt-img-preview-${i}"></div>
+                  </div>
+                `;
+              }).join('')}
             </div>
 
             <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-top:0.75rem; margin-bottom:0.35rem;">Đáp Án Đúng:</label>
@@ -3036,6 +3113,59 @@ class LMSApp {
     modal.querySelector('#close-add-q-modal').onclick = () => modal.remove();
     modal.querySelector('#btn-cancel-add-q').onclick = () => modal.remove();
 
+    // Bind Image File Reader for Question Text Image
+    modal._qImageUrl = '';
+    modal._optionImages = ['', '', '', ''];
+
+    const qImgInput = modal.querySelector('#new-q-img-input');
+    const qImgPreview = modal.querySelector('#new-q-img-preview');
+    if (qImgInput) {
+      qImgInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const r = new FileReader();
+          r.onload = (evt) => {
+            modal._qImageUrl = evt.target.result || '';
+            if (qImgPreview) {
+              qImgPreview.innerHTML = `
+                <div style="position:relative; display:inline-block; margin-top:0.5rem; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.35rem; background:#f8fafc;">
+                  <img src="${modal._qImageUrl}" style="max-height:280px; max-width:100%; object-fit:contain; border-radius:8px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${modal._qImageUrl}')" title="Bấm để xem ảnh to" />
+                  <button type="button" id="btn-remove-new-q-img" style="position:absolute; top:-8px; right:-8px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; font-weight:bold; cursor:pointer;">&times;</button>
+                </div>`;
+              const rmBtn = qImgPreview.querySelector('#btn-remove-new-q-img');
+              if (rmBtn) rmBtn.onclick = () => { modal._qImageUrl = ''; qImgPreview.innerHTML = ''; qImgInput.value = ''; };
+            }
+          };
+          r.readAsDataURL(file);
+        }
+      };
+    }
+
+    // Bind Image File Readers for Options A, B, C, D
+    modal.querySelectorAll('.new-opt-img-file').forEach(optFile => {
+      optFile.onchange = (e) => {
+        const idx = parseInt(optFile.getAttribute('data-idx'), 10);
+        const file = e.target.files[0];
+        if (file && !isNaN(idx)) {
+          const r = new FileReader();
+          r.onload = (evt) => {
+            modal._optionImages[idx] = evt.target.result || '';
+            const optPreview = modal.querySelector(`#new-opt-img-preview-${idx}`);
+            if (optPreview) {
+              optPreview.innerHTML = `
+                <div style="position:relative; display:inline-block; margin-top:0.4rem; border:1px solid #cbd5e1; border-radius:8px; padding:0.25rem; background:#fff;">
+                  <img src="${modal._optionImages[idx]}" style="max-height:160px; max-width:100%; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${modal._optionImages[idx]}')" title="Bấm để xem ảnh to" />
+                  <button type="button" class="btn-remove-opt-img" data-idx="${idx}" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; cursor:pointer;">&times;</button>
+                </div>`;
+              const rmOpt = optPreview.querySelector('.btn-remove-opt-img');
+              if (rmOpt) rmOpt.onclick = () => { modal._optionImages[idx] = ''; optPreview.innerHTML = ''; optFile.value = ''; };
+            }
+          };
+          r.readAsDataURL(file);
+        }
+      };
+    });
+
     modal.querySelector('#form-add-q').onsubmit = (e) => {
       e.preventDefault();
       const chapterId = modal.querySelector('#new-q-chapter').value || null;
@@ -3056,7 +3186,9 @@ class LMSApp {
         type,
         difficulty,
         questionText,
+        imageUrl: modal._qImageUrl || '',
         options: options.length > 0 ? options : ['Lựa chọn A', 'Lựa chọn B', 'Lựa chọn C', 'Lựa chọn D'],
+        optionImages: modal._optionImages || ['', '', '', ''],
         correctAnswer: isNaN(correctAnswer) ? 0 : correctAnswer,
         explanation,
         approved: true
@@ -3091,6 +3223,8 @@ class LMSApp {
       : ['A. Lựa chọn A', 'B. Lựa chọn B', 'C. Lựa chọn C', 'D. Lựa chọn D'];
 
     let currentCorrect = q.correctAnswer !== undefined ? q.correctAnswer : 0;
+    modal._qImageUrl = q.imageUrl || '';
+    modal._optionImages = Array.isArray(q.optionImages) ? [...q.optionImages] : ['', '', '', ''];
 
     modal.innerHTML = `
       <div class="glass-card" style="width:100%; max-width:680px; padding:1.75rem; border-radius:16px; background:#fff; box-shadow:0 25px 50px rgba(0,0,0,0.3); font-family:var(--font-title); max-height:92vh; overflow-y:auto;">
@@ -3142,8 +3276,21 @@ class LMSApp {
           </div>
 
           <div>
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Nội Dung Câu Hỏi:</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+              <label style="font-weight: 500; font-size:0.88rem; color:#1e293b;">Nội Dung Câu Hỏi:</label>
+              <label for="edit-q-img-input" style="background:#e0f2fe; color:#0284c7; font-weight:800; font-size:0.78rem; padding:0.25rem 0.6rem; border-radius:8px; cursor:pointer; border:1px solid #bae6fd; display:inline-flex; align-items:center; gap:0.3rem;">
+                🖼️ Đính kèm / Thay ảnh câu hỏi
+              </label>
+              <input type="file" id="edit-q-img-input" accept="image/*" style="display:none;" />
+            </div>
             <textarea id="edit-q-text" rows="3" required style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-family:var(--font-body); font-size:0.92rem; color:#0f172a;">${q.questionText || q.question || ''}</textarea>
+            <div id="edit-q-img-preview">
+              ${q.imageUrl ? `
+                <div style="position:relative; display:inline-block; margin-top:0.5rem; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.35rem; background:#f8fafc;">
+                  <img src="${q.imageUrl}" style="max-height:160px; max-width:100%; border-radius:6px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${q.imageUrl}')" />
+                  <button type="button" id="btn-rm-eq-img" style="position:absolute; top:-8px; right:-8px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; font-weight:bold; cursor:pointer;">&times;</button>
+                </div>` : ''}
+            </div>
           </div>
 
           <!-- Dynamic Options & Correct Answer Panel -->
@@ -3190,14 +3337,28 @@ class LMSApp {
               const label = String.fromCharCode(65 + i);
               const val = currentOptions[i] || '';
               const isCorrect = (selIdx === i);
+              const optImg = (modal._optionImages && modal._optionImages[i]) ? modal._optionImages[i] : '';
               return `
-                <div style="display:flex; align-items:center; gap:0.6rem; background:${isCorrect ? '#ecfdf5' : '#ffffff'}; padding:0.45rem 0.75rem; border-radius:8px; border:1.5px solid ${isCorrect ? '#10b981' : '#cbd5e1'};">
-                  <span style="font-weight: 500; color:${isCorrect ? '#047857' : '#475569'}; min-width:24px;">${label}.</span>
-                  <input type="text" class="edit-opt-input" data-idx="${i}" value="${val.replace(/^([A-D]\.\s*)/i, '')}" placeholder="Nhập lựa chọn ${label}..." style="flex:1; padding:0.45rem 0.65rem; border-radius:6px; border:1px solid #cbd5e1; font-size:0.9rem; font-weight:${isCorrect ? '800' : '500'}; color:${isCorrect ? '#047857' : '#1e293b'};">
-                  <label style="display:flex; align-items:center; gap:0.35rem; cursor:pointer; font-weight: 500; font-size:0.82rem; color:${isCorrect ? '#047857' : '#64748b'}; white-space:nowrap;">
-                    <input type="radio" name="edit-correct-radio" value="${i}" ${isCorrect ? 'checked' : ''} style="accent-color:#10b981; width:16px; height:16px;">
-                    ${isCorrect ? '✅ Đáp án đúng' : 'Chọn đúng'}
-                  </label>
+                <div style="background:${isCorrect ? '#ecfdf5' : '#ffffff'}; padding:0.6rem; border-radius:10px; border:1.5px solid ${isCorrect ? '#10b981' : '#cbd5e1'};">
+                  <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span style="font-weight: 900; color:${isCorrect ? '#047857' : '#1e40af'}; min-width:24px;">${label}.</span>
+                    <input type="text" class="edit-opt-input" data-idx="${i}" value="${val.replace(/^([A-D]\.\s*)/i, '')}" placeholder="Nhập lựa chọn ${label}..." style="flex:1; padding:0.45rem 0.65rem; border-radius:6px; border:1px solid #cbd5e1; font-size:0.9rem; font-weight:${isCorrect ? '800' : '500'}; color:${isCorrect ? '#047857' : '#1e293b'};">
+                    <label for="edit-opt-img-input-${i}" style="background:#f1f5f9; color:#475569; font-weight:800; font-size:0.75rem; padding:0.3rem 0.55rem; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1; white-space:nowrap;">
+                      🖼️ Ảnh ${label}
+                    </label>
+                    <input type="file" class="edit-opt-img-file" data-idx="${i}" id="edit-opt-img-input-${i}" accept="image/*" style="display:none;" />
+                    <label style="display:flex; align-items:center; gap:0.35rem; cursor:pointer; font-weight: 500; font-size:0.82rem; color:${isCorrect ? '#047857' : '#64748b'}; white-space:nowrap;">
+                      <input type="radio" name="edit-correct-radio" value="${i}" ${isCorrect ? 'checked' : ''} style="accent-color:#10b981; width:16px; height:16px;">
+                      ${isCorrect ? '✅ Đáp án đúng' : 'Chọn đúng'}
+                    </label>
+                  </div>
+                  <div class="edit-opt-img-preview" id="edit-opt-img-preview-${i}">
+                    ${optImg ? `
+                      <div style="position:relative; display:inline-block; margin-top:0.4rem; border:1px solid #cbd5e1; border-radius:8px; padding:0.25rem; background:#fff;">
+                        <img src="${optImg}" style="max-height:160px; max-width:100%; border-radius:4px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${optImg}')" />
+                        <button type="button" class="btn-remove-edit-opt-img" data-idx="${i}" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; cursor:pointer;">&times;</button>
+                      </div>` : ''}
+                  </div>
                 </div>
               `;
             }).join('')}
@@ -3291,6 +3452,76 @@ class LMSApp {
 
     renderOptionsPanel();
 
+    // 🌟 FileReader: Đính kèm ảnh câu hỏi trong form Sửa Câu Hỏi
+    const eqImgInput = modal.querySelector('#edit-q-img-input');
+    const eqImgPreview = modal.querySelector('#edit-q-img-preview');
+    if (eqImgInput) {
+      eqImgInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const r = new FileReader();
+          r.onload = (evt) => {
+            modal._qImageUrl = evt.target.result || '';
+            if (eqImgPreview) {
+              eqImgPreview.innerHTML = `
+                <div style="position:relative; display:inline-block; margin-top:0.5rem; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.35rem; background:#f8fafc;">
+                  <img src="${modal._qImageUrl}" style="max-height:160px; max-width:100%; border-radius:6px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${modal._qImageUrl}')" />
+                  <button type="button" id="btn-rm-eq-img" style="position:absolute; top:-8px; right:-8px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:22px; height:22px; font-size:12px; font-weight:bold; cursor:pointer;">&times;</button>
+                </div>`;
+              const rmBtn = eqImgPreview.querySelector('#btn-rm-eq-img');
+              if (rmBtn) rmBtn.onclick = () => { modal._qImageUrl = ''; eqImgPreview.innerHTML = ''; eqImgInput.value = ''; };
+            }
+          };
+          r.readAsDataURL(file);
+        }
+      };
+    }
+    // Xóa ảnh câu hỏi đang hiển thị sẵn (nếu có từ câu hỏi cũ)
+    if (eqImgPreview) {
+      const initRmBtn = eqImgPreview.querySelector('#btn-rm-eq-img');
+      if (initRmBtn) initRmBtn.onclick = () => { modal._qImageUrl = ''; eqImgPreview.innerHTML = ''; if (eqImgInput) eqImgInput.value = ''; };
+    }
+
+    // 🌟 FileReader: Đính kèm ảnh từng lựa chọn đáp án trong form Sửa Câu Hỏi
+    // Vì optionsPanel re-render mỗi lần thay loại câu hỏi, cần bind lại qua event delegation
+    optionsPanel.addEventListener('change', (e) => {
+      const optFile = e.target;
+      if (optFile && optFile.classList.contains('edit-opt-img-file')) {
+        const idx = parseInt(optFile.getAttribute('data-idx'), 10);
+        const file = optFile.files[0];
+        if (file && !isNaN(idx)) {
+          const r = new FileReader();
+          r.onload = (evt) => {
+            modal._optionImages[idx] = evt.target.result || '';
+            const prev = optionsPanel.querySelector(`#edit-opt-img-preview-${idx}`);
+            if (prev) {
+              prev.innerHTML = `
+                <div style="position:relative; display:inline-block; margin-top:0.4rem; border:1px solid #cbd5e1; border-radius:8px; padding:0.25rem; background:#fff;">
+                  <img src="${modal._optionImages[idx]}" style="max-height:160px; max-width:100%; border-radius:4px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${modal._optionImages[idx]}')" />
+                  <button type="button" class="btn-remove-edit-opt-img" data-idx="${idx}" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; cursor:pointer;">&times;</button>
+                </div>`;
+              const rmBtn = prev.querySelector('.btn-remove-edit-opt-img');
+              if (rmBtn) rmBtn.onclick = () => { modal._optionImages[idx] = ''; prev.innerHTML = ''; optFile.value = ''; };
+            }
+          };
+          r.readAsDataURL(file);
+        }
+      }
+    });
+
+    // Remove opt img buttons (delegation for dynamically rendered panels)
+    optionsPanel.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-remove-edit-opt-img');
+      if (btn) {
+        const idx = parseInt(btn.getAttribute('data-idx'), 10);
+        if (!isNaN(idx)) {
+          modal._optionImages[idx] = '';
+          const prev = optionsPanel.querySelector(`#edit-opt-img-preview-${idx}`);
+          if (prev) prev.innerHTML = '';
+        }
+      }
+    });
+
     modal.querySelector('#form-edit-q').onsubmit = (e) => {
       e.preventDefault();
       const chapterId = modal.querySelector('#edit-q-chapter').value || null;
@@ -3335,7 +3566,9 @@ class LMSApp {
           type,
           difficulty,
           questionText,
+          imageUrl: modal._qImageUrl || '',
           options: finalOptions,
+          optionImages: modal._optionImages || ['', '', '', ''],
           correctAnswer: finalCorrect,
           explanation
         });
@@ -3367,17 +3600,29 @@ class LMSApp {
           <button id="close-view-q-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#475569; font-weight:400; font-size:0.88rem;">&times;</button>
         </div>
 
-        <div style="font-weight:500; color:#1e293b; font-size:1.05rem; margin-bottom:1rem; line-height:1.6;">
+        <div style="font-weight:500; color:#1e293b; font-size:1.05rem; margin-bottom:0.75rem; line-height:1.6;">
           ${q.questionText || q.question || ''}
         </div>
 
+        ${q.imageUrl ? `
+          <div style="margin-top:0.35rem; margin-bottom:1rem;">
+            <div style="text-align:center; background:#f8fafc; padding:0.6rem; border-radius:12px; border:1px solid #e2e8f0;"><img src="${q.imageUrl}" style="max-height:360px; max-width:100%; object-fit:contain; border-radius:8px; border:1.5px solid #cbd5e1; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${q.imageUrl}')" title="Bấm để phóng to ảnh câu hỏi" /></div>
+          </div>
+        ` : ''}
+
         ${q.options ? `
           <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
-            ${q.options.map((opt, i) => `
+            ${q.options.map((opt, i) => {
+              const optImg = (q.optionImages && q.optionImages[i]) ? q.optionImages[i] : '';
+              return `
               <div style="padding:0.5rem 0.85rem; border-radius:8px; border:1px solid ${i === q.correctAnswer ? '#10b981' : '#cbd5e1'}; background:${i === q.correctAnswer ? '#ecfdf5' : '#f8fafc'}; color:${i === q.correctAnswer ? '#047857' : '#334155'}; font-weight:${i === q.correctAnswer ? '800' : '500'};">
-                <strong>${String.fromCharCode(65 + i)}.</strong> ${opt} ${i === q.correctAnswer ? '✅ (Đáp án đúng)' : ''}
+                <div><strong>${String.fromCharCode(65 + i)}.</strong> ${opt} ${i === q.correctAnswer ? '✅ (Đáp án đúng)' : ''}</div>
+                ${optImg ? `
+                  <div style="margin-top:0.35rem;">
+                    <img src="${optImg}" style="max-height:160px; max-width:100%; border-radius:6px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${optImg}')" title="Bấm để xem ảnh đáp án" />
+                  </div>` : ''}
               </div>
-            `).join('')}
+            `;}).join('')}
           </div>
         ` : ''}
 
@@ -4380,7 +4625,7 @@ async presentLiveLecture(fileId, isStudentAutoplay = false) {
                 ${slideTitle}
               </h2>
               <span style="${badgeBg} font-size:0.85rem; font-weight:700; padding:0.35rem 0.85rem; border-radius:10px; text-transform:uppercase; letter-spacing:0.5px;">
-                TRƯỜNG THCS AMA TRANG LƠNG
+                TRƯỜNG TH-THCS AMA TRANG LƠNG
               </span>
             </div>
             <div style="overflow-y:auto; flex:1; padding-right:0.5rem;">
@@ -4701,7 +4946,7 @@ async presentLiveLecture(fileId, isStudentAutoplay = false) {
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
           <div>
             <h3 class="card-title" style="font-family: var(--font-title); font-weight: 400; margin: 0;">👨‍🏫 Quản lý Đội ngũ Giáo viên</h3>
-            <p style="color: var(--text-secondary); margin: 0.3rem 0 0 0; font-size: 0.9rem;">Tổng số giáo viên trường THCS Ama Trang Lơng: <strong>${allTeachers.length} giáo viên</strong></p>
+            <p style="color: var(--text-secondary); margin: 0.3rem 0 0 0; font-size: 0.9rem;">Tổng số giáo viên trường TH-THCS Ama Trang Lơng: <strong>${allTeachers.length} giáo viên</strong></p>
           </div>
 
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
@@ -7365,7 +7610,40 @@ render_ai_geometry(dom) {
     const subjectId = this.currentExamSubject;
     const subject = subjects.find(s => s.id === subjectId) || { name: subjectId, icon: '📚' };
     const tab = this.currentExamTab || 'tx';
-    const tabExams = allExams.filter(e => e.subjectId === subjectId && e.examCategory === tab);
+
+    const isExamOfSubject = (e) => {
+      if (!e.subjectId) return true;
+      if (e.subjectId === subjectId) return true;
+      if (subjectId === 'toan' && (e.subjectId.startsWith('toan') || e.subjectId === 'toan')) return true;
+      return false;
+    };
+
+    const getExamCategory = (e) => {
+      if (e.examCategory && ['tx', 'midterm', 'final'].includes(e.examCategory)) return e.examCategory;
+      if (e.category && ['tx', 'midterm', 'final'].includes(e.category)) return e.category;
+      if (e.targetGradeColumn === 'CK') return 'final';
+      if (e.targetGradeColumn === 'GK') return 'midterm';
+      if (e.targetGradeColumn && e.targetGradeColumn.startsWith('TX')) return 'tx';
+      const t = (e.title || '').toLowerCase();
+      if (t.includes('cuối kỳ') || t.includes('cuối kì') || t.includes('học kỳ 2') || t.includes('học kì 2') || t.includes('học kỳ ii') || t.includes('ck')) return 'final';
+      if (t.includes('giữa kỳ') || t.includes('giữa kì') || t.includes('học kỳ 1') || t.includes('học kì 1') || t.includes('học kỳ i') || t.includes('gk')) return 'midterm';
+      if (e.isOfficial) return 'midterm';
+      return 'tx';
+    };
+
+    const isQuizizzExam = (e) => {
+      if (e.examSubType === 'regular' || e.format === 'standard') return false;
+      return Boolean(
+        e.examSubType === 'quizizz' ||
+        e.format === 'quizizz' ||
+        e.isQuizizz === true ||
+        (e.title && e.title.toLowerCase().includes('quizizz'))
+      );
+    };
+
+    const tabExams = allExams
+      .filter(e => isExamOfSubject(e) && getExamCategory(e) === tab)
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     const questions = db.getQuestions ? db.getQuestions() : [];
     const students = db.getStudents ? db.getStudents() : [];
 
@@ -7405,42 +7683,50 @@ render_ai_geometry(dom) {
         <!-- 3 Tab Bar -->
         <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;background:#f1f5f9;padding:0.4rem;border-radius:14px;flex-wrap:wrap;">
           ${Object.entries(tabConfig).map(([key, cfg]) => {
-            const cnt = allExams.filter(e => e.subjectId === subjectId && e.examCategory === key).length;
+            const cnt = allExams.filter(e => isExamOfSubject(e) && getExamCategory(e) === key).length;
             const active = tab === key;
             return `
-              <button class="exam-tab-btn" data-tab="${key}" style="flex:1;min-width:120px;padding:0.65rem 0.85rem;border-radius:10px;border:none;; font-weight: 400;font-family:var(--font-title);font-size:0.88rem;cursor:pointer;transition:all 0.18s;
-                background:${active ? cfg.color : 'transparent'};color:${active ? '#fff' : '#64748b'};">
-                ${cfg.label} <span style="opacity:0.8;font-size:0.78rem;">(${cnt})</span>
+              <button class="exam-tab-btn" data-tab="${key}" style="flex:1;min-width:120px;padding:0.65rem 0.85rem;border-radius:10px;border:none;font-weight:600;font-family:var(--font-title);font-size:0.88rem;cursor:pointer;transition:all 0.18s;
+                background:${active ? cfg.color : 'transparent'};color:${active ? '#fff' : '#64748b'};box-shadow:${active ? '0 3px 10px rgba(0,0,0,0.15)' : 'none'};">
+                ${cfg.label} <span style="opacity:0.9;font-size:0.78rem;">(${cnt})</span>
               </button>
             `;
           }).join('')}
         </div>
 
         <!-- TX: sub-tab for Regular vs Quizizz -->
-        ${tab === 'tx' ? `
-          <div style="display:flex;gap:0.5rem;margin-bottom:1.25rem;">
-            <button class="exam-subtab-btn" data-subtab="regular" style="padding:0.4rem 1rem;border-radius:8px;border:1.5px solid ${(this.currentExamSubTab||'regular')==='regular'?'#dc2626':'#cbd5e1'};background:${(this.currentExamSubTab||'regular')==='regular'?'#fef2f2':'#fff'};color:${(this.currentExamSubTab||'regular')==='regular'?'#dc2626':'#64748b'};; font-weight: 400;font-size:0.82rem;cursor:pointer;">
-              📄 Kiểm tra Thường
-            </button>
-            <button class="exam-subtab-btn" data-subtab="quizizz" style="padding:0.4rem 1rem;border-radius:8px;border:1.5px solid ${this.currentExamSubTab==='quizizz'?'#7c3aed':'#cbd5e1'};background:${this.currentExamSubTab==='quizizz'?'#f5f3ff':'#fff'};color:${this.currentExamSubTab==='quizizz'?'#7c3aed':'#64748b'};; font-weight: 400;font-size:0.82rem;cursor:pointer;">
-              🎮 Nhúng Quizizz Arena
-            </button>
-          </div>
-        ` : ''}
+        ${tab === 'tx' ? (() => {
+          const txQuizizzCount = tabExams.filter(e => isQuizizzExam(e)).length;
+          const txRegularCount = tabExams.length - txQuizizzCount;
+          const curSubTab = this.currentExamSubTab || 'regular';
+          return `
+            <div style="display:flex;gap:0.6rem;margin-bottom:1.25rem;align-items:center;">
+              <button class="exam-subtab-btn" data-subtab="regular" style="padding:0.5rem 1.1rem;border-radius:10px;border:1.5px solid ${curSubTab==='regular'?'#dc2626':'#cbd5e1'};background:${curSubTab==='regular'?'#fef2f2':'#fff'};color:${curSubTab==='regular'?'#dc2626':'#475569'};font-weight:600;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:${curSubTab==='regular'?'0 2px 8px rgba(220,38,38,0.15)':'none'};">
+                <span>📄</span> Kiểm tra Thường <span style="background:${curSubTab==='regular'?'#dc2626':'#e2e8f0'};color:${curSubTab==='regular'?'#fff':'#475569'};padding:0.12rem 0.5rem;border-radius:12px;font-size:0.75rem;font-weight:700;">${txRegularCount}</span>
+              </button>
+              <button class="exam-subtab-btn" data-subtab="quizizz" style="padding:0.5rem 1.1rem;border-radius:10px;border:1.5px solid ${curSubTab==='quizizz'?'#7c3aed':'#cbd5e1'};background:${curSubTab==='quizizz'?'#f5f3ff':'#fff'};color:${curSubTab==='quizizz'?'#7c3aed':'#475569'};font-weight:600;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:${curSubTab==='quizizz'?'0 2px 8px rgba(124,58,237,0.15)':'none'};">
+                <span>🎮</span> Nhúng Quizizz Arena <span style="background:${curSubTab==='quizizz'?'#7c3aed':'#e2e8f0'};color:${curSubTab==='quizizz'?'#fff':'#475569'};padding:0.12rem 0.5rem;border-radius:12px;font-size:0.75rem;font-weight:700;">${txQuizizzCount}</span>
+              </button>
+            </div>
+          `;
+        })() : ''}
 
         <!-- Danh sach de -->
         <div id="exam-list-panel">
           ${(() => {
             const subTab = (tab === 'tx') ? (this.currentExamSubTab || 'regular') : 'regular';
             const filtered = tabExams.filter(e => {
-              if (tab === 'tx') return (e.examSubType || 'regular') === subTab;
+              if (tab === 'tx') {
+                const isQz = isQuizizzExam(e);
+                return subTab === 'quizizz' ? isQz : !isQz;
+              }
               return true;
             });
             if (filtered.length === 0) return `
               <div style="text-align:center;padding:3rem;background:#f8fafc;border-radius:16px;border:2px dashed #e2e8f0;">
                 <div style="font-size:3rem;margin-bottom:0.75rem;">${tab==='tx'?'📝':tab==='midterm'?'📖':'📚'}</div>
                 <div style="font-weight: 500;color:#475569;margin-bottom:0.4rem;">Chưa có đề nào</div>
-                <div style="font-size:0.85rem;color:#64748b; font-weight:400; font-size:0.85rem;">${isTeacher?'Nhấn "➕ Tạo Đề Mới" để bắt đầu':'Chưa có đề kiểm tra nào được giao'}</div>
+                <div style="font-size:0.85rem;color:#64748b; font-weight:400;">${isTeacher?'Nhấn "➕ Tạo Đề Mới (Thủ công)" ở menu trên để bắt đầu':'Chưa có đề kiểm tra nào được giao'}</div>
               </div>
             `;
             return `<div style="display:flex;flex-direction:column;gap:1rem;">${filtered.map(exam => {
@@ -7483,9 +7769,14 @@ render_ai_geometry(dom) {
                   </div>
                   <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
                     ${isTeacher ? `
-                      <button class="btn-exam-preview" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:500;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px rgba(2,132,199,0.25);">
-                        <span>▶️</span> Chạy Thử
-                      </button>
+                      ${(() => {
+                        const isQz = (exam.examSubType === 'quizizz' || exam.format === 'quizizz' || exam.isQuizizz || subTab === 'quizizz');
+                        return `
+                          <button class="btn-exam-preview" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, ${isQz ? '#7c3aed 0%, #6d28d9 100%' : '#0284c7 0%, #0369a1 100%'});color:#fff;border:none;padding:0.42rem 0.85rem;border-radius:8px;font-weight:600;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px ${isQz ? 'rgba(124,58,237,0.3)' : 'rgba(2,132,199,0.25)'};">
+                            <span>${isQz ? '🎮' : '▶️'}</span> ${isQz ? 'Chạy Thử Quizizz' : 'Chạy Thử'}
+                          </button>
+                        `;
+                      })()}
                       <button class="btn-exam-edit" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #d97706 0%, #b45309 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:500;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px rgba(217,119,6,0.25);">
                         <span>✏️</span> Xem / Sửa
                       </button>
@@ -7556,8 +7847,16 @@ render_ai_geometry(dom) {
 
       dom.querySelectorAll('.btn-exam-preview').forEach(btn => {
         btn.onclick = () => {
-          this.showToast('▶️ Đang ở Chế Độ Chạy Thử (Dành cho Giáo viên). Kết quả nộp sẽ không lưu vào hệ thống điểm.');
-          this.startExamSession(btn.getAttribute('data-exam-id'), true);
+          const examId = btn.getAttribute('data-exam-id');
+          const exam = (allExams || []).find(e => e.id === examId);
+          const isQuizizz = (exam && (exam.examSubType === 'quizizz' || exam.format === 'quizizz' || exam.isQuizizz)) || (this.currentExamSubTab === 'quizizz');
+          if (isQuizizz) {
+            this.showToast('🎮 Đang khởi động Đấu Trường Quizizz Arena (Chế Độ Chạy Thử)...');
+            this.runQuizizzGameTest(exam, dom);
+          } else {
+            this.showToast('▶️ Đang ở Chế Độ Chạy Thử (Dành cho Giáo viên). Kết quả nộp sẽ không lưu vào hệ thống điểm.');
+            this.startExamSession(examId, true);
+          }
         };
       });
 
@@ -7638,21 +7937,41 @@ render_ai_geometry(dom) {
 
         <form id="form-single-q-editor" style="display:flex; flex-direction:column; gap:1rem;">
           <div>
-            <label style="font-weight:600; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📌 Nội dung câu hỏi (Câu dẫn):</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.3rem;">
+              <label style="font-weight:600; font-size:0.88rem; color:#1e293b;">📌 Nội dung câu hỏi (Câu dẫn):</label>
+              <label for="single-q-img-input" style="background:#e0f2fe; color:#0284c7; font-weight:800; font-size:0.78rem; padding:0.25rem 0.6rem; border-radius:8px; cursor:pointer; border:1px solid #bae6fd; display:inline-flex; align-items:center; gap:0.3rem;">
+                🖼️ Đính kèm ảnh câu hỏi
+              </label>
+              <input type="file" id="single-q-img-input" accept="image/*" style="display:none;" />
+            </div>
             <textarea id="single-q-text" rows="3" required style="width:100%; padding:0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.92rem; font-weight:500;">${qObj.questionText || qObj.title || ''}</textarea>
+            <div id="single-q-img-preview">${qObj.imageUrl ? `<div style="position:relative; display:inline-block; margin-top:0.4rem; border:1px solid #cbd5e1; border-radius:8px; padding:0.25rem; background:#fff;"><img src="${qObj.imageUrl}" style="max-height:280px; max-width:100%; object-fit:contain; border-radius:8px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${qObj.imageUrl}')" title="Bấm để xem ảnh to" /><button type="button" id="btn-rm-single-q-img" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; cursor:pointer;">&times;</button></div>` : ''}</div>
           </div>
 
           ${qType === 'trac_nghiem' ? `
             <div>
-              <label style="font-weight:600; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.4rem;">🔤 Các Phương Án Lựa Chọn (Tích chọn ô tròn đáp án ĐÚNG):</label>
-              <div style="display:flex; flex-direction:column; gap:0.5rem;">
-                ${[0,1,2,3].map(i => `
-                  <div style="display:flex; align-items:center; gap:0.5rem; background:#f8fafc; padding:0.4rem 0.6rem; border-radius:8px; border:1.5px solid ${i===correctIdx?'#86efac':'#e2e8f0'};">
-                    <input type="radio" name="single-opt-correct" value="${i}" ${i===correctIdx?'checked':''} style="width:18px; height:18px; accent-color:#16a34a; cursor:pointer;">
-                    <strong style="color:#1e293b; min-width:20px;">${String.fromCharCode(65+i)}.</strong>
-                    <input type="text" class="single-opt-val" value="${opts[i] || ''}" required style="flex:1; padding:0.45rem; border-radius:6px; border:1px solid #cbd5e1; font-size:0.88rem;">
-                  </div>
-                `).join('')}
+              <label style="font-weight:600; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.4rem;">🔤 Các Phương Án Lựa Chọn (Tích chọn ô tròn đáp án ĐÚNG & Đính kèm ảnh):</label>
+              <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                ${[0,1,2,3].map(i => {
+                  const label = String.fromCharCode(65+i);
+                  const optImg = (qObj.optionImages && qObj.optionImages[i]) ? qObj.optionImages[i] : '';
+                  return `
+                    <div style="background:${i===correctIdx?'#ecfdf5':'#f8fafc'}; padding:0.6rem; border-radius:10px; border:1.5px solid ${i===correctIdx?'#16a34a':'#e2e8f0'};">
+                      <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <input type="radio" name="single-opt-correct" value="${i}" ${i===correctIdx?'checked':''} style="width:18px; height:18px; accent-color:#16a34a; cursor:pointer;">
+                        <strong style="color:#1e293b; min-width:20px;">${label}.</strong>
+                        <input type="text" class="single-opt-val" value="${opts[i] || ''}" required style="flex:1; padding:0.45rem; border-radius:6px; border:1px solid #cbd5e1; font-size:0.88rem;">
+                        <label for="single-opt-img-input-${i}" style="background:#f1f5f9; color:#475569; font-weight:800; font-size:0.75rem; padding:0.3rem 0.55rem; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1; white-space:nowrap;">
+                          🖼️ Ảnh ${label}
+                        </label>
+                        <input type="file" class="single-opt-img-file" data-idx="${i}" id="single-opt-img-input-${i}" accept="image/*" style="display:none;" />
+                      </div>
+                      <div class="single-opt-img-preview" id="single-opt-img-preview-${i}">
+                        ${optImg ? `<div style="position:relative; display:inline-block; margin-top:0.4rem; border:1px solid #cbd5e1; border-radius:8px; padding:0.25rem; background:#fff;"><img src="${optImg}" style="max-height:160px; border-radius:4px;" /><button type="button" class="btn-rm-single-opt-img" data-idx="${i}" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; cursor:pointer;">&times;</button></div>` : ''}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
               </div>
             </div>
           ` : ''}
@@ -7686,9 +8005,67 @@ render_ai_geometry(dom) {
     qModal.querySelector('#btn-close-single-q-editor').onclick = () => qModal.remove();
     qModal.querySelector('#btn-cancel-single-q').onclick = () => qModal.remove();
 
+    // Bind FileReader events for Exam Question & Options
+    qModal._qImageUrl = qObj.imageUrl || '';
+    qModal._optionImages = Array.isArray(qObj.optionImages) ? [...qObj.optionImages] : ['', '', '', ''];
+
+    const sqImgInp = qModal.querySelector('#single-q-img-input');
+    const sqImgPrev = qModal.querySelector('#single-q-img-preview');
+    if (sqImgInp) {
+      sqImgInp.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const r = new FileReader();
+          r.onload = (evt) => {
+            qModal._qImageUrl = evt.target.result || '';
+            if (sqImgPrev) {
+              sqImgPrev.innerHTML = `<div style="position:relative; display:inline-block; margin-top:0.4rem; border:1px solid #cbd5e1; border-radius:8px; padding:0.25rem; background:#fff;"><img src="${qModal._qImageUrl}" style="max-height:280px; max-width:100%; object-fit:contain; border-radius:8px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${qModal._qImageUrl}')" title="Bấm để xem ảnh to" /><button type="button" id="btn-rm-single-q-img" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; cursor:pointer;">&times;</button></div>`;
+              const rmB = sqImgPrev.querySelector('#btn-rm-single-q-img');
+              if (rmB) rmB.onclick = () => { qModal._qImageUrl = ''; sqImgPrev.innerHTML = ''; sqImgInp.value = ''; };
+            }
+          };
+          r.readAsDataURL(file);
+        }
+      };
+    }
+    const sqRmInitBtn = qModal.querySelector('#btn-rm-single-q-img');
+    if (sqRmInitBtn) sqRmInitBtn.onclick = () => { qModal._qImageUrl = ''; sqImgPrev.innerHTML = ''; if (sqImgInp) sqImgInp.value = ''; };
+
+    qModal.querySelectorAll('.single-opt-img-file').forEach(optFile => {
+      optFile.onchange = (e) => {
+        const idx = parseInt(optFile.getAttribute('data-idx'), 10);
+        const file = e.target.files[0];
+        if (file && !isNaN(idx)) {
+          const r = new FileReader();
+          r.onload = (evt) => {
+            qModal._optionImages[idx] = evt.target.result || '';
+            const prev = qModal.querySelector(`#single-opt-img-preview-${idx}`);
+            if (prev) {
+              prev.innerHTML = `<div style="position:relative; display:inline-block; margin-top:0.4rem; border:1px solid #cbd5e1; border-radius:8px; padding:0.25rem; background:#fff;"><img src="${qModal._optionImages[idx]}" style="max-height:160px; border-radius:4px;" /><button type="button" class="btn-rm-single-opt-img" data-idx="${idx}" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; cursor:pointer;">&times;</button></div>`;
+              const rmB = prev.querySelector('.btn-rm-single-opt-img');
+              if (rmB) rmB.onclick = () => { qModal._optionImages[idx] = ''; prev.innerHTML = ''; optFile.value = ''; };
+            }
+          };
+          r.readAsDataURL(file);
+        }
+      };
+    });
+
+    qModal.querySelectorAll('.btn-rm-single-opt-img').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.getAttribute('data-idx'), 10);
+        if (!isNaN(idx)) {
+          qModal._optionImages[idx] = '';
+          const prev = qModal.querySelector(`#single-opt-img-preview-${idx}`);
+          if (prev) prev.innerHTML = '';
+        }
+      };
+    });
+
     qModal.querySelector('#form-single-q-editor').onsubmit = (e) => {
       e.preventDefault();
       qObj.questionText = qModal.querySelector('#single-q-text').value.trim();
+      qObj.imageUrl = qModal._qImageUrl || '';
       qObj.difficulty = qModal.querySelector('#single-q-diff').value;
       qObj.score = parseFloat(qModal.querySelector('#single-q-score').value) || 0.25;
 
@@ -7696,6 +8073,7 @@ render_ai_geometry(dom) {
         const opts = Array.from(qModal.querySelectorAll('.single-opt-val')).map(i => i.value.trim());
         const correct = parseInt(qModal.querySelector('input[name="single-opt-correct"]:checked')?.value || '0');
         qObj.options = opts;
+        qObj.optionImages = qModal._optionImages || ['', '', '', ''];
         qObj.correctAnswer = correct;
       }
 
@@ -7749,12 +8127,20 @@ render_ai_geometry(dom) {
           const correctIdx = q.correctAnswer !== undefined ? parseInt(q.correctAnswer) : 0;
           answersHtml = `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.6rem;">
-              ${opts.map((opt, oIdx) => `
-                <div style="padding:0.45rem 0.75rem; border-radius:8px; background:${oIdx===correctIdx?'#dcfce7':'#f8fafc'}; border:1.5px solid ${oIdx===correctIdx?'#86efac':'#e2e8f0'}; color:${oIdx===correctIdx?'#166534':'#334155'}; font-weight:${oIdx===correctIdx?'600':'400'}; font-size:0.85rem; display:flex; align-items:center; justify-content:space-between;">
-                  <span><strong>${String.fromCharCode(65+oIdx)}.</strong> ${opt}</span>
-                  ${oIdx===correctIdx ? '<span style="font-size:0.75rem; background:#166534; color:#fff; font-weight:700; padding:0.15rem 0.45rem; border-radius:6px;">✅ (Đáp án đúng)</span>' : ''}
+              ${opts.map((opt, oIdx) => {
+                const optImg = (q.optionImages && q.optionImages[oIdx]) ? q.optionImages[oIdx] : '';
+                return `
+                <div style="padding:0.45rem 0.75rem; border-radius:8px; background:${oIdx===correctIdx?'#dcfce7':'#f8fafc'}; border:1.5px solid ${oIdx===correctIdx?'#86efac':'#e2e8f0'}; color:${oIdx===correctIdx?'#166534':'#334155'}; font-weight:${oIdx===correctIdx?'600':'400'}; font-size:0.85rem;">
+                  <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <span><strong>${String.fromCharCode(65+oIdx)}.</strong> ${opt}</span>
+                    ${oIdx===correctIdx ? '<span style="font-size:0.75rem; background:#166534; color:#fff; font-weight:700; padding:0.15rem 0.45rem; border-radius:6px;">✅ (Đáp án đúng)</span>' : ''}
+                  </div>
+                  ${optImg ? `
+                    <div style="margin-top:0.35rem;">
+                      <img src="${optImg}" style="max-height:160px; max-width:100%; border-radius:4px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${optImg}')" title="Bấm để xem ảnh đáp án" />
+                    </div>` : ''}
                 </div>
-              `).join('')}
+              `;}).join('')}
             </div>
           `;
         } else if (qType === 'dung_sai') {
@@ -7809,6 +8195,11 @@ render_ai_geometry(dom) {
             <div style="font-weight:600; font-size:0.95rem; color:#0f172a; line-height:1.4; margin-bottom:0.25rem;">
               ${q.questionText || q.title || 'Nội dung câu hỏi'}
             </div>
+            ${q.imageUrl ? `
+              <div style="margin-top:0.4rem; margin-bottom:0.6rem;">
+                <div style="text-align:center; background:#f8fafc; padding:0.6rem; border-radius:12px; border:1px solid #e2e8f0;"><img src="${q.imageUrl}" style="max-height:360px; max-width:100%; object-fit:contain; border-radius:8px; border:1.5px solid #cbd5e1; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${q.imageUrl}')" title="Bấm để phóng to ảnh câu hỏi" /></div>
+              </div>
+            ` : ''}
             ${answersHtml}
           </div>
         `;
@@ -9055,6 +9446,9 @@ render_ai_geometry(dom) {
         const teacherId = this.currentUser?.id || 'unknown';
         let targetExamId = editExamId;
 
+        const finalTab = (tab && ['tx','midterm','final'].includes(tab)) ? tab : (this.currentExamTab || 'tx');
+        const finalSubTab = (finalTab === 'tx') ? (examSubType || this.currentExamSubTab || 'regular') : 'regular';
+
         if (isEdit) {
           db.updateExam(editExamId, {
             title, subjectId, classIds, targetClasses: classIds,
@@ -9062,28 +9456,48 @@ render_ai_geometry(dom) {
             questionIds, questions: finalQuestions,
             timeLimit, maxAttempts, dueDate, mode: examMode,
             targetGradeColumn, enableCamera, enableMic,
-            enableFullscreen: true, examCategory: tab, examSubType, teacherId,
+            enableFullscreen: true, 
+            examCategory: finalTab, 
+            category: finalTab,
+            examSubType: finalSubTab, 
+            format: finalSubTab === 'quizizz' ? 'quizizz' : 'standard',
+            isQuizizz: finalSubTab === 'quizizz',
+            teacherId,
             updatedAt: Date.now()
           });
+          this._lastCreatedExamId = editExamId;
           this.showToast(classIds.length > 0 ? '✅ Đã cập nhật đề kiểm tra!' : '💾 Đã lưu nháp đề kiểm tra thành công!');
         } else {
           targetExamId = 'exam_' + Date.now();
-          db.addExam({
+          const newExamData = {
             id: targetExamId,
             title, subjectId, classIds, targetClasses: classIds,
             classId: classIds.length > 0 ? classIds[0] : null,
             questionIds, questions: finalQuestions,
             timeLimit, maxAttempts, dueDate, mode: examMode,
             targetGradeColumn, enableCamera, enableMic,
-            enableFullscreen: true, examCategory: tab, examSubType, teacherId,
+            enableFullscreen: true, 
+            examCategory: finalTab, 
+            category: finalTab,
+            examSubType: finalSubTab, 
+            format: finalSubTab === 'quizizz' ? 'quizizz' : 'standard',
+            isQuizizz: finalSubTab === 'quizizz',
+            teacherId,
             published: classIds.length > 0,
-            isOfficial: tab !== 'tx',
+            isOfficial: finalTab !== 'tx',
             createdAt: Date.now()
-          });
+          };
+          db.addExam(newExamData);
+          if (db.addAssignment) db.addAssignment(newExamData);
+          this._lastCreatedExamId = targetExamId;
           this.showToast(classIds.length > 0 ? '✅ Đã tạo và giao đề kiểm tra thành công!' : '💾 Đã tạo bản nháp đề thi thành công!');
         }
 
         modal.remove();
+        this.currentExamTab = finalTab;
+        if (finalTab === 'tx') {
+          this.currentExamSubTab = finalSubTab;
+        }
         // Fallback nếu parentDom không còn trong DOM
         const renderTarget = (parentDom && document.body.contains(parentDom))
           ? parentDom
@@ -10089,15 +10503,28 @@ render_ai_geometry(dom) {
              return sectionHeader + `
               <div class="exam-q-card" id="exam-q-card-${qIdx}" style="background:#ffffff;border:1.5px solid #e2e8f0;border-radius:14px;padding:1.1rem 1.25rem;transition:border-color 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
                 <div style="font-size:0.78rem;font-weight:400;color:#6366f1;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.8px;">Câu ${qIdx+1} / ${examQs.length}</div>
-                <div style="font-weight:400;font-size:1.05rem;color:#0f172a;margin-bottom:1rem;line-height:1.6;">${qText}</div>
+                <div style="font-weight:400;font-size:1.05rem;color:#0f172a;margin-bottom:0.75rem;line-height:1.6;">${qText}</div>
+                ${q.imageUrl ? `
+                  <div style="margin-top:0.35rem; margin-bottom:1rem;">
+                    <img src="${q.imageUrl}" style="max-height:380px; max-width:100%; object-fit:contain; border-radius:10px; border:1.5px solid #cbd5e1; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.06);" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${q.imageUrl}')" title="Bấm để phóng to ảnh câu hỏi" />
+                  </div>
+                ` : ''}
                 ${opts.length > 0 ? `
                   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.55rem;">
-                    ${opts.map((opt, oIdx) => `
-                      <label style="display:flex;align-items:center;gap:0.6rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;cursor:pointer;transition:all 0.15s;" onmouseenter="this.style.background='#eff6ff';this.style.borderColor='#93c5fd'" onmouseleave="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0'">
-                        <input type="radio" name="exam-q-${qIdx}" value="${oIdx}" class="exam-ans-radio" data-q-idx="${qIdx}" style="width:17px;height:17px;accent-color:#6366f1;">
-                        <span style="color:#1e293b;font-weight:400;font-size:0.9rem;">${String.fromCharCode(65+oIdx)}. ${opt}</span>
+                    ${opts.map((opt, oIdx) => {
+                      const optImg = (q.optionImages && q.optionImages[oIdx]) ? q.optionImages[oIdx] : '';
+                      return `
+                      <label style="display:flex;flex-direction:column;gap:0.35rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;cursor:pointer;transition:all 0.15s;" onmouseenter="this.style.background='#eff6ff';this.style.borderColor='#93c5fd'" onmouseleave="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0'">
+                        <div style="display:flex;align-items:center;gap:0.6rem;">
+                          <input type="radio" name="exam-q-${qIdx}" value="${oIdx}" class="exam-ans-radio" data-q-idx="${qIdx}" style="width:17px;height:17px;accent-color:#6366f1;">
+                          <span style="color:#1e293b;font-weight:400;font-size:0.9rem;">${String.fromCharCode(65+oIdx)}. ${opt}</span>
+                        </div>
+                        ${optImg ? `
+                          <div style="margin-top:0.2rem;margin-left:1.65rem;">
+                            <img src="${optImg}" style="max-height:160px; max-width:100%; border-radius:6px; cursor:pointer;" onclick="event.stopPropagation(); window.LMSAppInstance && window.LMSAppInstance._zoomImage('${optImg}')" title="Bấm để xem ảnh đáp án" />
+                          </div>` : ''}
                       </label>
-                    `).join('')}
+                    `;}).join('')}
                   </div>
                 ` : `
                   <div class="exam-essay-wrapper" data-q-idx="${qIdx}" style="display:flex;flex-direction:column;gap:0.6rem;">
@@ -10207,24 +10634,18 @@ render_ai_geometry(dom) {
     const commitBox = overlay.querySelector('#violation-commit-box');
     const ackBtn    = overlay.querySelector('#btn-violation-ack');
 
-    // Điểm 3: resumeExamFromViolation — tự động fullscreen lại sau 200ms
+    // Điểm 3: resumeExamFromViolation — TỰ ĐỘNG BẬT LẠI TOÀN MÀN HÌNH NGAY LẬP TỨC
     const resumeExamFromViolation = () => {
       isShowingViolationModal = false;
       const warningOverlay = overlay.querySelector('#violation-warning-overlay');
       if (warningOverlay) warningOverlay.style.display = 'none';
-      setTimeout(() => {
-        try {
-          if (!document.fullscreenElement) {
-            (overlay.requestFullscreen || overlay.webkitRequestFullscreen || (() => {})).call(overlay);
-          }
-        } catch(e) {
-          try { document.documentElement.requestFullscreen(); } catch(e2) {}
-        }
-      }, 200);
+      enterFS();
+      setTimeout(enterFS, 100);
+      setTimeout(enterFS, 300);
       if (this._examViolationCount >= 4) {
         submitExam(true);
       } else {
-        this.showToast('✅ Đã nhận cam kết tuân thủ quy chế! Tiếp tục làm bài thi.');
+        this.showToast('✅ Đã nhận cam kết! Tự động khóa lại Toàn Màn Hình để tiếp tục.');
       }
     };
 
@@ -10537,43 +10958,85 @@ render_ai_geometry(dom) {
       }, 1000);
     }
 
-    // Điểm 1: Keyboard lockdown — khóa cứng toàn bộ phím nguy hiểm
+    // Điểm 1: Keyboard lockdown — khóa cứng & CẢNH BÁO VI PHẠM NGAY LẬP TỨC
     const kbHandler = (e) => {
       if (!this.isProctoringActive) return;
-      const blocked =
-        e.key === 'Escape' ||
-        ['F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12'].includes(e.key) ||
-        e.key === 'PrintScreen' ||
-        (e.ctrlKey && e.shiftKey) ||
-        (e.ctrlKey && ['c','x','a','v','w','t','u','p','s','r','l','i','j','k'].includes(e.key.toLowerCase())) ||
-        (e.altKey) ||
-        (e.metaKey);
-      if (blocked) {
-        e.preventDefault(); e.stopPropagation();
-        handleViolation(`Nhấn phím bị cấm: ${e.ctrlKey?'Ctrl+':''}${e.shiftKey?'Shift+':''}${e.altKey?'Alt+':''}${e.key}`);
+      const keyLow = (e.key || '').toLowerCase();
+      let violationReason = null;
+
+      if (e.key === 'Escape') {
+        violationReason = '⌨️ Cố tình bấm phím ESC để thoát toàn màn hình!';
+      } else if (e.key === 'F11') {
+        violationReason = '⌨️ Cố tình bấm phím F11 thay đổi kích thước màn hình!';
+      } else if (e.key === 'F12') {
+        violationReason = '⌨️ Cố tình bấm phím F12 mở công cụ lập trình!';
+      } else if (['F1','F2','F3','F4','F5','F6','F7','F8','F9','F10'].includes(e.key)) {
+        violationReason = `⌨️ Cố tình bấm phím chức năng cấm: ${e.key}!`;
+      } else if (e.altKey && e.key === 'Tab') {
+        violationReason = '⌨️ Cố tình bấm phím tắt Alt + Tab chuyển ứng dụng!';
+      } else if (e.altKey) {
+        violationReason = '⌨️ Cố tình bấm phím Alt gian lận!';
+      } else if (e.ctrlKey && keyLow === 'c') {
+        violationReason = '📋 Cố tình bấm phím tắt Sao chép câu hỏi (Ctrl + C)!';
+      } else if (e.ctrlKey && keyLow === 'v') {
+        violationReason = '📋 Cố tình bấm phím tắt Dán nội dung (Ctrl + V)!';
+      } else if (e.ctrlKey && keyLow === 'x') {
+        violationReason = '📋 Cố tình bấm phím tắt Cắt nội dung (Ctrl + X)!';
+      } else if (e.ctrlKey && ['a','u','p','s','r','l','i','j','k'].includes(keyLow)) {
+        violationReason = `⌨️ Cố tình bấm phím tắt Ctrl + ${keyLow.toUpperCase()}!`;
+      } else if (e.key === 'PrintScreen') {
+        violationReason = '📸 Cố tình bấm phím chụp màn hình (PrintScreen)!';
+      }
+
+      if (violationReason) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleViolation(violationReason);
         return false;
       }
     };
     document.addEventListener('keydown', kbHandler, true);
 
-    // Điểm 2: Chặn chuột phải hoàn toàn trong phòng thi
+    // Điểm 2: Chặn chuột phải & CẢNH BÁO VI PHẠM NGAY LẬP TỨC
     const ctxHandler = (e) => {
       if (this.isProctoringActive) {
         e.preventDefault();
         e.stopPropagation();
+        handleViolation('🖱️ Cố tình nhấp chuột phải (Menu ngữ cảnh) trong phòng thi!');
         return false;
       }
     };
     document.addEventListener('contextmenu', ctxHandler, true);
     overlay.addEventListener('contextmenu', ctxHandler, true);
 
-    // Fullscreen exit detection
+    // Điểm 3: Bắt sự kiện Copy / Paste / Cut trực tiếp
+    const copyHandler = (e) => {
+      if (this.isProctoringActive) {
+        e.preventDefault();
+        handleViolation('📋 Cố tình sao chép nội dung bài thi!');
+      }
+    };
+    const pasteHandler = (e) => {
+      if (this.isProctoringActive) {
+        e.preventDefault();
+        handleViolation('📋 Cố tình dán nội dung từ bên ngoài vào bài thi!');
+      }
+    };
+    document.addEventListener('copy', copyHandler, true);
+    document.addEventListener('paste', pasteHandler, true);
+
+    // Fullscreen exit detection & auto re-lock
     const fsHandler = () => {
       if (!document.fullscreenElement && this.isProctoringActive && !isSubmitting) {
         handleViolation('Thoát chế độ toàn màn hình (Phím ESC / F11)');
       }
     };
     document.addEventListener('fullscreenchange', fsHandler);
+    overlay.addEventListener('click', () => {
+      if (this.isProctoringActive && !document.fullscreenElement) {
+        enterFS();
+      }
+    });
 
     // Tab switch detection
     const visHandler = () => {
@@ -11616,23 +12079,28 @@ render_ai_geometry(dom) {
     };
   }
 
-  // === INTERACTIVE QUIZIZZ GAME TEST RUNNER (CHẠY THỬ GAME QUIZIZZ CHẾ ĐỘ GIÁO VIÊN / HỌC SINH) ===
+  // === INTERACTIVE QUIZIZZ GAME TEST RUNNER (CHẠY THỬ GAME QUIZIZZ CÓ ĐẾM NGƯỢC 3-2-1 & GIÁM SÁT AI) ===
   runQuizizzGameTest(asm, parentDom) {
     const oldModal = document.getElementById('quizizz-game-test-modal');
     if (oldModal) oldModal.remove();
 
-    let questions = (asm && asm.questions && asm.questions.length > 0) 
-      ? asm.questions 
-      : ((asm && asm.questionsList && typeof db !== 'undefined') ? asm.questionsList.map(qId => db.getQuestions().find(q => q.id === qId)).filter(Boolean) : []);
+    const allDbQuestions = (typeof db !== 'undefined' && db.getQuestions) ? db.getQuestions() : [];
+    let questions = [];
+    if (asm && asm.questions && asm.questions.length > 0) {
+      questions = asm.questions;
+    } else if (asm && asm.questionIds && asm.questionIds.length > 0) {
+      questions = asm.questionIds.map(id => allDbQuestions.find(q => q.id === id)).filter(Boolean);
+    } else if (asm && asm.questionsList && asm.questionsList.length > 0) {
+      questions = asm.questionsList.map(id => allDbQuestions.find(q => q.id === id)).filter(Boolean);
+    }
 
-    // Fallback: If no questions in assignment, draw 5 sample questions from question bank for current subject
-    if ((!questions || questions.length === 0) && typeof db !== 'undefined' && db.getQuestions) {
+    if ((!questions || questions.length === 0) && allDbQuestions.length > 0) {
       const subId = (asm && asm.subjectId) || this.currentAssignmentSubject || 'toan';
-      questions = db.getQuestions().filter(q => q.subjectId === subId).slice(0, 5);
+      questions = allDbQuestions.filter(q => q.subjectId === subId).slice(0, 5);
     }
 
     if (!questions || questions.length === 0) {
-      alert('⚠️ Đề bài tập này chưa có câu hỏi nào để chạy thử Game Quizizz!');
+      alert('⚠️ Đề bài này chưa có câu hỏi nào để chạy thử Game Quizizz!');
       return;
     }
 
@@ -11643,13 +12111,329 @@ render_ai_geometry(dom) {
     let wrongCount = 0;
     let timerInterval = null;
     let bgmInterval = null;
+    let micInterval = null;
+    let faceInterval = null;
     let isMusicOn = true;
     let audioCtx = null;
     let timeLeft = 20;
+    let violationCount = 0;
+    let isShowingViolationModal = false;
+    let mediaStream = null;
 
     const modal = document.createElement('div');
     modal.id = 'quizizz-game-test-modal';
-    modal.style.cssText = 'position:fixed !important; top:0 !important; left:0 !important; width:100vw !important; height:100vh !important; background:linear-gradient(-45deg, #0f172a, #2e1065, #4c1d95, #180b2b); background-size:400% 400%; animation:quizizzGradient 12s ease infinite; z-index:9999999 !important; display:flex !important; flex-direction:column !important; justify-content:space-between !important; padding:1.25rem !important; font-family:var(--font-body) !important; color:#fff !important; overflow:hidden !important; box-sizing:border-box !important;';
+    modal.style.cssText = 'position:fixed !important; inset:0 !important; width:100vw !important; height:100vh !important; background:linear-gradient(-45deg, #090314, #1e0836, #3b0764, #130324) !important; background-size:400% 400% !important; animation:quizizzGradient 12s ease infinite !important; z-index:9999999 !important; display:flex !important; flex-direction:column !important; justify-content:space-between !important; padding:0 !important; font-family:var(--font-body) !important; color:#fff !important; overflow:hidden !important; box-sizing:border-box !important;';
+
+    // 🌟 REQUEST FULLSCREEN
+    const requestFullScreenMode = () => {
+      try {
+        const docEl = document.documentElement;
+        const rfs = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+        if (rfs && !document.fullscreenElement) {
+          rfs.call(docEl).catch(() => {});
+        }
+      } catch(e) {}
+    };
+    requestFullScreenMode();
+
+    // 🌟 THÔNG BÁO TIẾNG VIỆT HƯỚNG DẪN BẬT CAMERA & MIC CHO HỌC SINH
+    const showCameraPermissionNotice = async () => {
+      return new Promise((resolve) => {
+        const pModal = document.createElement('div');
+        pModal.id = 'quizizz-camera-perm-modal';
+        pModal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.85); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; z-index:999999999; padding:1.25rem; animation:fadeIn 0.2s ease-out; font-family:var(--font-body);';
+        pModal.innerHTML = `
+          <div style="background:#ffffff; color:#0f172a; border-radius:24px; padding:2rem; max-width:480px; width:100%; text-align:center; box-shadow:0 30px 70px rgba(0,0,0,0.5); border:2.5px solid #38bdf8; animation:zoomIn 0.25s ease-out;">
+            <div style="font-size:3.8rem; margin-bottom:0.75rem; animation:bounce 1.5s infinite;">📷🎤</div>
+            <h2 style="font-family:var(--font-title); font-size:1.45rem; font-weight:800; color:#1e293b; margin:0 0 0.6rem 0;">
+              BẬT CAMERA ĐỂ VÀO PHÒNG THI
+            </h2>
+            <p style="color:#475569; font-size:0.95rem; line-height:1.6; margin:0 0 1.25rem 0;">
+              Đấu trường sử dụng <strong>Camera & Micro</strong> để giám sát và ghi nhận bài làm của em.
+            </p>
+            
+            <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:14px; padding:1rem; margin-bottom:1.5rem; text-align:left; font-size:0.88rem; color:#1e40af; line-height:1.5;">
+              👉 <strong>Hướng dẫn cho học sinh:</strong><br>
+              Khi nhấn nút bên dưới, trình duyệt sẽ hiện thông báo hỏi ở góc trên màn hình. Em hãy chọn <strong>"Cho phép" (hoặc "Allow")</strong> để bắt đầu làm bài nhé!
+            </div>
+
+            <div style="display:flex; gap:0.75rem; justify-content:center;">
+              <button id="btn-perm-cancel" style="flex:1; padding:0.85rem; border-radius:12px; border:1.5px solid #cbd5e1; background:#f1f5f9; color:#475569; font-weight:700; font-size:0.92rem; cursor:pointer;">
+                ✕ Hủy bỏ
+              </button>
+              <button id="btn-perm-confirm" style="flex:2; padding:0.85rem; border-radius:12px; border:none; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#ffffff; font-weight:800; font-size:1rem; cursor:pointer; box-shadow:0 6px 20px rgba(16,185,129,0.4); display:flex; align-items:center; justify-content:center; gap:0.4rem;">
+                <span>📷</span> BẬT CAMERA & VÀO THI
+              </button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(pModal);
+
+        pModal.querySelector('#btn-perm-cancel').onclick = () => {
+          pModal.remove();
+          resolve(false);
+        };
+        pModal.querySelector('#btn-perm-confirm').onclick = () => {
+          requestFullScreenMode();
+          pModal.remove();
+          resolve(true);
+        };
+      });
+    };
+
+    // 🌟 MÀN HÌNH ĐẾM NGƯỢC 3... 2... 1... BẮT ĐẦU (TỰ ĐỘNG TOÀN MÀN HÌNH NGAY TỪ ĐẦU)
+    const runCountdownStage = () => {
+      requestFullScreenMode();
+      const cdOverlay = document.createElement('div');
+      cdOverlay.id = 'quizizz-countdown-stage';
+      cdOverlay.style.cssText = 'position:fixed; inset:0; width:100vw; height:100vh; background:radial-gradient(circle, #3b0764 0%, #090314 100%); z-index:9999999999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; font-family:var(--font-title); color:#fff; overflow:hidden;';
+      cdOverlay.onclick = () => requestFullScreenMode();
+      cdOverlay.innerHTML = `
+        <div style="font-size:1.6rem; font-weight:800; color:#cbd5e1; margin-bottom:1.5rem; letter-spacing:2px; text-transform:uppercase; animation:pulse 1s infinite;">
+          🎯 CHUẨN BỊ VÀO ĐẤU TRƯỜNG QUIZIZZ...
+        </div>
+        <div id="quizizz-cd-num" style="font-size:9.5rem; font-weight:900; line-height:1; color:#f59e0b; text-shadow:0 0 60px rgba(245,158,11,0.8); transform:scale(1); transition:all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+          3
+        </div>
+        <div id="quizizz-cd-sub" style="font-size:1.4rem; font-weight:700; color:#38bdf8; margin-top:1.5rem; letter-spacing:1px;">
+          SẴN SÀNG!
+        </div>
+      `;
+      document.body.appendChild(cdOverlay);
+
+      const numEl = cdOverlay.querySelector('#quizizz-cd-num');
+      const subEl = cdOverlay.querySelector('#quizizz-cd-sub');
+
+      let count = 3;
+      const playBeep = (freq = 440, dur = 0.22) => {
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + dur);
+        } catch(e) {}
+      };
+
+      playBeep(440, 0.2); // Beep 3
+
+      const cdTimer = setInterval(() => {
+        count--;
+        if (count === 2) {
+          if (numEl) {
+            numEl.innerText = '2';
+            numEl.style.color = '#38bdf8';
+            numEl.style.textShadow = '0 0 60px rgba(56,189,248,0.8)';
+            numEl.style.transform = 'scale(1.25)';
+            setTimeout(() => { if (numEl) numEl.style.transform = 'scale(1)'; }, 150);
+          }
+          if (subEl) subEl.innerText = 'TẬP TRUNG CAO ĐỘ!';
+          playBeep(554.37, 0.2);
+        } else if (count === 1) {
+          if (numEl) {
+            numEl.innerText = '1';
+            numEl.style.color = '#10b981';
+            numEl.style.textShadow = '0 0 60px rgba(16,185,129,0.8)';
+            numEl.style.transform = 'scale(1.25)';
+            setTimeout(() => { if (numEl) numEl.style.transform = 'scale(1)'; }, 150);
+          }
+          if (subEl) subEl.innerText = 'XUẤT PHÁT NGAY BÂY GIỜ!';
+          playBeep(659.25, 0.2);
+        } else if (count === 0) {
+          if (numEl) {
+            numEl.innerText = '🚀 BẮT ĐẦU!';
+            numEl.style.fontSize = '5.2rem';
+            numEl.style.color = '#ec4899';
+            numEl.style.textShadow = '0 0 70px rgba(236,72,153,0.9)';
+            numEl.style.transform = 'scale(1.15)';
+          }
+          if (subEl) subEl.innerText = 'CHÚC BẠN ĐẠT ĐIỂM TỐI ĐA!';
+          playBeep(880, 0.4);
+        } else {
+          clearInterval(cdTimer);
+          setTimeout(() => {
+            cdOverlay.remove();
+            document.body.appendChild(modal);
+            requestFullScreenMode();
+            startBGM();
+            renderQuestion();
+            modal.addEventListener('click', () => {
+              if (!document.fullscreenElement) requestFullScreenMode();
+            });
+          }, 600);
+        }
+      }, 1000);
+    };
+
+    // 🌟 KHỞI TẠO CAMERA & MIC GIÁM SÁT AI SAU KHI CHO PHÉP
+    showCameraPermissionNotice().then(allowed => {
+      if (!allowed) {
+        cleanupSession();
+        modal.remove();
+        return;
+      }
+
+      navigator.mediaDevices?.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+          mediaStream = stream;
+          const pipVideo = modal.querySelector('#quizizz-pip-video');
+          if (pipVideo) {
+            pipVideo.srcObject = stream;
+            pipVideo.play().catch(() => {});
+          }
+          // Giám sát Mic volume
+          try {
+            const aCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const src = aCtx.createMediaStreamSource(stream);
+            const analyser = aCtx.createAnalyser();
+            analyser.fftSize = 256;
+            src.connect(analyser);
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+            micInterval = setInterval(() => {
+              if (!document.getElementById('quizizz-game-test-modal')) { clearInterval(micInterval); return; }
+              analyser.getByteFrequencyData(dataArray);
+              let sum = 0;
+              for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+              const avg = sum / dataArray.length;
+              const micBar = modal.querySelector('#quizizz-mic-level-bar');
+              if (micBar) micBar.style.width = Math.min(100, avg * 2.5) + '%';
+              if (avg > 48 && !isShowingViolationModal) {
+                triggerViolation('🎤 Phát hiện tiếng người đọc bài / nhắc bài liên tục trong phòng thi!');
+              }
+            }, 300);
+          } catch(e) {}
+          // Sau khi cấp quyền camera thành công ➔ Chạy đếm ngược 3-2-1
+          runCountdownStage();
+        })
+        .catch(err => {
+          console.warn('Webcam permission fallback:', err);
+          if (this.showToast) {
+            this.showToast('⚠️ Bạn chưa cấp quyền Camera/Mic. Bắt đầu đấu trường ở chế độ tiêu chuẩn.', 'info');
+          }
+          // Vẫn chạy đếm ngược 3-2-1
+          runCountdownStage();
+        });
+    });
+
+    // 🌟 XỬ LÝ VI PHẠM (4 CẤP ĐỘ GIỐNG THI THƯỜNG)
+    const triggerViolation = (reason) => {
+      if (isShowingViolationModal) return;
+      violationCount++;
+      if (typeof db !== 'undefined' && db.addExamViolationLog && asm && asm.id) {
+        db.addExamViolationLog(asm.id, (this.currentUser?.id || 'hs_test'), reason, Date.now());
+      }
+      const vBadge = modal.querySelector('#quizizz-vcount');
+      if (vBadge) vBadge.innerText = violationCount;
+
+      isShowingViolationModal = true;
+      const vModal = modal.querySelector('#quizizz-violation-overlay');
+      const vReason = modal.querySelector('#quizizz-violation-reason');
+      const vCountSpan = modal.querySelector('#quizizz-vcount-modal');
+      if (vReason) vReason.innerText = reason;
+      if (vCountSpan) vCountSpan.innerText = `${violationCount}/4`;
+      if (vModal) vModal.style.display = 'flex';
+
+      if (violationCount >= 4) {
+        alert('🛑 VI PHẠM QUÁ 4 LẦN! Hệ thống đã khóa bài thi và tự động thu bài!');
+        cleanupSession();
+        modal.remove();
+        if (this.showToast) this.showToast('🛑 Bài thi đã bị thu do vi phạm quy chế quá 4 lần!', 'error');
+      }
+    };
+
+    // Bắt sự kiện chuyển tab (Tab switch guard)
+    const handleVisibility = () => {
+      if (document.hidden && !isShowingViolationModal) {
+        triggerViolation('🔄 Phát hiện chuyển Tab trình duyệt hoặc mở cửa sổ tìm kiếm bên ngoài!');
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleVisibility);
+
+    // Chặn phím tắt & CẢNH BÁO VI PHẠM NGAY LẬP TỨC TRÊN QUIZIZZ ARENA
+    const keyHandler = (e) => {
+      const keyLow = (e.key || '').toLowerCase();
+      let violationReason = null;
+
+      if (e.key === 'Escape') {
+        violationReason = '⌨️ Cố tình bấm phím ESC để thoát toàn màn hình!';
+      } else if (e.key === 'F11') {
+        violationReason = '⌨️ Cố tình bấm phím F11 thay đổi kích thước màn hình!';
+      } else if (e.key === 'F12') {
+        violationReason = '⌨️ Cố tình bấm phím F12 mở công cụ lập trình!';
+      } else if (['F1','F2','F3','F4','F5','F6','F7','F8','F9','F10'].includes(e.key)) {
+        violationReason = `⌨️ Cố tình bấm phím chức năng cấm: ${e.key}!`;
+      } else if (e.altKey && e.key === 'Tab') {
+        violationReason = '⌨️ Cố tình bấm phím tắt Alt + Tab chuyển ứng dụng!';
+      } else if (e.altKey) {
+        violationReason = '⌨️ Cố tình bấm phím Alt gian lận!';
+      } else if (e.ctrlKey && keyLow === 'c') {
+        violationReason = '📋 Cố tình bấm phím tắt Sao chép câu hỏi (Ctrl + C)!';
+      } else if (e.ctrlKey && keyLow === 'v') {
+        violationReason = '📋 Cố tình bấm phím tắt Dán nội dung (Ctrl + V)!';
+      } else if (e.ctrlKey && keyLow === 'x') {
+        violationReason = '📋 Cố tình bấm phím tắt Cắt nội dung (Ctrl + X)!';
+      } else if (e.ctrlKey && ['a','u','p','s','r','l','i','j','k'].includes(keyLow)) {
+        violationReason = `⌨️ Cố tình bấm phím tắt Ctrl + ${keyLow.toUpperCase()}!`;
+      } else if (e.key === 'PrintScreen') {
+        violationReason = '📸 Cố tình bấm phím chụp màn hình (PrintScreen)!';
+      }
+
+      if (violationReason) {
+        e.preventDefault();
+        e.stopPropagation();
+        requestFullScreenMode();
+        triggerViolation(violationReason);
+        return false;
+      }
+    };
+    window.addEventListener('keydown', keyHandler, true);
+
+    // Chặn chuột phải & CẢNH BÁO VI PHẠM TRÊN QUIZIZZ ARENA
+    const qzCtxHandler = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      triggerViolation('🖱️ Cố tình nhấp chuột phải (Menu ngữ cảnh) trong Đấu Trường Quizizz!');
+      return false;
+    };
+    document.addEventListener('contextmenu', qzCtxHandler, true);
+    modal.addEventListener('contextmenu', qzCtxHandler, true);
+
+    // Chặn copy / paste / cut trên Quizizz Arena
+    const qzCopyHandler = (e) => {
+      e.preventDefault();
+      triggerViolation('📋 Cố tình sao chép nội dung bài thi Quizizz!');
+    };
+    document.addEventListener('copy', qzCopyHandler, true);
+    document.addEventListener('paste', qzCopyHandler, true);
+
+    const cleanupSession = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      if (micInterval) clearInterval(micInterval);
+      stopBGM();
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleVisibility);
+      window.removeEventListener('keydown', keyHandler, true);
+      document.removeEventListener('contextmenu', qzCtxHandler, true);
+      modal.removeEventListener('contextmenu', qzCtxHandler, true);
+      document.removeEventListener('copy', qzCopyHandler, true);
+      document.removeEventListener('paste', qzCopyHandler, true);
+      if (mediaStream) {
+        try { mediaStream.getTracks().forEach(t => t.stop()); } catch(e) {}
+      }
+      try {
+        if (document.exitFullscreen && (document.fullscreenElement || document.webkitFullscreenElement)) {
+          document.exitFullscreen().catch(() => {});
+        }
+      } catch(e) {}
+    };
 
     // BGM Melodic Synth Loop
     const playBGMSoundStep = () => {
@@ -11657,17 +12441,14 @@ render_ai_geometry(dom) {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        const notes = [261.63, 329.63, 392.00, 440.00, 523.25, 392.00, 329.63, 261.63]; // C4, E4, G4, A4, C5...
+        const notes = [261.63, 329.63, 392.00, 440.00, 523.25, 392.00, 329.63, 261.63];
         const noteFreq = notes[Math.floor(Math.random() * notes.length)];
-
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
@@ -11715,228 +12496,275 @@ render_ai_geometry(dom) {
       } catch (e) {}
     };
 
-    // Create Floating Particles
-    const particlesHTML = Array.from({ length: 14 }).map((_, i) => {
-      const icons = ['✨', '🌟', '💫', '⚡', '🔮', '🚀', '🎯'];
-      const icon = icons[i % icons.length];
-      const left = Math.floor(Math.random() * 92) + 4;
-      const duration = (Math.random() * 6 + 6).toFixed(1);
-      const delay = (Math.random() * 4).toFixed(1);
-      const size = (Math.random() * 0.8 + 1.1).toFixed(1);
-      return `<div style="position:absolute; left:${left}%; font-size:${size}rem; animation:floatParticle ${duration}s linear infinite; animation-delay:${delay}s; pointer-events:none; z-index:1; opacity:0.6;">${icon}</div>`;
-    }).join('');
-
     const renderQuestion = () => {
       if (timerInterval) clearInterval(timerInterval);
       timeLeft = 20;
 
       if (qIndex >= questions.length) {
-        stopBGM();
-        const finalGrade = parseFloat(((correctCount / questions.length) * 10).toFixed(1));
+        cleanupSession();
+        const quizizzScore100 = parseFloat(((correctCount / questions.length) * 100).toFixed(1));
+        const gradebookScore10 = parseFloat((quizizzScore100 / 10).toFixed(1));
+
+        if (this.currentUser && this.currentUser.role === 'student' && asm && asm.id) {
+          if (typeof db !== 'undefined' && db.addExamAttempt) {
+            db.addExamAttempt({
+              id: 'att_' + Date.now(),
+              examId: asm.id,
+              studentId: this.currentUser.id,
+              studentName: this.currentUser.name || this.currentUser.fullName || 'Học sinh',
+              classId: this.currentUser.classId || (asm.classIds ? asm.classIds[0] : asm.classId) || '6A',
+              score: gradebookScore10,
+              maxScore: 10,
+              quizizzScore: quizizzScore100,
+              correctCount,
+              totalQuestions: questions.length,
+              violationCount,
+              completedAt: Date.now(),
+              createdAt: Date.now()
+            });
+          }
+        }
+
         modal.innerHTML = `
-          ${particlesHTML}
-          <div style="max-width:550px; width:100%; margin:auto; background:rgba(255,255,255,0.08); backdrop-filter:blur(16px); border:2px solid rgba(255,255,255,0.2); border-radius:24px; padding:2rem; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.5); animation:zoomIn 0.35s ease-out; position:relative; z-index:2;">
-            <div style="font-size:3.5rem; margin-bottom:0.5rem;">🎉🏆</div>
-            <h2 style="font-family:var(--font-title); ; font-weight: 400; color:#fbbf24; margin:0 0 0.5rem 0; font-size:1.6rem;">HOÀN THÀNH CHẠY THỬ GAME QUIZIZZ!</h2>
-            <p style="font-size:0.9rem; color:#cbd5e1; margin-bottom:1.5rem;">Đề bài: <strong>${(asm && asm.title) || 'Chạy thử Quizizz Arena'}</strong></p>
-
-            <div style="font-size:3.2rem; font-weight: 500; color:#4ade80; margin-bottom:1.25rem;">${score} <span style="font-size:1.2rem; color:#a7f3d0;">ĐIỂM</span></div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; background:rgba(0,0,0,0.3); padding:1rem; border-radius:14px; text-align:left; font-size:0.9rem; margin-bottom:1.5rem; border:1px solid rgba(255,255,255,0.1);">
-              <div>✅ <strong>Số câu đúng:</strong> ${correctCount}/${questions.length}</div>
-              <div>❌ <strong>Số câu sai:</strong> ${wrongCount}/${questions.length}</div>
-              <div>🔥 <strong>Streak cao nhất:</strong> ${streak}x</div>
-              <div>💯 <strong>Điểm quy đổi LMS:</strong> ${finalGrade}/10 điểm</div>
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem; animation:fadeIn 0.3s ease-out;">
+            <div style="font-size:4.5rem; margin-bottom:0.75rem;">🏆🎉</div>
+            <h1 style="font-size:2.4rem; font-weight:900; margin:0 0 0.5rem; background:linear-gradient(90deg, #f59e0b, #fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+              HOÀN THÀNH ĐẤU TRƯỜNG QUIZIZZ!
+            </h1>
+            <p style="color:#cbd5e1; font-size:1.1rem; margin-bottom:1.5rem;">${asm.title || 'Bài kiểm tra Quizizz'}</p>
+            
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:1rem; width:100%; max-width:600px; margin-bottom:2rem;">
+              <div style="background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.15); border-radius:16px; padding:1.25rem;">
+                <div style="font-size:1.8rem; font-weight:900; color:#fbbf24;">${score}</div>
+                <div style="font-size:0.8rem; color:#94a3b8;">ĐIỂM QUIZIZZ</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.15); border-radius:16px; padding:1.25rem;">
+                <div style="font-size:1.8rem; font-weight:900; color:#10b981;">${correctCount}/${questions.length}</div>
+                <div style="font-size:0.8rem; color:#94a3b8;">CÂU TRẢ LỜI ĐÚNG</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.15); border-radius:16px; padding:1.25rem;">
+                <div style="font-size:1.8rem; font-weight:900; color:#38bdf8;">${gradebookScore10}đ</div>
+                <div style="font-size:0.8rem; color:#94a3b8;">ĐIỂM BẢNG ĐIỂM</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.15); border-radius:16px; padding:1.25rem;">
+                <div style="font-size:1.8rem; font-weight:900; color:${violationCount>0?'#ef4444':'#10b981'};">${violationCount}/4</div>
+                <div style="font-size:0.8rem; color:#94a3b8;">VI PHẠM QUY CHẾ</div>
+              </div>
             </div>
 
-            <button type="button" id="btn-close-quizizz-test" class="btn" style="width:100%; padding:0.8rem; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; ; font-weight: 400; border:none; border-radius:12px; font-size:1.05rem; cursor:pointer; box-shadow:0 6px 20px rgba(16,185,129,0.4);">
-              ✅ Đóng Chạy Thử & Quay Lại
+            <button id="btn-exit-quizizz-summary" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; padding:1rem 3rem; border-radius:16px; font-weight:800; font-size:1.1rem; cursor:pointer; box-shadow:0 10px 25px rgba(16,185,129,0.4);">
+              🚪 THOÁT KHỎI PHÒNG THI
             </button>
           </div>
         `;
-        playSoundEffect('correct');
-        modal.querySelector('#btn-close-quizizz-test').onclick = () => {
-          stopBGM();
-          modal.remove();
-        };
+        modal.querySelector('#btn-exit-quizizz-summary').onclick = () => modal.remove();
         return;
       }
 
-      const currentQ = questions[qIndex];
-      const qText = currentQ.questionText || currentQ.question || 'Câu hỏi Quizizz';
-      const opts = currentQ.options || ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'];
-      const correctIdx = typeof currentQ.correctAnswer === 'number' ? currentQ.correctAnswer : 0;
-
-      const bgColors = ['#ef4444', '#3b82f6', '#f59e0b', '#10b981'];
-      const icons = ['🔴', '🔵', '🟡', '🟢'];
+      const q = questions[qIndex];
+      const opts = q.options || ['Đáp án A', 'Đáp án B', 'Đáp án C', 'Đáp án D'];
+      const colors = [
+        { bg: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', border: '#fca5a5', icon: '🔺' },
+        { bg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', border: '#93c5fd', icon: '🔷' },
+        { bg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', border: '#fde68a', icon: '🟡' },
+        { bg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: '#86efac', icon: '🟢' }
+      ];
 
       modal.innerHTML = `
-        ${particlesHTML}
-
-        <!-- Top Bar -->
-        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.08); backdrop-filter:blur(10px); padding:0.75rem 1.25rem; border-radius:16px; border:1px solid rgba(255,255,255,0.15); position:relative; z-index:2;">
+        <!-- HEADER GIÁM SÁT TOÀN DIỆN (FULL AI PROCTORING HEADER GIỐNG PHÒNG THI CHUẨN) -->
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.85); backdrop-filter:blur(10px); padding:0.75rem 1.5rem; border-bottom:1.5px solid rgba(255,255,255,0.12); flex-wrap:wrap; gap:0.75rem;">
           <div style="display:flex; align-items:center; gap:0.75rem;">
-            <span style="background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color:#fff; font-weight: 500; padding:0.35rem 0.85rem; border-radius:10px; font-size:0.85rem; box-shadow:0 4px 12px rgba(124,58,237,0.4);">
-              🎮 CHẠY THỬ GAME QUIZIZZ
+            <span style="background:linear-gradient(135deg,#7c3aed,#4f46e5); color:#fff; padding:0.35rem 0.85rem; border-radius:10px; font-weight:800; font-size:0.85rem;">
+              🎮 QUIZIZZ ARENA
             </span>
-            <span style="font-weight: 500; font-size:0.9rem; color:#cbd5e1;">Câu ${qIndex + 1}/${questions.length}</span>
+            <span style="font-weight:700; font-size:1rem; color:#f8fafc;">${asm.title || 'Bài kiểm tra'}</span>
           </div>
 
-          <div style="display:flex; align-items:center; gap:1rem;">
-            <!-- Music Toggle Button -->
-            <button id="btn-toggle-quizizz-music" style="background:${isMusicOn ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}; border:1.5px solid ${isMusicOn ? '#10b981' : '#ef4444'}; color:${isMusicOn ? '#6ee7b7' : '#fca5a5'}; padding:0.35rem 0.8rem; border-radius:10px; ; font-weight: 400; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:0.3rem; transition:all 0.2s ease;">
-              ${isMusicOn ? '🔊 NHẠC NỀN: BẬT' : '🔇 NHẠC NỀN: TẮT'}
+          <!-- HUY HIỆU GIÁM SÁT AI CHUẨN MỰC -->
+          <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+            <div style="background:rgba(16,185,129,0.18); border:1.5px solid #10b981; color:#34d399; padding:0.3rem 0.75rem; border-radius:10px; font-size:0.8rem; font-weight:700; display:flex; align-items:center; gap:0.4rem;">
+              <span>📷</span> <span>Camera AI</span>
+            </div>
+            <div style="background:rgba(56,189,248,0.18); border:1.5px solid #38bdf8; color:#38bdf8; padding:0.3rem 0.75rem; border-radius:10px; font-size:0.8rem; font-weight:700; display:flex; align-items:center; gap:0.4rem;">
+              <span>🎤</span> <span>Mic AI</span>
+            </div>
+            <div style="background:rgba(239,68,68,0.18); border:1.5px solid #ef4444; color:#f87171; padding:0.3rem 0.75rem; border-radius:10px; font-size:0.8rem; font-weight:800;">
+              ⚠️ Vi phạm: <span id="quizizz-vcount">${violationCount}</span>/4
+            </div>
+            <div style="font-size:1.15rem; font-weight:900; color:#fbbf24; background:rgba(0,0,0,0.4); padding:0.3rem 0.85rem; border-radius:10px; border:1px solid rgba(251,191,36,0.4);">
+              ⏱️ <span id="quizizz-timer-text">${timeLeft}s</span>
+            </div>
+            <button id="btn-toggle-quizizz-sound" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; padding:0.35rem 0.75rem; border-radius:8px; cursor:pointer; font-size:0.85rem;">
+              ${isMusicOn ? '🔊' : '🔇'}
             </button>
-
-            <div style="font-weight: 500; color:#fbbf24; font-size:1.1rem; text-shadow:0 0 10px rgba(251,191,36,0.5);">⚡ STREAK: ${streak}x</div>
-            <div style="font-weight: 500; color:#4ade80; font-size:1.2rem; text-shadow:0 0 10px rgba(74,222,128,0.5);">🏆 ${score}đ</div>
-            <button id="btn-early-submit-quizizz" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); border:none; color:#ffffff; padding:0.4rem 1rem; border-radius:10px; ; font-weight: 400; font-size:0.88rem; cursor:pointer; box-shadow:0 0 15px rgba(16,185,129,0.5);" title="Nộp bài thi và tổng hợp kết quả">🚀 NỘP BÀI THI</button>
-            <button id="btn-quit-quizizz-test" style="background:rgba(239,68,68,0.25); border:1.5px solid #ef4444; color:#fca5a5; padding:0.35rem 0.8rem; border-radius:10px; ; font-weight: 400; font-size:0.82rem; cursor:pointer;">❌ Thoát</button>
+            <button id="btn-quit-quizizz" style="background:#ef4444; color:#fff; border:none; padding:0.35rem 0.85rem; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.85rem;">
+              ✕ Thoát
+            </button>
           </div>
         </div>
 
-        <!-- Timer bar -->
-        <div style="height:8px; background:rgba(255,255,255,0.12); border-radius:4px; margin:0.75rem 0 0.4rem 0; overflow:hidden; position:relative; z-index:2;">
-          <div id="quizizz-timer-bar" style="height:100%; width:100%; background:linear-gradient(90deg, #ec4899, #8b5cf6, #3b82f6); transition:width 1s linear;"></div>
-        </div>
-
-        <!-- Question Matrix Navigation Bar (Chọn lại câu hỏi muốn làm/sửa) -->
-        <div style="display:flex; flex-wrap:wrap; gap:0.35rem; justify-content:center; margin-bottom:0.6rem; position:relative; z-index:2; background:rgba(0,0,0,0.25); padding:0.4rem 0.75rem; border-radius:12px; border:1px solid rgba(255,255,255,0.1);">
-          <span style="font-size:0.78rem; font-weight: 500; color:#a7f3d0; margin-right:0.3rem; display:flex; align-items:center;">🎯 MA TRẬN CÂU HỎI:</span>
-          ${questions.map((q, idx) => `
-            <button type="button" class="btn-quizizz-jump-q" data-q-idx="${idx}" style="background:${idx === qIndex ? '#7c3aed' : 'rgba(255,255,255,0.12)'}; border:1.5px solid ${idx === qIndex ? '#a78bfa' : 'rgba(255,255,255,0.2)'}; color:#fff; ; font-weight: 400; padding:0.25rem 0.6rem; border-radius:8px; font-size:0.8rem; cursor:pointer; transition:all 0.15s ease;">
-              Câu ${idx + 1} ${idx === qIndex ? '📍' : ''}
-            </button>
-          `).join('')}
-        </div>
-
-        <!-- Question Card -->
-        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; margin:1rem 0; text-align:center; padding:1.75rem; background:rgba(255,255,255,0.07); backdrop-filter:blur(14px); border-radius:24px; border:1.5px solid rgba(167,139,250,0.5); animation:neonGlowPulse 3s infinite; position:relative; z-index:2;">
-          <div style="font-size:0.85rem; font-weight: 500; color:#a7f3d0; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:0.6rem; text-shadow:0 0 10px rgba(167,243,208,0.4);">
-            ✨ CÂU HỎI HỌC TẬP TƯƠNG TÁC ✨
+        <!-- MAIN ARENA BODY -->
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:1.5rem 2rem; position:relative; z-index:2;">
+          
+          <!-- THANH TIẾN ĐỘ & STREAK -->
+          <div style="width:100%; max-width:860px; display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <div style="font-size:0.95rem; font-weight:800; color:#cbd5e1;">
+              Câu hỏi ${qIndex + 1} / ${questions.length}
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span style="font-size:1.2rem;">🔥</span>
+              <span style="font-weight:900; font-size:1.05rem; color:#f97316;">Streak: ${streak}</span>
+              <span style="background:#fef08a; color:#854d0e; padding:0.15rem 0.5rem; border-radius:8px; font-weight:900; font-size:0.82rem; margin-left:0.5rem;">${score} pts</span>
+            </div>
           </div>
-          <h2 style="font-family:var(--font-title); ; font-weight: 400; font-size:1.55rem; line-height:1.45; color:#ffffff; max-width:780px; margin:0; text-shadow:0 2px 8px rgba(0,0,0,0.5);">
-            ${qText}
-          </h2>
+
+          <!-- NỘI DUNG CÂU HỎI -->
+          <div style="width:100%; max-width:860px; background:rgba(255,255,255,0.07); backdrop-filter:blur(16px); border:2px solid rgba(255,255,255,0.18); border-radius:24px; padding:2rem; margin-bottom:1.5rem; box-shadow:0 20px 50px rgba(0,0,0,0.5); text-align:center;">
+            <div style="font-size:1.45rem; font-weight:800; line-height:1.5; color:#ffffff;">
+              ${q.questionText || q.question || q.q || 'Nội dung câu hỏi'}
+            </div>
+          </div>
+
+          <!-- 4 Ô ĐÁP ÁN QUIZIZZ RỰC RỠ -->
+          <div style="width:100%; max-width:860px; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            ${opts.map((opt, i) => `
+              <button class="btn-quizizz-choice" data-idx="${i}" style="background:${colors[i%4].bg}; border:2.5px solid ${colors[i%4].border}; border-radius:18px; padding:1.25rem 1.5rem; color:#ffffff; font-weight:800; font-size:1.15rem; cursor:pointer; display:flex; align-items:center; gap:0.85rem; text-align:left; box-shadow:0 10px 25px rgba(0,0,0,0.35); transition:transform 0.1s, box-shadow 0.1s;">
+                <span style="font-size:1.5rem; flex-shrink:0;">${colors[i%4].icon}</span>
+                <span style="flex:1;">${String.fromCharCode(65 + i)}. ${opt}</span>
+              </button>
+            `).join('')}
+          </div>
         </div>
 
-        <!-- Answer Grid -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; max-width:850px; margin:0 auto; width:100%; position:relative; z-index:2;">
-          ${opts.map((opt, oIdx) => `
-            <button type="button" class="btn-quizizz-ans" data-opt-idx="${oIdx}" style="background:${bgColors[oIdx % 4]}; color:#ffffff; border:none; padding:1.15rem 1.35rem; border-radius:18px; ; font-weight: 400; font-size:1.08rem; cursor:pointer; display:flex; align-items:center; gap:0.75rem; text-align:left; box-shadow:0 8px 20px rgba(0,0,0,0.3); transition:all 0.15s ease;">
-              <span style="font-size:1.45rem;">${icons[oIdx % 4]}</span>
-              <span style="flex:1; font-family:var(--font-body);">${String.fromCharCode(65 + oIdx)}. ${opt}</span>
+        <!-- CAMERA AI FLOATING PIP (GÓC DƯỚI MÀN HÌNH - CHUẨN GIÁM SÁT PHÒNG THI) -->
+        <div id="quizizz-cam-pip-panel" style="position:fixed; bottom:20px; right:20px; width:190px; background:#0f172a; border:2px solid #38bdf8; border-radius:16px; overflow:hidden; box-shadow:0 12px 35px rgba(0,0,0,0.6); z-index:99999999; display:flex; flex-direction:column;">
+          <div style="background:#1e293b; padding:0.35rem 0.6rem; display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; font-weight:800; color:#38bdf8;">
+            <span>📷 CAMERA AI</span>
+            <span style="color:#10b981;">● Live</span>
+          </div>
+          <div style="width:100%; height:110px; background:#000; position:relative;">
+            <video id="quizizz-pip-video" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
+            <div style="position:absolute; bottom:4px; left:6px; right:6px; background:rgba(0,0,0,0.65); border-radius:6px; height:6px; overflow:hidden;">
+              <div id="quizizz-mic-level-bar" style="width:20%; height:100%; background:linear-gradient(90deg,#10b981,#ef4444); transition:width 0.1s;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODAL CẢNH BÁO VI PHẠM (GIỐNG THI THƯỜNG 100%) -->
+        <div id="quizizz-violation-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.95); backdrop-filter:blur(12px); z-index:999999999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem;">
+          <div style="background:#ffffff; color:#0f172a; border-radius:24px; padding:2rem; max-width:540px; width:100%; box-shadow:0 25px 60px rgba(0,0,0,0.5); border:3px solid #ef4444;">
+            <div style="font-size:3.5rem; margin-bottom:0.5rem;">⚠️🚫</div>
+            <h2 style="color:#dc2626; font-weight:900; margin:0 0 0.5rem 0; font-size:1.6rem;">CẢNH BÁO VI PHẠM QUY CHẾ!</h2>
+            <div style="background:#fef2f2; border:1.5px solid #fecaca; padding:0.85rem; border-radius:12px; margin-bottom:1.25rem;">
+              <div id="quizizz-violation-reason" style="font-weight:700; color:#b91c1c; font-size:0.95rem;">Phát hiện hành vi không hợp lệ!</div>
+              <div style="font-size:0.85rem; color:#7f1d1d; margin-top:0.3rem;">Số lần vi phạm: <strong id="quizizz-vcount-modal">1/4</strong> (Quá 4 lần bài thi sẽ tự động bị hủy)</div>
+            </div>
+            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:0.75rem; margin-bottom:1.25rem; text-align:left;">
+              <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.88rem; font-weight:700; color:#1e293b;">
+                <input type="checkbox" id="chk-quizizz-commit" style="width:18px; height:18px; accent-color:#dc2626;">
+                <span>Tôi cam kết tuân thủ quy chế, không chuyển tab hay trao đổi.</span>
+              </label>
+            </div>
+            <button id="btn-quizizz-commit-ack" disabled style="width:100%; padding:0.9rem; border-radius:14px; border:none; background:#cbd5e1; color:#fff; font-weight:800; font-size:1rem; cursor:not-allowed;">
+              ✅ TIẾP TỤC BÀI THI
             </button>
-          `).join('')}
+          </div>
         </div>
       `;
 
-      modal.querySelector('#btn-toggle-quizizz-music').onclick = () => {
-        isMusicOn = !isMusicOn;
-        if (isMusicOn) {
-          startBGM();
-        } else {
-          stopBGM();
-        }
-        const btn = modal.querySelector('#btn-toggle-quizizz-music');
-        if (btn) {
-          btn.innerHTML = isMusicOn ? '🔊 NHẠC NỀN: BẬT' : '🔇 NHẠC NỀN: TẮT';
-          btn.style.background = isMusicOn ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)';
-          btn.style.borderColor = isMusicOn ? '#10b981' : '#ef4444';
-          btn.style.color = isMusicOn ? '#6ee7b7' : '#fca5a5';
-        }
-      };
+      // Reconnect video stream if present
+      if (mediaStream) {
+        const vid = modal.querySelector('#quizizz-pip-video');
+        if (vid) { vid.srcObject = mediaStream; vid.play().catch(() => {}); }
+      }
 
-      modal.querySelector('#btn-early-submit-quizizz').onclick = () => {
-        if (confirm('🚀 Bạn có chắc chắn muốn NỘP BÀI THI QUIZIZZ và xem bảng điểm tổng kết không?')) {
-          if (timerInterval) clearInterval(timerInterval);
-          qIndex = questions.length;
-          renderQuestion();
-        }
-      };
-
-      modal.querySelectorAll('.btn-quizizz-jump-q').forEach(btn => {
-        btn.onclick = () => {
-          const targetIdx = parseInt(btn.getAttribute('data-q-idx'), 10);
-          if (targetIdx !== qIndex) {
-            if (timerInterval) clearInterval(timerInterval);
-            qIndex = targetIdx;
-            renderQuestion();
+      // Violation commit checkbox
+      const commitChk = modal.querySelector('#chk-quizizz-commit');
+      const ackBtn = modal.querySelector('#btn-quizizz-commit-ack');
+      if (commitChk && ackBtn) {
+        commitChk.onchange = () => {
+          if (commitChk.checked) {
+            ackBtn.disabled = false;
+            ackBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            ackBtn.style.cursor = 'pointer';
+          } else {
+            ackBtn.disabled = true;
+            ackBtn.style.background = '#cbd5e1';
+            ackBtn.style.cursor = 'not-allowed';
           }
+        };
+        ackBtn.onclick = () => {
+          isShowingViolationModal = false;
+          modal.querySelector('#quizizz-violation-overlay').style.display = 'none';
+          requestFullScreenMode();
+          setTimeout(requestFullScreenMode, 100);
+          setTimeout(requestFullScreenMode, 300);
+        };
+      }
+
+      // Choice handlers
+      modal.querySelectorAll('.btn-quizizz-choice').forEach(btn => {
+        btn.onclick = () => {
+          const pickedIdx = parseInt(btn.dataset.idx);
+          const isCorrect = (pickedIdx === (q.correctAnswer || 0));
+          if (isCorrect) {
+            correctCount++;
+            streak++;
+            score += Math.max(10, timeLeft * 5 + streak * 10);
+            playSoundEffect('correct');
+            btn.style.transform = 'scale(1.04)';
+            btn.style.background = '#15803d';
+          } else {
+            wrongCount++;
+            streak = 0;
+            playSoundEffect('wrong');
+            btn.style.background = '#991b1b';
+          }
+          modal.querySelectorAll('.btn-quizizz-choice').forEach(b => b.disabled = true);
+          setTimeout(() => {
+            qIndex++;
+            renderQuestion();
+          }, 1100);
         };
       });
 
-      modal.querySelector('#btn-quit-quizizz-test').onclick = () => {
-        if (timerInterval) clearInterval(timerInterval);
-        stopBGM();
-        modal.remove();
-      };
+      // Sound toggle
+      const sndBtn = modal.querySelector('#btn-toggle-quizizz-sound');
+      if (sndBtn) {
+        sndBtn.onclick = () => {
+          isMusicOn = !isMusicOn;
+          if (isMusicOn) startBGM(); else stopBGM();
+          sndBtn.innerText = isMusicOn ? '🔊' : '🔇';
+        };
+      }
 
-      const timerBar = modal.querySelector('#quizizz-timer-bar');
+      // Quit button
+      const quitBtn = modal.querySelector('#btn-quit-quizizz');
+      if (quitBtn) {
+        quitBtn.onclick = () => {
+          if (confirm('🚪 Bạn có chắc chắn muốn rời khỏi Đấu Trường Quizizz Arena?')) {
+            cleanupSession();
+            modal.remove();
+          }
+        };
+      }
+
+      // Timer countdown
       timerInterval = setInterval(() => {
         timeLeft--;
-        if (timerBar) timerBar.style.width = `${(timeLeft / 20) * 100}%`;
+        const tSpan = modal.querySelector('#quizizz-timer-text');
+        if (tSpan) tSpan.innerText = `${timeLeft}s`;
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
           wrongCount++;
           streak = 0;
           playSoundEffect('wrong');
-          this.showToast('⏱️ Hết thời gian câu này!', 'error');
           qIndex++;
           renderQuestion();
         }
       }, 1000);
-
-      modal.querySelectorAll('.btn-quizizz-ans').forEach(btn => {
-        btn.onclick = () => {
-          if (timerInterval) clearInterval(timerInterval);
-          const chosenIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
-          
-          if (chosenIdx === correctIdx) {
-            streak++;
-            correctCount++;
-            const pointsGained = 1000 + streak * 100;
-            score += pointsGained;
-            playSoundEffect('correct');
-            btn.style.background = '#22c55e';
-            btn.style.boxShadow = '0 0 30px #22c55e';
-            this.showToast(`✅ XUẤT SẮC! CHÍNH XÁC +${pointsGained}đ (Streak ${streak}x)!`);
-          } else {
-            streak = 0;
-            wrongCount++;
-            playSoundEffect('wrong');
-            btn.style.background = '#dc2626';
-            this.showToast('❌ Chưa chính xác!', 'error');
-          }
-
-          setTimeout(() => {
-            if (qIndex < questions.length - 1) {
-              qIndex++;
-              renderQuestion();
-            } else {
-              // Reached last question: DO NOT AUTO SUBMIT! Require clicking submit button!
-              this.showToast('🎉 Bạn đã chọn xong câu hỏi cuối cùng! Hãy kiểm tra lại hoặc bấm 🚀 NỘP BÀI THI ở góc trên để nộp bài.');
-              const submitBtn = modal.querySelector('#btn-early-submit-quizizz');
-              if (submitBtn) {
-                submitBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                submitBtn.style.color = '#ffffff';
-                submitBtn.style.fontSize = '0.95rem';
-                submitBtn.style.padding = '0.45rem 1.1rem';
-                submitBtn.style.boxShadow = '0 0 25px #10b981';
-                submitBtn.innerText = '🚀 CHỐT & NỘP BÀI THI NGAY';
-              }
-              renderQuestion();
-            }
-          }, 900);
-        };
-      });
     };
-
-    document.body.appendChild(modal);
-    startBGM();
-    renderQuestion();
   }
-
   // === MODAL 1: RÚT NGẪU NHIÊN TỪ NGÂN HÀNG ĐỀ ===
   showRandomFromQuestionBankModal(subjectId, parentDom, isExamParam) {
     const oldModal = document.getElementById('random-qbank-modal');
@@ -12392,7 +13220,10 @@ render_ai_geometry(dom) {
       const shuffled = [...pool].sort(() => 0.5 - Math.random());
       const selectedQuestions = shuffled.slice(0, Math.min(count, pool.length));
 
-      const isQuizizzMode = this.currentExamSubTab === 'quizizz';
+      const isQuizizzMode = (this.currentExamSubTab === 'quizizz');
+      if (this.currentExamTab === 'tx' || !this.currentExamTab) {
+        this.currentExamSubTab = isQuizizzMode ? 'quizizz' : 'regular';
+      }
       // Lấy đúng tab hiện tại (tx / midterm / final)
       const currentExamCat = (this.currentExamTab && ['tx','midterm','final'].includes(this.currentExamTab))
         ? this.currentExamTab : 'tx';
@@ -12709,7 +13540,11 @@ render_ai_geometry(dom) {
       const shuffled = [...selectedQuestions].sort(() => 0.5 - Math.random());
       const finalPicked = shuffled.slice(0, Math.min(count, selectedQuestions.length));
 
-      const isQuizizzMode = this.currentExamSubTab === 'quizizz';
+      const subTypeEl = modal.querySelector('input[name="rand-file-exam-subtype"]:checked');
+      const isQuizizzMode = subTypeEl ? (subTypeEl.value === 'quizizz') : (this.currentExamSubTab === 'quizizz');
+      if (this.currentExamTab === 'tx' || !this.currentExamTab) {
+        this.currentExamSubTab = isQuizizzMode ? 'quizizz' : 'regular';
+      }
       // Lấy đúng tab hiện tại (tx / midterm / final)
       const fileExamCat = (this.currentExamTab && ['tx','midterm','final'].includes(this.currentExamTab))
         ? this.currentExamTab : 'tx';
@@ -12832,34 +13667,58 @@ render_ai_geometry(dom) {
 
             <!-- Edit Question Text -->
             <div style="margin-bottom:0.75rem;">
-              <label style="font-weight: 500; font-size:0.82rem; color:#334155; display:block; margin-bottom:0.25rem;">Nội dung câu hỏi:</label>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                <label style="font-weight: 500; font-size:0.82rem; color:#334155;">Nội dung câu hỏi:</label>
+                ${!isReadOnly ? `
+                  <label for="asm-q-img-input-${idx}" style="background:#e0f2fe; color:#0284c7; font-weight:800; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:6px; cursor:pointer; border:1px solid #bae6fd; display:inline-flex; align-items:center; gap:0.3rem;">
+                    🖼️ Ảnh câu hỏi
+                  </label>
+                  <input type="file" class="asm-q-img-file-input" data-q-idx="${idx}" id="asm-q-img-input-${idx}" accept="image/*" style="display:none;" />
+                ` : ''}
+              </div>
               ${!isReadOnly ? `
                 <textarea class="asm-q-text-input form-control" data-q-idx="${idx}" rows="2" style="width:100%; font-weight: 400; font-size:0.9rem; border-radius:8px; border:1.5px solid #cbd5e1; padding:0.5rem;" required>${qText}</textarea>
               ` : `
                 <div style="background:#f8fafc; padding:0.6rem; border-radius:8px; font-weight:500; color:#1e293b;">${qText}</div>
               `}
+              <div class="asm-q-img-preview-box" id="asm-q-img-preview-${idx}">
+                ${q.imageUrl ? `<div style="position:relative; display:inline-block; margin-top:0.4rem; border:1px solid #cbd5e1; border-radius:8px; padding:0.25rem; background:#fff;"><img src="${q.imageUrl}" style="max-height:130px; border-radius:6px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${q.imageUrl}')" /><button type="button" class="btn-rm-asm-q-img" data-q-idx="${idx}" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; cursor:pointer;">&times;</button></div>` : ''}
+              </div>
             </div>
 
             <!-- Edit Options and Correct Answer -->
             ${(q.type === 'trac_nghiem' || !q.type || q.type === 'dung_sai') ? `
               <div style="background:#f8fafc; padding:0.75rem; border-radius:10px; border:1px solid #e2e8f0;">
                 <div style="font-weight: 500; font-size:0.8rem; color:#475569; margin-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
-                  <span>Các đáp án & Chọn đáp án ĐÚNG (Tích chọn ô tròn ✅):</span>
+                  <span>Các đáp án & Chọn đáp án ĐÚNG (Tích chọn ô tròn ✅ & Đính kèm ảnh):</span>
                   <span style="color:#166534; font-weight: 500;">Đáp án đúng hiện tại: ${String.fromCharCode(65 + correctIdx)}</span>
                 </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem;">
-                  ${opts.map((opt, oIdx) => `
-                    <div style="display:flex; align-items:center; gap:0.4rem; background:${oIdx === correctIdx ? '#dcfce7' : '#ffffff'}; padding:0.4rem 0.6rem; border-radius:8px; border:1.5px solid ${oIdx === correctIdx ? '#22c55e' : '#cbd5e1'};">
-                      ${!isReadOnly ? `
-                        <input type="radio" name="correct_ans_${idx}" class="asm-q-correct-radio" data-q-idx="${idx}" data-opt-idx="${oIdx}" value="${oIdx}" ${oIdx === correctIdx ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer; accent-color:#166534;">
-                        <span style="font-weight: 500; color:${oIdx === correctIdx ? '#15803d' : '#475569'}; min-width:20px;">${String.fromCharCode(65 + oIdx)}.</span>
-                        <input type="text" class="asm-q-opt-input form-control" data-q-idx="${idx}" data-opt-idx="${oIdx}" value="${opt}" style="flex:1; font-size:0.85rem; font-weight: 400; padding:0.3rem 0.5rem; border-radius:6px; border:1px solid #cbd5e1; background:${oIdx === correctIdx ? '#ffffff' : '#fff'};" required>
-                      ` : `
-                        <span style="font-weight: 500; color:${oIdx === correctIdx ? '#15803d' : '#475569'};">${String.fromCharCode(65 + oIdx)}. ${opt} ${oIdx === correctIdx ? '✅' : ''}</span>
-                      `}
-                    </div>
-                  `).join('')}
+                <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                  ${opts.map((opt, oIdx) => {
+                    const optImg = (q.optionImages && q.optionImages[oIdx]) ? q.optionImages[oIdx] : '';
+                    const label = String.fromCharCode(65 + oIdx);
+                    return `
+                      <div style="background:${oIdx === correctIdx ? '#dcfce7' : '#ffffff'}; padding:0.5rem 0.65rem; border-radius:8px; border:1.5px solid ${oIdx === correctIdx ? '#22c55e' : '#cbd5e1'};">
+                        <div style="display:flex; align-items:center; gap:0.4rem;">
+                          ${!isReadOnly ? `
+                            <input type="radio" name="correct_ans_${idx}" class="asm-q-correct-radio" data-q-idx="${idx}" data-opt-idx="${oIdx}" value="${oIdx}" ${oIdx === correctIdx ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer; accent-color:#166534;">
+                            <span style="font-weight: 900; color:${oIdx === correctIdx ? '#15803d' : '#475569'}; min-width:20px;">${label}.</span>
+                            <input type="text" class="asm-q-opt-input form-control" data-q-idx="${idx}" data-opt-idx="${oIdx}" value="${opt}" style="flex:1; font-size:0.85rem; font-weight: 400; padding:0.3rem 0.5rem; border-radius:6px; border:1px solid #cbd5e1; background:#fff;" required>
+                            <label for="asm-opt-img-input-${idx}-${oIdx}" style="background:#f1f5f9; color:#475569; font-weight:800; font-size:0.75rem; padding:0.25rem 0.5rem; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1; white-space:nowrap;">
+                              🖼️ Ảnh ${label}
+                            </label>
+                            <input type="file" class="asm-opt-img-file-input" data-q-idx="${idx}" data-opt-idx="${oIdx}" id="asm-opt-img-input-${idx}-${oIdx}" accept="image/*" style="display:none;" />
+                          ` : `
+                            <span style="font-weight: 500; color:${oIdx === correctIdx ? '#15803d' : '#475569'};">${label}. ${opt} ${oIdx === correctIdx ? '✅' : ''}</span>
+                          `}
+                        </div>
+                        <div class="asm-opt-img-preview" id="asm-opt-img-preview-${idx}-${oIdx}">
+                          ${optImg ? `<div style="position:relative; display:inline-block; margin-top:0.35rem; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem; background:#fff;"><img src="${optImg}" style="max-height:160px; border-radius:4px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${optImg}')" />${!isReadOnly ? `<button type="button" class="btn-rm-asm-opt-img" data-q-idx="${idx}" data-opt-idx="${oIdx}" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:9px; font-weight:bold; cursor:pointer;">&times;</button>` : ''}</div>` : ''}
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
                 </div>
               </div>
             ` : q.type === 'tra_loi_ngan' ? `
@@ -13078,6 +13937,77 @@ render_ai_geometry(dom) {
                   }
                 }
               });
+            }
+          };
+        });
+
+        // Tải ảnh câu hỏi trong Bài tập
+        container.querySelectorAll('.asm-q-img-file-input').forEach(inp => {
+          inp.onchange = (e) => {
+            const file = e.target.files[0];
+            const qIdx = parseInt(inp.getAttribute('data-q-idx'), 10);
+            if (file && currentQuestions[qIdx]) {
+              const r = new FileReader();
+              r.onload = (evt) => {
+                currentQuestions[qIdx].imageUrl = evt.target.result || '';
+                const prev = container.querySelector(`#asm-q-img-preview-${qIdx}`);
+                if (prev) {
+                  prev.innerHTML = `<div style="position:relative; display:inline-block; margin-top:0.4rem; border:1px solid #cbd5e1; border-radius:8px; padding:0.25rem; background:#fff;"><img src="${currentQuestions[qIdx].imageUrl}" style="max-height:130px; border-radius:6px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${currentQuestions[qIdx].imageUrl}')" /><button type="button" class="btn-rm-asm-q-img" data-q-idx="${qIdx}" style="position:absolute; top:-6px; right:-6px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:bold; cursor:pointer;">&times;</button></div>`;
+                  const rmBtn = prev.querySelector('.btn-rm-asm-q-img');
+                  if (rmBtn) rmBtn.onclick = () => { currentQuestions[qIdx].imageUrl = ''; prev.innerHTML = ''; inp.value = ''; };
+                }
+              };
+              r.readAsDataURL(file);
+            }
+          };
+        });
+
+        // Xóa ảnh câu hỏi bài tập khởi tạo
+        container.querySelectorAll('.btn-rm-asm-q-img').forEach(btn => {
+          btn.onclick = () => {
+            const qIdx = parseInt(btn.getAttribute('data-q-idx'), 10);
+            if (!isNaN(qIdx) && currentQuestions[qIdx]) {
+              currentQuestions[qIdx].imageUrl = '';
+              const prev = container.querySelector(`#asm-q-img-preview-${qIdx}`);
+              if (prev) prev.innerHTML = '';
+            }
+          };
+        });
+
+        // Tải ảnh từng đáp án A, B, C, D trong Bài tập
+        container.querySelectorAll('.asm-opt-img-file-input').forEach(inp => {
+          inp.onchange = (e) => {
+            const file = e.target.files[0];
+            const qIdx = parseInt(inp.getAttribute('data-q-idx'), 10);
+            const oIdx = parseInt(inp.getAttribute('data-opt-idx'), 10);
+            if (file && currentQuestions[qIdx]) {
+              if (!Array.isArray(currentQuestions[qIdx].optionImages)) {
+                currentQuestions[qIdx].optionImages = ['', '', '', ''];
+              }
+              const r = new FileReader();
+              r.onload = (evt) => {
+                currentQuestions[qIdx].optionImages[oIdx] = evt.target.result || '';
+                const prev = container.querySelector(`#asm-opt-img-preview-${qIdx}-${oIdx}`);
+                if (prev) {
+                  prev.innerHTML = `<div style="position:relative; display:inline-block; margin-top:0.35rem; border:1px solid #cbd5e1; border-radius:6px; padding:0.2rem; background:#fff;"><img src="${currentQuestions[qIdx].optionImages[oIdx]}" style="max-height:160px; border-radius:4px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${currentQuestions[qIdx].optionImages[oIdx]}')" /><button type="button" class="btn-rm-asm-opt-img" data-q-idx="${qIdx}" data-opt-idx="${oIdx}" style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:#fff; border:none; border-radius:50%; width:16px; height:16px; font-size:9px; font-weight:bold; cursor:pointer;">&times;</button></div>`;
+                  const rmBtn = prev.querySelector('.btn-rm-asm-opt-img');
+                  if (rmBtn) rmBtn.onclick = () => { currentQuestions[qIdx].optionImages[oIdx] = ''; prev.innerHTML = ''; inp.value = ''; };
+                }
+              };
+              r.readAsDataURL(file);
+            }
+          };
+        });
+
+        // Xóa ảnh đáp án bài tập
+        container.querySelectorAll('.btn-rm-asm-opt-img').forEach(btn => {
+          btn.onclick = () => {
+            const qIdx = parseInt(btn.getAttribute('data-q-idx'), 10);
+            const oIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
+            if (!isNaN(qIdx) && !isNaN(oIdx) && currentQuestions[qIdx] && currentQuestions[qIdx].optionImages) {
+              currentQuestions[qIdx].optionImages[oIdx] = '';
+              const prev = container.querySelector(`#asm-opt-img-preview-${qIdx}-${oIdx}`);
+              if (prev) prev.innerHTML = '';
             }
           };
         });
@@ -13638,7 +14568,7 @@ render_ai_geometry(dom) {
     if (oldModal) oldModal.remove();
 
     const info = (db.state && db.state.schoolInfo) ? db.state.schoolInfo : {
-      name: 'THCS AMA TRANG LƠNG',
+      name: 'TH-THCS AMA TRANG LƠNG',
       address: 'Dliê Ya, Đắc Lắc',
       principal: 'Thầy Y Krơr Niê',
       phone: '0500.3871234',
@@ -13719,7 +14649,7 @@ render_ai_geometry(dom) {
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
                 <div class="form-group">
                   <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.4rem;">Tên Trường Hợp Quy:</label>
-                  <input type="text" name="name" class="form-control" value="${info.name || 'THCS AMA TRANG LƠNG'}" required style="font-weight: 500; height:42px; border-radius:8px;">
+                  <input type="text" name="name" class="form-control" value="${info.name || 'TH-THCS AMA TRANG LƠNG'}" required style="font-weight: 500; height:42px; border-radius:8px;">
                 </div>
                 <div class="form-group">
                   <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.4rem;">Địa chỉ Trường:</label>
@@ -13799,7 +14729,7 @@ render_ai_geometry(dom) {
   saveSchoolInfo(form) {
     const fd = new FormData(form);
     if (!db.state.schoolInfo) db.state.schoolInfo = {};
-    db.state.schoolInfo.name = fd.get('name') || 'THCS AMA TRANG LƠNG';
+    db.state.schoolInfo.name = fd.get('name') || 'TH-THCS AMA TRANG LƠNG';
     db.state.schoolInfo.address = fd.get('address') || 'Dliê Ya, Đắc Lắc';
     db.state.schoolInfo.principal = fd.get('principal') || 'Thầy Y Krơr Niê';
     db.state.schoolInfo.phone = fd.get('phone') || '0500.3871234';
@@ -14402,7 +15332,7 @@ render_ai_geometry(dom) {
       if (loginOverlay) loginOverlay.style.display = 'none';
       this.showHeaderForUser(teacher, 'teacher');
       this.renderSidebar();
-      this.switchView('lessons');
+      this.switchView('info');
       this.showToast(`👨‍🏫 Đăng nhập giáo viên thành công! Xin chào ${teacher.name}`);
       return;
 
@@ -14798,14 +15728,12 @@ render_ai_geometry(dom) {
         teacherTab.style.boxShadow = '0 4px 14px rgba(37,99,235,0.35)';
       }
       if (usernameInput) {
-        usernameInput.placeholder = 'Nhập tên đăng nhập giáo viên (VD: gv_toan)...';
-        if (!usernameInput.value || usernameInput.value === 'hs_toan' || usernameInput.value === '0905123456') {
-          usernameInput.value = 'gv_toan';
-        }
+        usernameInput.placeholder = 'Nhập tên đăng nhập của bạn...';
+        usernameInput.value = '';
       }
       if (passwordInput) {
         passwordInput.placeholder = 'Nhập mật khẩu...';
-        if (!passwordInput.value) passwordInput.value = '123456';
+        passwordInput.value = '';
       }
       if (submitBtn) {
         submitBtn.style.background = 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
@@ -14820,14 +15748,12 @@ render_ai_geometry(dom) {
         studentTab.style.boxShadow = '0 4px 14px rgba(16,185,129,0.35)';
       }
       if (usernameInput) {
-        usernameInput.placeholder = 'Nhập tên đăng nhập học sinh (VD: hs_toan)...';
-        if (!usernameInput.value || usernameInput.value === 'gv_toan' || usernameInput.value === '0905123456') {
-          usernameInput.value = 'hs_toan';
-        }
+        usernameInput.placeholder = 'Nhập mã học sinh hoặc tên đăng nhập...';
+        usernameInput.value = '';
       }
       if (passwordInput) {
-        passwordInput.placeholder = 'Nhập mật khẩu học sinh...';
-        if (!passwordInput.value) passwordInput.value = '123456';
+        passwordInput.placeholder = 'Nhập mật khẩu...';
+        passwordInput.value = '';
       }
       if (submitBtn) {
         submitBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
@@ -14842,14 +15768,12 @@ render_ai_geometry(dom) {
         parentTab.style.boxShadow = '0 4px 14px rgba(139,92,246,0.35)';
       }
       if (usernameInput) {
-        usernameInput.placeholder = 'Nhập SĐT phụ huynh (VD: 0905123456)...';
-        if (!usernameInput.value || usernameInput.value === 'gv_toan' || usernameInput.value === 'hs_toan') {
-          usernameInput.value = '0905123456';
-        }
+        usernameInput.placeholder = 'Nhập số điện thoại phụ huynh...';
+        usernameInput.value = '';
       }
       if (passwordInput) {
-        passwordInput.placeholder = 'Nhập mật khẩu phụ huynh...';
-        if (!passwordInput.value) passwordInput.value = '123456';
+        passwordInput.placeholder = 'Nhập mật khẩu...';
+        passwordInput.value = '';
       }
       if (submitBtn) {
         submitBtn.style.background = 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)';
@@ -14945,7 +15869,7 @@ render_ai_geometry(dom) {
       if (loginOverlay) loginOverlay.style.display = 'none';
       this.showHeaderForUser(teacher, 'teacher');
       this.renderSidebar();
-      this.switchView('lessons');
+      this.switchView('info');
       this.showToast(`👨‍🏫 Đăng nhập giáo viên thành công! Xin chào ${teacher.name}`);
       return;
 
@@ -16084,7 +17008,15 @@ render_ai_geometry(dom) {
     };
 
     dom.querySelectorAll('.btn-exam-take').forEach(btn => {
-      btn.onclick = () => this.startExamSession(btn.getAttribute('data-exam-id'));
+      btn.onclick = () => {
+        const examId = btn.getAttribute('data-exam-id');
+        const exam = (subExams || []).find(e => e.id === examId);
+        if (exam && (exam.examSubType === 'quizizz' || exam.format === 'quizizz' || exam.isQuizizz)) {
+          this.runQuizizzGameTest(exam, dom);
+        } else {
+          this.startExamSession(examId);
+        }
+      };
     });
 
     // Khởi động đồng hồ đếm ngược cho các đề chưa mở
@@ -16399,17 +17331,29 @@ render_ai_geometry(dom) {
           <div style="padding:1.5rem; flex:1; overflow-y:auto; background:#f8fafc; display:flex; flex-direction:column; gap:1.25rem;">
             <div style="background:#fff; border-radius:14px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
               <div style="font-weight:700; font-size:1.05rem; color:#0f172a; line-height:1.5;">
-                ${q.questionText}
+                ${q.questionText || q.question || ''}
               </div>
+              ${q.imageUrl ? `
+                <div style="margin-top:0.5rem;">
+                  <img src="${q.imageUrl}" style="max-height:360px; max-width:100%; object-fit:contain; border-radius:10px; border:1.5px solid #cbd5e1; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${q.imageUrl}')" title="Bấm để phóng to ảnh câu hỏi" />
+                </div>
+              ` : ''}
             </div>
 
             <div id="ai-prac-options" style="display:flex; flex-direction:column; gap:0.75rem;">
-              ${q.options.map((opt, idx) => {
+              ${(q.options || []).map((opt, idx) => {
                 const optPrefix = ['A', 'B', 'C', 'D', 'E'][idx] || (idx + 1);
+                const optImg = (q.optionImages && q.optionImages[idx]) ? q.optionImages[idx] : '';
                 return `
-                  <button class="ai-prac-opt-btn" data-idx="${idx}" style="background:#fff; border:1.5px solid #cbd5e1; border-radius:12px; padding:0.85rem 1.1rem; text-align:left; font-size:0.92rem; color:#1e293b; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.75rem; transition:all 0.15s ease-out; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
-                    <span style="width:28px; height:28px; background:#f1f5f9; color:#475569; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">${optPrefix}</span>
-                    <span>${opt}</span>
+                  <button class="ai-prac-opt-btn" data-idx="${idx}" style="background:#fff; border:1.5px solid #cbd5e1; border-radius:12px; padding:0.85rem 1.1rem; text-align:left; font-size:0.92rem; color:#1e293b; font-weight:600; cursor:pointer; display:flex; flex-direction:column; gap:0.4rem; transition:all 0.15s ease-out; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                      <span style="width:28px; height:28px; background:#f1f5f9; color:#475569; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">${optPrefix}</span>
+                      <span>${opt}</span>
+                    </div>
+                    ${optImg ? `
+                      <div style="margin-left:2.5rem; margin-top:0.2rem;">
+                        <img src="${optImg}" style="max-height:160px; max-width:100%; border-radius:6px;" />
+                      </div>` : ''}
                   </button>
                 `;
               }).join('')}
@@ -18635,7 +19579,7 @@ render_ai_geometry(dom) {
     const students = (typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : [];
 
     const dataRows = [
-      ['BÁO CÁO THỐNG KÊ TỔNG HỢP HỌC LỰC & CHUYÊN CẦN - TRƯỜNG THCS AMA TRANG LƠNG'],
+      ['BÁO CÁO THỐNG KÊ TỔNG HỢP HỌC LỰC & CHUYÊN CẦN - TRƯỜNG TH-THCS AMA TRANG LƠNG'],
       ['Năm Học: 2025 - 2026'],
       [''],
       ['STT', 'Tên Lớp Học', 'Sĩ Số', 'Mức Tốt (Giỏi)', 'Mức Khá', 'Mức Đạt', 'Chưa Đạt', 'TBM Toàn Lớp', 'Tỷ Lệ Chuyên Cần']
@@ -18722,7 +19666,7 @@ render_ai_geometry(dom) {
         <div class="glass-card" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:18px; padding:1.5rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 15px rgba(0,0,0,0.04);">
           <div>
             <div style="display:inline-flex; align-items:center; gap:0.4rem; background:#dbeafe; border:1.5px solid #93c5fd; color:#1e40af; font-weight:700; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.8rem; margin-bottom:0.4rem;">
-              💾 TRUNG TÂM AN TOÀN & KHÔI PHỤC DỮ LIỆU THCS AMA TRANG LƠNG
+              💾 TRUNG TÂM AN TOÀN & KHÔI PHỤC DỮ LIỆU TH-THCS AMA TRANG LƠNG
             </div>
             <h2 style="margin:0; font-family:var(--font-title); font-weight:700; font-size:1.4rem; color:#1e293b;">
               TÌM KIẾM & KHÔI PHỤC DỮ LIỆU LỠ XÓA NHẦM
@@ -19169,7 +20113,541 @@ this._laserInterval = setInterval(() => {
 } catch(e) {}
 };
 
-LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toan') {
+
+// =========================================================================
+// =========================================================================
+// =========================================================================
+// 🌟 MODAL THỬ THÁCH TRỌN BỘ CÂU HỎI CHO HỌC SINH LÊN BẢNG (FULL THEATER VIEW)
+// - PHÓNG TO TOÀN DIỆN: CHUẨN MÀN HÌNH MÁY CHIẾU & TIVI LỚP HỌC (HD / 4K)
+// - BƯỚC 1: MỜI HỌC SINH LÊN BẢNG (CHƯA CHẠY CÂU HỎI & ĐỒNG HỒ)
+// - BƯỚC 2: HỌC SINH TRẢ LỜI TOÀN BỘ CÁC CÂU HỎI (CÂU 1 ➔ CÂU N) VỚI FONT TO RÕ
+// - BƯỚC 3: TỔNG KẾT ĐIỂM SỐ, ĐÁNH GIÁ VÀ ĐẨY ĐIỂM TỔNG VÀO SỔ ĐIỂM THƯỜNG XUYÊN
+// =========================================================================
+window.openStudentInteractiveQuestionChallenge = function(opts) {
+  const { student, gameTitle, gameKey, subjectId, grade, onNextRound, startImmediately } = opts || {};
+  if (!student) return;
+
+  const oldModal = document.getElementById('student-quiz-challenge-modal');
+  if (oldModal) oldModal.remove();
+
+  // 1. Get Questions list
+  let questions = [];
+  if (opts && opts.questions && Array.isArray(opts.questions) && opts.questions.length > 0) {
+    questions = opts.questions;
+  } else if (window._activeGameQuestions && Array.isArray(window._activeGameQuestions) && window._activeGameQuestions.length > 0) {
+    questions = window._activeGameQuestions;
+  } else if (typeof window.AITeachingTools !== 'undefined') {
+    if (gameKey === 'goldminer' && window.AITeachingTools._goldMinerQuestions) {
+      questions = window.AITeachingTools._goldMinerQuestions;
+    } else if (gameKey === 'luckywheel' && window.AITeachingTools._luckyWheelQuestions) {
+      questions = window.AITeachingTools._luckyWheelQuestions;
+    } else if (typeof window.AITeachingTools._getQuestionsForSubjectAndGrade === 'function') {
+      questions = window.AITeachingTools._getQuestionsForSubjectAndGrade(gameKey, subjectId, grade);
+    } else if (typeof window.AITeachingTools._getLoadedQuestions === 'function') {
+      questions = window.AITeachingTools._getLoadedQuestions(gameKey || 'luckywheel');
+    }
+  }
+
+  if (!questions || questions.length === 0) {
+    if (typeof window.AITeachingTools !== 'undefined' && typeof window.AITeachingTools._getDefaultQuestionsForGame === 'function') {
+      questions = window.AITeachingTools._getDefaultQuestionsForGame(gameKey || 'luckywheel');
+    }
+  }
+
+  if (!questions || questions.length === 0) {
+    questions = [
+      { q: 'Số nguyên tố chẵn DUY NHẤT trong toán học là số nào?', options: ['Số 2', 'Số 0', 'Số 4', 'Số 6'], correctAnswer: 0, points: 100, exp: 'Số 2 là số nguyên tố chẵn duy nhất trong toán học.' },
+      { q: 'Tổng ba góc trong một tam giác luôn bằng bao nhiêu độ?', options: ['180°', '360°', '90°', '270°'], correctAnswer: 0, points: 100, exp: 'Tổng ba góc của một tam giác luôn bằng 180°.' },
+      { q: 'Số 0 có phải là số nguyên dương không?', options: ['Không phải số nguyên dương cũng không âm', 'Là số nguyên dương', 'Là số nguyên âm', 'Là số vô tỉ'], correctAnswer: 0, points: 100, exp: 'Số 0 là số nguyên đặc biệt, không dương và không âm.' },
+      { q: 'Hình chữ nhật có 2 đường chéo vuông góc với nhau là hình gì?', options: ['Hình vuông', 'Hình thoi', 'Hình thang', 'Hình bình hành'], correctAnswer: 0, points: 100, exp: 'Hình chữ nhật có hai đường chéo vuông góc là hình vuông.' },
+      { q: 'Số nào sau đây chia hết cho cả 2 và 5?', options: ['Số có tận cùng là 0', 'Số có tận cùng là 5', 'Số có tận cùng là 2', 'Số có tận cùng là 8'], correctAnswer: 0, points: 100, exp: 'Số chia hết cho cả 2 và 5 phải có chữ số tận cùng bằng 0.' }
+    ];
+  }
+
+  const studentName = student.name || student.fullName || 'Học sinh';
+  const studentId = student.id || student.code || 'HS_01';
+  const studentClass = student.classId || '6A';
+  const subName = (subjectId === 'toan' ? 'Toán học' : (subjectId === 'van' ? 'Ngữ văn' : (subjectId === 'anh' ? 'Tiếng Anh' : (subjectId === 'khtn' ? 'Khoa học Tự nhiên' : 'Môn học'))));
+
+  // Session State
+  let currentQIdx = 0;
+  let sessionResults = []; // [{ qIdx, isCorrect, points, userChoice, correctChoice }]
+  let totalScoreEarned = 0;
+  let timerInterval = null;
+  let isAnswered = false;
+
+  const optPrefixes = ['🅰️', '🅱️', '🅲', '🅳'];
+
+  // Sound Synth
+  const playSound = (type) => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      if (type === 'tick') {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        g.gain.setValueAtTime(0.12, now);
+        g.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.05);
+      } else if (type === 'correct') {
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + i * 0.1);
+          g.gain.setValueAtTime(0.3, now + i * 0.1);
+          g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.3);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now + i * 0.1); osc.stop(now + i * 0.1 + 0.3);
+        });
+      } else if (type === 'wrong') {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.linearRampToValueAtTime(120, now + 0.35);
+        g.gain.setValueAtTime(0.3, now);
+        g.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.35);
+      } else if (type === 'victory') {
+        [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + i * 0.12);
+          g.gain.setValueAtTime(0.35, now + i * 0.12);
+          g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.12 + 0.4);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now + i * 0.12); osc.stop(now + i * 0.12 + 0.4);
+        });
+      }
+    } catch(e) {}
+  };
+
+  const modal = document.createElement('div');
+  modal.id = 'student-quiz-challenge-modal';
+  modal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.94); backdrop-filter:blur(16px); z-index:999999999; display:flex; align-items:center; justify-content:center; padding:1.25rem; font-family:var(--font-body); animation:fadeIn 0.25s ease-out;';
+  
+  // 🌟 ALWAYS ATTACH MODAL TO BODY
+  document.body.appendChild(modal);
+
+  // RENDER STAGE 1: INVITE STUDENT (WAITING - LARGE VIEW)
+  const renderStage1 = () => {
+    modal.innerHTML = `
+      <div style="background:#ffffff; border-radius:32px; width:95vw; max-width:1150px; box-shadow:0 35px 90px rgba(0,0,0,0.6); border:4px solid #f59e0b; overflow:hidden; animation:zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); display:flex; flex-direction:column;">
+        
+        <!-- HEADER -->
+        <div style="background:linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%); color:#fff; padding:1.5rem 2.2rem; display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #f59e0b;">
+          <div style="display:flex; align-items:center; gap:1rem;">
+            <span style="font-size:2.6rem; animation:pulse 1.5s infinite;">🎓</span>
+            <div>
+              <h3 style="margin:0; font-family:var(--font-title); font-size:1.65rem; font-weight:900; color:#facc15; letter-spacing:0.5px;">
+                ${gameTitle || 'THỬ THÁCH BỘ CÂU HỎI BÀI HỌC'}
+              </h3>
+              <p style="margin:0.3rem 0 0 0; font-size:1rem; color:#cbd5e1; font-weight:700;">
+                Lớp <b style="color:#fde047;">${studentClass}</b> • Môn <b style="color:#60a5fa;">${subName}</b> • Trọn bộ <b style="color:#4ade80;">${questions.length} câu hỏi</b>
+              </p>
+            </div>
+          </div>
+          <button id="close-student-quiz-modal" style="background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.25); color:#fff; width:44px; height:44px; border-radius:50%; font-size:1.6rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">&times;</button>
+        </div>
+
+        <!-- INVITE STUDENT CONTENT (ENLARGED) -->
+        <div style="padding:3rem 2.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:1.6rem;">
+          <div style="display:inline-flex; align-items:center; gap:0.6rem; background:#fef3c7; color:#b45309; font-weight:900; font-size:1.15rem; padding:0.6rem 1.8rem; border-radius:24px; border:2px solid #fde68a;">
+            <span>🌟</span> MỜI HỌC SINH BƯỚC LÊN BẢNG
+          </div>
+
+          <div style="font-size:5.5rem; line-height:1; animation:bounce 2s infinite;">🧑‍🎓</div>
+
+          <div>
+            <h1 style="margin:0; font-family:var(--font-title); font-size:3.2rem; font-weight:900; color:#1e3a8a; letter-spacing:-0.5px; text-shadow:0 3px 15px rgba(37,99,235,0.25);">
+              ${studentName}
+            </h1>
+            <p style="margin:0.5rem 0 0 0; font-size:1.25rem; color:#64748b; font-weight:800;">
+              Mã Học Sinh: ${studentId} • Lớp ${studentClass}
+            </p>
+          </div>
+
+          <div style="background:#f0fdf4; border:2px solid #86efac; border-radius:20px; padding:1.15rem 2rem; color:#166534; font-size:1.15rem; font-weight:800; max-width:720px; line-height:1.6;">
+            💡 <em>Em sẽ thực hiện lần lượt <strong>toàn bộ ${questions.length} câu hỏi</strong> của bài học. Thầy/Cô và học sinh bấm nút bên dưới khi đã đứng trước bảng để <strong>BẮT ĐẦU CÂU HỎI 1</strong>!</em>
+          </div>
+
+          <button id="btn-start-answering-quiz" class="btn" style="margin-top:0.75rem; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; font-family:var(--font-title); font-size:1.5rem; font-weight:900; padding:1.2rem 3.8rem; border-radius:24px; border:none; cursor:pointer; box-shadow:0 10px 35px rgba(16,185,129,0.5); display:flex; align-items:center; gap:0.8rem; animation:pulse 1.8s infinite;">
+            <span>▶️</span> BẮT ĐẦU TRẢ LỜI CÂU HỎI (SPACE)
+          </button>
+        </div>
+
+      </div>
+    `;
+
+    modal.querySelector('#close-student-quiz-modal').onclick = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      window.removeEventListener('keydown', handleSpaceKey);
+      modal.remove();
+    };
+
+    modal.querySelector('#btn-start-answering-quiz').onclick = () => {
+      window.removeEventListener('keydown', handleSpaceKey);
+      renderQuestion(0);
+    };
+
+    const handleSpaceKey = (e) => {
+      if (e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+        window.removeEventListener('keydown', handleSpaceKey);
+        renderQuestion(0);
+      }
+    };
+    window.addEventListener('keydown', handleSpaceKey);
+  };
+
+  // RENDER STAGE 2: QUESTION RUNNER (ENLARGED THEATER LAYOUT)
+  const renderQuestion = (index) => {
+    currentQIdx = index;
+    isAnswered = false;
+    if (timerInterval) clearInterval(timerInterval);
+
+    const currentQ = questions[currentQIdx];
+    let optsList = [];
+    let correctIdx = 0;
+    if (Array.isArray(currentQ.options) && currentQ.options.length > 0) {
+      optsList = currentQ.options;
+      correctIdx = currentQ.correctAnswer || 0;
+    } else if (currentQ.left && currentQ.right) {
+      optsList = [currentQ.left, currentQ.right];
+      correctIdx = (currentQ.correct === 'right' || currentQ.correctAnswer === 1) ? 1 : 0;
+    } else {
+      optsList = ['Đáp án A', 'Đáp án B', 'Đáp án C', 'Đáp án D'];
+    }
+
+    const progressPct = Math.round(((currentQIdx) / questions.length) * 100);
+
+    modal.innerHTML = `
+      <div style="background:#ffffff; border-radius:32px; width:95vw; max-width:1220px; box-shadow:0 35px 95px rgba(0,0,0,0.6); border:4px solid #3b82f6; overflow:hidden; animation:fadeIn 0.25s ease-out; display:flex; flex-direction:column;">
+        
+        <!-- HEADER (LARGE) -->
+        <div style="background:linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%); color:#fff; padding:1.25rem 2.2rem; display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #3b82f6;">
+          <div style="display:flex; align-items:center; gap:0.9rem;">
+            <span style="font-size:2.2rem;">🧑‍🎓</span>
+            <div>
+              <div style="font-weight:900; font-size:1.6rem; color:#facc15; font-family:var(--font-title);">${studentName}</div>
+              <div style="font-size:0.95rem; color:#cbd5e1; font-weight:700;">Lớp <b>${studentClass}</b> • Môn <b>${subName}</b></div>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:0.9rem;">
+            <span style="background:#eff6ff; color:#1d4ed8; font-weight:900; font-size:1.15rem; padding:0.5rem 1.4rem; border-radius:16px; border:2px solid #bfdbfe; box-shadow:0 2px 10px rgba(59,130,246,0.2);">
+              CÂU ${currentQIdx + 1} / ${questions.length}
+            </span>
+            <button id="close-student-quiz-modal" style="background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.25); color:#fff; width:40px; height:40px; border-radius:50%; font-size:1.4rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">&times;</button>
+          </div>
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div style="width:100%; height:8px; background:#e2e8f0;">
+          <div style="width:${progressPct}%; height:100%; background:linear-gradient(90deg, #3b82f6, #10b981); transition:width 0.3s ease;"></div>
+        </div>
+
+        <!-- QUESTION BODY (EXPANDED FOR PROJECTOR) -->
+        <div style="padding:2rem 2.4rem; display:flex; flex-direction:column; gap:1.6rem;">
+          
+          <!-- TOP TIMER & POINTS -->
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="background:#fef3c7; color:#b45309; font-weight:900; font-size:1rem; padding:0.4rem 1.1rem; border-radius:14px; border:1.5px solid #fde68a;">
+              🎯 +${currentQ.points || 100} Điểm / câu
+            </span>
+
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <div id="quiz-countdown-badge" style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:#fff; font-family:var(--font-title); font-size:1.8rem; font-weight:900; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(239,68,68,0.45); border:3px solid #fee2e2;">
+                10
+              </div>
+              <span style="font-size:1.05rem; font-weight:900; color:#dc2626;">GIÂY</span>
+            </div>
+          </div>
+
+          <!-- QUESTION CONTENT (HUGE READABLE TEXT) -->
+          <div style="background:#fefce8; border:3px solid #fde047; border-radius:24px; padding:1.75rem 2.25rem; box-shadow:0 6px 25px rgba(253,224,71,0.25); min-height:120px; display:flex; flex-direction:column; justify-content:center;">
+            ${currentQ.qImage ? `<div style="text-align:center; margin-bottom:1rem;"><img src="${currentQ.qImage}" style="max-height:280px; max-width:100%; border-radius:16px; border:2px solid #facc15;" /></div>` : ''}
+            <div style="font-family:var(--font-title); font-size:1.65rem; font-weight:900; color:#0f172a; line-height:1.55;">
+              ${currentQ.q || currentQ.questionText || currentQ.stmt || 'Nội dung câu hỏi kiến thức trọng tâm'}
+            </div>
+          </div>
+
+          <!-- 4 OPTIONS GRID (MASSIVE BUTTONS) -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;" id="quiz-options-container">
+            ${optsList.map((opt, i) => `
+              <button type="button" class="btn-quiz-option" data-opt-idx="${i}" style="background:#ffffff; border:3px solid #cbd5e1; border-radius:22px; padding:1.4rem 1.6rem; text-align:left; font-weight:800; font-size:1.35rem; color:#1e293b; cursor:pointer; transition:all 0.15s ease; display:flex; align-items:center; gap:0.9rem; box-shadow:0 4px 15px rgba(0,0,0,0.04); min-height:84px;">
+                <span style="font-size:1.8rem; flex-shrink:0;">${optPrefixes[i] || '🔘'}</span>
+                <span style="flex:1; line-height:1.35;">${opt}</span>
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- FEEDBACK BANNER (LARGE) -->
+          <div id="quiz-feedback-banner" style="display:none; border-radius:18px; padding:1.25rem 1.6rem; font-weight:900; font-size:1.25rem; animation:fadeIn 0.2s;"></div>
+
+          <!-- ACTION FOOTER -->
+          <div id="quiz-question-footer" style="display:none; justify-content:flex-end; border-top:2px solid #f1f5f9; padding-top:1.25rem;">
+            <button id="btn-next-question-or-finish" class="btn" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; font-weight:900; font-size:1.3rem; padding:1rem 2.8rem; border-radius:20px; border:none; cursor:pointer; box-shadow:0 8px 25px rgba(16,185,129,0.45); display:flex; align-items:center; gap:0.6rem;">
+              <span>${currentQIdx + 1 < questions.length ? '👉 CÂU TIẾP THEO' : '🏁 XEM BẢNG TỔNG KẾT ĐIỂM'}</span> ➔
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    modal.querySelector('#close-student-quiz-modal').onclick = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      modal.remove();
+    };
+
+    // Start Timer for Question
+    const timerBadge = modal.querySelector('#quiz-countdown-badge');
+    let timeLeft = currentQ.timeLimit || 10;
+    timerBadge.innerText = timeLeft;
+
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      if (timeLeft >= 0) {
+        timerBadge.innerText = timeLeft;
+        playSound('tick');
+        if (timeLeft <= 3) {
+          timerBadge.style.background = '#b91c1c';
+          timerBadge.style.animation = 'pulse 0.5s infinite';
+        }
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        if (!isAnswered) {
+          handleSelectAnswer(-1); // Timeout
+        }
+      }
+    }, 1000);
+
+    const handleSelectAnswer = (chosenIdx) => {
+      if (isAnswered) return;
+      isAnswered = true;
+      if (timerInterval) clearInterval(timerInterval);
+
+      const isCorrect = (chosenIdx === correctIdx);
+      const pts = isCorrect ? (currentQ.points || 100) : 0;
+      totalScoreEarned += pts;
+
+      sessionResults.push({
+        qIdx: currentQIdx,
+        question: currentQ.q || currentQ.questionText || '',
+        isCorrect: isCorrect,
+        points: pts,
+        userChoice: chosenIdx >= 0 ? optsList[chosenIdx] : 'Hết giờ',
+        correctChoice: optsList[correctIdx],
+        exp: currentQ.exp || ''
+      });
+
+      const optBtns = modal.querySelectorAll('.btn-quiz-option');
+      optBtns.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === correctIdx) {
+          btn.style.background = '#dcfce7';
+          btn.style.borderColor = '#16a34a';
+          btn.style.color = '#15803d';
+          btn.style.boxShadow = '0 0 20px rgba(22,163,74,0.4)';
+        } else if (i === chosenIdx) {
+          btn.style.background = '#fee2e2';
+          btn.style.borderColor = '#dc2626';
+          btn.style.color = '#991b1b';
+        }
+      });
+
+      const feedback = modal.querySelector('#quiz-feedback-banner');
+      const footer = modal.querySelector('#quiz-question-footer');
+
+      feedback.style.display = 'block';
+      if (isCorrect) {
+        playSound('correct');
+        feedback.style.background = '#dcfce7';
+        feedback.style.border = '2px solid #86efac';
+        feedback.style.color = '#15803d';
+        feedback.innerHTML = `🎉 <strong>CHÍNH XÁC 100%!</strong> (+${pts} Điểm) • Xuất sắc!`;
+      } else {
+        playSound('wrong');
+        feedback.style.background = '#fee2e2';
+        feedback.style.border = '2px solid #fca5a5';
+        feedback.style.color = '#991b1b';
+        feedback.innerHTML = `❌ <strong>CHƯA CHÍNH XÁC!</strong> Đáp án đúng: <strong>${optPrefixes[correctIdx]} ${optsList[correctIdx]}</strong>. ${currentQ.exp ? ('💡 ' + currentQ.exp) : ''}`;
+      }
+
+      footer.style.display = 'flex';
+      modal.querySelector('#btn-next-question-or-finish').onclick = () => {
+        if (currentQIdx + 1 < questions.length) {
+          renderQuestion(currentQIdx + 1);
+        } else {
+          renderStage3Summary();
+        }
+      };
+    };
+
+    modal.querySelectorAll('.btn-quiz-option').forEach(b => {
+      b.onclick = () => {
+        const idx = parseInt(b.getAttribute('data-opt-idx'));
+        handleSelectAnswer(idx);
+      };
+    });
+  };
+
+  // RENDER STAGE 3: FULL SUMMARY BOARD FOR STUDENT (ENLARGED)
+  const renderStage3Summary = () => {
+    playSound('victory');
+    const correctCount = sessionResults.filter(r => r.isCorrect).length;
+    const totalQ = questions.length;
+    const gradeScore = Math.round((correctCount / totalQ) * 100) / 10; // e.g. 8.0, 10.0
+
+    let rankLabel = 'Xuất Sắc ⭐⭐⭐';
+    let rankColor = '#15803d';
+    let rankBg = '#dcfce7';
+    if (gradeScore < 5) {
+      rankLabel = 'Cần Cố Gắng';
+      rankColor = '#b91c1c';
+      rankBg = '#fee2e2';
+    } else if (gradeScore < 7) {
+      rankLabel = 'Đạt / Khá';
+      rankColor = '#b45309';
+      rankBg = '#fef3c7';
+    } else if (gradeScore < 9) {
+      rankLabel = 'Giỏi ⭐⭐';
+      rankColor = '#1d4ed8';
+      rankBg = '#dbeafe';
+    }
+
+    modal.innerHTML = `
+      <div style="background:#ffffff; border-radius:32px; width:95vw; max-width:1150px; box-shadow:0 35px 95px rgba(0,0,0,0.6); border:4px solid #10b981; overflow:hidden; animation:zoomIn 0.3s ease-out; display:flex; flex-direction:column;">
+        
+        <!-- HEADER SUMMARY -->
+        <div style="background:linear-gradient(135deg, #065f46 0%, #047857 50%, #0f172a 100%); color:#fff; padding:1.75rem 2.5rem; text-align:center; border-bottom:4px solid #10b981;">
+          <div style="font-size:3.5rem; margin-bottom:0.25rem; animation:bounce 1.5s infinite;">🏆</div>
+          <h2 style="margin:0; font-family:var(--font-title); font-size:2rem; font-weight:900; color:#facc15;">
+            TỔNG KẾT KẾT QUẢ THỬ THÁCH BÀI HỌC
+          </h2>
+          <div style="font-size:1.5rem; font-weight:900; color:#ffffff; margin-top:0.5rem;">
+            Học sinh: <span style="color:#6ee7b7;">${studentName}</span> (Lớp ${studentClass})
+          </div>
+        </div>
+
+        <!-- SCORE HIGHLIGHTS (LARGE) -->
+        <div style="padding:2rem 2.5rem; display:flex; flex-direction:column; gap:1.6rem;">
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.25rem; text-align:center;">
+            <div style="background:#f8fafc; border:2px solid #cbd5e1; padding:1.25rem; border-radius:20px;">
+              <div style="font-size:0.95rem; font-weight:800; color:#64748b; text-transform:uppercase;">Số Câu Đúng</div>
+              <div style="font-family:var(--font-title); font-size:2.5rem; font-weight:900; color:#1e293b; margin-top:0.3rem;">
+                ${correctCount} / ${totalQ}
+              </div>
+            </div>
+
+            <div style="background:#eff6ff; border:3px solid #3b82f6; padding:1.25rem; border-radius:20px; box-shadow:0 6px 20px rgba(37,99,235,0.15);">
+              <div style="font-size:0.95rem; font-weight:900; color:#1e40af; text-transform:uppercase;">Điểm Tổng Kết (Thang 10)</div>
+              <div style="font-family:var(--font-title); font-size:2.8rem; font-weight:900; color:#1d4ed8; margin-top:0.3rem;">
+                ${gradeScore.toFixed(1)} <span style="font-size:1.3rem;">đ</span>
+              </div>
+            </div>
+
+            <div style="background:${rankBg}; border:2px solid ${rankColor}; padding:1.25rem; border-radius:20px;">
+              <div style="font-size:0.95rem; font-weight:800; color:${rankColor}; text-transform:uppercase;">Xếp Loại</div>
+              <div style="font-family:var(--font-title); font-size:1.6rem; font-weight:900; color:${rankColor}; margin-top:0.4rem;">
+                ${rankLabel}
+              </div>
+            </div>
+          </div>
+
+          <!-- DETAIL LIST OF QUESTIONS (LARGE) -->
+          <div style="background:#f8fafc; border:2px solid #e2e8f0; border-radius:20px; padding:1.25rem 1.6rem;">
+            <div style="font-weight:900; font-size:1.15rem; color:#1e293b; margin-bottom:0.8rem;">
+              📋 Chi Tiết Kết Quả Từng Câu Hỏi:
+            </div>
+            <div style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:0.6rem;">
+              ${sessionResults.map((r, idx) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1.5px solid #e2e8f0; padding:0.85rem 1.25rem; border-radius:14px; font-size:1.05rem;">
+                  <div style="font-weight:800; color:#334155;">
+                    <b>Câu ${idx + 1}:</b> ${r.question.length > 70 ? r.question.substring(0, 70) + '...' : r.question}
+                  </div>
+                  <span style="font-weight:900; color:${r.isCorrect ? '#16a34a' : '#dc2626'}; background:${r.isCorrect ? '#dcfce7' : '#fee2e2'}; padding:0.3rem 0.85rem; border-radius:10px; font-size:0.95rem;">
+                    ${r.isCorrect ? '✅ ĐÚNG' : '❌ SAI'} (+${r.points}đ)
+                  </span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- ACTIONS: PUSH TO GRADEBOOK & NEXT STUDENT -->
+          <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; border-top:2px solid #e2e8f0; padding-top:1.25rem;">
+            <button id="btn-save-summary-to-gradebook" class="btn" style="flex:1; min-width:260px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; font-weight:900; font-size:1.15rem; padding:1.1rem 1.8rem; border-radius:18px; border:none; cursor:pointer; box-shadow:0 6px 20px rgba(16,185,129,0.4); display:flex; align-items:center; justify-content:center; gap:0.6rem;">
+              <span>💾</span> LƯU ĐIỂM ${gradeScore.toFixed(1)} VÀO SỔ ĐIỂM (TX1)
+            </button>
+
+            <button id="btn-finish-and-next-student" class="btn" style="background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:#fff; font-weight:900; font-size:1.15rem; padding:1.1rem 1.8rem; border-radius:18px; border:none; cursor:pointer; box-shadow:0 6px 20px rgba(37,99,235,0.35); display:flex; align-items:center; gap:0.6rem;">
+              <span>🔄</span> MỜI BẠN TIẾP THEO LÊN BẢNG
+            </button>
+
+            <button id="btn-close-summary-modal" class="btn btn-secondary" style="font-weight:800; font-size:1.05rem; padding:1.1rem 1.6rem; border-radius:18px;">
+              Đóng
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    // Save to Gradebook
+    modal.querySelector('#btn-save-summary-to-gradebook').onclick = () => {
+      if (typeof db !== 'undefined' && db.addStudentScore) {
+        db.addStudentScore({
+          studentId: studentId,
+          subjectId: subjectId || 'toan',
+          scoreType: 'TX1',
+          score: gradeScore,
+          date: new Date().toISOString()
+        });
+      }
+      if (typeof window.app !== 'undefined' && window.app.showToast) {
+        window.app.showToast(`🎉 Đã lưu con điểm ${gradeScore.toFixed(1)} của bạn ${studentName} vào Sổ Điểm Thường Xuyên!`);
+      } else {
+        alert(`🎉 Đã lưu con điểm ${gradeScore.toFixed(1)} của bạn ${studentName} vào Sổ Điểm Thường Xuyên!`);
+      }
+      modal.querySelector('#btn-save-summary-to-gradebook').disabled = true;
+      modal.querySelector('#btn-save-summary-to-gradebook').innerText = '✅ ĐÃ LƯU VÀO SỔ ĐIỂM';
+      modal.querySelector('#btn-save-summary-to-gradebook').style.background = '#64748b';
+    };
+
+    modal.querySelector('#btn-finish-and-next-student').onclick = () => {
+      modal.remove();
+      if (typeof onNextRound === 'function') onNextRound();
+    };
+
+    modal.querySelector('#btn-close-summary-modal').onclick = () => modal.remove();
+  };
+
+  // If startImmediately is true, start Question 1 right away! Otherwise show stage 1 invite
+  if (startImmediately) {
+    renderQuestion(0);
+  } else {
+    renderStage1();
+  }
+};
+
+LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toan', passedQuestions = null) {
+  if (passedQuestions && Array.isArray(passedQuestions) && passedQuestions.length > 0) {
+    window._activeGameQuestions = passedQuestions;
+    if (typeof window.AITeachingTools !== 'undefined') window.AITeachingTools._luckyWheelQuestions = passedQuestions;
+  }
   if (typeof document === 'undefined') return;
 
   let cId = this._aiPickerSelectedClass || classId || '6A';
@@ -19579,6 +21057,10 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
     this._aiPickerSelectedSubject = subId;
     const sObj = allSubjects.find(s => s.id === subId);
     modal.querySelector('#lbl-wheel-sub-name').innerText = (sObj ? sObj.name : 'TOÁN').toUpperCase();
+    if (typeof window.AITeachingTools !== 'undefined' && window.AITeachingTools._getQuestionsForSubjectAndGrade) {
+      window._activeGameQuestions = window.AITeachingTools._getQuestionsForSubjectAndGrade('luckywheel', subId, activeGrade);
+      window.AITeachingTools._luckyWheelQuestions = window._activeGameQuestions;
+    }
   };
 
   // TX Radio Pills Listener
@@ -19833,6 +21315,77 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
         // Speak aloud "Mời em [Tên Học Sinh] lên bảng" (Default Hanoi Female Voice)
         const selectedVoice = modal.querySelector('#sel-wheel-voice-modal')?.value || 'vi-VN';
         if (typeof window.speakStudentName === 'function') window.speakStudentName(winnerName, selectedVoice); else speakStudentName(winnerName);
+
+        // 🌟 LAUNCH INTERACTIVE QUESTION CHALLENGE MODAL (2-STAGE FLOW: INVITE FIRST -> CLICK START TO RUN QUIZ & TIMER)
+        setTimeout(() => {
+          if (typeof window.openStudentInteractiveQuestionChallenge === 'function') {
+            window.openStudentInteractiveQuestionChallenge({
+              student: currentWinner,
+              gameTitle: '5. VÒNG QUAY CHIẾC NÓN KỲ DIỆU',
+              gameKey: 'luckywheel',
+              subjectId: subId,
+              grade: activeGrade,
+              onNextRound: () => {
+                const spinBtn = modal.querySelector('#btn-spin-wheel');
+                if (spinBtn) spinBtn.click();
+              }
+            });
+          }
+        }, 1200);
+
+        // Update Winner Card with Instant Big Start Button
+        const winnerCardEl = modal.querySelector('#wheel-winner-card');
+        if (winnerCardEl) {
+          winnerCardEl.innerHTML = `
+            <div style="font-size:3rem; margin-bottom:0.25rem; animation:bounce 1.5s infinite;">🎓</div>
+            <h2 id="wheel-winner-name" style="margin:0; font-size:1.6rem; font-weight:900; color:#facc15; text-shadow:0 0 12px rgba(250,204,21,0.5);">
+              ${winnerName}
+            </h2>
+            <p id="wheel-winner-code" style="margin:0.35rem 0 0.75rem 0; font-size:0.85rem; color:#cbd5e1; font-weight:600;">
+              Mã HS: ${currentWinner.code || currentWinner.id} • Lớp ${cId}
+            </p>
+            <button id="btn-start-wheel-quiz-card" style="width:100%; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; font-family:var(--font-title); font-size:1.05rem; font-weight:900; padding:0.85rem 1rem; border-radius:14px; border:2px solid #86efac; cursor:pointer; box-shadow:0 6px 20px rgba(16,185,129,0.5); display:flex; align-items:center; justify-content:center; gap:0.5rem; animation:pulse 1.5s infinite;">
+              <span>▶️</span> BẮT ĐẦU TRẢ LỜI CÂU HỎI (SPACE)
+            </button>
+          `;
+
+          const startCardBtn = winnerCardEl.querySelector('#btn-start-wheel-quiz-card');
+          if (startCardBtn) {
+            startCardBtn.onclick = () => {
+              if (typeof window.openStudentInteractiveQuestionChallenge === 'function') {
+                window.openStudentInteractiveQuestionChallenge({
+                  student: currentWinner,
+                  gameTitle: '5. VÒNG QUAY CHIẾC NÓN KỲ DIỆU',
+                  gameKey: 'luckywheel',
+                  subjectId: subId,
+                  grade: activeGrade,
+                  startImmediately: true,
+                  onNextRound: () => {
+                    const spinBtn = modal.querySelector('#btn-spin-wheel');
+                    if (spinBtn) spinBtn.click();
+                  }
+                });
+              }
+            };
+          }
+        }
+
+        // 🌟 LAUNCH INTERACTIVE QUESTION CHALLENGE MODAL IMMEDIATELY
+        setTimeout(() => {
+          if (typeof window.openStudentInteractiveQuestionChallenge === 'function') {
+            window.openStudentInteractiveQuestionChallenge({
+              student: currentWinner,
+              gameTitle: '5. VÒNG QUAY CHIẾC NÓN KỲ DIỆU',
+              gameKey: 'luckywheel',
+              subjectId: subId,
+              grade: activeGrade,
+              onNextRound: () => {
+                const spinBtn = modal.querySelector('#btn-spin-wheel');
+                if (spinBtn) spinBtn.click();
+              }
+            });
+          }
+        }, 500);
 
         if (typeof this.showToast === 'function') {
           this.showToast(`🎉 Vòng quay chọn: ${winnerName}!`);
@@ -20262,7 +21815,7 @@ LMSApp.prototype.render_ai_picker = function(dom) {
               <!-- HÌNH MẪU LỚP HỌC VỚI HIỆU ỨNG TIA LASER & KHUNG XANH NHẬN DIỆN KHUÔN MẶT CHUẨN MÔ PHỎNG AI -->
               <div id="ai-classroom-viewport" style="position: relative; width: 100%; height: 100%; min-height: 480px; border-radius: 18px; overflow: hidden; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);">
                   <!-- HÌNH ẢNH THẬT LỚP HỌC VỚI HỌC SINH -->
-                  <img src="./real_classroom.png" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; border-radius: 18px;" alt="Lớp học THCS Ama Trang Lơng">
+                  <img src="./real_classroom.png" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; border-radius: 18px;" alt="Lớp học TH-THCS Ama Trang Lơng">
                 
                 <!-- TIA LASER QUÉT RÀ QUA LỚP HỌC -->
                 <div id="ai-scan-laser" style="position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, transparent, #ef4444, #f59e0b, #ef4444, transparent); box-shadow: 0 0 15px #ef4444, 0 0 25px #ef4444; opacity: 0.85; pointer-events: none; z-index: 5; transition: top 0.05s linear;"></div>
@@ -20593,33 +22146,212 @@ LMSApp.prototype.selectYearCustom = function(yearId) {
 };
 
 LMSApp.prototype.exportTeachersExcel = function() {
-  const teachers = db.getTeachers().map(t => ({
-    ...t,
-    username: t.username || (db.generateUniqueTeacherUsername ? db.generateUniqueTeacherUsername(t) : ('thcsamtl_' + t.id)),
-    password: t.password || 'gv123456',
-    classes: t.classes || []
-  }));
-  const csvHeader = "STT,Họ và tên Giáo viên,Ngày sinh,Số điện thoại,Môn phụ trách,Phân công lớp dạy,Lớp Chủ nhiệm,Tên đăng nhập,Mật khẩu\n";
-  const csvRows = teachers.map((t, idx) => {
-    const sObj = subjects.find(s => s.id === t.subjectId);
-    const subjectName = sObj ? sObj.name : 'Chưa phân công';
-    const classesStr = t.classes.length > 0 ? t.classes.map(c => 'Lớp ' + c).join(';') : 'Chưa phân công';
-    const homeroomStr = t.isHomeroom ? 'Chủ nhiệm ' + t.isHomeroom : 'Không';
-    return (idx + 1) + ',"' + t.name + '","","' + (t.phone || '') + '","' + subjectName + '","' + classesStr + '","' + homeroomStr + '","' + t.username + '","' + t.password + '"';
-  }).join('\n');
+  try {
+    const teachersList = (typeof db !== 'undefined' && db.getTeachers) ? db.getTeachers() : [];
+    const subjectsList = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
 
-  const blob = new Blob([bom, csvHeader + csvRows], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', 'Danh_sach_doi_ngu_giao_vien_THCS_Ama_Trang_Long.csv');
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-  this.showToast('📊 Đã xuất danh sách giáo viên ra tệp Excel (.csv) thành công!');
+    if (teachersList.length === 0) {
+      if (this.showToast) this.showToast('⚠️ Không có dữ liệu giáo viên để xuất Excel!');
+      else alert('⚠️ Không có dữ liệu giáo viên để xuất Excel!');
+      return;
+    }
+
+    const teachers = teachersList.map(t => ({
+      ...t,
+      username: t.username || (db.generateUniqueTeacherUsername ? db.generateUniqueTeacherUsername(t) : ('thcsamtl_' + t.id)),
+      password: t.password || 'gv123456',
+      classes: Array.isArray(t.classes) ? t.classes : []
+    }));
+
+    // Generate clean HTML Spreadsheet (.xls) compatible with Microsoft Excel
+    let htmlContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <!--[if gte mso 9]>
+        <xml>
+          <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+              <x:ExcelWorksheet>
+                <x:Name>Danh Sách Giáo Viên</x:Name>
+                <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+              </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+          </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+        <style>
+          table { border-collapse: collapse; font-family: 'Segoe UI', Arial, sans-serif; }
+          th { background-color: #15803d; color: #ffffff; font-weight: bold; border: 1px solid #000000; text-align: center; padding: 8px; }
+          td { border: 1px solid #cbd5e1; padding: 6px 10px; font-size: 11pt; }
+          .text-center { text-align: center; }
+          .title { font-size: 16pt; font-weight: bold; color: #1e3a8a; text-align: center; margin-bottom: 10px; }
+        </style>
+      </head>
+      <body>
+        <table>
+          <tr><td colspan="9" class="title" style="border:none;font-size:16pt;font-weight:bold;text-align:center;color:#1e3a8a;">DANH SÁCH ĐỘI NGŨ GIÁO VIÊN - TRƯỜNG TH-THCS AMA TRANG LƠNG</td></tr>
+          <tr><td colspan="9" style="border:none;text-align:center;font-style:italic;color:#64748b;">(Xuất từ Hệ thống Quản trị THCS LMS - Năm học 2025-2026)</td></tr>
+          <tr><td colspan="9" style="border:none;height:10px;"></td></tr>
+          <thead>
+            <tr>
+              <th style="background-color:#15803d;color:#fff;font-weight:bold;width:50px;">STT</th>
+              <th style="background-color:#15803d;color:#fff;font-weight:bold;width:80px;">Mã GV</th>
+              <th style="background-color:#15803d;color:#fff;font-weight:bold;width:220px;">Họ và tên Giáo viên</th>
+              <th style="background-color:#15803d;color:#fff;font-weight:bold;width:120px;">Số điện thoại</th>
+              <th style="background-color:#15803d;color:#fff;font-weight:bold;width:160px;">Môn phụ trách</th>
+              <th style="background-color:#15803d;color:#fff;font-weight:bold;width:220px;">Phân công lớp dạy</th>
+              <th style="background-color:#15803d;color:#fff;font-weight:bold;width:130px;">Lớp Chủ nhiệm</th>
+              <th style="background-color:#15803d;color:#fff;font-weight:bold;width:150px;">Tên đăng nhập</th>
+              <th style="background-color:#15803d;color:#fff;font-weight:bold;width:120px;">Mật khẩu</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    teachers.forEach((t, idx) => {
+      const sObj = subjectsList.find(s => s.id === t.subjectId);
+      const subjectName = sObj ? sObj.name : 'Chưa phân công';
+      const classesStr = t.classes.length > 0 ? t.classes.map(c => 'Lớp ' + c).join('; ') : 'Chưa phân công';
+      const homeroomStr = t.isHomeroom ? ('Chủ nhiệm Lớp ' + t.isHomeroom) : 'Không';
+      const bgColor = idx % 2 === 0 ? '#ffffff' : '#f8fafc';
+
+      htmlContent += `
+        <tr style="background-color:${bgColor};">
+          <td style="text-align:center;border:1px solid #cbd5e1;">${idx + 1}</td>
+          <td style="text-align:center;font-weight:bold;color:#2563eb;border:1px solid #cbd5e1;">${t.id || ('GV' + (idx+1))}</td>
+          <td style="font-weight:bold;border:1px solid #cbd5e1;">${t.name || ''}</td>
+          <td style="text-align:center;border:1px solid #cbd5e1;">${t.phone || ''}</td>
+          <td style="border:1px solid #cbd5e1;">${subjectName}</td>
+          <td style="border:1px solid #cbd5e1;">${classesStr}</td>
+          <td style="text-align:center;border:1px solid #cbd5e1;">${homeroomStr}</td>
+          <td style="font-weight:bold;color:#0284c7;border:1px solid #cbd5e1;">${t.username}</td>
+          <td style="text-align:center;border:1px solid #cbd5e1;">${t.password}</td>
+        </tr>
+      `;
+    });
+
+    htmlContent += `
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\uFEFF' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Danh_sach_doi_ngu_giao_vien_TH_THCS_Ama_Trang_Long.xls';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    if (this.showToast) this.showToast('📊 Đã xuất tệp Excel danh sách giáo viên thành công!');
+    else alert('📊 Đã xuất tệp Excel danh sách giáo viên thành công!');
+  } catch(err) {
+    console.error('Export teachers excel error:', err);
+    alert('❌ Lỗi khi xuất tệp Excel: ' + err.message);
+  }
 };
 
+LMSApp.prototype.exportUsersExcel = function() {
+  try {
+    const users = (typeof db !== 'undefined' && db.getUsers) ? db.getUsers() : [];
+    if (users.length === 0) {
+      if (this.showToast) this.showToast('⚠️ Không có dữ liệu người dùng để xuất!');
+      return;
+    }
+    let htmlContent = `
+      <html xmlns:x="urn:schemas-microsoft-com:office:excel">
+      <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
+      <body>
+        <table border="1">
+          <thead>
+            <tr style="background:#2563eb;color:#fff;font-weight:bold;">
+              <th>STT</th><th>Mã ID</th><th>Tên đăng nhập</th><th>Họ và tên</th><th>Vai trò / Nhóm</th><th>Email</th><th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${users.map((u, i) => `
+              <tr>
+                <td style="text-align:center;">${i+1}</td>
+                <td>${u.id}</td>
+                <td><b>${u.username}</b></td>
+                <td>${u.name || u.fullName || ''}</td>
+                <td>${u.role || u.group || 'Người dùng'}</td>
+                <td>${u.email || ''}</td>
+                <td>${u.status === 'locked' ? 'Khóa' : 'Hoạt động'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+    const blob = new Blob(['\uFEFF' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Danh_sach_nguoi_dung_TH_THCS_Ama_Trang_Long.xls';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    if (this.showToast) this.showToast('📊 Đã xuất tệp Excel người dùng thành công!');
+  } catch(e) {
+    console.error(e);
+  }
+};
+
+LMSApp.prototype.exportClassesExcel = function() {
+  try {
+    const classes = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
+    if (classes.length === 0) {
+      if (this.showToast) this.showToast('⚠️ Không có dữ liệu lớp học để xuất!');
+      return;
+    }
+    let htmlContent = `
+      <html xmlns:x="urn:schemas-microsoft-com:office:excel">
+      <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>
+      <body>
+        <table border="1">
+          <thead>
+            <tr style="background:#059669;color:#fff;font-weight:bold;">
+              <th>STT</th><th>Mã Lớp</th><th>Tên Lớp</th><th>Khối</th><th>Sĩ số</th><th>Giáo viên Chủ nhiệm</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${classes.map((c, i) => `
+              <tr>
+                <td style="text-align:center;">${i+1}</td>
+                <td>${c.id}</td>
+                <td><b>${c.name}</b></td>
+                <td style="text-align:center;">Khối ${c.grade}</td>
+                <td style="text-align:center;">${c.studentCount || 40} HS</td>
+                <td>${c.homeroomTeacher || 'Chưa phân công'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+    const blob = new Blob(['\uFEFF' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Danh_sach_lop_hoc_TH_THCS_Ama_Trang_Long.xls';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    if (this.showToast) this.showToast('📊 Đã xuất tệp Excel lớp học thành công!');
+  } catch(e) {
+    console.error(e);
+  }
+};
 
 LMSApp.prototype.render_ai_hub = function(dom) {
   if (window.AITeachingTools && typeof window.AITeachingTools.render === 'function') {
@@ -20647,7 +22379,11 @@ if (typeof window !== 'undefined') {
 // ══════════════════════════════════════════════════════════════════════════════
 // GAME AI ĐÀO VÀNG CHỌN HỌC SINH & GHI ĐIỂM THƯỜNG XUYÊN (THÔNG TƯ 22) - NÂNG CẤP FULL
 // ══════════════════════════════════════════════════════════════════════════════
-LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan') {
+LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan', passedQuestions = null) {
+  if (passedQuestions && Array.isArray(passedQuestions) && passedQuestions.length > 0) {
+    window._activeGameQuestions = passedQuestions;
+    if (typeof window.AITeachingTools !== 'undefined') window.AITeachingTools._goldMinerQuestions = passedQuestions;
+  }
   const existing = document.getElementById('gold-miner-modal');
   if (existing) existing.remove();
 
@@ -21461,16 +23197,54 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
       <div style="font-size:1.6rem; font-weight:900; color:#facc15; font-family:var(--font-title); margin-bottom:0.3rem; animation:popIn 0.3s ease-out;">
         ${student.name}
       </div>
-      <div style="font-size:0.85rem; color:#cbd5e1; font-weight:600;">Mã HS: ${student.id} - Lớp ${cId}</div>
+      <div style="font-size:0.85rem; color:#cbd5e1; font-weight:600; margin-bottom:0.75rem;">Mã HS: ${student.id} - Lớp ${cId}</div>
+      <button id="btn-start-miner-quiz-card" style="width:100%; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; font-family:var(--font-title); font-size:1.05rem; font-weight:900; padding:0.85rem 1rem; border-radius:14px; border:2px solid #86efac; cursor:pointer; box-shadow:0 6px 20px rgba(16,185,129,0.5); display:flex; align-items:center; justify-content:center; gap:0.5rem; animation:pulse 1.5s infinite;">
+        <span>▶️</span> BẮT ĐẦU TRẢ LỜI CÂU HỎI (SPACE)
+      </button>
     `;
+
+    const startMinerBtn = winnerDisp.querySelector('#btn-start-miner-quiz-card');
+    if (startMinerBtn) {
+      startMinerBtn.onclick = () => {
+        if (typeof window.openStudentInteractiveQuestionChallenge === 'function') {
+          window.openStudentInteractiveQuestionChallenge({
+            student: student,
+            gameTitle: '6. GAME AI ĐÀO VÀNG GỌI HỌC SINH',
+            gameKey: 'goldminer',
+            subjectId: sId,
+            grade: activeGrade,
+            startImmediately: true,
+            onNextRound: () => {
+              if (hook) hook.state = 'swinging';
+            }
+          });
+        }
+      };
+    }
 
     // 🎆 Launch bursting multi-color fireworks!
     launchBurstFireworks();
 
     if (typeof window.speakStudentName === 'function') {
       const selectedVoice = modal.querySelector('#miner-sel-voice')?.value || 'vi-VN';
-window.speakStudentName(student.name, selectedVoice);
+      window.speakStudentName(student.name, selectedVoice);
     }
+
+    // 🌟 LAUNCH INTERACTIVE QUESTION CHALLENGE MODAL FOR GOLD MINER IMMEDIATELY
+    setTimeout(() => {
+      if (typeof window.openStudentInteractiveQuestionChallenge === 'function') {
+        window.openStudentInteractiveQuestionChallenge({
+          student: student,
+          gameTitle: '6. GAME AI ĐÀO VÀNG GỌI HỌC SINH',
+          gameKey: 'goldminer',
+          subjectId: sId,
+          grade: activeGrade,
+          onNextRound: () => {
+            if (hook) hook.state = 'swinging';
+          }
+        });
+      }
+    }, 500);
   };
 
   // Reload Class & Randomize Nugget Positions
