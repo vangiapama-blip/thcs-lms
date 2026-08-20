@@ -4850,7 +4850,8 @@ async presentLiveLecture(fileId, isStudentAutoplay = false) {
     const classes = db.getClasses();
 
     const filteredTeachers = allTeachers.filter(t => {
-      const matchSubject = this.teacherSubjectFilter === 'all' || t.subjectId === this.teacherSubjectFilter;
+      const tSubIds = (t.subjects && Array.isArray(t.subjects) && t.subjects.length > 0) ? t.subjects : (t.subjectId ? [t.subjectId] : []);
+      const matchSubject = this.teacherSubjectFilter === 'all' || tSubIds.includes(this.teacherSubjectFilter) || t.subjectId === this.teacherSubjectFilter;
       const kw = this.teacherSearchKeyword.trim().toLowerCase();
       const matchKw = !kw || 
                       t.name.toLowerCase().includes(kw) || 
@@ -4916,7 +4917,54 @@ async presentLiveLecture(fileId, isStudentAutoplay = false) {
             </td>
             <td style="white-space: nowrap;">${dobFormatted}</td>
             <td style="white-space: nowrap;"><span style="font-family: monospace; font-size: 0.9rem; white-space: nowrap;">${t.phone || '---'}</span></td>
-            <td style="white-space: nowrap;"><strong style="color: #0284c7; white-space: nowrap;">${subjectName}</strong></td>
+            <td style="text-align: center; white-space: nowrap;">
+              ${(() => {
+                const tSubIds = (t.subjects && Array.isArray(t.subjects) && t.subjects.length > 0) ? t.subjects : (t.subjectId ? [t.subjectId] : []);
+                const assignedSubObjs = subjects.filter(s => tSubIds.includes(s.id));
+                let btnLabel = '📚 Chọn môn (0)';
+                if (assignedSubObjs.length === 1) {
+                  btnLabel = `📚 ${assignedSubObjs[0].name}`;
+                } else if (assignedSubObjs.length === 2) {
+                  btnLabel = `📚 ${assignedSubObjs[0].name}, ${assignedSubObjs[1].name}`;
+                } else if (assignedSubObjs.length >= 3) {
+                  btnLabel = `📚 ${assignedSubObjs.length} môn phụ trách`;
+                }
+
+                return `
+                  <div class="teacher-subject-menu-wrapper" style="position: relative; display: inline-block; white-space: nowrap;">
+                    <button class="btn-toggle-teacher-subject-menu" data-teacher-id="${t.id}" style="background: #f0fdf4; color: #166534; border: 1.5px solid #bbf7d0; border-radius: 20px; padding: 0.38rem 0.85rem; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s ease; font-family: var(--font-body); white-space: nowrap;">
+                      <span>${btnLabel}</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron-icon-sub" style="transition: transform 0.2s ease; opacity: 0.75; margin-left: 0.15rem;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+
+                    <div id="teacher-subject-dropdown-${t.id}" class="teacher-subject-dropdown-menu" style="display: none; position: absolute; top: 110%; left: 0; z-index: 105; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 0.85rem 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); min-width: 230px; flex-direction: column; gap: 0.65rem;">
+                      <div style="font-size: 0.75rem; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.35rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Tích Chọn Các Môn Dạy:</span>
+                        <span style="background: #dcfce7; color: #166534; padding: 0.1rem 0.45rem; border-radius: 10px; font-size: 0.75rem; font-weight:800;">${tSubIds.length} môn</span>
+                      </div>
+                      
+                      <div style="display: flex; flex-direction: column; gap: 0.35rem; max-height: 200px; overflow-y: auto;">
+                        ${subjects.map(s => {
+                          const isSelected = tSubIds.includes(s.id);
+                          return `
+                            <label class="teacher-subject-item-checkbox" style="padding: 0.4rem 0.65rem; border-radius: 8px; font-size: 0.82rem; font-weight: ${isSelected ? '800' : '600'}; background: ${isSelected ? '#f0fdf4' : '#ffffff'}; color: ${isSelected ? '#166534' : '#334155'}; border: 1px solid ${isSelected ? '#86efac' : '#e2e8f0'}; cursor: pointer; display: flex; align-items: center; gap: 0.55rem; transition: all 0.15s;">
+                              <input type="checkbox" class="chk-teacher-subject" data-teacher-id="${t.id}" data-subject-id="${s.id}" ${isSelected ? 'checked' : ''} style="width: 16px; height: 16px; accent-color: #16a34a; cursor: pointer;">
+                              <span style="flex:1;">${s.name}</span>
+                            </label>
+                          `;
+                        }).join('')}
+                      </div>
+
+                      <div style="border-top: 1px solid #f1f5f9; padding-top: 0.5rem; margin-top: 0.2rem; display:flex; gap:0.4rem;">
+                        <button class="btn btn-secondary btn-sm btn-open-teacher-assign" data-teacher-id="${t.id}" style="flex:1; font-weight: 700; font-family: var(--font-title); padding: 0.45rem; font-size: 0.8rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem; box-shadow: 0 4px 10px rgba(16,185,129,0.25);" title="Phân công chuyên sâu">
+                          📋 Phân công lớp
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              })()}
+            </td>
             <td style="text-align: center; white-space: nowrap;">${collapsibleClassMenu}</td>
             <td style="text-align: center; white-space: nowrap;">${homeroomBadge}</td>
             <td style="white-space: nowrap;"><code style="background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 6px; font-weight: 500; color: #0284c7; font-size: 0.9rem; white-space: nowrap;">${t.username}</code></td>
@@ -5177,6 +5225,74 @@ async presentLiveLecture(fileId, isStudentAutoplay = false) {
         bar.style.display = count > 0 ? 'flex' : 'none';
       }
     };
+
+    // Collapsible Teacher Subject Menu Toggle (Xổ ra / Thu lại chọn môn)
+    dom.querySelectorAll('.btn-toggle-teacher-subject-menu').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const tId = btn.getAttribute('data-teacher-id');
+        const menu = dom.querySelector(`#teacher-subject-dropdown-${tId}`);
+        const chevron = btn.querySelector('.chevron-icon-sub');
+
+        // Close any other open teacher dropdowns first
+        dom.querySelectorAll('.teacher-subject-dropdown-menu, .teacher-class-dropdown-menu').forEach(m => {
+          if (m.id !== `teacher-subject-dropdown-${tId}`) {
+            m.style.display = 'none';
+          }
+        });
+        dom.querySelectorAll('.chevron-icon-sub, .chevron-icon').forEach(ch => {
+          if (ch !== chevron) ch.style.transform = 'rotate(0deg)';
+        });
+
+        if (menu) {
+          const isOpen = menu.style.display === 'flex';
+          menu.style.display = isOpen ? 'none' : 'flex';
+          if (chevron) chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+      };
+    });
+
+    // Multi-subject Checkbox Change handler
+    dom.querySelectorAll('.chk-teacher-subject').forEach(chk => {
+      chk.onchange = (e) => {
+        e.stopPropagation();
+        const tId = chk.getAttribute('data-teacher-id');
+        const sId = chk.getAttribute('data-subject-id');
+        const isChecked = chk.checked;
+
+        const teacher = db.getTeacherById ? db.getTeacherById(tId) : db.state.teachers.find(t => t.id === tId);
+        if (teacher) {
+          if (!Array.isArray(teacher.subjects)) {
+            teacher.subjects = teacher.subjectId ? [teacher.subjectId] : [];
+          }
+          if (isChecked) {
+            if (!teacher.subjects.includes(sId)) teacher.subjects.push(sId);
+          } else {
+            teacher.subjects = teacher.subjects.filter(s => s !== sId);
+          }
+          teacher.subjectId = teacher.subjects[0] || '';
+          db.save();
+
+          const subObj = db.getSubjects().find(s => s.id === sId);
+          const subName = subObj ? subObj.name : sId;
+          if (this.showToast) {
+            this.showToast(isChecked ? `✅ Đã thêm môn "${subName}" cho GV ${teacher.name}!` : `ℹ️ Đã bỏ môn "${subName}" khỏi GV ${teacher.name}!`);
+          }
+          this.render_teachers(dom);
+        }
+      };
+    });
+
+    // Close subject dropdowns when clicking outside
+    if (!window.teacherSubjectOutsideListenerAttached && document.addEventListener) {
+      window.teacherSubjectOutsideListenerAttached = true;
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.teacher-subject-menu-wrapper')) {
+          document.querySelectorAll('.teacher-subject-dropdown-menu').forEach(m => m.style.display = 'none');
+          document.querySelectorAll('.chevron-icon-sub').forEach(ch => ch.style.transform = 'rotate(0deg)');
+        }
+      });
+    }
 
     // Collapsible Teacher Class Menu Toggle (Xổ ra / Thu lại)
     dom.querySelectorAll('.btn-toggle-teacher-class-menu').forEach(btn => {
