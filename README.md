@@ -1,33 +1,17 @@
-# Hệ thống LMS THCS Chu Văn An - Tích hợp Trợ lý AI (GDPT 2018)
+# Hệ thống LMS Trường TH - THCS AMA TRANG LƠNG (Dliê Ya, Đắk Lắk) - Tích hợp Trợ lý AI (GDPT 2018)
 
-Dự án này là một ứng dụng web Single Page Application (SPA) cao cấp, mô phỏng toàn bộ quy trình vận hành của một hệ thống quản lý học tập (LMS) dành cho cấp Trung học cơ sở (THCS).
+Dự án Hệ thống Quản lý Học tập & Khảo thí Trực tuyến (LMS AI Thông minh) dành riêng cho **Trường TH - THCS AMA TRANG LƠNG, Dliê Ya, Đắk Lắk**.
 
-## ✨ Điểm nổi bật
-1. **Premium Glassmorphism UX/UI**: Thiết kế hiện đại với tông màu tối huyền ảo, bo góc mềm mại, đổ bóng sâu và các hiệu ứng chuyển động mượt mà (micro-animations).
-2. **Role Switcher tiện lợi**: Thanh công cụ phía trên cho phép bạn chuyển đổi nhanh giữa 4 vai trò:
-   - **Quản trị viên (Admin)**: Khởi tạo trường học, xếp lớp, quản lý năm học mới, sao lưu/phục hồi dữ liệu, xuất Excel/PDF, kết thúc năm học.
-   - **Giáo viên (Teacher)**: Thiết lập chương trình giảng dạy, quản lý học liệu, soạn bài giảng, tạo ngân hàng đề thi trắc nghiệm & tự luận, giao bài tập, điểm danh chuyên cần, liên lạc phụ huynh.
-   - **Học sinh (Student)**: Học bài, làm bài tập về nhà, thi trắc nghiệm trực tuyến có đếm ngược thời gian tự động, xem điểm thi và học bạ.
-   - **Phụ huynh (Parent)**: Giám sát kết quả học tập của con, theo dõi chuyên cần và nhắn tin trao đổi với giáo viên bộ môn.
-3. **Trợ lý AI thông minh (AI Assistant Hub)**: Hỗ trợ giáo viên sinh tự động giáo án HTML chi tiết, sinh danh sách câu hỏi trắc nghiệm/tự luận theo chủ đề kiến thức, và gợi ý nhận xét kết quả học bạ tức thì.
-4. **LocalStorage Persistence**: Dữ liệu được lưu trữ tự động trong trình duyệt của bạn, giúp duy trì trạng thái khi tải lại trang (F5).
-
-## 🚀 Hướng dẫn khởi chạy ứng dụng
-Có hai cách để khởi chạy ứng dụng:
-
-### Cách 1: Chạy trực tiếp (Không cần cài đặt)
-Mở trực tiếp tệp tin `index.html` bằng trình duyệt web của bạn (Double click vào file `index.html` hoặc chuột phải chọn Open with Chrome/Edge/Firefox).
-
-### Cách 2: Chạy qua Live Server (Khuyên dùng)
-Nếu bạn có Node.js cài sẵn trên máy:
-1. Mở cửa sổ terminal tại thư mục này.
-2. Chạy lệnh:
-   ```bash
-   npx live-server
-   # hoặc chạy bằng vite
-   npx -y vite
-   ```
-3. Truy cập địa chỉ hiển thị trên màn hình terminal (thường là `http://localhost:8080` hoặc `http://localhost:5173`).
+## ✨ Điểm nổi bật của hệ thống
+1. **Giao diện Đồ họa Trong Sáng & Hiện Đại**: Thiết kế thanh lịch, phối màu Mesh Gradient chuẩn sư phạm, tương thích hoàn hảo trên máy tính và điện thoại.
+2. **Hệ thống 4 Vai trò Đồng bộ**:
+   - **Quản trị viên (Admin)**: Quản trị thông tin trường, xếp lớp, quản lý năm học mới, sao lưu/phục hồi dữ liệu, xuất Excel Thông tư 22.
+   - **Giáo viên (Teacher)**: Bảng điều khiển giảng dạy & KPI cá nhân hóa, soạn KHBD 5512, tạo đề kiểm tra TX/GK/CK/Quizizz, chấm điểm tự động, sổ liên lạc điện tử 2 chiều.
+   - **Học sinh (Student)**: Phòng học trực tuyến, thi trắc nghiệm giám sát AI chống gian lận (ESC, F11, F12, Alt+Tab, Chuột phải), học bạ điện tử cá nhân.
+   - **Phụ huynh (Parent)**: Sổ liên lạc gia đình & nhà trường, theo dõi điểm số, chuyên cần và gửi đơn xin phép nghỉ học trực tuyến.
+3. **Giám sát Thi Trực Tuyến Chống Gian Lận (AI Proctoring)**: Tích hợp Camera AI HUD, đo âm thanh Micro AI, khóa toàn màn hình tự động và cảnh báo vi phạm tức thì.
+4. **Trợ lý AI & Kho 15 Game Giáo Dục**: Tích hợp các trò chơi tương tác như Đào Vàng, Đấu Trường Quizizz, AI Flashcard, Vòng Quay May Mắn...
 
 ---
-Chúc bạn có những trải nghiệm tuyệt vời cùng Hệ thống LMS THCS Chu Văn An!
+🏫 **Đơn vị**: Trường TH - THCS Ama Trang Lơng, Dliê Ya, Đắk Lắk  
+⚡ **Phát triển bởi**: Thầy Chu Văn Giáp (Điện thoại / Zalo: 0397800689)
