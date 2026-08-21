@@ -85,7 +85,8 @@ window.AITeachingTools = {
       plickers: 'Quét Thẻ Plickers AI',
       mysterypuzzle: 'Lật Mảnh Ghép Bí Ẩn',
       crossword: 'Ô Chữ Khóa Bí Mật',
-      wordhunt: 'Đuổi Hình Bắt Chữ'
+      wordhunt: 'Đuổi Hình Bắt Chữ',
+      multiverse: 'Đấu Trường Đa Vũ Trụ'
     };
     return TOOL_NAMES[toolKey] || 'Công Cụ Giảng Dạy';
   },
@@ -109,7 +110,8 @@ window.AITeachingTools = {
       plickers: '📇',
       mysterypuzzle: '🧩',
       crossword: '🔤',
-      wordhunt: '🖼️'
+      wordhunt: '🖼️',
+      multiverse: '🌌'
     };
     return TOOL_ICONS[toolKey] || '🎮';
   },
@@ -249,6 +251,10 @@ window.AITeachingTools = {
   },
 
   // 2. MODAL THƯ VIỆN DÙNG CHUNG CỦA TOÀN TRƯỜNG (BỘ LỌC TÌM KIẾM ĐA CHIỀU)
+  showSavedToolsModal(filterToolKey = null, filterGrade = null, filterSubject = null) {
+    return this.showSharedToolsLibraryModal(filterToolKey, filterGrade, filterSubject);
+  },
+
   showSharedToolsLibraryModal(filterToolKey = null, filterGrade = null, filterSubject = null) {
     const oldModal = document.getElementById('shared-tools-library-modal');
     if (oldModal) oldModal.remove();
@@ -487,6 +493,7 @@ window.AITeachingTools = {
             <div>
               <select id="lib-filter-tool" style="width:100%; padding:0.6rem 0.85rem; border-radius:12px; border:1.5px solid #cbd5e1; font-weight:700; font-size:0.88rem; background:#ffffff; color:#1e293b; cursor:pointer;">
                 <option value="all">🎮 Tất cả 18 Loại Game & Công Cụ</option>
+                <option value="multiverse" ${currentFilterToolKey==='multiverse'?'selected':''}>🌌 Game 19: Đấu Trường Đa Vũ Trụ</option>
                 <option value="goldminer" ${currentFilterToolKey==='goldminer'?'selected':''}>⛏️ Game Đào Vàng</option>
                 <option value="duckrace" ${currentFilterToolKey==='duckrace'?'selected':''}>🦆 Game Đua Vịt</option>
                 <option value="headtilt" ${currentFilterToolKey==='headtilt'?'selected':''}>🤸‍♂️ Nghiêng Đầu AI</option>
@@ -677,6 +684,8 @@ window.AITeachingTools = {
         this._startCrosswordArena(subName);
       } else if (tool.toolKey === 'wordhunt') {
         this._startWordHuntArena(subName);
+      } else if (tool.toolKey === 'multiverse') {
+        this._startMultiverseArena(subName, tool.payload && (tool.payload.stages || tool.payload.questions));
       } else if (tool.toolKey === 'slides') {
         if (typeof this._renderSlidesViewer === 'function') this._renderSlidesViewer();
       }
@@ -694,7 +703,13 @@ window.AITeachingTools = {
 
     setTimeout(() => {
       if (tool.payload) {
+        if (tool.payload.stages && tool.toolKey === 'multiverse') this._multiverseStages = tool.payload.stages;
         if (tool.payload.questions) {
+          if (tool.toolKey === 'multiverse') {
+          if (tool.payload.stages) this._multiverseStages = tool.payload.stages;
+          else if (tool.payload.questions) this._multiverseQuestions = tool.payload.questions;
+          this._renderMultiverseDashboard();
+        }
           if (tool.toolKey === 'goldminer') this._goldMinerQuestions = tool.payload.questions;
           if (tool.toolKey === 'duckrace') this._duckRaceQuestions = tool.payload.questions;
           if (tool.toolKey === 'headtilt') this._headTiltQuestions = tool.payload.questions;
@@ -887,6 +902,14 @@ window.AITeachingTools = {
       <div class="ait-text-box">
         <span class="ait-tab-num">GAME 18</span>
         <span class="ait-tab-name">Đuổi Hình Bắt Chữ</span>
+      </div>
+    </button>
+
+    <button id="ait-tab-multiverse" class="ait-tab-deluxe ${this.currentTab==='multiverse'?'ait-tab-on':''}" style="--tab-theme:#8b5cf6;--tab-bg:#f5f3ff;">
+      <div class="ait-icon-box" style="background:#ede9fe;color:#7c3aed;">🌌</div>
+      <div class="ait-text-box">
+        <span class="ait-tab-num">GAME 19</span>
+        <span class="ait-tab-name">Đấu Trường Đa Vũ Trụ</span>
       </div>
     </button>
 
@@ -5570,7 +5593,13 @@ window.AITeachingTools = {
     let score = 0;
     let isGameRunning = false;
 
-    const matchingRounds = [
+    // Load custom pairs if teacher generated, else standard rich rounds
+    let customPairs = null;
+    if (this._matchingPairs && Array.isArray(this._matchingPairs) && this._matchingPairs.length > 0) {
+      customPairs = this._matchingPairs;
+    }
+
+    const defaultRounds = [
       {
         title: 'Màn 1: Nối Thành Ngữ & Ý Nghĩa Tiếng Việt',
         pairs: [
@@ -5609,91 +5638,114 @@ window.AITeachingTools = {
       }
     ];
 
+    let matchingRounds = defaultRounds;
+    if (customPairs && customPairs.length > 0) {
+      const colors = ['#06b6d4', '#f59e0b', '#f43f5e', '#8b5cf6', '#10b981', '#ec4899'];
+      const glows  = ['#67e8f9', '#fde047', '#fda4af', '#c4b5fd', '#86efac', '#f472b6'];
+      const mappedPairs = customPairs.map((cp, idx) => ({
+        id: idx + 1,
+        left: cp.left || cp.q || `Ý ${idx + 1}`,
+        right: cp.right || cp.a || `Nghĩa ${idx + 1}`,
+        color: colors[idx % colors.length],
+        glow: glows[idx % glows.length]
+      }));
+      matchingRounds = [{
+        title: `Thử Thách Nối Ý: ${subName || 'Kiến Thức Tổng Hợp'}`,
+        pairs: mappedPairs
+      }];
+    }
+
     const totalRounds = matchingRounds.length;
 
     const modal = document.createElement('div');
     modal.id = 'matching-modal';
     modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
 
+    const isMobile = window.innerWidth < 640;
+
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
-      <div style="background:rgba(255, 255, 255, 0.94);backdrop-filter:blur(16px);padding:.6rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid rgba(249,115,22,0.35);box-shadow:0 6px 25px rgba(0,0,0,0.08);z-index:40;">
-        <div style="display:flex;align-items:center;gap:.9rem;">
-          <div style="width:44px;height:44px;background:radial-gradient(circle, #06b6d4, #0284c7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 4px 14px rgba(6,182,212,0.35);border:2px solid #fff;">🧩</div>
+      <div style="background:rgba(255, 255, 255, 0.95);backdrop-filter:blur(16px);padding:.55rem ${isMobile?'0.8rem':'1.5rem'};display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid rgba(2,132,199,0.3);box-shadow:0 4px 20px rgba(0,0,0,0.06);z-index:40;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <div style="width:38px;height:38px;background:radial-gradient(circle, #06b6d4, #0284c7);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 12px rgba(6,182,212,0.3);border:2px solid #fff;flex-shrink:0;">🧩</div>
           <div>
-            <div style="display:flex;align-items:center;gap:.5rem;">
-              <h3 style="margin:0;font-size:1.25rem;font-weight:900;background:linear-gradient(90deg, #0284c7, #8b5cf6, #ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.5px;">KÉO THẢ NỐI Ý & NỐI TỪ SIÊU HẠNG</h3>
-              <span style="background:linear-gradient(135deg, #0284c7, #0369a1);color:#fff;font-size:.65rem;padding:3px 10px;border-radius:999px;font-weight:800;letter-spacing:1px;box-shadow:0 2px 8px rgba(2,132,199,0.3);">NÉT BÚT UỐN LƯỢN</span>
+            <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;">
+              <h3 style="margin:0;font-size:${isMobile?'0.95rem':'1.2rem'};font-weight:900;background:linear-gradient(90deg, #0284c7, #8b5cf6, #ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">KÉO THẢ NỐI Ý SIÊU HẠNG</h3>
+              <span style="background:#0284c7;color:#fff;font-size:.65rem;padding:2px 8px;border-radius:999px;font-weight:800;">CHÍNH XÁC 100%</span>
             </div>
-            <div style="font-size:.78rem;color:#64748b;font-weight:600;">Kéo thả nét bút mềm mại nối thẻ Cột Trái với thẻ Cột Phải tương ứng!</div>
+            ${!isMobile ? '<div style="font-size:.75rem;color:#64748b;font-weight:600;">Kéo chuột/chạm hoặc Bấm chọn thẻ Trái ➔ Bấm thẻ Phải tương ứng!</div>' : ''}
           </div>
         </div>
 
         <!-- STATUS HUD (ROUND, SCORE) -->
-        <div style="display:flex;align-items:center;gap:1.5rem;background:rgba(255,255,255,0.95);border:2px solid rgba(249,115,22,0.3);padding:.35rem 1.5rem;border-radius:30px;box-shadow:0 4px 15px rgba(0,0,0,0.06);">
-          <div style="display:flex;align-items:center;gap:.4rem;color:#0284c7;font-weight:800;font-size:1rem;">
-            <span>Màn:</span> <span id="mq-round-badge" style="color:#ea580c;font-size:1.15rem;font-weight:900;">1 / 4</span>
+        <div style="display:flex;align-items:center;gap:${isMobile?'0.6rem':'1.2rem'};background:rgba(255,255,255,0.95);border:1.5px solid rgba(2,132,199,0.3);padding:.3rem ${isMobile?'0.8rem':'1.3rem'};border-radius:30px;">
+          <div style="display:flex;align-items:center;gap:.3rem;color:#0284c7;font-weight:800;font-size:${isMobile?'0.85rem':'0.95rem'};">
+            <span>Màn:</span> <span id="mq-round-badge" style="color:#ea580c;font-weight:900;">1 / ${totalRounds}</span>
           </div>
-          <div style="width:2px;height:20px;background:rgba(0,0,0,0.1);"></div>
-          <div style="color:#16a34a;font-weight:800;font-size:1rem;">
-            <span>Điểm:</span> <span id="mq-score-display" style="color:#15803d;font-size:1.15rem;font-weight:900;">0</span>
+          <div style="width:1.5px;height:16px;background:rgba(0,0,0,0.12);"></div>
+          <div style="color:#16a34a;font-weight:800;font-size:${isMobile?'0.85rem':'0.95rem'};">
+            <span>Điểm:</span> <span id="mq-score-display" style="color:#15803d;font-weight:900;">0</span>
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;gap:.75rem;">
-          <button id="mq-btn-sound" title="Bật/Tắt âm thanh & Nhạc nền" style="background:#f1f5f9;color:#0f172a;border:1px solid #cbd5e1;padding:.45rem .85rem;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:all .2s;">
-            <span id="mq-sound-icon">🔊</span> Âm thanh & Nhạc
+        <div style="display:flex;align-items:center;gap:.5rem;">
+          <button id="mq-btn-sound" title="Bật/Tắt âm thanh" style="background:#f1f5f9;color:#0f172a;border:1px solid #cbd5e1;padding:.4rem .7rem;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;">
+            <span id="mq-sound-icon">🔊</span>
           </button>
-          <button id="mq-btn-exit" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;padding:.45rem 1.1rem;border-radius:10px;font-size:.85rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:.35rem;box-shadow:0 4px 14px rgba(239,68,68,0.3);transition:all .2s;">
+          <button id="mq-btn-exit" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;padding:.4rem .9rem;border-radius:8px;font-size:.82rem;font-weight:800;cursor:pointer;">
             ✕ Thoát
           </button>
         </div>
       </div>
 
-      <!-- MAIN ARENA VIEWPORT (BRIGHT SKY & SAKURA CANVAS + CARDS GRID) -->
-      <div id="mq-viewport" style="flex:1;position:relative;background:transparent;overflow:hidden;display:flex;flex-direction:column;align-items:center;">
+      <!-- MAIN ARENA VIEWPORT -->
+      <div id="mq-viewport" style="flex:1;position:relative;background:transparent;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:space-between;">
         <canvas id="mq-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:20;"></canvas>
 
         <!-- TOP ROUND TITLE BANNER -->
-        <div id="mq-round-card" style="margin-top:1.2rem;z-index:25;background:rgba(255,255,255,0.96);border:2px solid rgba(6,182,212,0.6);border-radius:24px;padding:.8rem 2.4rem;text-align:center;max-width:920px;width:88%;box-shadow:0 10px 30px rgba(0,0,0,0.1), 0 0 25px rgba(6,182,212,0.15);backdrop-filter:blur(14px);">
-          <div id="mq-round-title" style="font-size:1.5rem;font-weight:900;color:#0f172a;line-height:1.3;">
-            Màn 1: Nối Thành Ngữ & Ý Nghĩa Tiếng Việt
+        <div id="mq-round-card" style="margin-top:${isMobile?'0.6rem':'1rem'};z-index:25;background:rgba(255,255,255,0.96);border:2px solid rgba(6,182,212,0.6);border-radius:18px;padding:${isMobile?'0.4rem 1rem':'0.6rem 2rem'};text-align:center;max-width:880px;width:92%;box-shadow:0 8px 25px rgba(0,0,0,0.08);backdrop-filter:blur(12px);flex-shrink:0;">
+          <div id="mq-round-title" style="font-size:${isMobile?'1.05rem':'1.35rem'};font-weight:900;color:#0f172a;line-height:1.25;">
+            ${matchingRounds[0].title}
           </div>
-          <div style="font-size:.82rem;color:#0284c7;font-weight:700;margin-top:.2rem;">
-            ✏️ Nhấn giữ kéo đường nét bút từ Cột Trái nối sang Cột Phải tương ứng!
+          <div id="mq-instruction-text" style="font-size:${isMobile?'0.72rem':'0.8rem'};color:#0284c7;font-weight:700;margin-top:.15rem;">
+            💡 Kéo nối trực tiếp HOẶC Bấm chọn thẻ cột Trái rồi Bấm thẻ cột Phải tương ứng!
           </div>
+        </div>
+
+        <!-- FLOATING RESULT FEEDBACK TOAST BANNER -->
+        <div id="mq-feedback-toast" style="display:none; position:absolute; top:${isMobile?'5rem':'6.2rem'}; z-index:35; background:#ffffff; border-radius:16px; padding:0.6rem 1.4rem; box-shadow:0 12px 35px rgba(0,0,0,0.18); font-weight:800; font-size:${isMobile?'0.85rem':'1rem'}; animation:fadeIn .25s ease-out; align-items:center; gap:0.6rem;">
         </div>
 
         <!-- MATCHING CARDS COLUMNS CONTAINER -->
-        <div id="mq-cards-container" style="flex:1;width:100%;max-width:1100px;display:flex;justify-content:space-between;align-items:center;padding:1.5rem 3rem 5.5rem;position:relative;z-index:15;">
+        <div id="mq-cards-container" style="flex:1;width:100%;max-width:1100px;display:flex;justify-content:space-between;align-items:center;padding:${isMobile?'0.75rem 1rem 4.5rem':'1rem 2.5rem 5rem'};position:relative;z-index:15;gap:${isMobile?'1rem':'3rem'};">
           <!-- LEFT COLUMN -->
-          <div id="mq-left-col" style="display:flex;flex-direction:column;gap:1.3rem;width:42%;"></div>
+          <div id="mq-left-col" style="display:flex;flex-direction:column;gap:${isMobile?'0.65rem':'1.1rem'};width:46%;"></div>
 
           <!-- RIGHT COLUMN -->
-          <div id="mq-right-col" style="display:flex;flex-direction:column;gap:1.3rem;width:42%;"></div>
+          <div id="mq-right-col" style="display:flex;flex-direction:column;gap:${isMobile?'0.65rem':'1.1rem'};width:46%;"></div>
         </div>
 
         <!-- BOTTOM ACTION BUTTONS -->
-        <div style="position:absolute;bottom:1.4rem;left:50%;transform:translateX(-50%);z-index:30;display:flex;gap:1.2rem;">
-          <button id="mq-btn-check" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);color:#ffffff;border:3px solid #6ee7b7;padding:.85rem 2.8rem;border-radius:50px;font-size:1.2rem;font-weight:900;cursor:pointer;letter-spacing:1px;box-shadow:0 10px 25px rgba(16,185,129,0.4);transition:all .2s cubic-bezier(0.175,0.885,0.32,1.275);display:flex;align-items:center;gap:.6rem;">
+        <div style="position:absolute;bottom:${isMobile?'0.75rem':'1.25rem'};left:50%;transform:translateX(-50%);z-index:30;display:flex;gap:1rem;width:max-content;">
+          <button id="mq-btn-check" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%);color:#ffffff;border:2.5px solid #6ee7b7;padding:${isMobile?'0.65rem 1.6rem':'0.75rem 2.4rem'};border-radius:50px;font-size:${isMobile?'0.95rem':'1.15rem'};font-weight:900;cursor:pointer;letter-spacing:.5px;box-shadow:0 8px 20px rgba(16,185,129,0.35);display:flex;align-items:center;gap:.5rem;">
             <span>✨</span> KIỂM TRA ĐÁP ÁN
           </button>
-          <button id="mq-btn-reset-links" style="background:#ffffff;color:#475569;border:2px solid #cbd5e1;padding:.85rem 1.6rem;border-radius:50px;font-size:1rem;font-weight:800;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.06);transition:all .2s;">
-            🔄 Vẽ Lại Nét
+          <button id="mq-btn-reset-links" style="background:#ffffff;color:#475569;border:1.5px solid #cbd5e1;padding:${isMobile?'0.65rem 1.1rem':'0.75rem 1.5rem'};border-radius:50px;font-size:${isMobile?'0.85rem':'0.95rem'};font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+            🔄 Nối Lại
           </button>
         </div>
 
         <!-- PRE-GAME START OVERLAY -->
-        <div id="mq-start-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.75);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:35;transition:opacity .3s ease;">
-          <div style="text-align:center;max-width:600px;padding:2.4rem;background:linear-gradient(145deg, #ffffff, #f8fafc);border:3px solid #06b6d4;border-radius:28px;box-shadow:0 20px 50px rgba(0,0,0,0.15), 0 0 40px rgba(6,182,212,0.25);animation:floatUp .4s ease;">
-            <div style="font-size:4rem;margin-bottom:.5rem;filter:drop-shadow(0 6px 15px rgba(6,182,212,0.4));">🧩🎨✨</div>
-            <h2 style="font-size:2.1rem;font-weight:900;margin:0 0 .5rem;background:linear-gradient(90deg,#0284c7,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ĐẤU TRƯỜNG KÉO THẢ NỐI Ý</h2>
-            <p style="color:#475569;font-size:1rem;line-height:1.5;margin:0 0 1.8rem;font-weight:600;">
-              Nét bút thư pháp uốn lượn uốn cong đa sắc màu rực rỡ!<br>
-              Kéo thả các cặp ý nghĩa tương ứng để hoàn thành thử thách.
+        <div id="mq-start-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.8);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:35;">
+          <div style="text-align:center;max-width:540px;width:90%;padding:2rem;background:#ffffff;border:3px solid #06b6d4;border-radius:24px;box-shadow:0 20px 50px rgba(0,0,0,0.12);">
+            <div style="font-size:3.5rem;margin-bottom:.4rem;">🧩🎨✨</div>
+            <h2 style="font-size:1.8rem;font-weight:900;margin:0 0 .4rem;background:linear-gradient(90deg,#0284c7,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ĐẤU TRƯỜNG KÉO THẢ NỐI Ý</h2>
+            <p style="color:#475569;font-size:0.95rem;line-height:1.5;margin:0 0 1.5rem;font-weight:600;">
+              Nét bút mượt mà, độ nhạy cao không giật lag!<br>
+              Hỗ trợ kéo thả trực tiếp hoặc chạm chọn 2 thẻ tương ứng.
             </p>
 
-            <button id="mq-btn-launch" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%);color:#ffffff;border:3px solid #7dd3fc;padding:1rem 2.8rem;border-radius:50px;font-size:1.35rem;font-weight:900;cursor:pointer;letter-spacing:1px;box-shadow:0 10px 30px rgba(2,132,199,0.4);transition:all .2s cubic-bezier(0.175,0.885,0.32,1.275);display:inline-flex;align-items:center;gap:.8rem;">
+            <button id="mq-btn-launch" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%);color:#ffffff;border:3px solid #7dd3fc;padding:.85rem 2.4rem;border-radius:50px;font-size:1.2rem;font-weight:900;cursor:pointer;letter-spacing:1px;box-shadow:0 8px 25px rgba(2,132,199,0.35);display:inline-flex;align-items:center;gap:.6rem;">
               <span>🚀</span> BẮT ĐẦU NỐI Ý!
             </button>
           </div>
@@ -5701,40 +5753,35 @@ window.AITeachingTools = {
 
         <!-- 3-2-1 COUNTDOWN POPUP OVERLAY -->
         <div id="mq-countdown-overlay" style="position:absolute;inset:0;pointer-events:none;display:none;align-items:center;justify-content:center;z-index:36;">
-          <div id="mq-count-number" style="font-size:9rem;font-weight:900;color:#0284c7;text-shadow:0 0 40px rgba(2,132,199,0.7), 0 10px 25px rgba(0,0,0,0.2);transform:scale(0.5);opacity:0;transition:transform .25s cubic-bezier(0.175,0.885,0.32,1.275), opacity .25s ease;">
+          <div id="mq-count-number" style="font-size:8rem;font-weight:900;color:#0284c7;text-shadow:0 0 40px rgba(2,132,199,0.7);transform:scale(0.5);opacity:0;transition:transform .2s, opacity .2s;">
             3
           </div>
         </div>
 
         <!-- WINNER / COMPLETION OVERLAY -->
-        <div id="mq-winner-overlay" style="position:absolute;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:9999;animation:fadeIn .3s ease;">
-          <div style="text-align:center;max-width:580px;width:92%;padding:2.5rem;background:#ffffff;border:4px solid #06b6d4;border-radius:32px;box-shadow:0 25px 70px rgba(0,0,0,0.3), 0 0 50px rgba(6,182,212,0.35);position:relative;">
-            <div style="position:absolute;top:-45px;left:50%;transform:translateX(-50%);width:90px;height:90px;background:radial-gradient(circle, #fde047, #0284c7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:3.5rem;border:4px solid #fff;box-shadow:0 10px 25px rgba(2,132,199,0.4);">
-              🏆
-            </div>
-            <div style="font-size:1.1rem;font-weight:800;color:#0284c7;letter-spacing:2px;margin-top:1.8rem;text-transform:uppercase;">KẾT QUẢ THỬ THÁCH</div>
-            <h1 id="mq-winner-title" style="font-size:2.4rem;font-weight:900;color:#0f172a;margin:.3rem 0 .6rem;">
+        <div id="mq-winner-overlay" style="position:absolute;inset:0;background:rgba(15,23,42,0.7);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:9999;">
+          <div style="text-align:center;max-width:540px;width:92%;padding:2.2rem;background:#ffffff;border:3px solid #06b6d4;border-radius:28px;box-shadow:0 25px 70px rgba(0,0,0,0.3);position:relative;">
+            <div style="font-size:3.5rem;margin-bottom:.2rem;">🏆🎉</div>
+            <div style="font-size:1rem;font-weight:800;color:#0284c7;letter-spacing:1.5px;text-transform:uppercase;">KẾT QUẢ THỬ THÁCH</div>
+            <h1 id="mq-winner-title" style="font-size:2.2rem;font-weight:900;color:#0f172a;margin:.2rem 0 .5rem;">
               BẬC THẦY NỐI Ý!
             </h1>
 
-            <div style="background:linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(139,92,246,0.15) 100%);border:2px solid #06b6d4;padding:.7rem 1.5rem;border-radius:20px;margin:.4rem auto 1.2rem;display:inline-flex;align-items:center;gap:.65rem;box-shadow:0 4px 15px rgba(6,182,212,0.15);">
-              <span style="font-size:1.6rem;">📢</span>
-              <span id="mq-voice-call-text" style="font-size:1.1rem;font-weight:900;color:#0369a1;letter-spacing:.3px;">"Chúc mừng bạn đã xuất sắc vượt qua toàn bộ các thử thách Nối Ý!"</span>
-              <button id="mq-btn-respeak" title="Nghe lại giọng đọc" style="background:#0284c7;color:#fff;border:none;padding:5px 12px;border-radius:8px;font-size:.8rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:3px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-                🔊 Nghe lại
-              </button>
+            <div style="background:#f0fdf4;border:1.5px solid #86efac;padding:.6rem 1.2rem;border-radius:16px;margin:.4rem auto 1rem;display:inline-flex;align-items:center;gap:.5rem;">
+              <span style="font-size:1.3rem;">📢</span>
+              <span id="mq-voice-call-text" style="font-size:0.95rem;font-weight:800;color:#15803d;">"Chúc mừng bạn đã xuất sắc hoàn thành trò chơi Nối Ý!"</span>
             </div>
 
-            <div id="mq-final-score-text" style="display:inline-block;background:#f1f5f9;padding:.4rem 1.4rem;border-radius:20px;font-size:1rem;color:#0f172a;margin-bottom:2rem;font-weight:800;border:1px solid #cbd5e1;">
+            <div id="mq-final-score-text" style="display:inline-block;background:#f1f5f9;padding:.4rem 1.4rem;border-radius:20px;font-size:1rem;color:#0f172a;margin-bottom:1.5rem;font-weight:800;border:1px solid #cbd5e1;">
               Tổng điểm xuất sắc: 400 Điểm
             </div>
 
-            <div style="display:flex;gap:1.2rem;justify-content:center;">
-              <button id="mq-btn-play-again" style="background:linear-gradient(135deg, #10b981, #059669);color:#fff;border:none;padding:1rem 2.2rem;border-radius:16px;font-size:1.15rem;font-weight:900;cursor:pointer;box-shadow:0 8px 25px rgba(16,185,129,0.4);transition:all .2s;display:flex;align-items:center;gap:.6rem;">
-                <span style="font-size:1.3rem;">🔄</span> CHƠI LẠI NGAY
+            <div style="display:flex;gap:1rem;justify-content:center;">
+              <button id="mq-btn-play-again" style="background:linear-gradient(135deg, #10b981, #059669);color:#fff;border:none;padding:.85rem 2rem;border-radius:14px;font-size:1.05rem;font-weight:900;cursor:pointer;box-shadow:0 8px 25px rgba(16,185,129,0.35);">
+                🔄 CHƠI LẠI
               </button>
-              <button id="mq-btn-close-winner" style="background:#f1f5f9;color:#475569;border:2px solid #cbd5e1;padding:1rem 1.6rem;border-radius:16px;font-size:1.15rem;font-weight:800;cursor:pointer;transition:all .2s;">
-                ✕ Thoát Ra
+              <button id="mq-btn-close-winner" style="background:#f1f5f9;color:#475569;border:1.5px solid #cbd5e1;padding:.85rem 1.5rem;border-radius:14px;font-size:1.05rem;font-weight:800;cursor:pointer;">
+                ✕ Thoát
               </button>
             </div>
           </div>
@@ -5747,8 +5794,6 @@ window.AITeachingTools = {
     // AUDIO & BGM SYNTHESIS ENGINE
     let audioEnabled = true;
     let audioCtx = null;
-    let matchingBgmId = null;
-    let matchingBgmStep = 0;
 
     function getAudioCtx() {
       if (!audioCtx && typeof window !== 'undefined') {
@@ -5763,63 +5808,6 @@ window.AITeachingTools = {
       return audioCtx;
     }
 
-    const matchingBgm = {
-      notes: [523.25, 659.25, 783.99, 1046.50, 880.00, 783.99, 659.25, 587.33],
-      bass: [130.81, 196.00, 164.81, 196.00],
-
-      start() {
-        if (matchingBgmId) return;
-        matchingBgmStep = 0;
-        const interval = 170;
-
-        matchingBgmId = setInterval(() => {
-          if (!audioEnabled) return;
-          const ctx = getAudioCtx();
-          if (!ctx) return;
-          try {
-            const now = ctx.currentTime;
-
-            // 1. MARIMBA / ACOUSTIC MELODY
-            const mFreq = this.notes[matchingBgmStep % this.notes.length];
-            const mOsc = ctx.createOscillator();
-            const mGain = ctx.createGain();
-            mOsc.type = 'sine';
-            mOsc.frequency.setValueAtTime(mFreq, now);
-            mGain.gain.setValueAtTime(0.24, now);
-            mGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-            mOsc.connect(mGain);
-            mGain.connect(ctx.destination);
-            mOsc.start(now);
-            mOsc.stop(now + 0.16);
-
-            // 2. WARM BASS
-            if (matchingBgmStep % 2 === 0) {
-              const bFreq = this.bass[(matchingBgmStep / 2) % this.bass.length];
-              const bOsc = ctx.createOscillator();
-              const bGain = ctx.createGain();
-              bOsc.type = 'triangle';
-              bOsc.frequency.setValueAtTime(bFreq, now);
-              bGain.gain.setValueAtTime(0.35, now);
-              bGain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
-              bOsc.connect(bGain);
-              bGain.connect(ctx.destination);
-              bOsc.start(now);
-              bOsc.stop(now + 0.28);
-            }
-
-            matchingBgmStep++;
-          } catch(e) {}
-        }, interval);
-      },
-
-      stop() {
-        if (matchingBgmId) {
-          clearInterval(matchingBgmId);
-          matchingBgmId = null;
-        }
-      }
-    };
-
     const soundFX = {
       countdownBeep(pitchHigh = false) {
         if (!audioEnabled) return;
@@ -5831,12 +5819,12 @@ window.AITeachingTools = {
           const gain = ctx.createGain();
           osc.type = pitchHigh ? 'triangle' : 'sine';
           osc.frequency.setValueAtTime(pitchHigh ? 880 : 440, now);
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + (pitchHigh ? 0.45 : 0.25));
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + (pitchHigh ? 0.4 : 0.22));
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(now);
-          osc.stop(now + (pitchHigh ? 0.45 : 0.25));
+          osc.stop(now + (pitchHigh ? 0.4 : 0.22));
         } catch(e) {}
       },
 
@@ -5851,7 +5839,7 @@ window.AITeachingTools = {
           osc.type = 'sine';
           osc.frequency.setValueAtTime(450, now);
           osc.frequency.exponentialRampToValueAtTime(750, now + 0.08);
-          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.setValueAtTime(0.15, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
           osc.connect(gain);
           gain.connect(ctx.destination);
@@ -5871,12 +5859,12 @@ window.AITeachingTools = {
             const gain = ctx.createGain();
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(f, now + i * 0.04);
-            gain.gain.setValueAtTime(0.22, now + i * 0.04);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.3);
+            gain.gain.setValueAtTime(0.2, now + i * 0.04);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.25);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start(now + i * 0.04);
-            osc.stop(now + i * 0.04 + 0.3);
+            osc.stop(now + i * 0.04 + 0.25);
           });
         } catch(e) {}
       },
@@ -5890,14 +5878,14 @@ window.AITeachingTools = {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(160, now);
-          osc.frequency.exponentialRampToValueAtTime(70, now + 0.18);
-          gain.gain.setValueAtTime(0.28, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(80, now + 0.25);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
           osc.connect(gain);
           gain.connect(ctx.destination);
           osc.start(now);
-          osc.stop(now + 0.18);
+          osc.stop(now + 0.25);
         } catch(e) {}
       },
 
@@ -5910,7 +5898,7 @@ window.AITeachingTools = {
             { f: 523.25, t: 0, d: 0.15 },
             { f: 659.25, t: 0.15, d: 0.15 },
             { f: 783.99, t: 0.30, d: 0.2 },
-            { f: 1046.50, t: 0.50, d: 0.6 }
+            { f: 1046.50, t: 0.50, d: 0.5 }
           ];
           const now = ctx.currentTime;
           notes.forEach(n => {
@@ -5918,7 +5906,7 @@ window.AITeachingTools = {
             const gain = ctx.createGain();
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(n.f, now + n.t);
-            gain.gain.setValueAtTime(0.28, now + n.t);
+            gain.gain.setValueAtTime(0.25, now + n.t);
             gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -5935,14 +5923,9 @@ window.AITeachingTools = {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
+        utterance.rate = 0.95;
         utterance.pitch = 1.05;
         utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
       } catch(e) {}
     }
@@ -5956,24 +5939,26 @@ window.AITeachingTools = {
       soundBtn.style.color = audioEnabled ? '#0f172a' : '#94a3b8';
       if (audioEnabled) {
         getAudioCtx();
-        if (isGameRunning) matchingBgm.start();
       } else {
-        matchingBgm.stop();
         if (typeof window !== 'undefined' && window.speechSynthesis) window.speechSynthesis.cancel();
       }
     };
 
     modal.querySelector('#mq-btn-exit').onclick = () => cleanupAndClose();
 
-    // CANVAS & CALLIGRAPHIC STROKES RENDERING
+    // CANVAS SETUP & HIGH-PERFORMANCE COORDINATES
     const canvas = modal.querySelector('#mq-canvas');
     const ctx = canvas.getContext('2d');
+    let dpr = 1;
 
     function resizeCanvas() {
-      canvas.width = (typeof window !== 'undefined' && window.innerWidth) || 1280;
-      canvas.height = ((typeof window !== 'undefined' && window.innerHeight) || 800) - 68;
+      const rect = canvas.getBoundingClientRect();
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(300, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(200, Math.floor(rect.height * dpr));
     }
     resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     let animId = null;
     let animTime = 0;
@@ -5982,30 +5967,69 @@ window.AITeachingTools = {
 
     // Interactive connection state
     let userConnections = {}; // { leftId: rightId }
-    let activeDrag = null; // { startLeftId, startX, startY, currX, currY, color }
+    let activeDrag = null; // { leftId, startX, startY, currX, currY, color, glow }
+    let selectedLeftId = null; // Click-to-connect state
+    let checkedResults = null; // null or { [leftId]: boolean }
 
-    for (let i = 0; i < 35; i++) {
+    for (let i = 0; i < 20; i++) {
       sakuraPetals.push({
-        x: Math.random() * ((typeof window !== 'undefined' && window.innerWidth) || 1280),
-        y: Math.random() * ((typeof window !== 'undefined' && window.innerHeight) || 800),
-        size: 9 + Math.random() * 8,
-        speedX: 0.6 + Math.random() * 1.2,
-        speedY: 1 + Math.random() * 1.5,
+        x: Math.random() * (window.innerWidth || 1280),
+        y: Math.random() * (window.innerHeight || 800),
+        size: 8 + Math.random() * 6,
+        speedX: 0.4 + Math.random() * 0.8,
+        speedY: 0.8 + Math.random() * 1.0,
         rotation: Math.random() * Math.PI * 2,
-        rotSpeed: 0.02 + Math.random() * 0.03
+        rotSpeed: 0.015 + Math.random() * 0.02
       });
     }
 
-    // POPULATE CARDS FOR CURRENT ROUND
     const leftCol = modal.querySelector('#mq-left-col');
     const rightCol = modal.querySelector('#mq-right-col');
     const roundTitle = modal.querySelector('#mq-round-title');
     const roundBadge = modal.querySelector('#mq-round-badge');
     const scoreDisplay = modal.querySelector('#mq-score-display');
+    const feedbackToast = modal.querySelector('#mq-feedback-toast');
+
+    function getCardAnchorPos(card, isRightAnchor = true) {
+      const rect = card.getBoundingClientRect();
+      const cRect = canvas.getBoundingClientRect();
+      return {
+        x: isRightAnchor ? (rect.right - cRect.left - 6) : (rect.left - cRect.left + 6),
+        y: (rect.top - cRect.top) + rect.height / 2
+      };
+    }
+
+    function getCanvasCoords(clientX, clientY) {
+      const cRect = canvas.getBoundingClientRect();
+      return {
+        x: clientX - cRect.left,
+        y: clientY - cRect.top
+      };
+    }
+
+    function showToastMessage(msg, isSuccess = false) {
+      if (!feedbackToast) return;
+      feedbackToast.style.display = 'flex';
+      feedbackToast.style.border = isSuccess ? '2.5px solid #10b981' : '2.5px solid #ef4444';
+      feedbackToast.style.color = isSuccess ? '#15803d' : '#b91c1c';
+      feedbackToast.style.background = isSuccess ? '#f0fdf4' : '#fef2f2';
+      feedbackToast.innerHTML = `
+        <span style="font-size:1.3rem;">${isSuccess ? '✅' : '❌'}</span>
+        <span>${msg}</span>
+      `;
+    }
+
+    function hideToastMessage() {
+      if (feedbackToast) feedbackToast.style.display = 'none';
+    }
 
     function loadRoundCards() {
       userConnections = {};
       activeDrag = null;
+      selectedLeftId = null;
+      checkedResults = null;
+      hideToastMessage();
+
       const rData = matchingRounds[(currentRound - 1) % matchingRounds.length];
       roundTitle.textContent = rData.title;
       roundBadge.textContent = `${currentRound} / ${totalRounds}`;
@@ -6014,40 +6038,47 @@ window.AITeachingTools = {
       leftCol.innerHTML = '';
       rightCol.innerHTML = '';
 
+      const cardFontSz = isMobile ? '0.88rem' : '1.05rem';
+      const cardPadding = isMobile ? '0.65rem 0.85rem' : '0.95rem 1.25rem';
+      const badgeSize = isMobile ? '24px' : '30px';
+      const badgeFont = isMobile ? '0.75rem' : '0.88rem';
+
       // Render Left Column
       rData.pairs.forEach((p, idx) => {
         const card = document.createElement('div');
         card.className = 'mq-card mq-card-left';
         card.dataset.id = p.id;
         card.style.cssText = `
-          background: rgba(255, 255, 255, 0.94);
-          border: 3px solid ${p.color};
-          border-radius: 18px;
-          padding: 1.1rem 1.4rem;
-          font-size: 1.15rem;
+          background: rgba(255, 255, 255, 0.95);
+          border: 2.5px solid ${p.color};
+          border-radius: 14px;
+          padding: ${cardPadding};
+          font-size: ${cardFontSz};
           font-weight: 800;
           color: #0f172a;
-          box-shadow: 0 6px 20px rgba(0,0,0,0.06), 0 0 15px ${p.color}33;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.06);
           display: flex;
           align-items: center;
           justify-content: space-between;
-          cursor: grab;
-          transition: transform .2s, box-shadow .2s;
+          cursor: pointer;
+          transition: transform .15s, box-shadow .15s, border-color .15s;
           position: relative;
+          touch-action: none;
         `;
         card.innerHTML = `
-          <div style="display:flex;align-items:center;gap:.75rem;">
-            <span style="width:32px;height:32px;border-radius:50%;background:${p.color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;">${idx + 1}</span>
-            <span>${p.left}</span>
+          <div style="display:flex;align-items:center;gap:.6rem;flex:1;padding-right:.4rem;">
+            <span class="mq-card-idx" style="width:${badgeSize};height:${badgeSize};border-radius:50%;background:${p.color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:${badgeFont};font-weight:900;flex-shrink:0;">${idx + 1}</span>
+            <span style="line-height:1.35;">${p.left}</span>
           </div>
-          <div class="mq-anchor-dot" style="width:16px;height:16px;border-radius:50%;background:${p.color};box-shadow:0 0 10px ${p.color};border:2px solid #fff;"></div>
+          <div class="mq-anchor-dot" style="width:14px;height:14px;border-radius:50%;background:${p.color};box-shadow:0 0 8px ${p.color};border:2px solid #fff;flex-shrink:0;"></div>
         `;
 
-        card.addEventListener('mousedown', (e) => startDragFromCard(card, p, e.clientX, e.clientY));
-        card.addEventListener('touchstart', (e) => {
-          const t = e.touches[0];
-          if (t) startDragFromCard(card, p, t.clientX, t.clientY);
-        }, { passive: true });
+        // Pointer Down & Click
+        card.addEventListener('pointerdown', (e) => {
+          if (!isGameRunning) return;
+          e.preventDefault();
+          startDragFromCard(card, p, e.clientX, e.clientY);
+        });
 
         leftCol.appendChild(card);
       });
@@ -6060,101 +6091,152 @@ window.AITeachingTools = {
         card.dataset.id = p.id;
         const letter = String.fromCharCode(65 + idx);
         card.style.cssText = `
-          background: rgba(255, 255, 255, 0.94);
-          border: 3px solid #94a3b8;
-          border-radius: 18px;
-          padding: 1.1rem 1.4rem;
-          font-size: 1.15rem;
+          background: rgba(255, 255, 255, 0.95);
+          border: 2.5px solid #94a3b8;
+          border-radius: 14px;
+          padding: ${cardPadding};
+          font-size: ${cardFontSz};
           font-weight: 800;
           color: #0f172a;
-          box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+          box-shadow: 0 4px 14px rgba(0,0,0,0.06);
           display: flex;
           align-items: center;
           justify-content: space-between;
           cursor: pointer;
-          transition: transform .2s, box-shadow .2s, border-color .2s;
+          transition: transform .15s, box-shadow .15s, border-color .15s;
           position: relative;
+          touch-action: none;
         `;
         card.innerHTML = `
-          <div class="mq-anchor-dot" style="width:16px;height:16px;border-radius:50%;background:#94a3b8;box-shadow:0 0 10px rgba(0,0,0,0.1);border:2px solid #fff;"></div>
-          <div style="display:flex;align-items:center;gap:.75rem;text-align:right;">
-            <span>${p.right}</span>
-            <span style="width:32px;height:32px;border-radius:50%;background:#0284c7;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;">${letter}</span>
+          <div class="mq-anchor-dot" style="width:14px;height:14px;border-radius:50%;background:#94a3b8;border:2px solid #fff;flex-shrink:0;"></div>
+          <div style="display:flex;align-items:center;gap:.6rem;text-align:right;flex:1;justify-content:flex-end;padding-left:.4rem;">
+            <span style="line-height:1.35;">${p.right}</span>
+            <span class="mq-card-idx" style="width:${badgeSize};height:${badgeSize};border-radius:50%;background:#0284c7;color:#fff;display:flex;align-items:center;justify-content:center;font-size:${badgeFont};font-weight:900;flex-shrink:0;">${letter}</span>
           </div>
         `;
 
-        card.addEventListener('mouseup', () => finishDragOnCard(card));
-        card.addEventListener('touchend', () => finishDragOnCard(card));
+        // Click-to-Connect
+        card.addEventListener('click', (e) => {
+          if (!isGameRunning) return;
+          if (selectedLeftId) {
+            connectLeftToRight(selectedLeftId, parseInt(card.dataset.id));
+            selectedLeftId = null;
+            updateSelectionStyles();
+          }
+        });
 
         rightCol.appendChild(card);
       });
     }
 
-    function getCardAnchorPos(card, isRightAnchor = true) {
-      const rect = card.getBoundingClientRect();
-      const modalRect = modal.getBoundingClientRect();
-      return {
-        x: isRightAnchor ? (rect.right - modalRect.left - 8) : (rect.left - modalRect.left + 8),
-        y: rect.top - modalRect.top + rect.height / 2
-      };
-    }
-
     function startDragFromCard(card, pairData, clientX, clientY) {
       if (!isGameRunning) return;
-      const modalRect = modal.getBoundingClientRect();
+      checkedResults = null; // Clear check results upon new interaction
+      hideToastMessage();
+
       const anchor = getCardAnchorPos(card, true);
+      const pos = getCanvasCoords(clientX, clientY);
 
       soundFX.penSwoosh();
+
+      // Click to select mode toggle
+      if (selectedLeftId === pairData.id) {
+        selectedLeftId = null;
+      } else {
+        selectedLeftId = pairData.id;
+      }
+      updateSelectionStyles();
+
+      // Drag mode
       activeDrag = {
         leftId: pairData.id,
         startX: anchor.x,
         startY: anchor.y,
-        currX: clientX - modalRect.left,
-        currY: clientY - modalRect.top,
+        currX: pos.x,
+        currY: pos.y,
         color: pairData.color,
         glow: pairData.glow
       };
     }
 
-    function finishDragOnCard(rightCard) {
-      if (!activeDrag) return;
-      const rId = parseInt(rightCard.dataset.id);
-      userConnections[activeDrag.leftId] = rId;
-
+    function connectLeftToRight(leftId, rightId) {
+      checkedResults = null; // Clear check results on link update
+      hideToastMessage();
+      userConnections[leftId] = rightId;
       soundFX.magicChime();
-      activeDrag = null;
       updateRightCardsStyles();
     }
 
-    modal.addEventListener('mousemove', (e) => {
+    function findHoveredRightCard(clientX, clientY) {
+      const rightCards = modal.querySelectorAll('.mq-card-right');
+      for (const card of rightCards) {
+        const rect = card.getBoundingClientRect();
+        if (
+          clientX >= rect.left - 15 &&
+          clientX <= rect.right + 15 &&
+          clientY >= rect.top - 15 &&
+          clientY <= rect.bottom + 15
+        ) {
+          return card;
+        }
+      }
+      return null;
+    }
+
+    window.addEventListener('pointermove', (e) => {
       if (activeDrag) {
-        const modalRect = modal.getBoundingClientRect();
-        activeDrag.currX = e.clientX - modalRect.left;
-        activeDrag.currY = e.clientY - modalRect.top;
+        const pos = getCanvasCoords(e.clientX, e.clientY);
+        activeDrag.currX = pos.x;
+        activeDrag.currY = pos.y;
+
+        const hoveredCard = findHoveredRightCard(e.clientX, e.clientY);
+        modal.querySelectorAll('.mq-card-right').forEach(rc => {
+          if (rc === hoveredCard) {
+            rc.style.transform = 'scale(1.04)';
+            rc.style.borderColor = activeDrag.color;
+          } else {
+            rc.style.transform = 'scale(1)';
+          }
+        });
       }
     });
 
-    modal.addEventListener('touchmove', (e) => {
+    window.addEventListener('pointerup', (e) => {
       if (activeDrag) {
-        const t = e.touches[0];
-        if (t) {
-          const modalRect = modal.getBoundingClientRect();
-          activeDrag.currX = t.clientX - modalRect.left;
-          activeDrag.currY = t.clientY - modalRect.top;
+        const hoveredCard = findHoveredRightCard(e.clientX, e.clientY);
+        if (hoveredCard) {
+          const rId = parseInt(hoveredCard.dataset.id);
+          connectLeftToRight(activeDrag.leftId, rId);
+          selectedLeftId = null;
         }
+        activeDrag = null;
+        modal.querySelectorAll('.mq-card-right').forEach(rc => { rc.style.transform = 'scale(1)'; });
+        updateSelectionStyles();
+        updateRightCardsStyles();
       }
-    }, { passive: true });
+    });
 
-    modal.addEventListener('mouseup', () => { activeDrag = null; });
-    modal.addEventListener('touchend', () => { activeDrag = null; });
+    function updateSelectionStyles() {
+      modal.querySelectorAll('.mq-card-left').forEach(lc => {
+        const lId = parseInt(lc.dataset.id);
+        if (lId === selectedLeftId) {
+          lc.style.transform = 'scale(1.04)';
+          lc.style.boxShadow = '0 0 20px rgba(2,132,199,0.5)';
+        } else {
+          lc.style.transform = 'scale(1)';
+          lc.style.boxShadow = '0 4px 14px rgba(0,0,0,0.06)';
+        }
+      });
+    }
 
     function updateRightCardsStyles() {
       const rData = matchingRounds[(currentRound - 1) % matchingRounds.length];
       const rightCards = modal.querySelectorAll('.mq-card-right');
+      const leftCards  = modal.querySelectorAll('.mq-card-left');
 
+      // Update right cards
       rightCards.forEach(rc => {
         const rcId = parseInt(rc.dataset.id);
-        // Find if any left card connects to this right card
         let matchedLeftId = null;
         Object.keys(userConnections).forEach(lId => {
           if (userConnections[lId] === rcId) matchedLeftId = parseInt(lId);
@@ -6164,20 +6246,54 @@ window.AITeachingTools = {
         if (matchedLeftId) {
           const pair = rData.pairs.find(p => p.id === matchedLeftId);
           if (pair) {
-            rc.style.borderColor = pair.color;
-            rc.style.boxShadow = `0 6px 20px rgba(0,0,0,0.06), 0 0 15px ${pair.color}44`;
-            if (dot) {
-              dot.style.background = pair.color;
-              dot.style.boxShadow = `0 0 10px ${pair.color}`;
+            // Check if checked and wrong
+            if (checkedResults && checkedResults[matchedLeftId] === false) {
+              rc.style.borderColor = '#ef4444';
+              rc.style.boxShadow = '0 0 16px rgba(239,68,68,0.45)';
+              if (dot) {
+                dot.style.background = '#ef4444';
+                dot.style.boxShadow = '0 0 10px #ef4444';
+              }
+            } else if (checkedResults && checkedResults[matchedLeftId] === true) {
+              rc.style.borderColor = '#10b981';
+              rc.style.boxShadow = '0 0 16px rgba(16,185,129,0.45)';
+              if (dot) {
+                dot.style.background = '#10b981';
+                dot.style.boxShadow = '0 0 10px #10b981';
+              }
+            } else {
+              rc.style.borderColor = pair.color;
+              rc.style.boxShadow = `0 4px 16px ${pair.color}44`;
+              if (dot) {
+                dot.style.background = pair.color;
+                dot.style.boxShadow = `0 0 10px ${pair.color}`;
+              }
             }
           }
         } else {
           rc.style.borderColor = '#94a3b8';
-          rc.style.boxShadow = '0 6px 20px rgba(0,0,0,0.06)';
+          rc.style.boxShadow = '0 4px 14px rgba(0,0,0,0.06)';
           if (dot) {
             dot.style.background = '#94a3b8';
             dot.style.boxShadow = 'none';
           }
+        }
+      });
+
+      // Update left cards if checked
+      leftCards.forEach(lc => {
+        const lId = parseInt(lc.dataset.id);
+        const pair = rData.pairs.find(p => p.id === lId);
+        if (checkedResults && pair) {
+          if (checkedResults[lId] === false) {
+            lc.style.borderColor = '#ef4444';
+            lc.style.boxShadow = '0 0 16px rgba(239,68,68,0.45)';
+          } else if (checkedResults[lId] === true) {
+            lc.style.borderColor = '#10b981';
+            lc.style.boxShadow = '0 0 16px rgba(16,185,129,0.45)';
+          }
+        } else if (pair) {
+          lc.style.borderColor = pair.color;
         }
       });
     }
@@ -6190,26 +6306,32 @@ window.AITeachingTools = {
       const connectedCount = Object.keys(userConnections).length;
 
       if (connectedCount < totalPairs) {
-        alert('Bạn hãy nối đủ cả 4 cặp ý nghĩa trước khi kiểm tra nhé!');
+        showToastMessage(`Bạn mới nối ${connectedCount}/${totalPairs} cặp. Hãy nối đủ trước khi kiểm tra nhé!`, false);
+        soundFX.errorClack();
         return;
       }
 
-      let allCorrect = true;
+      checkedResults = {};
+      let wrongCount = 0;
+
       rData.pairs.forEach(p => {
-        if (userConnections[p.id] !== p.id) {
-          allCorrect = false;
-        }
+        const isCorrect = (userConnections[p.id] === p.id);
+        checkedResults[p.id] = isCorrect;
+        if (!isCorrect) wrongCount++;
       });
 
-      if (allCorrect) {
+      updateRightCardsStyles();
+
+      if (wrongCount === 0) {
         soundFX.magicChime();
         score += 100;
         scoreDisplay.textContent = score;
+        showToastMessage('🎉 XUẤT SẮC! BẠN ĐÃ NỐI CHÍNH XÁC 100% CÁC CẶP Ý NGHĨA!', true);
         speakAnnounce('Xuất sắc! Bạn đã nối chính xác 100% các cặp ý nghĩa!');
 
-        // Flash green cards
         modal.querySelectorAll('.mq-card').forEach(c => {
-          c.style.animation = 'pulse .4s';
+          c.style.transform = 'scale(1.03)';
+          c.style.borderColor = '#10b981';
         });
 
         setTimeout(() => {
@@ -6222,35 +6344,47 @@ window.AITeachingTools = {
         }, 1200);
       } else {
         soundFX.errorClack();
-        speakAnnounce('Có cặp nối chưa chính xác, bạn hãy kiểm tra lại nét vẽ nhé!');
+        showToastMessage(`❌ RẤT TIẾC! CÓ ${wrongCount} CẶP NỐI SAI (ĐÃ CHUYỂN MÀU ĐỎ ⚠️). HÃY NỐI LẠI NHÉ!`, false);
+        speakAnnounce(`Rất tiếc! Có ${wrongCount} cặp nối sai rồi. Bạn hãy kiểm tra nét màu đỏ và nối lại nhé!`);
 
-        const vp = modal.querySelector('#mq-viewport');
-        vp.style.animation = 'shake .5s';
-        setTimeout(() => { vp.style.animation = ''; }, 500);
+        const vp = modal.querySelector('#mq-cards-container');
+        if (vp) {
+          vp.style.transform = 'translateX(8px)';
+          setTimeout(() => { vp.style.transform = 'translateX(-8px)'; }, 70);
+          setTimeout(() => { vp.style.transform = 'translateX(6px)'; }, 140);
+          setTimeout(() => { vp.style.transform = 'translateX(-6px)'; }, 210);
+          setTimeout(() => { vp.style.transform = 'translateX(0)'; }, 280);
+        }
       }
     };
 
     modal.querySelector('#mq-btn-reset-links').onclick = () => {
       userConnections = {};
       activeDrag = null;
+      selectedLeftId = null;
+      checkedResults = null;
+      hideToastMessage();
+      updateSelectionStyles();
       updateRightCardsStyles();
       soundFX.penSwoosh();
     };
 
-    // MAIN GAME LOOP (60 FPS)
+    // MAIN GAME LOOP (HIGH 60 FPS WITHOUT LAG)
     function mainGameLoop() {
-      animTime += 0.035;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      animTime += 0.03;
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
 
       // 1. Draw Falling Sakura Petals Background
       drawSakuraPetals();
 
-      // 2. Draw Realistic Calligraphic Connected Pen Strokes
+      // 2. Draw Connected Pen Strokes
       drawConnectedCalligraphicStrokes();
 
       // 3. Draw Active Dragging Stroke
       if (activeDrag) {
-        drawSingleCalligraphicStroke(activeDrag.startX, activeDrag.startY, activeDrag.currX, activeDrag.currY, activeDrag.color, activeDrag.glow, true);
+        drawSingleCalligraphicStroke(activeDrag.startX, activeDrag.startY, activeDrag.currX, activeDrag.currY, activeDrag.color, activeDrag.glow, true, false);
       }
 
       // 4. Update & Draw Celebration Particles
@@ -6267,13 +6401,13 @@ window.AITeachingTools = {
         ctx.save();
         ctx.globalAlpha = Math.max(0, ep.life);
         ctx.fillStyle = ep.color;
-        ctx.shadowColor = ep.color;
-        ctx.shadowBlur = 16;
         ctx.beginPath();
         ctx.arc(ep.x, ep.y, ep.size * ep.life, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
+
+      ctx.restore();
 
       if (typeof requestAnimationFrame === 'function') {
         animId = requestAnimationFrame(mainGameLoop);
@@ -6281,25 +6415,25 @@ window.AITeachingTools = {
     }
 
     function drawSakuraPetals() {
+      const cW = canvas.width / dpr;
+      const cH = canvas.height / dpr;
       ctx.save();
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.6)';
       sakuraPetals.forEach(p => {
         p.y += p.speedY;
-        p.x += Math.sin(animTime * 2 + p.y * 0.01) * 1.5 + p.speedX;
+        p.x += Math.sin(animTime + p.y * 0.02) * 0.8 + p.speedX;
         p.rotation += p.rotSpeed;
 
-        if (p.y > canvas.height + 20) {
-          p.y = -20;
-          p.x = Math.random() * canvas.width;
+        if (p.y > cH + 15) {
+          p.y = -15;
+          p.x = Math.random() * cW;
         }
 
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation);
-        ctx.fillStyle = 'rgba(244, 63, 94, 0.75)';
-        ctx.shadowColor = '#f43f5e';
-        ctx.shadowBlur = 6;
         ctx.beginPath();
-        ctx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, p.size, p.size * 0.5, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       });
@@ -6324,73 +6458,79 @@ window.AITeachingTools = {
           const pair = rData.pairs.find(p => p.id === leftId);
 
           if (pair) {
-            drawSingleCalligraphicStroke(startAnchor.x, startAnchor.y, endAnchor.x, endAnchor.y, pair.color, pair.glow, false);
+            let strokeColor = pair.color;
+            let glowColor   = pair.glow;
+            let isWrong = false;
+
+            if (checkedResults) {
+              if (checkedResults[leftId] === false) {
+                strokeColor = '#ef4444';
+                glowColor   = '#f87171';
+                isWrong = true;
+              } else if (checkedResults[leftId] === true) {
+                strokeColor = '#10b981';
+                glowColor   = '#86efac';
+              }
+            }
+
+            drawSingleCalligraphicStroke(startAnchor.x, startAnchor.y, endAnchor.x, endAnchor.y, strokeColor, glowColor, false, isWrong);
           }
         }
       });
     }
 
-    // DRAW REALISTIC FLOWING CURVED CALLIGRAPHIC STROKE (THICK-THIN BEZIER WITH STARDUST)
-    function drawSingleCalligraphicStroke(x1, y1, x2, y2, color, glow, isDragging = false) {
+    // DRAW SMOOTH HARDWARE-ACCELERATED BEZIER RIBBON (WITH RED ERROR HIGHLIGHTING)
+    function drawSingleCalligraphicStroke(x1, y1, x2, y2, color, glow, isDragging = false, isWrong = false) {
       const dx = x2 - x1;
-      const dy = y2 - y1;
-      const dist = Math.hypot(dx, dy);
-
-      // Smooth organic control points for flowing ribbon curve
-      const cp1X = x1 + Math.max(80, dx * 0.45);
-      const cp1Y = y1 + Math.sin(animTime * 3 + x1 * 0.02) * 15;
-      const cp2X = x2 - Math.max(80, dx * 0.45);
-      const cp2Y = y2 - Math.sin(animTime * 3 + x2 * 0.02) * 15;
+      const cp1X = x1 + Math.max(50, dx * 0.45);
+      const cp1Y = y1;
+      const cp2X = x2 - Math.max(50, dx * 0.45);
+      const cp2Y = y2;
 
       ctx.save();
 
-      // 1. Soft Outer Luminous Glow Aura
+      // Outer glow line
       ctx.strokeStyle = color;
-      ctx.shadowColor = glow;
-      ctx.shadowBlur = 18;
-      ctx.lineWidth = 14;
+      ctx.lineWidth = isDragging ? 8 : (isWrong ? 9 : 7);
       ctx.lineCap = 'round';
-      ctx.globalAlpha = 0.4;
+      ctx.globalAlpha = isWrong ? 0.6 : 0.5;
+      if (isWrong) {
+        ctx.setLineDash([12, 6]);
+      }
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, x2, y2);
       ctx.stroke();
 
-      // 2. Vibrant Rich Calligraphic Main Ribbon (Width 7px)
-      ctx.shadowBlur = 8;
-      ctx.lineWidth = 7;
+      // Main vibrant line
+      ctx.setLineDash([]);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = isDragging ? 5 : (isWrong ? 5.5 : 4.5);
       ctx.globalAlpha = 0.95;
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, x2, y2);
       ctx.stroke();
 
-      // 3. Crisp White Core Centerline
-      ctx.strokeStyle = '#ffffff';
-      ctx.shadowBlur = 0;
-      ctx.lineWidth = 2.5;
+      // Crisp White / Accent center line
+      ctx.strokeStyle = isWrong ? '#fee2e2' : '#ffffff';
+      ctx.lineWidth = 1.8;
       ctx.globalAlpha = 0.95;
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, x2, y2);
       ctx.stroke();
 
-      // 4. Sparkling Stardust Particles moving along the curve
+      // Flowing spark / error indicator along connected lines
       if (!isDragging) {
-        const particleCount = 3;
-        for (let p = 0; p < particleCount; p++) {
-          const t = ((animTime * 0.6 + p / particleCount) % 1);
-          // Bezier calculation
-          const cx = Math.pow(1 - t, 3) * x1 + 3 * Math.pow(1 - t, 2) * t * cp1X + 3 * (1 - t) * Math.pow(t, 2) * cp2X + Math.pow(t, 3) * x2;
-          const cy = Math.pow(1 - t, 3) * y1 + 3 * Math.pow(1 - t, 2) * t * cp1Y + 3 * (1 - t) * Math.pow(t, 2) * cp2Y + Math.pow(t, 3) * y2;
+        const t = ((animTime * 0.8) % 1);
+        const cx = Math.pow(1 - t, 3) * x1 + 3 * Math.pow(1 - t, 2) * t * cp1X + 3 * (1 - t) * Math.pow(t, 2) * cp2X + Math.pow(t, 3) * x2;
+        const cy = Math.pow(1 - t, 3) * y1 + 3 * Math.pow(1 - t, 2) * t * cp1Y + 3 * (1 - t) * Math.pow(t, 2) * cp2Y + Math.pow(t, 3) * y2;
 
-          ctx.fillStyle = '#ffffff';
-          ctx.shadowColor = glow;
-          ctx.shadowBlur = 12;
-          ctx.beginPath();
-          ctx.arc(cx, cy, 4, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        ctx.fillStyle = isWrong ? '#ef4444' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx, cy, isWrong ? 5 : 3.5, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       ctx.restore();
@@ -6399,7 +6539,6 @@ window.AITeachingTools = {
     // FINISH GAME CEREMONY
     function finishGame(isVictory) {
       isGameRunning = false;
-      matchingBgm.stop();
 
       const winOverlay = modal.querySelector('#mq-winner-overlay');
       const winTitle = modal.querySelector('#mq-winner-title');
@@ -6410,49 +6549,44 @@ window.AITeachingTools = {
         soundFX.victoryFanfare();
         winTitle.textContent = 'BẬC THẦY NỐI Ý!';
         winTitle.style.color = '#0284c7';
-        voiceText.textContent = '"Chúc mừng bạn đã xuất sắc vượt qua toàn bộ các thử thách Nối Ý!"';
+        voiceText.textContent = '"Chúc mừng bạn đã xuất sắc hoàn thành trò chơi Nối Ý!"';
         scoreText.textContent = `Tổng điểm xuất sắc: ${score} Điểm`;
         winOverlay.style.display = 'flex';
 
-        speakAnnounce('Chúc mừng bạn đã xuất sắc vượt qua toàn bộ các thử thách Nối Ý!');
+        speakAnnounce('Chúc mừng bạn đã xuất sắc hoàn thành trò chơi Nối Ý!');
         launchMegaFireworksShow();
-      }
-
-      const respeakBtn = modal.querySelector('#mq-btn-respeak');
-      if (respeakBtn) {
-        respeakBtn.onclick = () => {
-          speakAnnounce(voiceText.textContent.replace(/"/g, ''));
-        };
       }
     }
 
     function spawnMegaFireworkBurst(x, y) {
       soundFX.magicChime();
       const colors = ['#06b6d4', '#f59e0b', '#f43f5e', '#8b5cf6', '#10b981', '#ffffff'];
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 40; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const spd = 3 + Math.random() * 8;
+        const spd = 3 + Math.random() * 6;
         explosionParticles.push({
           x: x,
           y: y,
           vx: Math.cos(angle) * spd,
           vy: Math.sin(angle) * spd,
-          size: 4.5,
+          size: 4,
           color: colors[Math.floor(Math.random() * colors.length)],
           life: 1.0,
-          decay: 0.02
+          decay: 0.025
         });
       }
     }
 
     function launchMegaFireworksShow() {
-      for (let i = 0; i < 10; i++) {
+      const cW = canvas.width / dpr;
+      const cH = canvas.height / dpr;
+      for (let i = 0; i < 6; i++) {
         setTimeout(() => {
           if (!document.getElementById('matching-modal')) return;
-          const fx = canvas.width * 0.15 + Math.random() * (canvas.width * 0.7);
-          const fy = canvas.height * 0.12 + Math.random() * (canvas.height * 0.45);
+          const fx = cW * 0.2 + Math.random() * (cW * 0.6);
+          const fy = cH * 0.15 + Math.random() * (cH * 0.4);
           spawnMegaFireworkBurst(fx, fy);
-        }, i * 320);
+        }, i * 350);
       }
     }
 
@@ -6463,17 +6597,14 @@ window.AITeachingTools = {
       const countOverlay = modal.querySelector('#mq-countdown-overlay');
       const countNum = modal.querySelector('#mq-count-number');
 
-      startOverlay.style.opacity = '0';
-      startOverlay.style.pointerEvents = 'none';
-      setTimeout(() => { startOverlay.style.display = 'none'; }, 300);
-
+      startOverlay.style.display = 'none';
       countOverlay.style.display = 'flex';
 
       const steps = [
         { text: '3', color: '#ef4444', pitchHigh: false, delay: 0 },
         { text: '2', color: '#f59e0b', pitchHigh: false, delay: 1000 },
         { text: '1', color: '#10b981', pitchHigh: false, delay: 2000 },
-        { text: 'NỐI Ý! 🧩✨', color: '#0284c7', pitchHigh: true, delay: 3000 }
+        { text: 'NỐI Ý! 🧩', color: '#0284c7', pitchHigh: true, delay: 3000 }
       ];
 
       steps.forEach(st => {
@@ -6481,20 +6612,18 @@ window.AITeachingTools = {
           if (!document.getElementById('matching-modal')) return;
           countNum.textContent = st.text;
           countNum.style.color = st.color;
-          countNum.style.transform = 'scale(1.2)';
+          countNum.style.transform = 'scale(1.15)';
           countNum.style.opacity = '1';
 
           soundFX.countdownBeep(st.pitchHigh);
 
           setTimeout(() => {
-            countNum.style.transform = 'scale(0.8)';
+            countNum.style.transform = 'scale(0.85)';
             countNum.style.opacity = '0.7';
           }, 400);
 
           if (st.text.includes('NỐI Ý')) {
             soundFX.magicChime();
-            if (audioEnabled) matchingBgm.start();
-
             isGameRunning = true;
             score = 0;
             currentRound = 1;
@@ -6502,7 +6631,7 @@ window.AITeachingTools = {
 
             setTimeout(() => {
               countOverlay.style.display = 'none';
-            }, 700);
+            }, 600);
           }
         }, st.delay);
       });
@@ -6514,9 +6643,6 @@ window.AITeachingTools = {
       modal.querySelector('#mq-winner-overlay').style.display = 'none';
       const startOverlay = modal.querySelector('#mq-start-overlay');
       startOverlay.style.display = 'flex';
-      startOverlay.style.opacity = '1';
-      startOverlay.style.pointerEvents = 'auto';
-
       currentRound = 1;
       score = 0;
       loadRoundCards();
@@ -6528,7 +6654,7 @@ window.AITeachingTools = {
 
     function cleanupAndClose() {
       isGameRunning = false;
-      matchingBgm.stop();
+      window.removeEventListener('resize', resizeCanvas);
       if (typeof window !== 'undefined' && window.speechSynthesis) {
         window.speechSynthesis.cancel();
       }
@@ -8870,9 +8996,14 @@ window.AITeachingTools = {
 
   _bindTabs() {
     const dom = this._dom;
-    ['slides','icebreaker','voice','simulation','luckywheel','goldminer','headtilt','duckrace','tugofwar','minesweeper','fruitninja','matching','trainorder','luckycamera','plickers','mysterypuzzle','crossword','wordhunt'].forEach(t => {
+    ['slides','icebreaker','voice','simulation','luckywheel','goldminer','headtilt','duckrace','tugofwar','minesweeper','fruitninja','matching','trainorder','luckycamera','plickers','mysterypuzzle','crossword','wordhunt','multiverse'].forEach(t => {
       const btn = dom.querySelector(`#ait-tab-${t}`);
       if (btn) btn.onclick = () => { this.currentTab = t; this.render(dom); };
+    });
+    // Dynamic fallback for all ait-tab buttons
+    dom.querySelectorAll('[id^="ait-tab-"]').forEach(btn => {
+      const t = btn.id.replace('ait-tab-', '');
+      btn.onclick = () => { this.currentTab = t; this.render(dom); };
     });
   },
 
@@ -8898,6 +9029,7 @@ window.AITeachingTools = {
     else if (t === 'mysterypuzzle') this._renderMysteryPuzzleDashboard();
     else if (t === 'crossword')     this._renderCrosswordDashboard();
     else if (t === 'wordhunt')      this._renderWordHuntDashboard();
+    else if (t === 'multiverse')    this._renderMultiverseDashboard();
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -17745,6 +17877,1449 @@ ${notificationMsg ? `
       }
       modal.remove();
     }
+  },
+
+
+  // ═══════════════════════════════════════════════════════════════
+  // GAME 19: ĐẤU TRƯỜNG ĐA VŨ TRỤ (MULTIVERSE ADVENTURE ARENA)
+  // KIẾN TRÚC NHÓM ẢI GAME ĐA DẠNG (MULTI-QUESTION STAGE GROUPS)
+  // ═══════════════════════════════════════════════════════════════
+  _getDefaultMultiverseStages() {
+    return [
+      {
+        stageId: 'stg_1',
+        gameType: 'goldminer',
+        stageName: 'Ải 1: ⛏️ Mỏ Vàng Tri Thức',
+        questions: [
+          {
+            q: 'Kim loại nào có nhiệt độ nóng chảy cao nhất dùng làm dây tóc bóng đèn?',
+            options: ['Tungsten (Vonfram)', 'Đồng (Copper)', 'Nhôm (Aluminium)', 'Sắt (Iron)'],
+            correctAnswer: 0,
+            explanation: 'Vonfram (W) có nhiệt độ nóng chảy lên tới 3422°C.'
+          },
+          {
+            q: 'Số nguyên tố chẵn DUY NHẤT trong toán học là số nào?',
+            options: ['Số 2', 'Số 0', 'Số 4', 'Số 6'],
+            correctAnswer: 0,
+            explanation: 'Số 2 là số nguyên tố chẵn duy nhất.'
+          }
+        ]
+      },
+      {
+        stageId: 'stg_2',
+        gameType: 'fruitninja',
+        stageName: 'Ải 2: 🍉 Chém Hoa Quả Tốc Độ',
+        questions: [
+          {
+            q: 'Chém quả chứa TỪ TRÁI NGHĨA với "CẦN CÙ":',
+            options: ['Lười biếng', 'Chăm chỉ', 'Siêng năng', 'Cần mẫn'],
+            correctAnswer: 0,
+            explanation: '"Lười biếng" trái nghĩa với "Cần cù".'
+          },
+          {
+            q: 'Chém quả chứa kết quả phép tính: 8 × 9 = ?',
+            options: ['72', '64', '81', '56'],
+            correctAnswer: 0,
+            explanation: '8 × 9 = 72.'
+          }
+        ]
+      },
+      {
+        stageId: 'stg_3',
+        gameType: 'headtilt',
+        stageName: 'Ải 3: 🤸 Nghiêng Đầu AI',
+        questions: [
+          {
+            q: 'Đỉnh núi Phan Xi Păng (Fansipan) thuộc dãy Hoàng Liên Sơn?',
+            options: ['Đúng (True)', 'Sai (False)'],
+            correctAnswer: 0,
+            explanation: 'Fansipan cao 3.143m nằm trên dãy Hoàng Liên Sơn hùng vĩ.'
+          },
+          {
+            q: 'Nước đóng băng ở 0°C trong điều kiện áp suất tiêu chuẩn?',
+            options: ['Đúng (True)', 'Sai (False)'],
+            correctAnswer: 0,
+            explanation: 'Nước tinh khiết đóng băng ở 0°C (32°F).'
+          }
+        ]
+      },
+      {
+        stageId: 'stg_4',
+        gameType: 'tugofwar',
+        stageName: 'Ải 4: 🪢 Kéo Co Đồng Đội',
+        questions: [
+          {
+            q: 'Đơn vị đo cường độ dòng điện trong hệ đo lường SI là gì?',
+            options: ['Ampe (A)', 'Vôn (V)', 'Ohm (Ω)', 'Watt (W)'],
+            correctAnswer: 0,
+            explanation: 'Ampe (A) là đơn vị đo cường độ dòng điện.'
+          },
+          {
+            q: 'Hệ nhị phân (Binary) dùng trong máy tính gồm bao nhiêu chữ số cơ bản?',
+            options: ['2 chữ số (0 và 1)', '8 chữ số', '10 chữ số', '16 chữ số'],
+            correctAnswer: 0,
+            explanation: 'Hệ nhị phân gồm 2 chữ số 0 và 1.'
+          }
+        ]
+      },
+      {
+        stageId: 'stg_5',
+        gameType: 'matching',
+        stageName: 'Ải 5: 🧩 Kéo Thả Nối Ý',
+        pairs: [
+          { id: 1, left: 'Cần cù bù thông minh', right: 'Chăm chỉ vượt qua thiếu sót', color: '#06b6d4', glow: '#67e8f9' },
+          { id: 2, left: 'Uống nước nhớ nguồn', right: 'Biết ơn người đi trước', color: '#f59e0b', glow: '#fde047' },
+          { id: 3, left: 'Lá lành đùm lá rách', right: 'Thương yêu, đùm bọc lẫn nhau', color: '#f43f5e', glow: '#fda4af' }
+        ]
+      }
+    ];
+  },
+
+  _getMultiverseStages() {
+    if (!this._multiverseStages || !Array.isArray(this._multiverseStages) || this._multiverseStages.length === 0) {
+      this._multiverseStages = this._getDefaultMultiverseStages();
+    }
+    return this._multiverseStages;
+  },
+
+  // 1. GIAO DIỆN SOẠN THẢO NHÓM ẢI GAME ĐA VŨ TRỤ (TEACHER DASHBOARD)
+  _renderMultiverseDashboard() {
+    const area = this._area();
+    if (!area) return;
+
+    const stages = this._getMultiverseStages();
+    const subName = (typeof window.app !== 'undefined' && window.app.currentSubject) ? window.app.currentSubject.name : 'Khoa học tự nhiên';
+    const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'multiverse').length : 0;
+
+    const GAME_META = {
+      goldminer:   { name: 'Đào Vàng', icon: '⛏️', color: '#f59e0b', bg: '#fef3c7' },
+      fruitninja:  { name: 'Chém Hoa Quả', icon: '🍉', color: '#ea580c', bg: '#ffedd5' },
+      headtilt:    { name: 'Nghiêng Đầu AI', icon: '🤸', color: '#0284c7', bg: '#e0f2fe' },
+      tugofwar:    { name: 'Kéo Co Đồng Đội', icon: '🪢', color: '#dc2626', bg: '#fee2e2' },
+      minesweeper: { name: 'Dò Mìn Vượt Bãi', icon: '💣', color: '#7c3aed', bg: '#f5f3ff' },
+      matching:    { name: 'Kéo Thả Nối Ý', icon: '🧩', color: '#0891b2', bg: '#ecfeff' },
+      duckrace:    { name: 'Game Đua Vịt', icon: '🦆', color: '#0d9488', bg: '#f0fdfa' },
+      trainorder:  { name: 'Đoàn Tàu Tri Thức', icon: '🚂', color: '#2563eb', bg: '#eff6ff' }
+    };
+
+    const totalQuestionsCount = stages.reduce((acc, s) => acc + ((s.questions && s.questions.length) || (s.pairs && s.pairs.length) || 0), 0);
+
+    area.innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:1.5rem; animation:fadeIn 0.25s ease-out;">
+        
+        <!-- HEADER BANNER -->
+        <div style="background:linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); border-radius:22px; padding:1.8rem; color:#fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem; box-shadow:0 12px 35px rgba(49,46,129,0.25); border:2px solid rgba(199,210,254,0.3);">
+          <div style="display:flex; align-items:center; gap:1.2rem;">
+            <div style="width:68px; height:68px; border-radius:20px; background:radial-gradient(circle, #a855f7, #6366f1); display:flex; align-items:center; justify-content:center; font-size:2.4rem; box-shadow:0 8px 25px rgba(168,85,247,0.4); border:2px solid #fff;">
+              🌌
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                <h2 style="margin:0; font-size:1.6rem; font-weight:900; background:linear-gradient(90deg, #c084fc, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+                  GAME 19: ĐẤU TRƯỜNG ĐA VŨ TRỤ (MULTIVERSE ARENA)
+                </h2>
+                <span style="background:#7c3aed; color:#fff; font-size:0.75rem; padding:3px 10px; border-radius:999px; font-weight:800; border:1px solid #c084fc;">ĐA ẢI LIÊN HOÀN</span>
+              </div>
+              <p style="margin:0.4rem 0 0; color:#e0e7ff; font-size:0.95rem; font-weight:500;">
+                Tổ chức bài học thành các <strong>Nhóm Game (mỗi nhóm chứa nhiều câu hỏi)</strong> — Tự do chọn 2, 3 hoặc nhiều game bất kỳ tùy thích!
+              </p>
+            </div>
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <button id="btn-mva-launch-all" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:2px solid #86efac; padding:0.9rem 1.8rem; border-radius:16px; font-weight:900; font-size:1.05rem; cursor:pointer; box-shadow:0 8px 25px rgba(16,185,129,0.35); display:flex; align-items:center; gap:0.6rem; transition:transform 0.15s;">
+              <span>🚀</span> BẮT ĐẦU ĐẤU TRƯỜNG NGAY
+            </button>
+            <button id="btn-mva-save-db" style="background:rgba(255,255,255,0.15); border:1.5px solid rgba(255,255,255,0.35); color:#fff; padding:0.9rem 1.2rem; border-radius:16px; font-weight:800; font-size:0.92rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem;">
+              <span>💾</span> Lưu Kho
+            </button>
+            <button id="btn-mva-open-library" style="background:linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border:1.5px solid #a5b4fc; color:#fff; padding:0.9rem 1.3rem; border-radius:16px; font-weight:900; font-size:0.92rem; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:0 8px 25px rgba(99,102,241,0.35);">
+              <span>🏫</span> MỞ KHO BÀI GIẢNG (${savedCount} bài)
+            </button>
+          </div>
+        </div>
+
+        <!-- TOOLBAR ĐIỀU KHIỂN -->
+        <div style="background:#ffffff; border-radius:18px; padding:1rem 1.4rem; border:1.5px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <button id="btn-mva-add-stage" style="background:#7c3aed; color:#fff; border:none; padding:0.65rem 1.3rem; border-radius:12px; font-weight:800; font-size:0.92rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; box-shadow:0 4px 14px rgba(124,58,237,0.25);">
+              <span>➕</span> Thêm Nhóm Ải Game Mới
+            </button>
+            <button id="btn-mva-ai-generate" style="background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; border:none; padding:0.65rem 1.3rem; border-radius:12px; font-weight:800; font-size:0.92rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; box-shadow:0 4px 14px rgba(245,158,11,0.25);">
+              <span>🤖</span> AI Tạo Chuỗi Ải Tự Động
+            </button>
+            <button id="btn-mva-open-library-2" style="background:#f1f5f9; color:#4338ca; border:1.5px solid #c7d2fe; padding:0.65rem 1.2rem; border-radius:12px; font-weight:800; font-size:0.92rem; cursor:pointer; display:flex; align-items:center; gap:0.45rem;">
+              <span>🏫</span> Xem Kho Bài Đã Lưu (${savedCount})
+            </button>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:1.2rem; font-size:0.92rem; font-weight:800; color:#64748b;">
+            <div>Số Nhóm Ải: <span style="color:#7c3aed; font-size:1.15rem; font-weight:900;">${stages.length} Ải</span></div>
+            <div style="width:1.5px; height:18px; background:#cbd5e1;"></div>
+            <div>Tổng Câu Hỏi: <span style="color:#10b981; font-size:1.15rem; font-weight:900;">${totalQuestionsCount} Câu</span></div>
+          </div>
+        </div>
+
+        <!-- DANH SÁCH CÁC NHÓM ẢI GAME -->
+        <div id="mva-stages-container" style="display:flex; flex-direction:column; gap:1.3rem;">
+          ${stages.map((stg, sIdx) => {
+            const meta = GAME_META[stg.gameType] || GAME_META.goldminer;
+            const qList = stg.questions || [];
+            const pList = stg.pairs || [];
+            const itemCount = qList.length || pList.length;
+
+            return `
+              <div class="mva-stage-box" data-stage-idx="${sIdx}" style="background:#ffffff; border:2.5px solid ${meta.color}; border-radius:20px; padding:1.4rem 1.6rem; box-shadow:0 6px 20px rgba(0,0,0,0.05); display:flex; flex-direction:column; gap:1rem; position:relative;">
+                
+                <!-- STAGE HEADER -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; border-bottom:1.5px solid #f1f5f9; padding-bottom:0.85rem;">
+                  <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <span style="background:${meta.color}; color:#fff; width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.3rem; box-shadow:0 4px 12px ${meta.color}44;">
+                      ${meta.icon}
+                    </span>
+                    <div>
+                      <div style="font-weight:900; font-size:1.15rem; color:#0f172a;">
+                        Ải ${sIdx + 1}: ${stg.stageName || (meta.name + ' (' + itemCount + ' câu)')}
+                      </div>
+                      <div style="font-size:0.78rem; font-weight:700; color:#64748b;">
+                        Đang chứa <strong>${itemCount} câu hỏi/nội dung</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- MINI-GAME SWITCHER CHO ẢI NÀY -->
+                  <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                    <span style="font-size:0.8rem; font-weight:800; color:#64748b;">Đổi Game:</span>
+                    <select class="sel-mva-stage-game" data-stage-idx="${sIdx}" style="padding:0.4rem 0.8rem; border:1.5px solid ${meta.color}; border-radius:10px; font-weight:800; font-size:0.85rem; color:${meta.color}; background:#ffffff; cursor:pointer;">
+                      ${Object.keys(GAME_META).map(k => `
+                        <option value="${k}" ${stg.gameType === k ? 'selected' : ''}>${GAME_META[k].icon} ${GAME_META[k].name}</option>
+                      `).join('')}
+                    </select>
+
+                    <button class="btn-mva-add-q-to-stage" data-stage-idx="${sIdx}" style="background:#10b981; color:#fff; border:none; padding:0.4rem 0.85rem; border-radius:10px; font-weight:800; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+                      <span>➕</span> Thêm Câu Vào Ải
+                    </button>
+                    <button class="btn-mva-del-stage" data-stage-idx="${sIdx}" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; padding:0.4rem 0.75rem; border-radius:10px; font-weight:800; font-size:0.82rem; cursor:pointer;">
+                      🗑️ Xóa Ải
+                    </button>
+                  </div>
+                </div>
+
+                <!-- DANH SÁCH CÂU HỎI TRONG ẢI NÀY -->
+                <div style="display:flex; flex-direction:column; gap:0.75rem; background:#f8fafc; padding:1rem; border-radius:14px; border:1px solid #e2e8f0;">
+                  ${stg.gameType === 'matching' ? `
+                    <!-- GIAO DIỆN CẶP NỐI Ý -->
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                      ${pList.map((p, pIdx) => `
+                        <div style="background:#fff; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.6rem 1rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+                          <div style="font-weight:800; font-size:0.9rem; color:#0f172a; flex:1;">
+                            <span style="color:#0891b2;">Cặp ${pIdx + 1}:</span> [${p.left}] ➔ [${p.right}]
+                          </div>
+                          <div style="display:flex; gap:0.4rem;">
+                            <button class="btn-mva-edit-pair" data-stage-idx="${sIdx}" data-pair-idx="${pIdx}" style="background:#f1f5f9; border:1px solid #cbd5e1; color:#334155; border-radius:6px; padding:0.25rem 0.6rem; font-weight:800; font-size:0.75rem; cursor:pointer;">✏️ Sửa</button>
+                            <button class="btn-mva-del-pair" data-stage-idx="${sIdx}" data-pair-idx="${pIdx}" style="background:#fee2e2; border:none; color:#dc2626; border-radius:6px; padding:0.25rem 0.55rem; font-weight:800; font-size:0.75rem; cursor:pointer;">Xóa</button>
+                          </div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : `
+                    <!-- GIAO DIỆN CÂU HỎI TRẮC NGHIỆM VỚI BỘ CHỌN ĐÁP ÁN ĐÚNG & NẠP ĐIỂM -->
+                    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                      ${qList.map((q, qIdx) => `
+                        <div style="background:#fff; border:1.5px solid #e2e8f0; border-radius:14px; padding:0.85rem 1.1rem; display:flex; flex-direction:column; gap:0.6rem; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+                          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                            <span style="font-weight:800; font-size:0.95rem; color:#0f172a; flex:1; min-width:220px;">
+                              Câu ${sIdx + 1}.${qIdx + 1}: ${q.q || q.questionText}
+                            </span>
+                            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                              <!-- NẠP ĐIỂM SỐ CHO CÂU NÀY -->
+                              <div style="display:flex; align-items:center; gap:0.3rem; background:#fef3c7; border:1.5px solid #fde047; padding:0.25rem 0.6rem; border-radius:10px;" title="Điểm số đạt được khi trả lời đúng câu này">
+                                <span style="font-size:0.82rem; font-weight:800; color:#b45309;">⭐ Điểm:</span>
+                                <input type="number" class="inp-mva-q-points" data-stage-idx="${sIdx}" data-q-idx="${qIdx}" value="${q.points || 100}" min="10" max="1000" step="10" style="width:60px; border:1.5px solid #f59e0b; border-radius:6px; font-weight:900; font-size:0.85rem; color:#b45309; text-align:center; padding:2px; outline:none; background:#ffffff;" />
+                              </div>
+
+                              <button class="btn-mva-edit-q-in-stage" data-stage-idx="${sIdx}" data-q-idx="${qIdx}" style="background:#f8fafc; border:1px solid #cbd5e1; color:#475569; border-radius:8px; padding:0.3rem 0.75rem; font-weight:800; font-size:0.78rem; cursor:pointer;">✏️ Sửa</button>
+                              <button class="btn-mva-del-q-in-stage" data-stage-idx="${sIdx}" data-q-idx="${qIdx}" style="background:#fee2e2; border:none; color:#dc2626; border-radius:8px; padding:0.3rem 0.65rem; font-weight:800; font-size:0.78rem; cursor:pointer;">Xóa</button>
+                            </div>
+                          </div>
+
+                          <!-- 4 PHƯƠNG ÁN LỰA CHỌN (BẤM VÀO ĐỂ ĐỔI ĐÁP ÁN ĐÚNG) -->
+                          <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                              ${(q.options || []).map((opt, oIdx) => {
+                                const isCorrect = (oIdx === (q.correctAnswer || 0));
+                                return `
+                                  <button class="btn-mva-set-correct-opt" data-stage-idx="${sIdx}" data-q-idx="${qIdx}" data-opt-idx="${oIdx}" title="Bấm để chọn phương án này làm đáp án đúng" style="background:${isCorrect ? '#dcfce7' : '#ffffff'}; color:${isCorrect ? '#15803d' : '#334155'}; font-weight:${isCorrect ? '900' : '700'}; padding:0.4rem 0.85rem; border-radius:8px; border:2px solid ${isCorrect ? '#10b981' : '#cbd5e1'}; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:0.35rem; transition:all 0.15s; ${isCorrect ? 'box-shadow:0 0 10px rgba(16,185,129,0.3);' : ''}">
+                                    <span>${isCorrect ? '✅' : '⚪'}</span>
+                                    <span><strong>${String.fromCharCode(65 + oIdx)}.</strong> ${opt}</span>
+                                    ${isCorrect ? '<span style="background:#16a34a; color:#fff; font-size:0.65rem; padding:1px 6px; border-radius:999px; margin-left:0.2rem;">ĐÚNG</span>' : ''}
+                                  </button>
+                                `;
+                              }).join('')}
+                            </div>
+                            <div style="font-size:0.73rem; color:#64748b; font-weight:600; margin-top:0.1rem;">
+                              💡 <em>Mẹo: Bấm trực tiếp vào phương án A, B, C hoặc D bất kỳ ở trên để đặt làm <strong>Đáp Án Đúng</strong>!</em>
+                            </div>
+                          </div>
+
+                        </div>
+                      `).join('')}
+                    </div>
+                  `}
+                </div>
+
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+      </div>
+    `;
+    // ─── BINDING EVENTS CHO DASHBOARD NHÓM ẢI ───
+    // Nạp điểm số khi gõ trực tiếp vào ô Điểm
+    area.querySelectorAll('.inp-mva-q-points').forEach(inp => {
+      inp.onchange = (e) => {
+        const sIdx = parseInt(inp.dataset.stageIdx);
+        const qIdx = parseInt(inp.dataset.qIdx);
+        const pts = parseInt(e.target.value) || 100;
+        if (stages[sIdx] && stages[sIdx].questions && stages[sIdx].questions[qIdx]) {
+          stages[sIdx].questions[qIdx].points = pts;
+          if (window.app && window.app.showToast) {
+            window.app.showToast(`⭐ Đã cập nhật ${pts} điểm cho Câu ${sIdx + 1}.${qIdx + 1}!`);
+          }
+        }
+      };
+    });
+
+    // Đặt đáp án đúng khi bấm trực tiếp vào phương án
+    area.querySelectorAll('.btn-mva-set-correct-opt').forEach(btn => {
+      btn.onclick = () => {
+        const sIdx = parseInt(btn.dataset.stageIdx);
+        const qIdx = parseInt(btn.dataset.qIdx);
+        const optIdx = parseInt(btn.dataset.optIdx);
+        if (stages[sIdx] && stages[sIdx].questions && stages[sIdx].questions[qIdx]) {
+          stages[sIdx].questions[qIdx].correctAnswer = optIdx;
+          this._renderMultiverseDashboard();
+          if (window.app && window.app.showToast) {
+            window.app.showToast(`✅ Đã đặt đáp án [${String.fromCharCode(65 + optIdx)}] làm ĐÁP ÁN ĐÚNG cho Câu ${sIdx + 1}.${qIdx + 1}!`);
+          }
+        }
+      };
+    });
+
+    // Sửa câu hỏi trong ải modal
+    area.querySelectorAll('.btn-mva-edit-q-in-stage').forEach(btn => {
+      btn.onclick = () => {
+        const sIdx = parseInt(btn.dataset.stageIdx);
+        const qIdx = parseInt(btn.dataset.qIdx);
+        const q = stages[sIdx].questions[qIdx];
+        const editModal = document.createElement('div');
+        editModal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.75); backdrop-filter:blur(6px); z-index:9999999; display:flex; align-items:center; justify-content:center; padding:1rem;';
+        editModal.innerHTML = `
+          <div style="background:#fff; border-radius:20px; max-width:600px; width:100%; padding:1.8rem; box-shadow:0 25px 60px rgba(0,0,0,0.3); border:2px solid #7c3aed; animation:fadeIn 0.2s ease-out; font-family:system-ui,sans-serif;">
+            <h3 style="margin:0 0 1rem; color:#4338ca; font-size:1.3rem; font-weight:800;">✏️ Chỉnh Sửa Câu ${sIdx + 1}.${qIdx + 1}</h3>
+            
+            <div style="margin-bottom:0.9rem;">
+              <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:0.3rem;">Nội dung câu hỏi:</label>
+              <textarea id="edit-stg-q-text" style="width:100%; min-height:70px; border:1.5px solid #cbd5e1; border-radius:10px; padding:0.6rem; font-size:0.92rem; box-sizing:border-box;">${q.q || q.questionText || ''}</textarea>
+            </div>
+
+            <div style="margin-bottom:0.9rem;">
+              <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:0.3rem;">⭐ Điểm số:</label>
+              <input type="number" id="edit-stg-points" value="${q.points || 100}" min="10" max="1000" step="10" style="width:100%; padding:0.5rem; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.9rem; font-weight:800; box-sizing:border-box;" />
+            </div>
+
+            <div style="margin-bottom:0.9rem;">
+              <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:0.3rem;">4 Phương án lựa chọn:</label>
+              <div style="display:flex; flex-direction:column; gap:0.45rem;">
+                ${[0,1,2,3].map(i => `
+                  <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span style="font-weight:800; color:#64748b; width:20px;">${String.fromCharCode(65+i)}:</span>
+                    <input type="text" id="edit-stg-opt-${i}" value="${(q.options && q.options[i]) || ''}" style="flex:1; padding:0.5rem; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.88rem;">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div style="margin-bottom:1.2rem;">
+              <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:0.3rem;">Đáp án đúng:</label>
+              <select id="edit-stg-correct" style="width:100%; padding:0.5rem; border:2px solid #86efac; border-radius:8px; font-weight:800; font-size:0.9rem; background:#f0fdf4; color:#15803d;">
+                <option value="0" ${q.correctAnswer === 0 ? 'selected' : ''}>Đáp án A</option>
+                <option value="1" ${q.correctAnswer === 1 ? 'selected' : ''}>Đáp án B</option>
+                <option value="2" ${q.correctAnswer === 2 ? 'selected' : ''}>Đáp án C</option>
+                <option value="3" ${q.correctAnswer === 3 ? 'selected' : ''}>Đáp án D</option>
+              </select>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:0.6rem;">
+              <button id="btn-cancel-edit-stg-q" style="background:#f1f5f9; border:1px solid #cbd5e1; padding:0.6rem 1.2rem; border-radius:10px; font-weight:700; cursor:pointer;">Hủy</button>
+              <button id="btn-save-edit-stg-q" style="background:#7c3aed; color:#fff; border:none; padding:0.6rem 1.5rem; border-radius:10px; font-weight:800; cursor:pointer;">Lưu Thay Đổi</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(editModal);
+
+        editModal.querySelector('#btn-cancel-edit-stg-q').onclick = () => editModal.remove();
+        editModal.querySelector('#btn-save-edit-stg-q').onclick = () => {
+          q.q = editModal.querySelector('#edit-stg-q-text').value.trim() || q.q;
+          q.questionText = q.q;
+          q.points = parseInt(editModal.querySelector('#edit-stg-points').value) || 100;
+          q.options = [0,1,2,3].map(i => editModal.querySelector('#edit-stg-opt-' + i).value.trim() || `Phương án ${String.fromCharCode(65+i)}`);
+          q.correctAnswer = parseInt(editModal.querySelector('#edit-stg-correct').value) || 0;
+          editModal.remove();
+          this._renderMultiverseDashboard();
+        };
+      };
+    });
+
+    // Sửa cặp nối ý modal
+    area.querySelectorAll('.btn-mva-edit-pair').forEach(btn => {
+      btn.onclick = () => {
+        const sIdx = parseInt(btn.dataset.stageIdx);
+        const pIdx = parseInt(btn.dataset.pairIdx);
+        const p = stages[sIdx].pairs[pIdx];
+        const newLeft = prompt('Nhập nội dung vế TRÁI:', p.left);
+        if (newLeft === null) return;
+        const newRight = prompt('Nhập nội dung vế PHẢI:', p.right);
+        if (newRight === null) return;
+        p.left = newLeft.trim() || p.left;
+        p.right = newRight.trim() || p.right;
+        this._renderMultiverseDashboard();
+      };
+    });
+
+        area.querySelector('#btn-mva-launch-all').onclick = () => {
+      this._startMultiverseArena(subName, this._getMultiverseStages());
+    };
+
+    const btnOpenLibMva = area.querySelector('#btn-mva-open-library');
+    if (btnOpenLibMva) btnOpenLibMva.onclick = () => this.showSharedToolsLibraryModal('multiverse');
+    const btnOpenLibMva2 = area.querySelector('#btn-mva-open-library-2');
+    if (btnOpenLibMva2) btnOpenLibMva2.onclick = () => this.showSharedToolsLibraryModal('multiverse');
+
+    area.querySelector('#btn-mva-save-db').onclick = () => {
+      this.showSaveToolModal('multiverse', `Đấu Trường Đa Vũ Trụ: ${subName}`, {
+        stages: this._getMultiverseStages()
+      }, () => {
+        if (window.app && window.app.showToast) window.app.showToast('✅ Đã lưu chuỗi Ải Đa Vũ Trụ vào kho!');
+      });
+    };
+
+    area.querySelector('#btn-mva-add-stage').onclick = () => {
+      const keys = Object.keys(GAME_META);
+      const nextKey = keys[stages.length % keys.length];
+      stages.push({
+        stageId: 'stg_' + Date.now(),
+        gameType: nextKey,
+        stageName: `Ải ${stages.length + 1}: ${GAME_META[nextKey].name}`,
+        questions: [
+          {
+            q: `Câu hỏi mới cho Ải ${stages.length + 1}`,
+            options: ['Phương án A (Đúng)', 'Phương án B', 'Phương án C', 'Phương án D'],
+            correctAnswer: 0,
+            explanation: 'Giải thích cho câu hỏi này.'
+          }
+        ]
+      });
+      this._renderMultiverseDashboard();
+    };
+
+    area.querySelectorAll('.sel-mva-stage-game').forEach(sel => {
+      sel.onchange = (e) => {
+        const sIdx = parseInt(sel.dataset.stageIdx);
+        const newGame = e.target.value;
+        if (stages[sIdx]) {
+          stages[sIdx].gameType = newGame;
+          stages[sIdx].stageName = `Ải ${sIdx + 1}: ${GAME_META[newGame].name}`;
+          if (newGame === 'matching' && !stages[sIdx].pairs) {
+            stages[sIdx].pairs = [
+              { id: 1, left: 'Ý 1', right: 'Nghĩa tương ứng 1', color: '#06b6d4' },
+              { id: 2, left: 'Ý 2', right: 'Nghĩa tương ứng 2', color: '#f59e0b' }
+            ];
+          }
+          this._renderMultiverseDashboard();
+        }
+      };
+    });
+
+    area.querySelectorAll('.btn-mva-add-q-to-stage').forEach(btn => {
+      btn.onclick = () => {
+        const sIdx = parseInt(btn.dataset.stageIdx);
+        const stg = stages[sIdx];
+        if (stg.gameType === 'matching') {
+          if (!stg.pairs) stg.pairs = [];
+          stg.pairs.push({
+            id: stg.pairs.length + 1,
+            left: `Ý nghĩa ${(stg.pairs.length + 1)}`,
+            right: `Giải thích ${(stg.pairs.length + 1)}`,
+            color: '#06b6d4'
+          });
+        } else {
+          if (!stg.questions) stg.questions = [];
+          stg.questions.push({
+            q: `Câu hỏi ${(stg.questions.length + 1)} của Ải ${sIdx + 1}`,
+            options: ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'],
+            correctAnswer: 0,
+            explanation: 'Giải thích cho câu hỏi này.'
+          });
+        }
+        this._renderMultiverseDashboard();
+      };
+    });
+
+    area.querySelectorAll('.btn-mva-del-stage').forEach(btn => {
+      btn.onclick = () => {
+        const sIdx = parseInt(btn.dataset.stageIdx);
+        if (stages.length <= 1) {
+          alert('Đấu trường cần có ít nhất 1 ải!');
+          return;
+        }
+        if (confirm(`Bạn có chắc muốn xóa Ải ${sIdx + 1}?`)) {
+          stages.splice(sIdx, 1);
+          this._renderMultiverseDashboard();
+        }
+      };
+    });
+
+    area.querySelectorAll('.btn-mva-del-q-in-stage').forEach(btn => {
+      btn.onclick = () => {
+        const sIdx = parseInt(btn.dataset.stageIdx);
+        const qIdx = parseInt(btn.dataset.qIdx);
+        if (stages[sIdx] && stages[sIdx].questions) {
+          stages[sIdx].questions.splice(qIdx, 1);
+          this._renderMultiverseDashboard();
+        }
+      };
+    });
+
+    area.querySelectorAll('.btn-mva-del-pair').forEach(btn => {
+      btn.onclick = () => {
+        const sIdx = parseInt(btn.dataset.stageIdx);
+        const pIdx = parseInt(btn.dataset.pairIdx);
+        if (stages[sIdx] && stages[sIdx].pairs) {
+          stages[sIdx].pairs.splice(pIdx, 1);
+          this._renderMultiverseDashboard();
+        }
+      };
+    });
+
+    area.querySelector('#btn-mva-ai-generate').onclick = () => {
+      const topic = prompt('Nhập chủ đề bài học muốn AI tạo chuỗi Ải Đa Vũ Trụ:', subName);
+      if (!topic) return;
+      if (window.app && window.app.showToast) window.app.showToast('🤖 AI đang thiết kế chuỗi Ải Đa Vũ Trụ...');
+      setTimeout(() => {
+        this._multiverseStages = [
+          {
+            stageId: 'stg_1',
+            gameType: 'goldminer',
+            stageName: `Ải 1: ⛏️ Đào Vàng Khởi Động - [${topic}]`,
+            questions: [
+              { q: `[${topic}] - Khái niệm nền tảng nào quan trọng nhất?`, options: ['Khái niệm cốt lõi', 'Khái niệm phụ', 'Dữ liệu thô', 'Công thức mở rộng'], correctAnswer: 0 },
+              { q: `[${topic}] - Đâu là tính chất đặc trưng nổi bật?`, options: ['Tính chất quy luật', 'Tính ngẫu nhiên', 'Tính phỏng đoán', 'Không có tính chất'], correctAnswer: 0 }
+            ]
+          },
+          {
+            stageId: 'stg_2',
+            gameType: 'fruitninja',
+            stageName: `Ải 2: 🍉 Chém Quả Tốc Độ - [${topic}]`,
+            questions: [
+              { q: `[${topic}] - Chém quả chứa phát biểu CHÍNH XÁC nhất:`, options: ['Phát biểu chuẩn quy luật', 'Phát biểu giả định', 'Phát biểu sai', 'Phát biểu thiếu'], correctAnswer: 0 },
+              { q: `[${topic}] - Chém quả chứa đơn vị/đại lượng tương ứng:`, options: ['Đơn vị chuẩn SI', 'Đơn vị tự chế', 'Đơn vị sai', 'Không đơn vị'], correctAnswer: 0 }
+            ]
+          },
+          {
+            stageId: 'stg_3',
+            gameType: 'headtilt',
+            stageName: `Ải 3: 🤸 Nghiêng Đầu AI - [${topic}]`,
+            questions: [
+              { q: `[${topic}] - Kiến thức này có ứng dụng thực tiễn cao?`, options: ['Đúng (True)', 'Sai (False)'], correctAnswer: 0 }
+            ]
+          },
+          {
+            stageId: 'stg_4',
+            gameType: 'tugofwar',
+            stageName: `Ải 4: 🪢 Kéo Co Quyết Định - [${topic}]`,
+            questions: [
+              { q: `[${topic}] - Phương pháp tối ưu để đạt kết quả chuẩn là gì?`, options: ['Quy trình khoa học chuẩn', 'Đoán mò', 'Bỏ qua bước', 'Làm đại'], correctAnswer: 0 }
+            ]
+          }
+        ];
+        this._renderMultiverseDashboard();
+        if (window.app && window.app.showToast) window.app.showToast('🎉 AI đã tạo thành công chuỗi 4 Ải Đa Vũ Trụ chất lượng cao!');
+      }, 700);
+    };
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 2. ORCHESTRATOR ĐIỀU PHỐI CÁC FULL GAME ENGINE NGUYÊN BẢN (AUTO TRANSITION)
+  // ═══════════════════════════════════════════════════════════════
+  _startMultiverseArena(subName, customStages) {
+    const stages = (customStages && Array.isArray(customStages) && customStages.length > 0)
+      ? customStages
+      : this._getMultiverseStages();
+
+    let currentStageIdx = 0;
+    let totalScore = 0;
+    const self = this;
+
+    window._multiverseActive = true;
+
+    // Hàm chuyển ải toàn cục
+    window._multiverseNextStage = function(resultData) {
+      totalScore += (resultData && resultData.score) || 100;
+
+      // Xóa các modal game đang mở
+      const modalsToClose = [
+        'goldminer-quiz-modal', 'goldminer-modal', 'fruitninja-modal', 
+        'headtilt-arena-modal', 'tugofwar-modal', 'minesweeper-modal', 
+        'matching-modal', 'duckrace-modal', 'trainorder-modal', 
+        'duckrace-arena-modal', 'mva-floating-hud'
+      ];
+      modalsToClose.forEach(mId => {
+        const m = document.getElementById(mId);
+        if (m) m.remove();
+      });
+
+      currentStageIdx++;
+      if (currentStageIdx < stages.length) {
+        const prevStage = stages[currentStageIdx - 1];
+        const nextStage = stages[currentStageIdx];
+        const prevTitle = `Ải ${currentStageIdx}: ${prevStage.stageName || prevStage.gameType}`;
+        const nextTitle = `Ải ${currentStageIdx + 1}: ${nextStage.stageName || nextStage.gameType}`;
+        
+        showPortalTransition(prevTitle, nextTitle, () => {
+          runStage(currentStageIdx);
+        });
+      } else {
+        showGrandFinale();
+      }
+    };
+
+    // Âm thanh Lốc Xoáy Vũ Trụ (Vortex / Cosmic Dimensional Tornado Whoosh)
+    function playVortexTornadoSound() {
+      try {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioClass) return;
+        const ctx = new AudioClass();
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+        const dur = 1.35;
+
+        // 1. Tiếng gió rít lốc xoáy (Noise Generator qua Bandpass Filter)
+        const bufferSize = ctx.sampleRate * dur;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = (Math.random() * 2 - 1) * 0.45;
+        }
+
+        const whiteNoise = ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.Q.setValueAtTime(3.5, now);
+        filter.frequency.setValueAtTime(180, now);
+        filter.frequency.exponentialRampToValueAtTime(1800, now + 0.5);
+        filter.frequency.exponentialRampToValueAtTime(350, now + dur);
+
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.01, now);
+        noiseGain.gain.linearRampToValueAtTime(0.35, now + 0.4);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+        whiteNoise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(ctx.destination);
+        whiteNoise.start(now);
+        whiteNoise.stop(now + dur);
+
+        // 2. Tiếng rền gầm hạ âm không gian (Sub-bass Cosmic Rumble)
+        const subOsc = ctx.createOscillator();
+        const subGain = ctx.createGain();
+        subOsc.type = 'sawtooth';
+        subOsc.frequency.setValueAtTime(70, now);
+        subOsc.frequency.exponentialRampToValueAtTime(320, now + 0.6);
+        subOsc.frequency.exponentialRampToValueAtTime(50, now + dur);
+
+        subGain.gain.setValueAtTime(0.01, now);
+        subGain.gain.linearRampToValueAtTime(0.25, now + 0.35);
+        subGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+        subOsc.connect(subGain);
+        subGain.connect(ctx.destination);
+        subOsc.start(now);
+        subOsc.stop(now + dur);
+
+        // 3. Tiếng lấp lánh ánh sáng mở cổng vũ trụ (Cosmic Portal Chimes)
+        [523.25, 659.25, 783.99, 1046.5, 1318.5, 1568.0].forEach((f, i) => {
+          const chimeOsc = ctx.createOscillator();
+          const chimeGain = ctx.createGain();
+          chimeOsc.type = 'sine';
+          chimeOsc.frequency.setValueAtTime(f, now + 0.15 + i * 0.08);
+          chimeGain.gain.setValueAtTime(0.12, now + 0.15 + i * 0.08);
+          chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15 + i * 0.08 + 0.35);
+          chimeOsc.connect(chimeGain);
+          chimeGain.connect(ctx.destination);
+          chimeOsc.start(now + 0.15 + i * 0.08);
+          chimeOsc.stop(now + 0.15 + i * 0.08 + 0.35);
+        });
+      } catch(e) {
+        console.error('Audio vortex error:', e);
+      }
+    }
+
+    // Hiển thị Cổng Dịch Chuyển Không Gian Portal Warp Transition
+    function showPortalTransition(fromStageName, toStageName, onComplete) {
+      const portalModal = document.createElement('div');
+      portalModal.id = 'multiverse-portal-warp-modal';
+      portalModal.style.cssText = 'position:fixed; inset:0; background:#090314; z-index:99999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:system-ui,sans-serif; color:#fff; overflow:hidden; animation:fadeIn 0.2s ease-out;';
+
+      portalModal.innerHTML = `
+        <canvas id="portal-warp-anim-canvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;"></canvas>
+        <div style="position:relative; z-index:10; text-align:center; padding:2rem; max-width:600px; animation:bounce 1.5s infinite;">
+          <div style="font-size:4.5rem; margin-bottom:0.6rem; filter:drop-shadow(0 0 25px #a855f7);">🌌🌀✨</div>
+          <h2 style="font-size:2.2rem; font-weight:900; margin:0 0 0.5rem; background:linear-gradient(90deg, #c084fc, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+            CỔNG DỊCH CHUYỂN ĐA VŨ TRỤ
+          </h2>
+          <p style="color:#e0e7ff; font-size:1.15rem; font-weight:700; margin:0 0 1.2rem;">
+            Đã vượt qua <span style="color:#a5f3fc;">${fromStageName}</span>!
+          </p>
+          <div style="background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.35); border-radius:30px; padding:0.6rem 1.6rem; display:inline-block; font-weight:900; font-size:1.2rem; color:#fde047; box-shadow:0 0 25px rgba(168,85,247,0.5);">
+            🚀 ĐANG TIẾN VÀO: ${toStageName}
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(portalModal);
+
+      // KÍCH HOẠT ÂM THANH LỐC XOÁY VŨ TRỤ NGAY KHI MỞ CỔNG!
+      playVortexTornadoSound();
+
+      // Canvas Warp Animation
+      const canvas = portalModal.querySelector('#portal-warp-anim-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      let start = Date.now();
+      const dur = 1350;
+
+            function renderLoop() {
+        const elapsed = Date.now() - start;
+        const p = Math.min(1, elapsed / dur);
+        ctx.fillStyle = '#090314';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const maxR = Math.hypot(cx, cy);
+
+        for (let i = 1; i <= 8; i++) {
+          const r = ((p * 2 + i * 0.12) % 1) * maxR;
+          ctx.strokeStyle = `hsla(${260 + i * 15}, 100%, 75%, ${1 - (r / maxR)})`;
+          ctx.lineWidth = 12 * (1 - r / maxR) + 2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        if (elapsed < dur) {
+          requestAnimationFrame(renderLoop);
+        } else {
+          portalModal.remove();
+          if (onComplete) onComplete();
+        }
+      }
+      renderLoop();
+    }
+
+    // Chạy từng Ải Full Game Engine
+    function runStage(idx) {
+      if (idx >= stages.length) {
+        showGrandFinale();
+        return;
+      }
+
+      const stage = stages[idx];
+      const gameType = stage.gameType || 'goldminer';
+      const stageTitle = `Ải ${idx + 1}/${stages.length}: ${stage.stageName || gameType}`;
+
+      // GỌI TRỰC TIẾP CHÍNH XÁC NGUYÊN BẢN 100% CỦA TỪNG GAME
+      if (gameType === 'goldminer') {
+        // NGUYÊN BẢN GAME 6 ĐÀO VÀNG VỚI ĐÚNG SỐ LƯỢNG CÂU HỎI ĐÃ NẠP
+        const cls = (self.icebreaker && self.icebreaker.grade ? (self.icebreaker.grade + 'A') : '6A');
+        const sub = (self.icebreaker && self.icebreaker.subjectId) || 'toan';
+        const qs = (stage.questions && Array.isArray(stage.questions) && stage.questions.length > 0) 
+          ? stage.questions 
+          : (self._goldMinerQuestions || self._getLoadedQuestions('goldminer') || self._getDefaultQuestionsForGame('goldminer'));
+
+        window._activeGameQuestions = qs;
+        self._goldMinerQuestions = qs;
+
+        if (typeof window.showGoldMinerModal === 'function') {
+          window.showGoldMinerModal(cls, sub, qs);
+        } else if (typeof window.app !== 'undefined' && window.app.showGoldMinerModal) {
+          window.app.showGoldMinerModal(cls, sub, qs);
+        } else if (typeof LMSApp !== 'undefined' && LMSApp.prototype.showGoldMinerModal) {
+          LMSApp.prototype.showGoldMinerModal(cls, sub, qs);
+        }
+      } else if (gameType === 'fruitninja') {
+        // NGUYÊN BẢN GAME 11 CHÉM HOA QUẢ
+        if (stage.questions && stage.questions.length > 0) self._fruitQuestions = stage.questions;
+        self._startFruitNinjaArena(subName);
+      } else if (gameType === 'headtilt') {
+        // NGUYÊN BẢN GAME 7 NGHIÊNG ĐẦU AI
+        if (stage.questions && stage.questions.length > 0) self._headTiltQuestions = stage.questions;
+        self._startHeadTiltArena({ mode: 'practice', points: 100, thinkTime: 10, holdTime: 2.0, useCamera: true, sound: true, subName }, stage.questions);
+      } else if (gameType === 'tugofwar') {
+        // NGUYÊN BẢN GAME 9 KÉO CO
+        if (stage.questions && stage.questions.length > 0) self._duckRaceQuestions = stage.questions;
+        self._startTugOfWarArena(subName);
+      } else if (gameType === 'minesweeper') {
+        // NGUYÊN BẢN GAME 10 DÒ MÌN
+        if (stage.questions && stage.questions.length > 0) self._mineQuestions = stage.questions;
+        self._startMinesweeperArena(subName);
+      } else if (gameType === 'matching') {
+        // NGUYÊN BẢN GAME 12 NỐI Ý
+        if (stage.pairs && stage.pairs.length > 0) self._matchingPairs = stage.pairs;
+        self._startMatchingArena(subName);
+      } else if (gameType === 'duckrace') {
+        // NGUYÊN BẢN GAME 8 ĐUA VỊT
+        if (stage.questions && stage.questions.length > 0) self._duckRaceQuestions = stage.questions;
+        self._startDuckRaceArena(subName);
+      } else if (gameType === 'trainorder') {
+        // NGUYÊN BẢN GAME 13 ĐOÀN TÀU
+        if (stage.carriages && stage.carriages.length > 0) self._trainCarriages = stage.carriages;
+        self._startTrainOrderArena(subName);
+      } else {
+        // Mặc định: Game 6 Đào Vàng nguyên bản
+        const cls = '6A';
+        const sub = 'toan';
+        if (typeof window.showGoldMinerModal === 'function') {
+          window.showGoldMinerModal(cls, sub, stage.questions);
+        } else if (typeof window.app !== 'undefined' && window.app.showGoldMinerModal) {
+          window.app.showGoldMinerModal(cls, sub, stage.questions);
+        }
+      }
+
+      // Tạo Floating In-Game HUD điều hướng chuyển ải
+      setTimeout(() => {
+        createFloatingMultiverseHud(idx + 1, stages.length, stage.stageName || gameType);
+      }, 500);
+    }
+
+        function createFloatingMultiverseHud(currentNum, totalNum, currentName) {
+      const oldHud = document.getElementById('mva-floating-hud');
+      if (oldHud) oldHud.remove();
+
+      const hud = document.createElement('div');
+      hud.id = 'mva-floating-hud';
+      hud.style.cssText = 'position:fixed; top:12px; right:20px; z-index:99999999; background:rgba(15,23,42,0.95); backdrop-filter:blur(12px); border:2px solid #a855f7; border-radius:30px; padding:0.45rem 1.1rem; display:flex; align-items:center; gap:0.75rem; box-shadow:0 8px 30px rgba(0,0,0,0.6); color:#fff; font-family:system-ui,sans-serif; user-select:none; animation:fadeIn 0.25s ease-out;';
+      
+      hud.innerHTML = `
+        <span style="font-size:1.3rem;">🌌</span>
+        <div style="display:flex; flex-direction:column; line-height:1.2;">
+          <span style="font-size:0.7rem; color:#c084fc; font-weight:800; letter-spacing:0.5px;">ĐẤU TRƯỜNG ĐA VŨ TRỤ</span>
+          <span style="font-size:0.85rem; font-weight:900; color:#fff;">Ải ${currentNum}/${totalNum}: ${currentName}</span>
+        </div>
+        <button id="btn-mva-floating-next" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:1.5px solid #86efac; border-radius:20px; padding:0.4rem 0.95rem; font-weight:900; font-size:0.82rem; cursor:pointer; box-shadow:0 0 15px rgba(16,185,129,0.5); display:flex; align-items:center; gap:0.35rem; transition:transform 0.15s;">
+          <span>Tiến Vào Ải Tiếp</span> ➔
+        </button>
+        <button id="btn-mva-floating-exit" title="Thoát đấu trường" style="background:rgba(239,68,68,0.25); border:1px solid #ef4444; color:#f87171; width:28px; height:28px; border-radius:50%; font-weight:900; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+          ✕
+        </button>
+      `;
+
+      document.body.appendChild(hud);
+
+      hud.querySelector('#btn-mva-floating-next').onclick = () => {
+        window._multiverseNextStage({ score: 100 });
+      };
+
+      hud.querySelector('#btn-mva-floating-exit').onclick = () => {
+        if (confirm('Bạn có chắc muốn dừng Đấu Trường Đa Vũ Trụ?')) {
+          window._multiverseActive = false;
+          const modalsToClose = [
+            'goldminer-quiz-modal', 'goldminer-modal', 'fruitninja-modal', 
+            'headtilt-arena-modal', 'tugofwar-modal', 'minesweeper-modal', 
+            'matching-modal', 'duckrace-modal', 'trainorder-modal', 
+            'duckrace-arena-modal', 'mva-floating-hud'
+          ];
+          modalsToClose.forEach(mId => {
+            const m = document.getElementById(mId);
+            if (m) m.remove();
+          });
+        }
+      };
+    }
+
+    // ĐẠI LỄ TRAO CÚP VINH DANH BẬC THẦY ĐA VŨ TRỤ
+    function showGrandFinale() {
+      window._multiverseActive = false;
+      const finaleModal = document.createElement('div');
+      finaleModal.id = 'multiverse-grand-finale-modal';
+      finaleModal.style.cssText = 'position:fixed; inset:0; background:rgba(9,3,20,0.95); backdrop-filter:blur(16px); z-index:99999999; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:system-ui,sans-serif; color:#fff; overflow:hidden; animation:fadeIn 0.3s ease-out;';
+
+      finaleModal.innerHTML = `
+        <div style="text-align:center; max-width:620px; width:90%; padding:2.5rem; background:linear-gradient(135deg, rgba(30,27,75,0.95), rgba(49,46,129,0.95)); border:3px solid #a855f7; border-radius:30px; box-shadow:0 25px 70px rgba(168,85,247,0.4);">
+          <div style="font-size:5rem; margin-bottom:0.5rem; filter:drop-shadow(0 0 30px #f59e0b); animation:bounce 1.5s infinite;">🏆🌌✨</div>
+          <h1 style="font-size:2.5rem; font-weight:900; margin:0 0 0.5rem; background:linear-gradient(90deg, #c084fc, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+            BẬC THẦY ĐA VŨ TRỤ!
+          </h1>
+          <p style="color:#e0e7ff; font-size:1.1rem; margin-bottom:1.5rem;">
+            Chúc mừng bạn đã xuất sắc chinh phục toàn bộ ${stages.length} Nhóm Ải Đa Trò Chơi!
+          </p>
+
+          <div style="background:rgba(255,255,255,0.1); border:1.5px solid rgba(255,255,255,0.2); border-radius:18px; padding:1rem; margin-bottom:1.8rem; display:flex; justify-content:space-around;">
+            <div>
+              <div style="font-size:1.8rem; font-weight:900; color:#fbbf24;">${totalScore || (stages.length * 100)}</div>
+              <div style="font-size:0.75rem; color:#94a3b8; font-weight:700;">TỔNG ĐIỂM</div>
+            </div>
+            <div style="width:1.5px; height:40px; background:rgba(255,255,255,0.2);"></div>
+            <div>
+              <div style="font-size:1.8rem; font-weight:900; color:#10b981;">${stages.length}/${stages.length}</div>
+              <div style="font-size:0.75rem; color:#94a3b8; font-weight:700;">ẢI HOÀN THÀNH</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:1rem; justify-content:center;">
+            <button id="btn-finale-replay" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding:0.9rem 2.2rem; border-radius:14px; font-weight:900; font-size:1.05rem; cursor:pointer; box-shadow:0 8px 25px rgba(16,185,129,0.35);">
+              🔄 CHƠI LẠI TỪ ĐẦU
+            </button>
+            <button id="btn-finale-close" style="background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3); padding:0.9rem 1.8rem; border-radius:14px; font-weight:800; font-size:1.05rem; cursor:pointer;">
+              🚪 THOÁT RA
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(finaleModal);
+
+      finaleModal.querySelector('#btn-finale-replay').onclick = () => {
+        finaleModal.remove();
+        runStage(0);
+      };
+
+      finaleModal.querySelector('#btn-finale-close').onclick = () => {
+        finaleModal.remove();
+      };
+    }
+
+    // Bắt đầu Ải 1!
+    runStage(0);
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // 3. STANDALONE GOLD MINER QUIZ ARENA CHO HỌC SINH (60 FPS CANVAS)
+  // MÓC ĐÀO VUNG LẮC 60 FPS & 4 KHỐI VÀNG MANG ĐÁP ÁN A, B, C, D
+  // ═══════════════════════════════════════════════════════════════
+  _startGoldMinerQuizArena(subName, passedQuestions) {
+    const old = document.getElementById('goldminer-quiz-modal');
+    if (old) old.remove();
+
+    const questions = (passedQuestions && Array.isArray(passedQuestions) && passedQuestions.length > 0)
+      ? passedQuestions
+      : [
+          {
+            q: 'Kim loại nào có nhiệt độ nóng chảy cao nhất dùng làm dây tóc bóng đèn?',
+            options: ['Tungsten (Vonfram)', 'Đồng (Copper)', 'Nhôm (Aluminium)', 'Sắt (Iron)'],
+            correctAnswer: 0,
+            explanation: 'Vonfram nóng chảy ở 3422°C, cao nhất trong các kim loại.'
+          },
+          {
+            q: 'Số nguyên tố chẵn DUY NHẤT trong toán học là số nào?',
+            options: ['Số 2', 'Số 0', 'Số 4', 'Số 6'],
+            correctAnswer: 0,
+            explanation: 'Số 2 là số nguyên tố chẵn duy nhất.'
+          }
+        ];
+
+    let currentQIdx = 0;
+    let score = 0;
+    let isGameOver = false;
+
+    const modal = document.createElement('div');
+    modal.id = 'goldminer-quiz-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:#020617; z-index:9999999; display:flex; flex-direction:column; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.25s ease-out;';
+
+    modal.innerHTML = `
+      <!-- TOP HUD -->
+      <div style="background:rgba(15,23,42,0.92); backdrop-filter:blur(12px); padding:0.55rem 1.5rem; display:flex; justify-content:space-between; align-items:center; border-bottom:2.5px solid #f59e0b; z-index:40; box-shadow:0 4px 20px rgba(0,0,0,0.5);">
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+          <div style="width:38px; height:38px; background:radial-gradient(circle, #fde047, #d97706); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; border:2px solid #fff; box-shadow:0 0 15px rgba(245,158,11,0.5);">⛏️</div>
+          <div>
+            <div style="font-size:1.15rem; font-weight:900; background:linear-gradient(90deg, #fde047, #fbbf24, #f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+              GAME ĐÀO VÀNG TRI THỨC
+            </div>
+            <div style="font-size:0.75rem; color:#cbd5e1; font-weight:600;">Nhấn thả mỏ câu hoặc Chạm thẳng vào khối Vàng mang đáp án đúng!</div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.9rem;">
+          <div style="background:rgba(245,158,11,0.2); border:1.5px solid #f59e0b; padding:0.35rem 0.9rem; border-radius:14px; font-weight:900; font-size:0.95rem; color:#fde047;">
+            Câu: <span id="gmq-num-disp">1</span>/${questions.length}
+          </div>
+          <div style="background:rgba(16,185,129,0.2); border:1.5px solid #10b981; padding:0.35rem 0.9rem; border-radius:14px; font-weight:900; font-size:0.95rem; color:#34d399;">
+            ⭐ <span id="gmq-score-disp">0</span> Điểm
+          </div>
+          <button id="btn-gmq-close-modal" style="background:#ef4444; color:#fff; border:none; padding:0.4rem 0.85rem; border-radius:10px; font-weight:800; font-size:0.85rem; cursor:pointer;">
+            ✕ Đóng
+          </button>
+        </div>
+      </div>
+
+      <!-- QUESTION HEADER BANNER -->
+      <div style="position:relative; z-index:30; background:rgba(255,255,255,0.96); color:#0f172a; margin:0.8rem auto 0; padding:0.8rem 1.8rem; border-radius:18px; max-width:880px; width:92%; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,0.3); border:2.5px solid #f59e0b;">
+        <div style="font-size:0.75rem; font-weight:800; color:#d97706; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.2rem;">⛏️ THỬ THÁCH MỎ VÀNG</div>
+        <div id="gmq-q-title" style="font-size:1.25rem; font-weight:900; color:#1e1b4b; line-height:1.35;">
+          ${questions[0].q || questions[0].questionText}
+        </div>
+      </div>
+
+      <!-- MAIN CANVAS ARENA -->
+      <div style="flex:1; position:relative; overflow:hidden; width:100%; height:100%;">
+        <canvas id="gmq-canvas" style="position:absolute; inset:0; width:100%; height:100%; cursor:pointer;"></canvas>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const canvas = modal.querySelector('#gmq-canvas');
+    const ctx = canvas.getContext('2d');
+    const qTitleEl = modal.querySelector('#gmq-q-title');
+    const numDispEl = modal.querySelector('#gmq-num-disp');
+    const scoreDispEl = modal.querySelector('#gmq-score-disp');
+
+    let animId = null;
+
+    // AUDIO SYNTH
+    let audioCtx = null;
+    function getAudio() {
+      if (!audioCtx && typeof window !== 'undefined') {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) { try { audioCtx = new AC(); } catch(e) {} }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') { try { audioCtx.resume(); } catch(e) {} }
+      return audioCtx;
+    }
+
+    const sfx = {
+      launch() {
+        const ctx = getAudio(); if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(700, now + 0.15);
+          g.gain.setValueAtTime(0.2, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.15);
+        } catch(e) {}
+      },
+      grab() {
+        const ctx = getAudio(); if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+          g.gain.setValueAtTime(0.25, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.1);
+        } catch(e) {}
+      },
+      correct() {
+        const ctx = getAudio(); if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.frequency.setValueAtTime(f, now + i * 0.05);
+            g.gain.setValueAtTime(0.25, now + i * 0.05);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.3);
+            osc.connect(g); g.connect(ctx.destination);
+            osc.start(now + i * 0.05); osc.stop(now + i * 0.05 + 0.3);
+          });
+        } catch(e) {}
+      },
+      wrong() {
+        const ctx = getAudio(); if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.linearRampToValueAtTime(80, now + 0.25);
+          g.gain.setValueAtTime(0.3, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.connect(g); g.connect(ctx.destination);
+          osc.start(now); osc.stop(now + 0.25);
+        } catch(e) {}
+      }
+    };
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Miner Hook State
+    const hook = {
+      x: canvas.width / 2,
+      y: 35,
+      length: 60,
+      angle: 0,
+      angleSpeed: 0.035,
+      state: 'swinging', // 'swinging' | 'extending' | 'retracting'
+      extendSpeed: 10,
+      retractSpeed: 7,
+      caughtNugget: null
+    };
+
+    // 4 Answer Nuggets
+    let nuggets = [];
+    function setupNuggetsForQuestion(qData) {
+      const opts = qData.options || ['A', 'B', 'C', 'D'];
+      const cW = canvas.width;
+      const cH = canvas.height;
+
+      // 4 positions spread out across bottom half of mine
+      const positions = [
+        { x: cW * 0.20, y: cH * 0.65 },
+        { x: cW * 0.40, y: cH * 0.78 },
+        { x: cW * 0.60, y: cH * 0.78 },
+        { x: cW * 0.80, y: cH * 0.65 }
+      ];
+
+      nuggets = opts.map((opt, i) => {
+        const isCorrect = (i === (qData.correctAnswer || 0));
+        const pos = positions[i] || { x: cW * 0.5, y: cH * 0.7 };
+        return {
+          idx: i,
+          letter: String.fromCharCode(65 + i),
+          text: opt,
+          isCorrect: isCorrect,
+          x: pos.x,
+          y: pos.y,
+          radius: 52,
+          type: (i % 2 === 0) ? 'gold' : 'diamond',
+          caught: false
+        };
+      });
+    }
+
+    setupNuggetsForQuestion(questions[0]);
+
+    // Particles for explosion / celebration
+    let particles = [];
+    function spawnParticles(x, y, color) {
+      for (let i = 0; i < 30; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = 2 + Math.random() * 6;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          color: color || '#fde047',
+          size: 4 + Math.random() * 4,
+          life: 1.0,
+          decay: 0.03
+        });
+      }
+    }
+
+    // MAIN 60 FPS LOOP
+    function render() {
+      if (!document.getElementById('goldminer-quiz-modal') || isGameOver) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Draw Mine Cavern Background
+      if (window.goldMinerBgImg && window.goldMinerBgImg.complete && window.goldMinerBgImg.naturalWidth !== 0) {
+        ctx.drawImage(window.goldMinerBgImg, 0, 0, canvas.width, canvas.height);
+      } else {
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, '#1e1b4b');
+        grad.addColorStop(0.4, '#312e81');
+        grad.addColorStop(1, '#451a03');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      // 2. Draw Cowboy Miner Top Center
+      const minerX = canvas.width / 2;
+      const minerY = 10;
+      if (window.cowboyMinerImg && window.cowboyMinerImg.complete && window.cowboyMinerImg.naturalWidth !== 0) {
+        ctx.drawImage(window.cowboyMinerImg, minerX - 45, minerY - 10, 90, 90);
+      } else {
+        ctx.fillStyle = '#f59e0b';
+        ctx.font = '36px sans-serif';
+        ctx.fillText('🤠', minerX - 18, minerY + 30);
+      }
+
+      // 3. Update Hook Physics
+      hook.x = minerX;
+      hook.y = 35;
+
+      if (hook.state === 'swinging') {
+        hook.angle += hook.angleSpeed;
+        if (hook.angle > 1.2 || hook.angle < -1.2) {
+          hook.angleSpeed = -hook.angleSpeed;
+        }
+      } else if (hook.state === 'extending') {
+        hook.length += hook.extendSpeed;
+        const hookTipX = hook.x + Math.sin(hook.angle) * hook.length;
+        const hookTipY = hook.y + Math.cos(hook.angle) * hook.length;
+
+        // Check boundary
+        if (hookTipX < 30 || hookTipX > canvas.width - 30 || hookTipY > canvas.height - 40) {
+          hook.state = 'retracting';
+        }
+
+        // Check collision with 4 Answer Nuggets
+        for (let n of nuggets) {
+          if (!n.caught) {
+            const dist = Math.hypot(hookTipX - n.x, hookTipY - n.y);
+            if (dist < n.radius + 15) {
+              n.caught = true;
+              hook.caughtNugget = n;
+              hook.state = 'retracting';
+              sfx.grab();
+              break;
+            }
+          }
+        }
+      } else if (hook.state === 'retracting') {
+        hook.length -= hook.retractSpeed;
+        if (hook.caughtNugget) {
+          hook.caughtNugget.x = hook.x + Math.sin(hook.angle) * hook.length;
+          hook.caughtNugget.y = hook.y + Math.cos(hook.angle) * hook.length + 15;
+        }
+        if (hook.length <= 60) {
+          hook.length = 60;
+          hook.state = 'swinging';
+
+          if (hook.caughtNugget) {
+            const caught = hook.caughtNugget;
+            hook.caughtNugget = null;
+            onNuggetReeledIn(caught);
+          }
+        }
+      }
+
+      // 4. Draw Hook Rope & Claw
+      const endX = hook.x + Math.sin(hook.angle) * hook.length;
+      const endY = hook.y + Math.cos(hook.angle) * hook.length;
+
+      ctx.beginPath();
+      ctx.moveTo(hook.x, hook.y);
+      ctx.lineTo(endX, endY);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 3.5;
+      ctx.stroke();
+
+      // Claw Icon
+      ctx.save();
+      ctx.translate(endX, endY);
+      ctx.rotate(-hook.angle);
+      ctx.font = '26px sans-serif';
+      ctx.fillText('🪝', -13, 13);
+      ctx.restore();
+
+      // 5. Draw 4 Golden Nuggets with Answer Labels
+      for (let n of nuggets) {
+        if (n.caught && hook.caughtNugget !== n) continue;
+
+        ctx.save();
+        ctx.translate(n.x, n.y);
+
+        // Outer Glow
+        ctx.shadowColor = (n.type === 'diamond') ? '#38bdf8' : '#f59e0b';
+        ctx.shadowBlur = 18;
+
+        // Draw Nugget Body
+        ctx.beginPath();
+        ctx.arc(0, 0, n.radius, 0, Math.PI * 2);
+        ctx.fillStyle = (n.type === 'diamond')
+          ? 'linear-gradient(135deg, #0284c7, #0369a1)'
+          : 'linear-gradient(135deg, #f59e0b, #b45309)';
+        ctx.fill();
+        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = (n.type === 'diamond') ? '#bae6fd' : '#fde68a';
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Nugget Badge Icon & Letter
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${n.type === 'diamond' ? '💎' : '⭐'} ${n.letter}`, 0, -18);
+
+        // Nugget Answer Text (Wrapped neatly)
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillStyle = '#ffffff';
+        const words = n.text.split(' ');
+        let l1 = '', l2 = '';
+        for (let w of words) {
+          if ((l1 + ' ' + w).length < 14 && !l2) l1 += (l1 ? ' ' : '') + w;
+          else l2 += (l2 ? ' ' : '') + w;
+        }
+        ctx.fillText(l1, 0, 4);
+        if (l2) ctx.fillText(l2, 0, 20);
+
+        ctx.restore();
+      }
+
+      // 6. Draw Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= p.decay;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      animId = requestAnimationFrame(render);
+    }
+
+    render();
+
+    function fireHookTowards(targetAngle) {
+      if (hook.state === 'swinging') {
+        if (typeof targetAngle === 'number') {
+          hook.angle = targetAngle;
+        }
+        hook.state = 'extending';
+        sfx.launch();
+      }
+    }
+
+    // Click on canvas ➔ Shoot hook!
+    canvas.onclick = (e) => {
+      if (hook.state !== 'swinging') return;
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      // Check if user clicked directly on one of the 4 Nuggets
+      let clickedNugget = null;
+      for (let n of nuggets) {
+        if (Math.hypot(clickX - n.x, clickY - n.y) < n.radius + 20) {
+          clickedNugget = n;
+          break;
+        }
+      }
+
+      if (clickedNugget) {
+        // Direct target aim angle!
+        const dx = clickedNugget.x - hook.x;
+        const dy = clickedNugget.y - hook.y;
+        const targetAngle = Math.atan2(dx, dy);
+        fireHookTowards(targetAngle);
+      } else {
+        // Fire at current swinging angle
+        fireHookTowards();
+      }
+    };
+
+    // When gold nugget reaches miner
+    function onNuggetReeledIn(caughtNugget) {
+      const isCorrect = caughtNugget.isCorrect;
+      const q = questions[currentQIdx];
+
+      if (isCorrect) {
+        sfx.correct();
+        score += 100;
+        scoreDispEl.textContent = score;
+        spawnParticles(hook.x, hook.y + 40, '#10b981');
+      } else {
+        sfx.wrong();
+        spawnParticles(hook.x, hook.y + 40, '#ef4444');
+      }
+
+      // Show instant feedback toast & next question
+      showInstantFeedbackModal(isCorrect, q, caughtNugget.text, () => {
+        currentQIdx++;
+        if (currentQIdx < questions.length) {
+          const nextQ = questions[currentQIdx];
+          qTitleEl.textContent = nextQ.q || nextQ.questionText;
+          numDispEl.textContent = currentQIdx + 1;
+          setupNuggetsForQuestion(nextQ);
+        } else {
+          // HOÀN THÀNH TOÀN BỘ ẢI ĐÀO VÀNG!
+          isGameOver = true;
+          if (animId) cancelAnimationFrame(animId);
+
+          if (window._multiverseActive && typeof window._multiverseNextStage === 'function') {
+            modal.remove();
+            window._multiverseNextStage({ score: score });
+          } else {
+            alert(`🎉 Xuất sắc! Bạn đã hoàn thành toàn bộ ải Đào Vàng với ${score} điểm!`);
+            modal.remove();
+          }
+        }
+      });
+    }
+
+    function showInstantFeedbackModal(isCorrect, qData, pickedText, onNext) {
+      const fbModal = document.createElement('div');
+      fbModal.style.cssText = 'position:absolute; inset:0; background:rgba(15,23,42,0.85); backdrop-filter:blur(8px); z-index:50; display:flex; align-items:center; justify-content:center; padding:1.5rem; animation:fadeIn 0.2s ease-out;';
+      
+      fbModal.innerHTML = `
+        <div style="background:#ffffff; color:#0f172a; border-radius:24px; padding:2rem; max-width:480px; width:100%; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.5); border:3.5px solid ${isCorrect ? '#10b981' : '#ef4444'};">
+          <div style="font-size:3.5rem; margin-bottom:0.4rem;">${isCorrect ? '🎉💎' : '💥❌'}</div>
+          <h2 style="margin:0 0 0.5rem; font-size:1.6rem; font-weight:900; color:${isCorrect ? '#15803d' : '#dc2626'};">
+            ${isCorrect ? 'GẮP VÀNG CHÍNH XÁC!' : 'CHƯA CHÍNH XÁC RỒI!'}
+          </h2>
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:0.75rem; font-size:0.88rem; color:#334155; margin-bottom:1.2rem; text-align:left;">
+            <div><strong>Bạn đã chọn:</strong> ${pickedText}</div>
+            <div style="margin-top:0.4rem; color:${isCorrect ? '#15803d' : '#b91c1c'}; font-weight:700;">
+              💡 <strong>Đáp án đúng:</strong> ${(qData.options && qData.options[qData.correctAnswer || 0]) || 'Phương án A'}
+            </div>
+          </div>
+
+          <button id="btn-next-gmq-step" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:none; padding:0.85rem 2rem; border-radius:14px; font-weight:900; font-size:1.05rem; cursor:pointer; width:100%; box-shadow:0 8px 25px rgba(245,158,11,0.35); display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+            <span>Tiếp Tục Câu Sau</span> ➔
+          </button>
+        </div>
+      `;
+
+      modal.appendChild(fbModal);
+
+      fbModal.querySelector('#btn-next-gmq-step').onclick = () => {
+        fbModal.remove();
+        onNext();
+      };
+    }
+
+    modal.querySelector('#btn-gmq-close-modal').onclick = () => {
+      isGameOver = true;
+      if (animId) cancelAnimationFrame(animId);
+      modal.remove();
+    };
   },
 
 };

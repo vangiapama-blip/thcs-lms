@@ -540,25 +540,50 @@ class LMSApp {
       const sharedFiles = uploadedFiles.filter(f => (f.isShared !== false));
       const sharedLessons = lessons.filter(l => l.isSharedForStudent || l.shared || l.isShared);
       const totalStudyCount = sharedFiles.length + sharedLessons.length;
-      studentBadges['study'] = totalStudyCount > 0 ? totalStudyCount : 1;
+      studentBadges['study'] = totalStudyCount;
 
       const assignments = (typeof db !== 'undefined' && db.getAssignments) ? db.getAssignments() : [];
       const submissions = (typeof db !== 'undefined' && db.getSubmissions) ? db.getSubmissions() : [];
-      const myAssignments = assignments.filter(a => this.isClassMatching(a.classIds, a.classId, classId));
+      
+      // Filter out any TX / GK / CK / exams from assignments so they don't count as homework
+      const isExamItem = (item) => {
+        if (!item) return false;
+        const col = String(item.targetGradeColumn || '').toUpperCase();
+        return col.startsWith('TX') || col === 'GK' || col === 'CK' || 
+               item.examCategory === 'tx' || item.examCategory === 'midterm' || item.examCategory === 'final' ||
+               item.isOfficial || item.format === 'exam' || item.isExam;
+      };
+
+      const myAssignments = assignments.filter(a => !isExamItem(a) && this.isClassMatching(a.classIds, a.classId, classId));
       const pendingAsm = myAssignments.filter(a => !submissions.some(s => s.assignmentId === a.id && s.studentId === studentId && (s.status === 'submitted' || s.submitted)));
       studentBadges['student_assignments'] = pendingAsm.length;
 
       const exams = (typeof db !== 'undefined' && db.getExams) ? db.getExams() : [];
       const attempts = (typeof db !== 'undefined' && db.getExamAttempts) ? db.getExamAttempts() : [];
-      const myExams = exams.filter(e => {
-        if (e.published === false) return false;
-        return this.isClassMatching(e.classIds, e.classId, classId);
+
+      // Combine exams + any TX/GK/CK items created in assignments
+      const combinedExams = [...exams];
+      const exIds = new Set(combinedExams.map(e => e.id));
+      assignments.forEach(a => {
+        if (isExamItem(a) && !exIds.has(a.id)) {
+          combinedExams.push(a);
+          exIds.add(a.id);
+        }
+      });
+
+      const myExams = combinedExams.filter(e => {
+        const hasClasses = (Array.isArray(e.classIds) && e.classIds.length > 0) || Boolean(e.classId);
+        // Đề không gán lớp nào → không hiển thị cho học sinh
+        if (!hasClasses) return false;
+        // Đề gán lớp nhưng không khớp lớp học sinh → bỏ qua
+        if (!this.isClassMatching(e.classIds, e.classId, classId)) return false;
+        return true;
       });
       const pendingExams = myExams.filter(e => !attempts.some(a => a.examId === e.id && a.studentId === studentId));
       studentBadges['student_exams'] = pendingExams.length;
 
       const quizAsm = myAssignments.filter(a => a.type === 'quizizz' || a.isQuiz);
-      studentBadges['quizizz_practice'] = quizAsm.length > 0 ? quizAsm.length : 1;
+      studentBadges['quizizz_practice'] = quizAsm.length;
     }
 
     // Auto expand Quản trị if active view is one of its 2 children
@@ -662,18 +687,19 @@ class LMSApp {
   normalizeSubjectId(subId) {
     if (!subId) return '';
     const s = String(subId).toLowerCase().trim();
-    if (s.includes('toán') || s.includes('math') || s === 'toan') return 'toan';
-    if (s.includes('văn') || s.includes('ngữ văn') || s.includes('literature') || s === 'van') return 'van';
-    if (s.includes('anh') || s.includes('tiếng anh') || s.includes('english') || s === 'anh') return 'anh';
-    if (s.includes('tự nhiên') || s.includes('khtn') || s.includes('science') || s === 'khtn') return 'khtn';
-    if (s.includes('lịch sử') || s.includes('địa lý') || s.includes('lsdl') || s === 'lsdl') return 'lsdl';
-    if (s.includes('tin') || s === 'tin') return 'tin';
-    if (s.includes('công dân') || s.includes('gdcd') || s === 'gdcd') return 'gdcd';
-    if (s.includes('công nghệ') || s === 'congnghe') return 'congnghe';
-    if (s.includes('nghệ thuật') || s.includes('âm nhạc') || s.includes('mỹ thuật') || s === 'nghethuat') return 'nghethuat';
-    if (s.includes('thể chất') || s.includes('gdtc') || s === 'gdtc') return 'gdtc';
-    if (s.includes('trải nghiệm') || s.includes('hướng nghiệp') || s === 'hn_trainghiem') return 'hn_trainghiem';
-    return s;
+    const sClean = s.replace(/[0-9]/g, '').trim();
+    if (sClean.includes('toan') || sClean.includes('toán') || sClean.includes('math')) return 'toan';
+    if (sClean.includes('van') || sClean.includes('văn') || sClean.includes('ngữ văn') || sClean.includes('literature')) return 'van';
+    if (sClean.includes('anh') || sClean.includes('tiếng anh') || sClean.includes('english') || sClean.includes('tienganh')) return 'anh';
+    if (sClean.includes('khtn') || sClean.includes('tự nhiên') || sClean.includes('science') || sClean.includes('khoahoc')) return 'khtn';
+    if (sClean.includes('lsdl') || sClean.includes('lịch sử') || sClean.includes('địa lý') || sClean.includes('su') || sClean.includes('dia')) return 'lsdl';
+    if (sClean.includes('tin') || sClean.includes('tinhoc') || sClean.includes('it') || sClean.includes('ict')) return 'tin';
+    if (sClean.includes('gdcd') || sClean.includes('công dân') || sClean.includes('congdan')) return 'gdcd';
+    if (sClean.includes('congnghe') || sClean.includes('công nghệ') || sClean === 'cn') return 'congnghe';
+    if (sClean.includes('nghethuat') || sClean.includes('nghệ thuật') || sClean.includes('âm nhạc') || sClean.includes('mỹ thuật') || sClean.includes('nhac') || sClean.includes('hoa')) return 'nghethuat';
+    if (sClean.includes('gdtc') || sClean.includes('thể chất') || sClean.includes('thechat') || sClean.includes('theduc')) return 'gdtc';
+    if (sClean.includes('trainghiem') || sClean.includes('trải nghiệm') || sClean.includes('hướng nghiệp') || sClean.includes('hn_trainghiem')) return 'hn_trainghiem';
+    return sClean || s;
   }
 
   normalizeClassId(cId) {
@@ -8892,15 +8918,17 @@ render_ai_geometry(dom) {
       exam.classId = selectedClasses.length > 0 ? selectedClasses[0] : null;
       exam.openTime  = modal.querySelector('#assign-open-time')?.value  || null;
       exam.closeTime = modal.querySelector('#assign-close-time')?.value || null;
+      exam.published = selectedClasses.length > 0;
+      exam.status = selectedClasses.length > 0 ? 'assigned' : 'draft';
       if (exam.closeTime) exam.dueDate = exam.closeTime;
 
       if (db.updateExam) {
-        db.updateExam(exam);
+        db.updateExam(exam.id, exam);
       } else if (db.save) {
         db.save();
       }
 
-      this.showToast(selectedClasses.length > 0 ? `🚀 Đã cập nhật giao bài cho ${selectedClasses.length} lớp!` : `↩️ Đã thu hồi bài kiểm tra khỏi tất cả các lớp!`);
+      this.showToast(selectedClasses.length > 0 ? `🚀 Đã giao bài kiểm tra "${exam.title}" cho ${selectedClasses.length} lớp (${selectedClasses.map(c => 'Lớp ' + c).join(', ')}) thành công!` : `↩️ Đã thu hồi bài kiểm tra khỏi tất cả các lớp!`);
       modal.remove();
       if (typeof this.render_exams === 'function') {
         this.render_exams(parentDom);
@@ -9963,16 +9991,20 @@ render_ai_geometry(dom) {
         const permModal = document.createElement('div');
         permModal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:999999;padding:1rem;animation:fadeIn 0.2s ease-out;';
         permModal.innerHTML = `
-          <div style="background:#fff;border-radius:20px;padding:2rem;max-width:420px;width:100%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.35);animation:zoomIn 0.25s ease-out;">
-            <div style="font-size:3.5rem;margin-bottom:0.75rem;">${needCamera && needMic ? '📷🎤' : needCamera ? '📷' : '🎤'}</div>
-            <h3 style="margin:0 0 0.6rem 0;font-size:1.15rem;color:#0f172a;font-weight:700;">Đề Thi Yêu Cầu Cấp Quyền</h3>
-            <p style="color:#475569;font-size:0.9rem;margin:0 0 1rem 0;line-height:1.55;">
+          <div style="background:#fff;border-radius:20px;padding:clamp(1.2rem, 3vw, 1.8rem);max-width:440px;width:100%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.35);animation:zoomIn 0.25s ease-out;box-sizing:border-box;">
+            <div style="font-size:3rem;margin-bottom:0.6rem;">${needCamera && needMic ? '📷🎤' : needCamera ? '📷' : '🎤'}</div>
+            <h3 style="margin:0 0 0.5rem 0;font-size:1.15rem;color:#0f172a;font-weight:700;">Đề Thi Yêu Cầu Cấp Quyền</h3>
+            <p style="color:#475569;font-size:0.88rem;margin:0 0 0.85rem 0;line-height:1.5;">
               Đề kiểm tra này sử dụng ${needCamera && needMic ? '<strong>Camera và Microphone</strong>' : needCamera ? '<strong>Camera</strong>' : '<strong>Microphone</strong>'} để <strong>giám sát phòng thi</strong> và đảm bảo tính nghiêm túc.
             </p>
-            <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:12px;padding:0.85rem;margin-bottom:1.25rem;font-size:0.82rem;color:#92400e;text-align:left;line-height:1.5;">
+            ${needCamera ? `
+            <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;padding:0.75rem 0.85rem;margin-bottom:0.75rem;font-size:0.8rem;color:#991b1b;text-align:left;line-height:1.45;">
+              👁️ <strong>Lưu ý giám sát khuôn mặt:</strong> Trong suốt thời gian làm bài, học sinh phải ngồi trước camera. <strong>Không được rời khỏi màn hình camera quá 4 giây</strong>, nếu vi phạm hệ thống sẽ tự động tính lỗi vi phạm quy chế phòng thi!
+            </div>` : ''}
+            <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:12px;padding:0.75rem 0.85rem;margin-bottom:1.15rem;font-size:0.8rem;color:#92400e;text-align:left;line-height:1.45;">
               ⚠️ Sau khi nhấn <strong>"Tiếp tục"</strong>, trình duyệt sẽ hỏi quyền truy cập — hãy nhấn <strong>"Allow" (Cho phép)</strong> để vào phòng thi.
             </div>
-            <div style="display:flex;gap:0.75rem;justify-content:center;">
+            <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
               <button id="perm-deny" style="padding:0.65rem 1.25rem;border-radius:10px;border:1.5px solid #cbd5e1;background:#f1f5f9;color:#475569;font-weight:600;font-size:0.88rem;cursor:pointer;">✕ Hủy Thi</button>
               <button id="perm-allow" style="padding:0.65rem 1.5rem;border-radius:10px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:700;font-size:0.92rem;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.4);">✅ Tiếp tục & Cấp quyền</button>
             </div>
@@ -10023,6 +10055,9 @@ render_ai_geometry(dom) {
   // =====================================================
   // MODAL KIỂM TRA THIẾT BỊ THI (CAMERA / MICROPHONE)
   // =====================================================
+  // =====================================================
+  // MODAL KIỂM TRA THIẾT BỊ THI (CAMERA / MICROPHONE) - FULL MOBILE RESPONSIVE
+  // =====================================================
   showDeviceCheckModal(exam, stream, onProceed) {
     const oldModal = document.getElementById('device-check-modal');
     if (oldModal) oldModal.remove();
@@ -10030,45 +10065,47 @@ render_ai_geometry(dom) {
 
     const modal = document.createElement('div');
     modal.id = 'device-check-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.90);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:999999;padding:1.5rem;font-family:var(--font-body);';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:999999;padding:clamp(0.5rem,2vw,1.25rem);font-family:var(--font-body);box-sizing:border-box;overflow-y:auto;';
 
     const needCamera = exam.enableCamera;
     const needMic    = exam.enableMic;
 
     const camHtml = needCamera ? `
-      <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:16px;padding:1.1rem;margin-bottom:1rem;">
-        <div style="font-weight:700;font-size:0.9rem;color:#0f172a;margin-bottom:0.75rem;">📷 Đăng Ký Khuôn Mặt — Bắt Buộc</div>
-        <div style="display:flex;gap:0.75rem;align-items:flex-start;">
-          <div style="position:relative;flex-shrink:0;">
-            <video id="dcm-video" autoplay muted playsinline style="width:130px;height:98px;object-fit:cover;border-radius:10px;border:2px solid #22c55e;background:#000;display:block;"></video>
-            <div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,0.7);color:#22c55e;font-size:0.6rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;">● LIVE</div>
+      <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:16px;padding:clamp(0.75rem,2vw,1rem);margin-bottom:0.9rem;text-align:left;box-sizing:border-box;">
+        <div style="font-weight:700;font-size:0.9rem;color:#0f172a;margin-bottom:0.6rem;text-align:center;">📷 Đăng Ký Khuôn Mặt — Bắt Buộc</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;justify-content:center;">
+          <div style="display:flex;gap:0.55rem;justify-content:center;flex-shrink:0;">
+            <div style="position:relative;">
+              <video id="dcm-video" autoplay muted playsinline style="width:124px;height:93px;object-fit:cover;border-radius:10px;border:2px solid #22c55e;background:#000;display:block;"></video>
+              <div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,0.7);color:#22c55e;font-size:0.58rem;font-weight:700;padding:0.1rem 0.35rem;border-radius:4px;">● LIVE</div>
+            </div>
+            <div style="position:relative;">
+              <canvas id="dcm-ref-canvas" width="124" height="93" style="width:124px;height:93px;border-radius:10px;border:2.5px dashed #94a3b8;background:#e2e8f0;display:block;"></canvas>
+              <div id="dcm-ref-label" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#94a3b8;font-size:0.7rem;text-align:center;pointer-events:none;width:80px;line-height:1.2;">📸 Chưa<br>chụp</div>
+            </div>
           </div>
-          <div style="position:relative;flex-shrink:0;">
-            <canvas id="dcm-ref-canvas" width="130" height="98" style="border-radius:10px;border:2.5px dashed #94a3b8;background:#e2e8f0;display:block;"></canvas>
-            <div id="dcm-ref-label" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#94a3b8;font-size:0.7rem;text-align:center;pointer-events:none;width:80px;line-height:1.3;">📸 Chưa<br>chụp</div>
-          </div>
-          <div style="flex:1;min-width:0;">
-            <div id="dcm-face-status" style="font-size:0.78rem;color:#dc2626;font-weight:600;background:#fef2f2;border:1px solid #fca5a5;padding:0.35rem 0.55rem;border-radius:8px;margin-bottom:0.55rem;line-height:1.4;">
+          <div style="flex:1;min-width:200px;width:100%;box-sizing:border-box;">
+            <div id="dcm-face-status" style="font-size:0.78rem;color:#dc2626;font-weight:600;background:#fef2f2;border:1px solid #fca5a5;padding:0.35rem 0.55rem;border-radius:8px;margin-bottom:0.45rem;line-height:1.35;text-align:center;">
               ⏳ Đang tìm khuôn mặt...
             </div>
-            <button id="dcm-capture-btn" disabled style="width:100%;padding:0.5rem;background:#94a3b8;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.78rem;cursor:not-allowed;transition:all 0.2s;margin-bottom:0.35rem;">
+            <button id="dcm-capture-btn" disabled style="width:100%;padding:0.55rem;background:#94a3b8;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.82rem;cursor:not-allowed;transition:all 0.2s;margin-bottom:0.35rem;">
               📸 Chụp Khuôn Mặt
             </button>
-            <div style="font-size:0.7rem;color:#64748b;line-height:1.4;">Nhìn thẳng vào camera, mặt rõ ràng rồi nhấn Chụp để AI nhận diện.</div>
+            <div style="font-size:0.7rem;color:#64748b;line-height:1.35;text-align:center;">Nhìn thẳng vào camera, đủ sáng rồi nhấn Chụp để xác nhận.</div>
           </div>
         </div>
       </div>` : '';
 
     const micHtml = needMic ? `
-      <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:16px;padding:1rem;display:flex;align-items:center;gap:0.9rem;margin-bottom:1rem;">
-        <div style="width:44px;height:44px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">🎤</div>
-        <div style="flex:1;">
-          <div style="font-weight:700;font-size:0.88rem;color:#0f172a;margin-bottom:0.3rem;">🎤 Kiểm Tra Microphone AI</div>
-          <div style="font-size:0.78rem;color:#15803d;font-weight:600;margin-bottom:0.3rem;">✅ Đã kết nối — nói thử vài câu để kiểm tra</div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.25rem;">
-            <span id="dcm-mic-label" style="font-size:0.72rem;color:#64748b;font-weight:600;">🔊 Đang nghe...</span>
+      <div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:16px;padding:clamp(0.75rem,2vw,1rem);display:flex;align-items:center;gap:0.75rem;margin-bottom:0.9rem;box-sizing:border-box;text-align:left;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">🎤</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:0.85rem;color:#0f172a;margin-bottom:0.2rem;">🎤 Kiểm Tra Microphone AI</div>
+          <div style="font-size:0.75rem;color:#15803d;font-weight:600;margin-bottom:0.25rem;">✅ Đã kết nối — nói thử vài câu để kiểm tra</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.2rem;">
+            <span id="dcm-mic-label" style="font-size:0.7rem;color:#64748b;font-weight:600;">🔊 Đang nghe...</span>
           </div>
-          <div style="background:#cbd5e1;border-radius:6px;height:14px;overflow:hidden;">
+          <div style="background:#cbd5e1;border-radius:6px;height:12px;overflow:hidden;">
             <div id="dcm-mic-meter" style="width:3%;height:100%;background:linear-gradient(90deg,#22c55e,#eab308,#ef4444);transition:width 0.08s ease;border-radius:6px;"></div>
           </div>
         </div>
@@ -10081,20 +10118,20 @@ render_ai_geometry(dom) {
     const startText = needCamera ? '⏳ Chụp khuôn mặt trước khi vào thi' : '🚀 ĐÃ KIỂM TRA XONG — VÀO PHÒNG THI NGAY';
 
     modal.innerHTML = `
-      <div style="background:#fff;border-radius:24px;padding:2rem;width:100%;max-width:610px;box-shadow:0 30px 70px rgba(0,0,0,0.45);text-align:center;">
-        <div style="font-size:2.4rem;margin-bottom:0.3rem;">🛡️ GEAR CHECK</div>
-        <h3 style="margin:0 0 0.3rem 0;font-family:var(--font-title);font-weight:700;font-size:1.2rem;color:#0f172a;">XÁC MINH DANH TÍNH TRƯỚC KHI VÀO THI</h3>
-        <p style="color:#64748b;font-size:0.85rem;margin:0 0 0.9rem 0;">Đề thi <strong>"${exam.title}"</strong> yêu cầu xác minh danh tính và kết nối thiết bị.</p>
-        <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:1.2rem;">
-          <div style="display:flex;align-items:center;gap:0.3rem;padding:0.28rem 0.7rem;border-radius:20px;background:${needCamera?'#eff6ff':'#f0fdf4'};border:1.5px solid ${needCamera?'#93c5fd':'#86efac'};font-size:0.76rem;font-weight:700;color:${needCamera?'#1d4ed8':'#15803d'};">📷 ${needCamera?'Bước 1: Khuôn mặt':'Camera OK'}</div>
-          <div style="width:22px;height:2px;background:#cbd5e1;flex-shrink:0;"></div>
-          <div style="display:flex;align-items:center;gap:0.3rem;padding:0.28rem 0.7rem;border-radius:20px;background:${needMic?'#f5f3ff':'#f0fdf4'};border:1.5px solid ${needMic?'#c4b5fd':'#86efac'};font-size:0.76rem;font-weight:700;color:${needMic?'#6d28d9':'#15803d'};">🎤 ${needMic?'Bước 2: Mic':'Mic OK'}</div>
-          <div style="width:22px;height:2px;background:#cbd5e1;flex-shrink:0;"></div>
-          <div style="display:flex;align-items:center;gap:0.3rem;padding:0.28rem 0.7rem;border-radius:20px;background:#f8fafc;border:1.5px solid #cbd5e1;font-size:0.76rem;font-weight:700;color:#94a3b8;">🚀 Vào thi</div>
+      <div style="background:#fff;border-radius:24px;padding:clamp(1rem,3vw,1.75rem);width:100%;max-width:580px;max-height:94vh;overflow-y:auto;box-shadow:0 30px 70px rgba(0,0,0,0.45);text-align:center;box-sizing:border-box;">
+        <div style="font-size:clamp(1.8rem,4vw,2.4rem);margin-bottom:0.2rem;">🛡️ GEAR CHECK</div>
+        <h3 style="margin:0 0 0.3rem 0;font-family:var(--font-title);font-weight:700;font-size:clamp(1rem,2.5vw,1.2rem);color:#0f172a;">XÁC MINH DANH TÍNH TRƯỚC KHI VÀO THI</h3>
+        <p style="color:#64748b;font-size:clamp(0.78rem,2vw,0.85rem);margin:0 0 0.8rem 0;line-height:1.4;">Đề thi <strong>"${exam.title}"</strong> yêu cầu xác minh danh tính và kết nối thiết bị.</p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:0.35rem;flex-wrap:wrap;margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;gap:0.3rem;padding:0.25rem 0.65rem;border-radius:20px;background:${needCamera?'#eff6ff':'#f0fdf4'};border:1.5px solid ${needCamera?'#93c5fd':'#86efac'};font-size:0.75rem;font-weight:700;color:${needCamera?'#1d4ed8':'#15803d'};white-space:nowrap;">📷 ${needCamera?'Bước 1: Khuôn mặt':'Camera OK'}</div>
+          <span style="color:#cbd5e1;font-weight:700;">➔</span>
+          <div style="display:flex;align-items:center;gap:0.3rem;padding:0.25rem 0.65rem;border-radius:20px;background:${needMic?'#f5f3ff':'#f0fdf4'};border:1.5px solid ${needMic?'#c4b5fd':'#86efac'};font-size:0.75rem;font-weight:700;color:${needMic?'#6d28d9':'#15803d'};white-space:nowrap;">🎤 ${needMic?'Bước 2: Mic':'Mic OK'}</div>
+          <span style="color:#cbd5e1;font-weight:700;">➔</span>
+          <div style="display:flex;align-items:center;gap:0.3rem;padding:0.25rem 0.65rem;border-radius:20px;background:#f8fafc;border:1.5px solid #cbd5e1;font-size:0.75rem;font-weight:700;color:#94a3b8;white-space:nowrap;">🚀 Vào thi</div>
         </div>
         ${camHtml}
         ${micHtml}
-        <button id="dcm-start-btn" ${startDisabled} style="width:100%;padding:0.88rem 1.5rem;background:${startBg};color:#fff;border:none;border-radius:14px;font-weight:700;font-size:1rem;cursor:${startCursor};box-shadow:${startShadow};">${startText}</button>
+        <button id="dcm-start-btn" ${startDisabled} style="width:100%;padding:0.85rem 1.2rem;background:${startBg};color:#fff;border:none;border-radius:14px;font-weight:700;font-size:clamp(0.88rem,2.2vw,1rem);cursor:${startCursor};box-shadow:${startShadow};">${startText}</button>
       </div>`;
 
     document.body.appendChild(modal);
@@ -10126,7 +10163,7 @@ render_ai_geometry(dom) {
           warn: 'color:#92400e;background:#fef9c3;border:1px solid #fde047;',
           err:  'color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;'
         };
-        faceStatus.style.cssText = 'font-size:0.78rem;font-weight:600;padding:0.35rem 0.55rem;border-radius:8px;margin-bottom:0.55rem;line-height:1.4;' + (styles[type] || styles.err);
+        faceStatus.style.cssText = 'font-size:0.78rem;font-weight:600;padding:0.35rem 0.55rem;border-radius:8px;margin-bottom:0.45rem;line-height:1.35;text-align:center;' + (styles[type] || styles.err);
       };
 
       const runDetect = async () => {
@@ -10143,19 +10180,19 @@ render_ai_geometry(dom) {
             }
           } catch(e) { faceOk = true; setStatus('✅ Camera sẵn sàng — nhấn Chụp', 'ok'); }
         } else {
-          // YCbCr fallback
+          // YCbCr skin tone detection fallback
           try {
-            const tc = document.createElement('canvas'); tc.width=130; tc.height=98;
-            const tx = tc.getContext('2d'); tx.drawImage(video, 0, 0, 130, 98);
-            const d = tx.getImageData(0, 0, 130, 98).data;
+            const tc = document.createElement('canvas'); tc.width = 124; tc.height = 93;
+            const tx = tc.getContext('2d'); tx.drawImage(video, 0, 0, 124, 93);
+            const d = tx.getImageData(0, 0, 124, 93).data;
             let skin = 0;
-            for (let i = 0; i < d.length; i+=4) {
-              const Y=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
-              const Cb=-0.169*d[i]-0.331*d[i+1]+0.500*d[i+2]+128;
-              const Cr=0.500*d[i]-0.419*d[i+1]-0.081*d[i+2]+128;
-              if (Y>16&&Cb>=77&&Cb<=127&&Cr>=133&&Cr<=173) skin++;
+            for (let i = 0; i < d.length; i += 4) {
+              const Y  =  0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+              const Cb = -0.169 * d[i] - 0.331 * d[i+1] + 0.500 * d[i+2] + 128;
+              const Cr =  0.500 * d[i] - 0.419 * d[i+1] - 0.081 * d[i+2] + 128;
+              if (Y > 15 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) skin++;
             }
-            faceOk = (skin/(130*98)) > 0.04;
+            faceOk = (skin / (124 * 93)) > 0.035;
             if (faceOk) setStatus('✅ Phát hiện khuôn mặt — nhấn Chụp', 'ok');
             else setStatus('⚠️ Không thấy mặt rõ — hãy nhìn thẳng vào camera', 'err');
           } catch(e) { faceOk = true; }
@@ -10176,17 +10213,34 @@ render_ai_geometry(dom) {
 
       captureBtn.onclick = () => {
         if (!faceOk) return;
-        refCtx.drawImage(video, 0, 0, 130, 98);
+        refCtx.drawImage(video, 0, 0, 124, 93);
         if (refLabel) refLabel.style.display = 'none';
-        // 48x48 grayscale reference for exam monitoring
-        const rc = document.createElement('canvas'); rc.width=48; rc.height=48;
-        const rx = rc.getContext('2d'); rx.drawImage(video, 0, 0, 48, 48);
-        const id = rx.getImageData(0, 0, 48, 48);
-        const gray = new Uint8Array(48*48);
-        for (let i = 0; i < id.data.length; i+=4) {
-          gray[i/4] = Math.round(0.299*id.data[i]+0.587*id.data[i+1]+0.114*id.data[i+2]);
+
+        // Capture reference grayscale & YCbCr data for proctoring
+        const rc = document.createElement('canvas'); rc.width = 64; rc.height = 48;
+        const rx = rc.getContext('2d'); rx.drawImage(video, 0, 0, 64, 48);
+        const id = rx.getImageData(0, 0, 64, 48);
+        const gray = new Uint8Array(64 * 48);
+        let skinCount = 0;
+        let totLuma = 0;
+
+        for (let i = 0; i < id.data.length; i += 4) {
+          const r = id.data[i], g = id.data[i+1], b = id.data[i+2];
+          const Y  =  0.299 * r + 0.587 * g + 0.114 * b;
+          const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
+          const Cr =  0.500 * r - 0.419 * g - 0.081 * b + 128;
+          gray[i/4] = Math.round(Y);
+          totLuma += Y;
+          if (Y > 15 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) skinCount++;
         }
-        this._examFaceRef = { grayData: gray };
+
+        this._examFaceRef = {
+          grayData: gray,
+          skinRatio: skinCount / (64 * 48),
+          meanLuma: totLuma / (64 * 48),
+          captured: true
+        };
+
         setStatus('✅ Đã đăng ký khuôn mặt! AI sẽ giám sát trong suốt bài thi.', 'ok');
         captureBtn.textContent = '🔄 Chụp lại';
         captureBtn.style.background = '#475569';
@@ -10210,8 +10264,8 @@ render_ai_geometry(dom) {
         const dArr = new Uint8Array(anlsr.frequencyBinCount);
         micMeterInterval = setInterval(() => {
           anlsr.getByteFrequencyData(dArr);
-          let s = 0; for (let i=0;i<dArr.length;i++) s+=dArr[i];
-          const pct = Math.min(100, Math.max(3, Math.round((s/dArr.length/128)*100)));
+          let s = 0; for (let i = 0; i < dArr.length; i++) s += dArr[i];
+          const pct = Math.min(100, Math.max(3, Math.round((s / dArr.length / 128) * 100)));
           const m = modal.querySelector('#dcm-mic-meter');
           if (m) m.style.width = pct + '%';
         }, 80);
@@ -10224,7 +10278,6 @@ render_ai_geometry(dom) {
       onProceed();
     };
   }
-
 
   // =====================================================
   // IN BAI KIEM TRA HOC SINH (CHUAN FORM GIAO VIEN CHAM)
@@ -10625,35 +10678,40 @@ render_ai_geometry(dom) {
                     <img src="${q.imageUrl}" style="max-height:380px; max-width:100%; object-fit:contain; border-radius:10px; border:1.5px solid #cbd5e1; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.06);" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${q.imageUrl}')" title="Bấm để phóng to ảnh câu hỏi" />
                   </div>
                 ` : ''}
-                ${opts.length > 0 ? `
-                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.55rem;">
-                    ${opts.map((opt, oIdx) => {
-                      const optImg = (q.optionImages && q.optionImages[oIdx]) ? q.optionImages[oIdx] : '';
-                      return `
-                      <label style="display:flex;flex-direction:column;gap:0.35rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;cursor:pointer;transition:all 0.15s;" onmouseenter="this.style.background='#eff6ff';this.style.borderColor='#93c5fd'" onmouseleave="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0'">
-                        <div style="display:flex;align-items:center;gap:0.6rem;">
-                          <input type="radio" name="exam-q-${qIdx}" value="${oIdx}" class="exam-ans-radio" data-q-idx="${qIdx}" style="width:17px;height:17px;accent-color:#6366f1;">
-                          <span style="color:#1e293b;font-weight:400;font-size:0.9rem;">${String.fromCharCode(65+oIdx)}. ${opt}</span>
-                        </div>
-                        ${optImg ? `
-                          <div style="margin-top:0.2rem;margin-left:1.65rem;">
-                            <img src="${optImg}" style="max-height:160px; max-width:100%; border-radius:6px; cursor:pointer;" onclick="event.stopPropagation(); window.LMSAppInstance && window.LMSAppInstance._zoomImage('${optImg}')" title="Bấm để xem ảnh đáp án" />
-                          </div>` : ''}
-                      </label>
-                    `;}).join('')}
-                  </div>
-                ` : `
-                  <div class="exam-essay-wrapper" data-q-idx="${qIdx}" style="display:flex;flex-direction:column;gap:0.6rem;">
-                     <textarea class="exam-essay-input" data-q-idx="${qIdx}" placeholder="Nhập câu trả lời của bạn (hoặc đính kèm tệp bên dưới)..." style="width:100%;min-height:100px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:0.75rem;color:#0f172a;font-size:0.9rem;resize:vertical;box-sizing:border-box;"></textarea>
-                     <div style="border-top:1px dashed rgba(255,255,255,0.15);padding-top:0.5rem;">
-                       <div style="font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:0.35rem;">── Đính kèm tệp (ảnh / .docx / .xlsx / .pptx) ──</div>
-                       <label class="exam-essay-file-label" data-q-idx="${qIdx}" style="display:inline-flex;align-items:center;gap:0.45rem;background:#f0f9ff;border:1.5px dashed #93c5fd;border-radius:10px;padding:0.45rem 0.9rem;cursor:pointer;font-size:0.82rem;color:#0369a1;font-weight:600;" onmouseenter="this.style.background='#dbeafe'" onmouseleave="this.style.background='#f0f9ff'">
-                         📎 Chọn tệp đính kèm
-                         <input type="file" class="exam-essay-file" data-q-idx="${qIdx}" accept="image/*,.docx,.xlsx,.pptx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation" style="display:none;">
+                 ${(qType === 'tra_loi_ngan' || qType === 'tu_luan') ? `
+                   <div class="exam-essay-wrapper" data-q-idx="${qIdx}" style="display:flex;flex-direction:column;gap:0.6rem;">
+                      <textarea class="exam-essay-input" data-q-idx="${qIdx}" placeholder="${qType === 'tra_loi_ngan' ? 'Nhập câu trả lời ngắn...' : 'Nhập câu trả lời của bạn (hoặc đính kèm tệp bên dưới)...'}" style="width:100%;min-height:${qType === 'tra_loi_ngan' ? '56px' : '100px'};background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:0.75rem;color:#0f172a;font-size:0.9rem;resize:vertical;box-sizing:border-box;"></textarea>
+                      ${qType === 'tu_luan' ? `
+                      <div style="border-top:1px dashed rgba(255,255,255,0.15);padding-top:0.5rem;">
+                        <div style="font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:0.35rem;">── Đính kèm tệp (ảnh / .docx / .xlsx / .pptx) ──</div>
+                        <label class="exam-essay-file-label" data-q-idx="${qIdx}" style="display:inline-flex;align-items:center;gap:0.45rem;background:#f0f9ff;border:1.5px dashed #93c5fd;border-radius:10px;padding:0.45rem 0.9rem;cursor:pointer;font-size:0.82rem;color:#0369a1;font-weight:600;" onmouseenter="this.style.background='#dbeafe'" onmouseleave="this.style.background='#f0f9ff'">
+                          📎 Chọn tệp đính kèm
+                          <input type="file" class="exam-essay-file" data-q-idx="${qIdx}" accept="image/*,.docx,.xlsx,.pptx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation" style="display:none;">
+                        </label>
+                        <div class="exam-essay-file-preview" data-q-idx="${qIdx}" style="display:none;margin-top:0.4rem;align-items:center;gap:0.55rem;background:rgba(255,255,255,0.07);border:1.5px solid rgba(167,139,250,0.35);border-radius:10px;padding:0.45rem 0.8rem;font-size:0.82rem;color:#e2e8f0;"></div>
+                      </div>` : ''}
+                    </div>
+                 ` : opts.length > 0 ? `
+                   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.55rem;">
+                     ${opts.map((opt, oIdx) => {
+                       const optImg = (q.optionImages && q.optionImages[oIdx]) ? q.optionImages[oIdx] : '';
+                       return `
+                       <label style="display:flex;flex-direction:column;gap:0.35rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;cursor:pointer;transition:all 0.15s;" onmouseenter="this.style.background='#eff6ff';this.style.borderColor='#93c5fd'" onmouseleave="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0'">
+                         <div style="display:flex;align-items:center;gap:0.6rem;">
+                           <input type="radio" name="exam-q-${qIdx}" value="${oIdx}" class="exam-ans-radio" data-q-idx="${qIdx}" style="width:17px;height:17px;accent-color:#6366f1;">
+                           <span style="color:#1e293b;font-weight:400;font-size:0.9rem;">${String.fromCharCode(65+oIdx)}. ${opt}</span>
+                         </div>
+                         ${optImg ? `
+                           <div style="margin-top:0.2rem;margin-left:1.65rem;">
+                             <img src="${optImg}" style="max-height:160px; max-width:100%; border-radius:6px; cursor:pointer;" onclick="event.stopPropagation(); window.LMSAppInstance && window.LMSAppInstance._zoomImage('${optImg}')" title="Bấm để xem ảnh đáp án" />
+                           </div>` : ''}
                        </label>
-                       <div class="exam-essay-file-preview" data-q-idx="${qIdx}" style="display:none;margin-top:0.4rem;align-items:center;gap:0.55rem;background:rgba(255,255,255,0.07);border:1.5px solid rgba(167,139,250,0.35);border-radius:10px;padding:0.45rem 0.8rem;font-size:0.82rem;color:#e2e8f0;"></div>
-                     </div>
-                   </div>`}
+                     `;}).join('')}
+                   </div>
+                 ` : `
+                   <div class="exam-essay-wrapper" data-q-idx="${qIdx}" style="display:flex;flex-direction:column;gap:0.6rem;">
+                      <textarea class="exam-essay-input" data-q-idx="${qIdx}" placeholder="Nhập câu trả lời của bạn..." style="width:100%;min-height:100px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:0.75rem;color:#0f172a;font-size:0.9rem;resize:vertical;box-sizing:border-box;"></textarea>
+                    </div>`}
               </div>
             `;
           }).join(''); })()}
@@ -11141,42 +11199,73 @@ render_ai_geometry(dom) {
     document.addEventListener('copy', copyHandler, true);
     document.addEventListener('paste', pasteHandler, true);
 
+    // ─── FILE-PICKER GUARD (khai báo trước fsHandler để tránh TDZ) ──────────
+    let lastBlurTime = 0;
+    let _filePickerTs = 0; // timestamp lần cuối click vào file label/input
+
+    const _docFileCaptureHandler = (e) => {
+      const t = e.target;
+      if (t && (
+        t.type === 'file' ||
+        t.classList.contains('exam-essay-file-label') ||
+        (t.closest && t.closest('.exam-essay-file-label'))
+      )) {
+        _filePickerTs = Date.now();
+      }
+    };
+    document.addEventListener('mousedown',   _docFileCaptureHandler, true);
+    document.addEventListener('pointerdown', _docFileCaptureHandler, true);
+    document.addEventListener('touchstart',  _docFileCaptureHandler, { capture: true, passive: true });
+
+    // Cửa sổ 3 giây: nếu < 3s kể từ lần click file label → đang mở file dialog
+    const _isFilePickerJustOpened = () => (Date.now() - _filePickerTs) < 3000;
+
+    // Khi window lấy lại focus (file dialog đóng) → reset timestamp
+    window.addEventListener('focus', () => { _filePickerTs = 0; });
+    // ────────────────────────────────────────────────────────────────────────
+
     // Fullscreen exit detection & auto re-lock
+    // OS file dialog làm trình duyệt thoát fullscreen → dùng guard để bỏ qua
     const fsHandler = () => {
       if (!document.fullscreenElement && this.isProctoringActive && !isSubmitting) {
+        if (_isFilePickerJustOpened()) return; // đang mở file dialog → bỏ qua
         handleViolation('Thoát chế độ toàn màn hình (Phím ESC / F11)');
       }
     };
     document.addEventListener('fullscreenchange', fsHandler);
     overlay.addEventListener('click', () => {
       if (this.isProctoringActive && !document.fullscreenElement) {
-        enterFS();
+        if (!_isFilePickerJustOpened()) enterFS();
       }
     });
 
     // Tab switch detection
     const visHandler = () => {
       if (document.hidden && this.isProctoringActive && !isSubmitting) {
+        if (_isFilePickerJustOpened()) return; // đang mở file dialog → bỏ qua
         handleViolation('Chuyển tab / Thu nhỏ trình duyệt');
       }
     };
     document.addEventListener('visibilitychange', visHandler);
 
-    // Window blur detection
-    let lastBlurTime = 0;
+    // Window blur detection — delay 80ms để capture handler kịp set _filePickerTs
     const blurHandler = () => {
-      const now = Date.now();
-      if (now - lastBlurTime > 1500 && this.isProctoringActive && !isSubmitting) {
-        lastBlurTime = now;
-        handleViolation('Mất tiêu điểm cửa sổ (Alt+Tab / Chuyển ứng dụng)');
-      }
+      setTimeout(() => {
+        if (_isFilePickerJustOpened()) return;
+        const now = Date.now();
+        if (now - lastBlurTime > 1500 && this.isProctoringActive && !isSubmitting) {
+          lastBlurTime = now;
+          handleViolation('Mất tiêu điểm cửa sổ (Alt+Tab / Chuyển ứng dụng)');
+        }
+      }, 80);
     };
     window.addEventListener('blur', blurHandler);
 
-    // Matrix nav
-    // Wire file preview for essay upload
+    // Matrix nav / Wire file preview for essay upload
+
     overlay.querySelectorAll('.exam-essay-file').forEach(inp => {
       inp.onchange = function() {
+        window._examFilePickerOpen = false;
         const qI = this.getAttribute('data-q-idx');
         const preview = overlay.querySelector(`.exam-essay-file-preview[data-q-idx="${qI}"]`);
         if (!preview) return;
@@ -11264,140 +11353,134 @@ render_ai_geometry(dom) {
         });
       } catch(e) { console.warn('Mic init error:', e); }
     }
-    // Face detection — FaceDetector API with reference comparison
+    // Face detection — Dual Engine (Native FaceDetector + Real-time YCbCr Skin Tone & Spatial Presence)
     if (exam.enableCamera && stream) {
       const vidEl  = overlay.querySelector('#exam-pip-video');
       const canEl  = overlay.querySelector('#exam-pip-canvas');
       if (vidEl && canEl) {
-        const fd2d = canEl.getContext('2d');
-        canEl.width = 160; canEl.height = 120;
         const camSt = overlay.querySelector('#cam-status');
         let multiCount = 0;
+
         const startFaceDetect = async () => {
           if (faceInterval) return;
           let fd = null;
-          if ('FaceDetector' in window) { try { fd = new FaceDetector({ fastMode: true, maxDetectedFaces: 3 }); } catch(e) {} }
-          if (fd) {
-            if (camSt) { camSt.textContent = '\u25cf AI (FaceDetector)'; camSt.style.color = '#4ade80'; }
-            let fdFailCount = 0;
-            faceInterval = setInterval(async () => {
-              if (!this.isProctoringActive || vidEl.readyState < 1) return;
-              let faces = [];
-              try { faces = await fd.detect(vidEl); fdFailCount = 0; } catch(e) {
-                fdFailCount++;
-                if (fdFailCount >= 3) {
-                  // FaceDetector failing — switch to reference comparison
-                  clearInterval(faceInterval); faceInterval = null;
-                  if (camSt) camSt.textContent = '\u25cf So s\u00e1nh (ref)';
-                  useRefComparison();
-                }
-                return;
-              }
-              const n = faces.length;
-              if (camSt) camSt.title = 'faces:' + n;
-              if (n === 0) {
-                multiCount = 0; faceAbsentTimer++;
-                if (camSt) { camSt.textContent = '\u26a0\ufe0f Kh\u00f4ng th\u1ea5y m\u1eb7t (' + faceAbsentTimer + '/5)'; camSt.style.color = '#f59e0b'; }
-                if (faceAbsentTimer >= 5) { faceAbsentTimer = 0; handleViolation('Kh\u00f4ng ph\u00e1t hi\u1ec7n khu\u00f4n m\u1eb7t trong camera qu\u00e1 5 gi\u00e2y'); }
-              } else if (n > 1) {
-                faceAbsentTimer = 0; multiCount++;
-                if (camSt) { camSt.textContent = '\u26a0\ufe0f Ki\u1ec3m tra... (' + multiCount + '/3)'; camSt.style.color = '#f59e0b'; }
-                if (multiCount >= 3) { multiCount = 0; if (camSt) { camSt.textContent = '\u26a0\ufe0f Nhi\u1ec1u ng\u01b0\u1eddi!'; camSt.style.color = '#ef4444'; } handleViolation('Ph\u00e1t hi\u1ec7n ' + n + ' ng\u01b0\u1eddi trong kh\u00f4ng gian thi'); }
-              } else {
-                faceAbsentTimer = 0; multiCount = 0;
-                if (this._examFaceRef) {
-                  try {
-                    const fc = document.createElement('canvas'); fc.width=48; fc.height=48;
-                    const fx = fc.getContext('2d'); fx.drawImage(vidEl, 0, 0, 48, 48);
-                    const id = fx.getImageData(0, 0, 48, 48);
-                    const gry = new Uint8Array(48*48);
-                    for (let i=0;i<id.data.length;i+=4) gry[i/4]=Math.round(0.299*id.data[i]+0.587*id.data[i+1]+0.114*id.data[i+2]);
-                    const ref = this._examFaceRef.grayData;
-                    let diff = 0; for (let i=0;i<gry.length;i++) diff+=Math.abs(gry[i]-ref[i]);
-                    const mad = diff/gry.length;
-                    if (camSt) camSt.title = 'faces:1 mad:' + mad.toFixed(1);
-                    if (mad > 65) {
-                      if (camSt) { camSt.textContent = '\u26a0\ufe0f Khu\u00f4n m\u1eb7t kh\u00e1c!'; camSt.style.color = '#ef4444'; }
-                      handleViolation('Khu\u00f4n m\u1eb7t trong camera kh\u00e1c v\u1edbi h\u1ecdc sinh \u0111\u00e3 \u0111\u0103ng k\u00fd');
-                    } else {
-                      if (camSt) { camSt.textContent = '\u25cf \u0110ang gi\u00e1m s\u00e1t'; camSt.style.color = '#4ade80'; }
-                    }
-                  } catch(e) { if (camSt) { camSt.textContent = '\u25cf \u0110ang gi\u00e1m s\u00e1t'; camSt.style.color = '#4ade80'; } }
-                } else {
-                  if (camSt) { camSt.textContent = '\u25cf \u0110ang gi\u00e1m s\u00e1t'; camSt.style.color = '#4ade80'; }
-                }
-              }
-            }, 1000);
-          } else {
-            useRefComparison();
+          if ('FaceDetector' in window) {
+            try { fd = new FaceDetector({ fastMode: true, maxDetectedFaces: 3 }); } catch(e) {}
           }
-          // Reference comparison: compare 48x48 grayscale current frame vs registered face
-          // MAD low = face still present; MAD high = face left or different person
-          const useRefComparison = () => {
-            if (faceInterval) return;
-            if (camSt) { camSt.textContent = '\u25cf So s\u00e1nh (ref)'; camSt.style.color = '#4ade80'; }
-            const refC = document.createElement('canvas'); refC.width=48; refC.height=48;
-            const refX = refC.getContext('2d');
-            faceInterval = setInterval(() => {
-              if (!this.isProctoringActive || vidEl.readyState < 1) return;
-              try { refX.drawImage(vidEl, 0, 0, 48, 48); } catch(e) { return; }
-              let imgD; try { imgD = refX.getImageData(0, 0, 48, 48); } catch(e) { return; }
-              // Compute grayscale + brightness + variance
-              const d = imgD.data;
-              let totBr = 0, sumSq = 0;
-              const curGray = new Uint8Array(48*48);
-              for (let i = 0; i < d.length; i+=4) {
-                const g = Math.round(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]);
-                curGray[i/4] = g; totBr += g; sumSq += g*g;
-              }
-              const mean = totBr / (48*48);
-              const variance = sumSq/(48*48) - mean*mean;
-              const stdDev = Math.sqrt(variance);
-              // Very dark = camera covered
-              if (mean < 12) {
-                faceAbsentTimer++;
-                if (camSt) { camSt.textContent = '\u26a0\ufe0f Camera b\u1ecb che'; camSt.style.color = '#f59e0b'; }
-                if (faceAbsentTimer >= 5) { faceAbsentTimer=0; handleViolation('Camera b\u1ecb che ho\u1eb7c ph\u00f2ng thi qu\u00e1 t\u1ed1i'); }
-                return;
-              }
-              // Reference comparison (if face was registered)
-              if (this._examFaceRef) {
-                const ref = this._examFaceRef.grayData;
-                let diff = 0;
-                for (let i = 0; i < curGray.length; i++) diff += Math.abs(curGray[i]-ref[i]);
-                const mad = diff / curGray.length;
-                if (camSt) camSt.title = 'mad:'+mad.toFixed(1)+' std:'+stdDev.toFixed(1);
-                // MAD > 45 AND stdDev < 25 (blank wall has low variance) = face absent
-                // MAD > 45 AND stdDev >= 25 = different person (complex scene but not reference)
-                if (mad > 45) {
-                  faceAbsentTimer++;
-                  if (camSt) { camSt.textContent = '\u26a0\ufe0f Kh\u00f4ng th\u1ea5y m\u1eb7t ('+faceAbsentTimer+'/5)'; camSt.style.color = '#f59e0b'; }
-                  if (faceAbsentTimer >= 5) {
-                    faceAbsentTimer = 0;
-                    if (stdDev < 20) handleViolation('Kh\u00f4ng ph\u00e1t hi\u1ec7n khu\u00f4n m\u1eb7t trong camera qu\u00e1 5 gi\u00e2y');
-                    else handleViolation('Khu\u00f4n m\u1eb7t trong camera kh\u00e1c v\u1edbi h\u1ecdc sinh \u0111\u00e3 \u0111\u0103ng k\u00fd');
-                  }
-                } else {
-                  faceAbsentTimer = 0;
-                  if (camSt) { camSt.textContent = '\u25cf \u0110ang gi\u00e1m s\u00e1t'; camSt.style.color = '#4ade80'; }
-                }
-              } else {
-                // No reference: use stdDev (face = high texture, blank wall = low)
-                if (stdDev < 8) {
-                  faceAbsentTimer++;
-                  if (camSt) { camSt.textContent = '\u26a0\ufe0f Kh\u00f4ng th\u1ea5y m\u1eb7t ('+faceAbsentTimer+'/5)'; camSt.style.color = '#f59e0b'; }
-                  if (faceAbsentTimer >= 5) { faceAbsentTimer=0; handleViolation('Kh\u00f4ng ph\u00e1t hi\u1ec7n khu\u00f4n m\u1eb7t trong camera qu\u00e1 5 gi\u00e2y'); }
-                } else {
-                  faceAbsentTimer = 0;
-                  if (camSt) { camSt.textContent = '\u25cf \u0110ang gi\u00e1m s\u00e1t'; camSt.style.color = '#4ade80'; }
+
+          // Small canvas for high-performance pixel evaluation
+          const evalC = document.createElement('canvas');
+          evalC.width = 64; evalC.height = 48;
+          const evalX = evalC.getContext('2d');
+
+          if (camSt) {
+            camSt.textContent = '● Đang giám sát AI';
+            camSt.style.color = '#16a34a';
+          }
+
+          faceInterval = setInterval(async () => {
+            if (!this.isProctoringActive || vidEl.readyState < 2) {
+              if (vidEl && vidEl.paused) vidEl.play().catch(() => {});
+              return;
+            }
+
+            // 1. Draw video frame & extract pixels
+            try { evalX.drawImage(vidEl, 0, 0, 64, 48); } catch(e) { return; }
+            let imgD; try { imgD = evalX.getImageData(0, 0, 64, 48); } catch(e) { return; }
+
+            const d = imgD.data;
+            let totLuma = 0;
+            let skinPixels = 0;
+            let centerSkinPixels = 0;
+            const curGray = new Uint8Array(64 * 48);
+
+            for (let i = 0; i < d.length; i += 4) {
+              const r = d[i], g = d[i+1], b = d[i+2];
+              const Y  =  0.299 * r + 0.587 * g + 0.114 * b;
+              const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
+              const Cr =  0.500 * r - 0.419 * g - 0.081 * b + 128;
+
+              curGray[i/4] = Math.round(Y);
+              totLuma += Y;
+
+              // YCbCr skin tone detection
+              if (Y > 15 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) {
+                skinPixels++;
+                const px = (i / 4) % 64;
+                const py = Math.floor((i / 4) / 64);
+                // Center box (x: 16..48, y: 8..40)
+                if (px >= 16 && px <= 48 && py >= 8 && py <= 40) {
+                  centerSkinPixels++;
                 }
               }
-            }, 1000);
-          };
+            }
+
+            const meanLuma = totLuma / (64 * 48);
+            const skinRatio = skinPixels / (64 * 48);
+            const centerSkinRatio = centerSkinPixels / (32 * 32);
+
+            // Check camera covered / too dark
+            if (meanLuma < 10) {
+              faceAbsentTimer++;
+              if (camSt) { camSt.textContent = '⚠️ Camera bị che / Quá tối (' + faceAbsentTimer + '/4)'; camSt.style.color = '#ef4444'; }
+              if (faceAbsentTimer >= 4) {
+                faceAbsentTimer = 0;
+                handleViolation('Camera bị che hoặc phòng thi quá tối không thấy học sinh!');
+              }
+              return;
+            }
+
+            // 2. Native FaceDetector check (if browser supports)
+            let nativeFacesCount = -1;
+            if (fd) {
+              try {
+                const faces = await fd.detect(vidEl);
+                nativeFacesCount = faces.length;
+              } catch(e) {}
+            }
+
+            // 3. Multi-person check
+            if (nativeFacesCount > 1) {
+              multiCount++;
+              if (camSt) { camSt.textContent = '⚠️ Nhiều người! (' + multiCount + '/3)'; camSt.style.color = '#ef4444'; }
+              if (multiCount >= 3) {
+                multiCount = 0;
+                handleViolation('Phát hiện nhiều người trước camera trong không gian thi!');
+              }
+              return;
+            } else {
+              multiCount = 0;
+            }
+
+            // 4. Face presence evaluation
+            // - If native FaceDetector is available: use native detector result
+            // - Else (standard Edge/Chrome/Firefox/Safari): use YCbCr skin tone + center composition
+            const hasFace = (nativeFacesCount === 1) || (nativeFacesCount === -1 && (skinRatio >= 0.025 || centerSkinRatio >= 0.03));
+
+            if (!hasFace) {
+              faceAbsentTimer++;
+              if (camSt) {
+                camSt.textContent = '⚠️ Không thấy mặt (' + faceAbsentTimer + '/4)';
+                camSt.style.color = '#ef4444';
+              }
+              if (faceAbsentTimer >= 4) {
+                faceAbsentTimer = 0;
+                handleViolation('Không phát hiện khuôn mặt / Học sinh đã rời khỏi màn hình camera quá 4 giây!');
+              }
+            } else {
+              // Face is detected & verified present!
+              faceAbsentTimer = 0;
+              if (camSt) {
+                camSt.textContent = '● Đang giám sát AI';
+                camSt.style.color = '#16a34a';
+              }
+            }
+          }, 1000);
         };
+
         if (!vidEl.srcObject) vidEl.srcObject = stream;
         vidEl.addEventListener('playing', () => startFaceDetect(), { once: true });
-        setTimeout(() => { if (!faceInterval) startFaceDetect(); }, 3000);
+        setTimeout(() => { if (!faceInterval) startFaceDetect(); }, 2000);
         vidEl.play().catch(() => { document.addEventListener('click', () => vidEl.play().catch(() => {}), { once: true }); });
       }
     }
@@ -12238,7 +12321,7 @@ render_ai_geometry(dom) {
 
     const modal = document.createElement('div');
     modal.id = 'quizizz-game-test-modal';
-    modal.style.cssText = 'position:fixed !important; inset:0 !important; width:100vw !important; height:100vh !important; background:linear-gradient(-45deg, #090314, #1e0836, #3b0764, #130324) !important; background-size:400% 400% !important; animation:quizizzGradient 12s ease infinite !important; z-index:9999999 !important; display:flex !important; flex-direction:column !important; justify-content:space-between !important; padding:0 !important; font-family:var(--font-body) !important; color:#fff !important; overflow:hidden !important; box-sizing:border-box !important;';
+    modal.style.cssText = 'position:fixed !important; inset:0 !important; width:100vw !important; height:100vh !important; background:transparent !important; z-index:9999999 !important; display:flex !important; flex-direction:column !important; justify-content:space-between !important; padding:0 !important; font-family:var(--font-body) !important; color:#fff !important; overflow:hidden !important; box-sizing:border-box !important;';
 
     // 🌟 REQUEST FULLSCREEN
     const requestFullScreenMode = () => {
@@ -12259,25 +12342,29 @@ render_ai_geometry(dom) {
         pModal.id = 'quizizz-camera-perm-modal';
         pModal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.85); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; z-index:999999999; padding:1.25rem; animation:fadeIn 0.2s ease-out; font-family:var(--font-body);';
         pModal.innerHTML = `
-          <div style="background:#ffffff; color:#0f172a; border-radius:24px; padding:2rem; max-width:480px; width:100%; text-align:center; box-shadow:0 30px 70px rgba(0,0,0,0.5); border:2.5px solid #38bdf8; animation:zoomIn 0.25s ease-out;">
-            <div style="font-size:3.8rem; margin-bottom:0.75rem; animation:bounce 1.5s infinite;">📷🎤</div>
-            <h2 style="font-family:var(--font-title); font-size:1.45rem; font-weight:800; color:#1e293b; margin:0 0 0.6rem 0;">
+          <div style="background:#ffffff; color:#0f172a; border-radius:24px; padding:clamp(1.2rem, 3vw, 2rem); max-width:480px; width:100%; text-align:center; box-shadow:0 30px 70px rgba(0,0,0,0.5); border:2.5px solid #38bdf8; animation:zoomIn 0.25s ease-out; box-sizing:border-box;">
+            <div style="font-size:3.5rem; margin-bottom:0.6rem;">📷🎤</div>
+            <h2 style="font-family:var(--font-title); font-size:1.35rem; font-weight:800; color:#1e293b; margin:0 0 0.5rem 0;">
               BẬT CAMERA ĐỂ VÀO PHÒNG THI
             </h2>
-            <p style="color:#475569; font-size:0.95rem; line-height:1.6; margin:0 0 1.25rem 0;">
-              Đấu trường sử dụng <strong>Camera & Micro</strong> để giám sát và ghi nhận bài làm của em.
+            <p style="color:#475569; font-size:0.9rem; line-height:1.5; margin:0 0 0.85rem 0;">
+              Đấu trường sử dụng <strong>Camera & Micro</strong> để giám sát và đảm bảo tính nghiêm túc của bài làm.
             </p>
             
-            <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:14px; padding:1rem; margin-bottom:1.5rem; text-align:left; font-size:0.88rem; color:#1e40af; line-height:1.5;">
+            <div style="background:#fef2f2; border:1.5px solid #fca5a5; border-radius:12px; padding:0.75rem 0.85rem; margin-bottom:0.75rem; text-align:left; font-size:0.8rem; color:#991b1b; line-height:1.45;">
+              👁️ <strong>Lưu ý giám sát khuôn mặt:</strong> Trong suốt thời gian làm bài, học sinh phải ngồi trước camera. <strong>Không được rời khỏi màn hình camera quá 4 giây</strong>, nếu vi phạm hệ thống sẽ tự động tính lỗi vi phạm quy chế phòng thi!
+            </div>
+
+            <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:12px; padding:0.75rem 0.85rem; margin-bottom:1.25rem; text-align:left; font-size:0.82rem; color:#1e40af; line-height:1.45;">
               👉 <strong>Hướng dẫn cho học sinh:</strong><br>
               Khi nhấn nút bên dưới, trình duyệt sẽ hiện thông báo hỏi ở góc trên màn hình. Em hãy chọn <strong>"Cho phép" (hoặc "Allow")</strong> để bắt đầu làm bài nhé!
             </div>
 
-            <div style="display:flex; gap:0.75rem; justify-content:center;">
-              <button id="btn-perm-cancel" style="flex:1; padding:0.85rem; border-radius:12px; border:1.5px solid #cbd5e1; background:#f1f5f9; color:#475569; font-weight:700; font-size:0.92rem; cursor:pointer;">
+            <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap;">
+              <button id="btn-perm-cancel" style="padding:0.75rem 1.25rem; border-radius:12px; border:1.5px solid #cbd5e1; background:#f1f5f9; color:#475569; font-weight:700; font-size:0.9rem; cursor:pointer;">
                 ✕ Hủy bỏ
               </button>
-              <button id="btn-perm-confirm" style="flex:2; padding:0.85rem; border-radius:12px; border:none; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#ffffff; font-weight:800; font-size:1rem; cursor:pointer; box-shadow:0 6px 20px rgba(16,185,129,0.4); display:flex; align-items:center; justify-content:center; gap:0.4rem;">
+              <button id="btn-perm-confirm" style="padding:0.75rem 1.5rem; border-radius:12px; border:none; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#ffffff; font-weight:800; font-size:0.95rem; cursor:pointer; box-shadow:0 6px 20px rgba(16,185,129,0.4); display:flex; align-items:center; justify-content:center; gap:0.4rem;">
                 <span>📷</span> BẬT CAMERA & VÀO THI
               </button>
             </div>
@@ -12338,7 +12425,7 @@ render_ai_geometry(dom) {
         } catch(e) {}
       };
 
-      playBeep(440, 0.2); // Beep 3
+      playBeep(440, 0.2);
 
       const cdTimer = setInterval(() => {
         count--;
@@ -12376,13 +12463,321 @@ render_ai_geometry(dom) {
           clearInterval(cdTimer);
           setTimeout(() => {
             cdOverlay.remove();
+            
+            // Xây dựng Modal cố định (Vùng câu hỏi + PiP Camera + Modal Cảnh Báo Vi Phạm chuẩn thi thường 100%)
+            modal.innerHTML = `
+              <div id="quizizz-arena-main" style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between; position:relative; z-index:2;"></div>
+
+              ${mediaStream ? `
+                <div id="cam-pip-panel" style="position:fixed;top:60px;right:12px;z-index:100000;width:132px;background:#ffffff;border:2px solid #10b981;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.18);display:flex;flex-direction:column;align-items:center;padding:0.3rem 0.3rem 0.4rem;gap:0.2rem;cursor:grab;user-select:none;touch-action:none;">
+                  <div style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 0.25rem;cursor:grab;">
+                    <span style="font-size:0.6rem;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.4px;">📷 CAMERA AI</span>
+                    <span style="font-size:0.6rem;color:#64748b;cursor:grab;" title="Kéo để di chuyển">✥</span>
+                  </div>
+                  <video id="exam-pip-video" autoplay muted playsinline style="width:118px;height:88px;border-radius:8px;object-fit:cover;pointer-events:none;"></video>
+                  <canvas id="exam-pip-canvas" style="display:none;"></canvas>
+                  <div id="cam-status" style="font-size:0.62rem;font-weight:700;color:#16a34a;">● Đang giám sát AI</div>
+                </div>
+              ` : ''}
+
+              <div id="violation-warning-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.75); backdrop-filter:blur(6px); z-index:2147483647; align-items:center; justify-content:center; padding:1.25rem; animation:fadeIn 0.2s ease-out; font-family:var(--font-body);">
+                <div style="background:#ffffff; border-radius:20px; padding:1.6rem; width:100%; max-width:460px; box-shadow:0 25px 70px rgba(0,0,0,0.5); text-align:center; border:3px solid #ef4444; position:relative;">
+                  <div style="font-size:2.6rem; margin-bottom:0.3rem;">🚨</div>
+                  <h3 id="violation-title" style="margin:0 0 0.5rem 0; font-family:var(--font-title); font-weight:800; font-size:1.25rem; color:#dc2626;">CẢNH BÁO VI PHẠM QUY CHẾ PHÒNG THI!</h3>
+                  <div id="violation-msg" style="background:#fef2f2; border:1.5px solid #fca5a5; border-radius:12px; padding:0.85rem 1rem; color:#991b1b; font-weight:600; font-size:0.88rem; margin-bottom:1.1rem; text-align:left; line-height:1.45;"></div>
+                  <div id="violation-commit-box" style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:0.85rem 1rem; margin-bottom:1.1rem; text-align:left; cursor:pointer;">
+                    <label style="display:flex; align-items:flex-start; gap:0.6rem; cursor:pointer; font-size:0.86rem; font-weight:600; color:#0f172a; margin:0; user-select:none;">
+                      <input type="checkbox" id="chk-violation-commit" style="width:20px; height:20px; accent-color:#dc2626; margin-top:1px; cursor:pointer;">
+                      <span>Tôi đã đọc rõ lý do vi phạm và <strong>CAM KẾT TUÂN THỦ QUY CHẾ PHÒNG THI</strong>, không tái phạm nữa.</span>
+                    </label>
+                  </div>
+                  <button id="btn-violation-ack" type="button" style="width:100%; padding:0.8rem 1.25rem; background:linear-gradient(135deg, #16a34a 0%, #15803d 100%); color:#ffffff; border:none; border-radius:12px; font-weight:700; font-size:0.95rem; cursor:pointer; box-shadow:0 6px 20px rgba(22,163,74,0.4); display:flex; align-items:center; justify-content:center; gap:0.4rem;">
+                    <span>✅</span> TÔI ĐỒNG Ý CAM KẾT — TIẾP TỤC BÀI THI
+                  </button>
+                </div>
+              </div>
+            `;
+
             document.body.appendChild(modal);
             requestFullScreenMode();
             startBGM();
+
+            // 📷 Kết nối Camera và khởi chạy bộ máy Giám Sát AI chuẩn 100%
+            if (mediaStream) {
+              const vidEl = modal.querySelector('#exam-pip-video');
+              const camSt = modal.querySelector('#cam-status');
+              if (vidEl) {
+                vidEl.srcObject = mediaStream;
+                vidEl.play().catch(() => {});
+                
+                let quizFd = null;
+                if ('FaceDetector' in window) {
+                  try { quizFd = new FaceDetector({ fastMode: true, maxDetectedFaces: 3 }); } catch(e) {}
+                }
+                const evalC = document.createElement('canvas');
+                evalC.width = 64; evalC.height = 48;
+                const evalX = evalC.getContext('2d');
+                let faceAbsentTimer = 0;
+                let multiCount = 0;
+
+                const startQuizProctoring = () => {
+                  if (faceInterval) return;
+                  if (camSt) {
+                    camSt.textContent = '● Đang giám sát AI';
+                    camSt.style.color = '#16a34a';
+                  }
+
+                  faceInterval = setInterval(async () => {
+                    if (!document.getElementById('quizizz-game-test-modal')) {
+                      clearInterval(faceInterval);
+                      return;
+                    }
+                    if (vidEl.readyState < 2) {
+                      if (vidEl.paused) vidEl.play().catch(() => {});
+                      return;
+                    }
+
+                    // 1. Chụp frame và tính toán sắc thái
+                    try { evalX.drawImage(vidEl, 0, 0, 64, 48); } catch(e) { return; }
+                    let imgD; try { imgD = evalX.getImageData(0, 0, 64, 48); } catch(e) { return; }
+
+                    const d = imgD.data;
+                    let totLuma = 0;
+                    let skinPixels = 0;
+                    let centerSkinPixels = 0;
+
+                    for (let i = 0; i < d.length; i += 4) {
+                      const r = d[i], g = d[i+1], b = d[i+2];
+                      const Y  =  0.299 * r + 0.587 * g + 0.114 * b;
+                      const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
+                      const Cr =  0.500 * r - 0.419 * g - 0.081 * b + 128;
+
+                      totLuma += Y;
+
+                      if (Y > 15 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) {
+                        skinPixels++;
+                        const px = (i / 4) % 64;
+                        const py = Math.floor((i / 4) / 64);
+                        // Vùng trung tâm khuôn mặt (x: 16..48, y: 8..40)
+                        if (px >= 16 && px <= 48 && py >= 8 && py <= 40) {
+                          centerSkinPixels++;
+                        }
+                      }
+                    }
+
+                    const meanLuma = totLuma / (64 * 48);
+                    const skinRatio = skinPixels / (64 * 48);
+                    const centerSkinRatio = centerSkinPixels / (32 * 32);
+
+                    // Quá tối hoặc bị che
+                    if (meanLuma < 10) {
+                      faceAbsentTimer++;
+                      if (camSt) { camSt.textContent = '⚠️ Camera bị che / Quá tối (' + faceAbsentTimer + '/4)'; camSt.style.color = '#ef4444'; }
+                      if (faceAbsentTimer >= 4) {
+                        faceAbsentTimer = 0;
+                        triggerViolation('Camera bị che hoặc phòng thi quá tối không thấy học sinh!');
+                      }
+                      return;
+                    }
+
+                    // 2. Native FaceDetector check
+                    let nativeFacesCount = -1;
+                    if (quizFd) {
+                      try {
+                        const faces = await quizFd.detect(vidEl);
+                        nativeFacesCount = faces.length;
+                      } catch(e) {}
+                    }
+
+                    // 3. Multi-person check
+                    if (nativeFacesCount > 1) {
+                      multiCount++;
+                      if (camSt) { camSt.textContent = '⚠️ Nhiều người! (' + multiCount + '/3)'; camSt.style.color = '#ef4444'; }
+                      if (multiCount >= 3) {
+                        multiCount = 0;
+                        triggerViolation('Phát hiện nhiều người trước camera trong không gian thi!');
+                      }
+                      return;
+                    } else {
+                      multiCount = 0;
+                    }
+
+                    // 4. Face presence evaluation (Nhạy tuyệt đối theo vị trí trung tâm màn hình)
+                    const hasFace = (nativeFacesCount === 1) || (nativeFacesCount === -1 && (skinRatio >= 0.025 || centerSkinRatio >= 0.03));
+
+                    if (!hasFace) {
+                      faceAbsentTimer++;
+                      if (camSt) {
+                        camSt.textContent = '⚠️ Không thấy mặt (' + faceAbsentTimer + '/4)';
+                        camSt.style.color = '#ef4444';
+                      }
+                      if (faceAbsentTimer >= 4) {
+                        faceAbsentTimer = 0;
+                        triggerViolation('Không phát hiện khuôn mặt / Học sinh đã rời khỏi màn hình camera quá 4 giây!');
+                      }
+                    } else {
+                      faceAbsentTimer = 0;
+                      if (camSt) {
+                        camSt.textContent = '● Đang giám sát AI';
+                        camSt.style.color = '#16a34a';
+                      }
+                    }
+                  }, 1000);
+                };
+
+                vidEl.addEventListener('playing', () => startQuizProctoring(), { once: true });
+                setTimeout(() => { if (!faceInterval) startQuizProctoring(); }, 1500);
+              }
+
+              // Draggable PiP
+              const pip = modal.querySelector('#cam-pip-panel');
+              if (pip) {
+                let isDragging = false, startX = 0, startY = 0, origX = 0, origY = 0;
+                const onDown = (cx, cy) => {
+                  isDragging = true; pip.style.cursor = 'grabbing';
+                  const r = pip.getBoundingClientRect();
+                  origX = r.left; origY = r.top; startX = cx; startY = cy;
+                  pip.style.right = 'auto'; pip.style.bottom = 'auto';
+                  pip.style.left = origX + 'px'; pip.style.top = origY + 'px';
+                };
+                const onMove = (cx, cy) => {
+                  if (!isDragging) return;
+                  const dx = cx - startX, dy = cy - startY;
+                  const nx = Math.max(0, Math.min(window.innerWidth  - pip.offsetWidth,  origX + dx));
+                  const ny = Math.max(0, Math.min(window.innerHeight - pip.offsetHeight, origY + dy));
+                  pip.style.left = nx + 'px'; pip.style.top = ny + 'px';
+                };
+                const onUp = () => { isDragging = false; pip.style.cursor = 'grab'; };
+                pip.addEventListener('mousedown',  e => { e.preventDefault(); onDown(e.clientX, e.clientY); });
+                document.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+                document.addEventListener('mouseup', onUp);
+                pip.addEventListener('touchstart', e => { const t = e.touches[0]; onDown(t.clientX, t.clientY); }, { passive: true });
+                document.addEventListener('touchmove', e => { const t = e.touches[0]; onMove(t.clientX, t.clientY); }, { passive: true });
+                document.addEventListener('touchend', onUp);
+              }
+            }
+
+            // Gán sự kiện cam kết vi phạm (giống 100% thi thường)
+            const resumeFromViolation = () => {
+              isShowingViolationModal = false;
+              const vOverlay = modal.querySelector('#violation-warning-overlay');
+              if (vOverlay) vOverlay.style.display = 'none';
+              requestFullScreenMode();
+              setTimeout(requestFullScreenMode, 100);
+              setTimeout(requestFullScreenMode, 300);
+              if (violationCount >= 4) {
+                alert('🛑 BẠN ĐÃ VI PHẠM QUY CHẾ QUÁ 4 LẦN! Hệ thống tự động thu bài!');
+                cleanupSession();
+                modal.remove();
+              }
+            };
+            const triggerResume = (e) => {
+              if (e) e.stopPropagation();
+              const chk = modal.querySelector('#chk-violation-commit');
+              if (chk) chk.checked = true;
+              resumeFromViolation();
+            };
+            const commitChk = modal.querySelector('#chk-violation-commit');
+            const commitBox = modal.querySelector('#violation-commit-box');
+            const ackBtn    = modal.querySelector('#btn-violation-ack');
+            if (commitChk) { commitChk.onclick = triggerResume; commitChk.onchange = triggerResume; }
+            if (commitBox) { commitBox.onclick = triggerResume; }
+            if (ackBtn)    { ackBtn.onclick = triggerResume; }
+
+            // ✨ HIỆU ỨNG NỀN QUIZIZZ — CANVAS CỐ ĐỊNH TRÊN BODY
+            (() => {
+              const bgCanvas = document.createElement('canvas');
+              bgCanvas.id = 'quizizz-star-canvas';
+              bgCanvas.style.cssText = [
+                'position:fixed', 'inset:0', 'width:100vw', 'height:100vh',
+                'pointer-events:none', 'z-index:9999998',
+              ].join(';') + ';';
+              document.body.appendChild(bgCanvas);
+
+              const resize = () => {
+                bgCanvas.width  = window.innerWidth;
+                bgCanvas.height = window.innerHeight;
+              };
+              resize();
+              window.addEventListener('resize', resize);
+
+              const bCtx = bgCanvas.getContext('2d');
+              const stars = Array.from({ length: 120 }, () => ({
+                x: Math.random(), y: Math.random(),
+                r: 0.6 + Math.random() * 1.6,
+                alpha: 0.3 + Math.random() * 0.7,
+                phase: Math.random() * Math.PI * 2,
+                freq: 0.5 + Math.random() * 1.5,
+              }));
+              const pts = Array.from({ length: 40 }, () => ({
+                x: Math.random(), y: 1 + Math.random() * 0.5,
+                r: 2 + Math.random() * 4,
+                vy: -(0.0003 + Math.random() * 0.0007),
+                vx: (Math.random() - 0.5) * 0.0002,
+                alpha: 0.55 + Math.random() * 0.45,
+                hue: Math.random() < 0.55 ? 265 + Math.floor(Math.random()*45) : 42 + Math.floor(Math.random()*22),
+              }));
+
+              let rafId;
+              const draw = (t) => {
+                if (!document.getElementById('quizizz-game-test-modal')) {
+                  cancelAnimationFrame(rafId);
+                  window.removeEventListener('resize', resize);
+                  bgCanvas.remove();
+                  return;
+                }
+                const w = bgCanvas.width, h = bgCanvas.height;
+                const grad = bCtx.createLinearGradient(0, 0, w, h);
+                const phase = (t * 0.00008) % 1;
+                const c = [
+                  ['#090314','#1e0836'],
+                  ['#1e0836','#3b0764'],
+                  ['#3b0764','#130324'],
+                  ['#130324','#090314'],
+                ];
+                const idx = Math.floor(phase * 4);
+                const frac = (phase * 4) % 1;
+                const lerp = (a, b, t) => {
+                  const ah = parseInt(a.slice(1),16), bh = parseInt(b.slice(1),16);
+                  const ar=(ah>>16)&255, ag=(ah>>8)&255, ab=ah&255;
+                  const br=(bh>>16)&255, bg=(bh>>8)&255, bb=bh&255;
+                  return `rgb(${Math.round(ar+(br-ar)*t)},${Math.round(ag+(bg-ag)*t)},${Math.round(ab+(bb-ab)*t)})`;
+                };
+                grad.addColorStop(0, lerp(c[idx][0], c[(idx+1)%4][0], frac));
+                grad.addColorStop(1, lerp(c[idx][1], c[(idx+1)%4][1], frac));
+                bCtx.fillStyle = grad;
+                bCtx.fillRect(0, 0, w, h);
+
+                const sec = t * 0.001;
+                stars.forEach(s => {
+                  const a = s.alpha * (0.55 + 0.45 * Math.sin(sec * s.freq + s.phase));
+                  bCtx.beginPath();
+                  bCtx.arc(s.x * w, s.y * h, s.r, 0, Math.PI * 2);
+                  bCtx.shadowColor = '#fff';
+                  bCtx.shadowBlur = s.r * 4;
+                  bCtx.fillStyle = `rgba(255,255,255,${a.toFixed(2)})`;
+                  bCtx.fill();
+                  bCtx.shadowBlur = 0;
+                });
+
+                pts.forEach(p => {
+                  p.x += p.vx; p.y += p.vy;
+                  if (p.y < -0.04) { p.y = 1.04; p.x = Math.random(); }
+                  const grd = bCtx.createRadialGradient(p.x*w,p.y*h,0,p.x*w,p.y*h,p.r*2.5);
+                  grd.addColorStop(0, `hsla(${p.hue},100%,78%,${p.alpha})`);
+                  grd.addColorStop(1, `hsla(${p.hue},100%,55%,0)`);
+                  bCtx.beginPath();
+                  bCtx.arc(p.x*w, p.y*h, p.r, 0, Math.PI*2);
+                  bCtx.fillStyle = grd;
+                  bCtx.fill();
+                });
+
+                rafId = requestAnimationFrame(draw);
+              };
+              rafId = requestAnimationFrame(draw);
+            })();
+
             renderQuestion();
-            modal.addEventListener('click', () => {
-              if (!document.fullscreenElement) requestFullScreenMode();
-            });
           }, 600);
         }
       }, 1000);
@@ -12396,14 +12791,13 @@ render_ai_geometry(dom) {
         return;
       }
 
-      navigator.mediaDevices?.getUserMedia({ video: true, audio: true })
+      navigator.mediaDevices?.getUserMedia({
+        video: { width: 320, height: 240, facingMode: 'user' },
+        audio: true
+      })
         .then(stream => {
           mediaStream = stream;
-          const pipVideo = modal.querySelector('#quizizz-pip-video');
-          if (pipVideo) {
-            pipVideo.srcObject = stream;
-            pipVideo.play().catch(() => {});
-          }
+
           // Giám sát Mic volume
           try {
             const aCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -12418,14 +12812,13 @@ render_ai_geometry(dom) {
               let sum = 0;
               for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
               const avg = sum / dataArray.length;
-              const micBar = modal.querySelector('#quizizz-mic-level-bar');
-              if (micBar) micBar.style.width = Math.min(100, avg * 2.5) + '%';
               if (avg > 48 && !isShowingViolationModal) {
                 triggerViolation('🎤 Phát hiện tiếng người đọc bài / nhắc bài liên tục trong phòng thi!');
               }
             }, 300);
           } catch(e) {}
-          // Sau khi cấp quyền camera thành công ➔ Chạy đếm ngược 3-2-1
+
+          // Chạy đếm ngược 3-2-1
           runCountdownStage();
         })
         .catch(err => {
@@ -12433,14 +12826,14 @@ render_ai_geometry(dom) {
           if (this.showToast) {
             this.showToast('⚠️ Bạn chưa cấp quyền Camera/Mic. Bắt đầu đấu trường ở chế độ tiêu chuẩn.', 'info');
           }
-          // Vẫn chạy đếm ngược 3-2-1
           runCountdownStage();
         });
     });
 
-    // 🌟 XỬ LÝ VI PHẠM (4 CẤP ĐỘ GIỐNG THI THƯỜNG)
+    // 🌟 XỬ LÝ VI PHẠM (4 CẤP ĐỘ GIỐNG THI THƯỜNG 100%)
     const triggerViolation = (reason) => {
       if (isShowingViolationModal) return;
+      isShowingViolationModal = true;
       violationCount++;
       if (typeof db !== 'undefined' && db.addExamViolationLog && asm && asm.id) {
         db.addExamViolationLog(asm.id, (this.currentUser?.id || 'hs_test'), reason, Date.now());
@@ -12448,30 +12841,47 @@ render_ai_geometry(dom) {
       const vBadge = modal.querySelector('#quizizz-vcount');
       if (vBadge) vBadge.innerText = violationCount;
 
-      isShowingViolationModal = true;
-      const vModal = modal.querySelector('#quizizz-violation-overlay');
-      const vReason = modal.querySelector('#quizizz-violation-reason');
-      const vCountSpan = modal.querySelector('#quizizz-vcount-modal');
-      if (vReason) vReason.innerText = reason;
-      if (vCountSpan) vCountSpan.innerText = `${violationCount}/4`;
-      if (vModal) vModal.style.display = 'flex';
-
-      if (violationCount >= 4) {
-        alert('🛑 VI PHẠM QUÁ 4 LẦN! Hệ thống đã khóa bài thi và tự động thu bài!');
-        cleanupSession();
-        modal.remove();
-        if (this.showToast) this.showToast('🛑 Bài thi đã bị thu do vi phạm quy chế quá 4 lần!', 'error');
-      }
+      const vOverlay = modal.querySelector('#violation-warning-overlay');
+      const vMsg     = modal.querySelector('#violation-msg');
+      const commitChk = modal.querySelector('#chk-violation-commit');
+      if (vMsg) vMsg.textContent = reason;
+      if (commitChk) commitChk.checked = false;
+      if (vOverlay) vOverlay.style.display = 'flex';
     };
 
-    // Bắt sự kiện chuyển tab (Tab switch guard)
+    // ─── TAB SWITCH + FILE-PICKER GUARD (QUIZIZZ) ──────────────────────────
+    let _quizFilePickerTs = 0;
+
+    const _quizDocCapture = (e) => {
+      const t = e.target;
+      if (t && (
+        t.type === 'file' ||
+        t.classList.contains('quiz-essay-file-label') ||
+        (t.closest && t.closest('.quiz-essay-file-label'))
+      )) {
+        _quizFilePickerTs = Date.now();
+      }
+    };
+    document.addEventListener('mousedown',   _quizDocCapture, true);
+    document.addEventListener('pointerdown', _quizDocCapture, true);
+
+    const _quizIsFilePicker = () => (Date.now() - _quizFilePickerTs) < 3000;
+
     const handleVisibility = () => {
+      if (_quizIsFilePicker()) return;
       if (document.hidden && !isShowingViolationModal) {
         triggerViolation('🔄 Phát hiện chuyển Tab trình duyệt hoặc mở cửa sổ tìm kiếm bên ngoài!');
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('blur', handleVisibility);
+    window.addEventListener('blur', () => {
+      setTimeout(() => {
+        if (_quizIsFilePicker()) return;
+        handleVisibility();
+      }, 80);
+    });
+    window.addEventListener('focus', () => { _quizFilePickerTs = 0; });
+    // ────────────────────────────────────────────────────────────────────────
 
     // Chặn phím tắt & CẢNH BÁO VI PHẠM NGAY LẬP TỨC TRÊN QUIZIZZ ARENA
     const keyHandler = (e) => {
@@ -12512,12 +12922,10 @@ render_ai_geometry(dom) {
     };
     window.addEventListener('keydown', keyHandler, true);
 
-    // Chặn chuột phải & CẢNH BÁO VI PHẠM TRÊN QUIZIZZ ARENA
+    // Chặn chuột phải trên Quizizz Arena
     const qzCtxHandler = (e) => {
       e.preventDefault();
-      e.stopPropagation();
-      triggerViolation('🖱️ Cố tình nhấp chuột phải (Menu ngữ cảnh) trong Đấu Trường Quizizz!');
-      return false;
+      triggerViolation('🖱️ Cố tình bấm chuột phải trong phòng thi Quizizz!');
     };
     document.addEventListener('contextmenu', qzCtxHandler, true);
     modal.addEventListener('contextmenu', qzCtxHandler, true);
@@ -12533,6 +12941,7 @@ render_ai_geometry(dom) {
     const cleanupSession = () => {
       if (timerInterval) clearInterval(timerInterval);
       if (micInterval) clearInterval(micInterval);
+      if (faceInterval) clearInterval(faceInterval);
       stopBGM();
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('blur', handleVisibility);
@@ -12557,68 +12966,70 @@ render_ai_geometry(dom) {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        const notes = [261.63, 329.63, 392.00, 440.00, 523.25, 392.00, 329.63, 261.63];
-        const noteFreq = notes[Math.floor(Math.random() * notes.length)];
+        const baseFreqs = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23];
+        const f = baseFreqs[Math.floor(Math.random() * baseFreqs.length)];
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(f, audioCtx.currentTime);
         gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.3);
-      } catch (e) {}
+        osc.stop(audioCtx.currentTime + 0.4);
+      } catch(e) {}
     };
 
     const startBGM = () => {
-      stopBGM();
+      if (bgmInterval) clearInterval(bgmInterval);
       bgmInterval = setInterval(playBGMSoundStep, 350);
     };
 
     const stopBGM = () => {
-      if (bgmInterval) {
-        clearInterval(bgmInterval);
-        bgmInterval = null;
-      }
+      if (bgmInterval) { clearInterval(bgmInterval); bgmInterval = null; }
     };
 
     const playSoundEffect = (type) => {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
         if (type === 'correct') {
-          osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-          osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
-          osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
-          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.35);
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+          osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime);
+          g.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+          osc1.connect(g); osc2.connect(g); g.connect(audioCtx.destination);
+          osc1.start(); osc2.start();
+          osc1.stop(audioCtx.currentTime + 0.35); osc2.stop(audioCtx.currentTime + 0.35);
         } else {
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-          osc.frequency.setValueAtTime(164.81, audioCtx.currentTime + 0.15);
-          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.3);
+          osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+          osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+          g.gain.setValueAtTime(0.25, audioCtx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+          osc.connect(g); g.connect(audioCtx.destination);
+          osc.start(); osc.stop(audioCtx.currentTime + 0.3);
         }
-      } catch (e) {}
+      } catch(e) {}
     };
 
+    // 🌟 RENDER CÂU HỎI QUIZIZZ (CHỈ RENDER VÀO #quizizz-arena-main, KHÔNG XÓA PiP CAMERA)
     const renderQuestion = () => {
-      if (timerInterval) clearInterval(timerInterval);
       timeLeft = 20;
+      if (timerInterval) clearInterval(timerInterval);
+
+      const arenaMain = modal.querySelector('#quizizz-arena-main') || modal;
 
       if (qIndex >= questions.length) {
         cleanupSession();
-        const quizizzScore100 = parseFloat(((correctCount / questions.length) * 100).toFixed(1));
+        const rawScore = (correctCount / questions.length) * 100;
+        const quizizzScore100 = Math.round(rawScore);
         const gradebookScore10 = parseFloat((quizizzScore100 / 10).toFixed(1));
 
         if (this.currentUser && this.currentUser.role === 'student' && asm && asm.id) {
@@ -12641,7 +13052,7 @@ render_ai_geometry(dom) {
           }
         }
 
-        modal.innerHTML = `
+        arenaMain.innerHTML = `
           <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem; animation:fadeIn 0.3s ease-out;">
             <div style="font-size:4.5rem; margin-bottom:0.75rem;">🏆🎉</div>
             <h1 style="font-size:2.4rem; font-weight:900; margin:0 0 0.5rem; background:linear-gradient(90deg, #f59e0b, #fbbf24); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
@@ -12673,7 +13084,7 @@ render_ai_geometry(dom) {
             </button>
           </div>
         `;
-        modal.querySelector('#btn-exit-quizizz-summary').onclick = () => modal.remove();
+        arenaMain.querySelector('#btn-exit-quizizz-summary').onclick = () => modal.remove();
         return;
       }
 
@@ -12686,140 +13097,86 @@ render_ai_geometry(dom) {
         { bg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: '#86efac', icon: '🟢' }
       ];
 
-      modal.innerHTML = `
+      const isMobile = window.innerWidth < 640;
+      const bodyPad   = isMobile ? '0.75rem 0.85rem' : '1.5rem 2rem';
+      const qFontSize = isMobile ? '1.05rem' : '1.45rem';
+      const qPad      = isMobile ? '1rem' : '2rem';
+      const ansGrid   = isMobile ? '1fr' : '1fr 1fr';
+      const ansPad    = isMobile ? '0.85rem 1rem' : '1.25rem 1.5rem';
+      const ansFontSz = isMobile ? '0.95rem' : '1.15rem';
+      const hdPad     = isMobile ? '0.5rem 0.75rem' : '0.75rem 1.5rem';
+      const titleFont = isMobile ? '0.78rem' : '1rem';
+      const badgeFnt  = isMobile ? '0.7rem' : '0.8rem';
+
+      arenaMain.innerHTML = `
         <!-- HEADER GIÁM SÁT TOÀN DIỆN (FULL AI PROCTORING HEADER GIỐNG PHÒNG THI CHUẨN) -->
-        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.85); backdrop-filter:blur(10px); padding:0.75rem 1.5rem; border-bottom:1.5px solid rgba(255,255,255,0.12); flex-wrap:wrap; gap:0.75rem;">
-          <div style="display:flex; align-items:center; gap:0.75rem;">
-            <span style="background:linear-gradient(135deg,#7c3aed,#4f46e5); color:#fff; padding:0.35rem 0.85rem; border-radius:10px; font-weight:800; font-size:0.85rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15,23,42,0.85); backdrop-filter:blur(10px); padding:${hdPad}; border-bottom:1.5px solid rgba(255,255,255,0.12); flex-wrap:wrap; gap:0.5rem;">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span style="background:linear-gradient(135deg,#7c3aed,#4f46e5); color:#fff; padding:0.3rem 0.7rem; border-radius:10px; font-weight:800; font-size:${badgeFnt};">
               🎮 QUIZIZZ ARENA
             </span>
-            <span style="font-weight:700; font-size:1rem; color:#f8fafc;">${asm.title || 'Bài kiểm tra'}</span>
+            <span style="font-weight:700; font-size:${titleFont}; color:#f8fafc; ${isMobile ? 'max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' : ''}">${asm.title || 'Bài kiểm tra'}</span>
           </div>
 
-          <!-- HUY HIỆU GIÁM SÁT AI CHUẨN MỰC -->
-          <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
-            <div style="background:rgba(16,185,129,0.18); border:1.5px solid #10b981; color:#34d399; padding:0.3rem 0.75rem; border-radius:10px; font-size:0.8rem; font-weight:700; display:flex; align-items:center; gap:0.4rem;">
+          <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+            ${!isMobile ? `
+            <div style="background:rgba(16,185,129,0.18); border:1.5px solid #10b981; color:#34d399; padding:0.3rem 0.75rem; border-radius:10px; font-size:${badgeFnt}; font-weight:700; display:flex; align-items:center; gap:0.4rem;">
               <span>📷</span> <span>Camera AI</span>
             </div>
-            <div style="background:rgba(56,189,248,0.18); border:1.5px solid #38bdf8; color:#38bdf8; padding:0.3rem 0.75rem; border-radius:10px; font-size:0.8rem; font-weight:700; display:flex; align-items:center; gap:0.4rem;">
+            <div style="background:rgba(56,189,248,0.18); border:1.5px solid #38bdf8; color:#38bdf8; padding:0.3rem 0.75rem; border-radius:10px; font-size:${badgeFnt}; font-weight:700; display:flex; align-items:center; gap:0.4rem;">
               <span>🎤</span> <span>Mic AI</span>
+            </div>` : ''}
+            <div style="background:rgba(239,68,68,0.18); border:1.5px solid #ef4444; color:#f87171; padding:0.3rem 0.6rem; border-radius:10px; font-size:${badgeFnt}; font-weight:800;">
+              ⚠️ <span id="quizizz-vcount">${violationCount}</span>/4
             </div>
-            <div style="background:rgba(239,68,68,0.18); border:1.5px solid #ef4444; color:#f87171; padding:0.3rem 0.75rem; border-radius:10px; font-size:0.8rem; font-weight:800;">
-              ⚠️ Vi phạm: <span id="quizizz-vcount">${violationCount}</span>/4
-            </div>
-            <div style="font-size:1.15rem; font-weight:900; color:#fbbf24; background:rgba(0,0,0,0.4); padding:0.3rem 0.85rem; border-radius:10px; border:1px solid rgba(251,191,36,0.4);">
+            <div style="font-size:${isMobile?'0.95rem':'1.15rem'}; font-weight:900; color:#fbbf24; background:rgba(0,0,0,0.4); padding:0.3rem 0.7rem; border-radius:10px; border:1px solid rgba(251,191,36,0.4);">
               ⏱️ <span id="quizizz-timer-text">${timeLeft}s</span>
             </div>
-            <button id="btn-toggle-quizizz-sound" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; padding:0.35rem 0.75rem; border-radius:8px; cursor:pointer; font-size:0.85rem;">
+            <button id="btn-toggle-quizizz-sound" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); color:#fff; padding:0.3rem 0.65rem; border-radius:8px; cursor:pointer; font-size:${badgeFnt};">
               ${isMusicOn ? '🔊' : '🔇'}
             </button>
-            <button id="btn-quit-quizizz" style="background:#ef4444; color:#fff; border:none; padding:0.35rem 0.85rem; border-radius:8px; cursor:pointer; font-weight:700; font-size:0.85rem;">
+            <button id="btn-quit-quizizz" style="background:#ef4444; color:#fff; border:none; padding:0.3rem 0.7rem; border-radius:8px; cursor:pointer; font-weight:700; font-size:${badgeFnt};">
               ✕ Thoát
             </button>
           </div>
         </div>
 
         <!-- MAIN ARENA BODY -->
-        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:1.5rem 2rem; position:relative; z-index:2;">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:${bodyPad}; position:relative; z-index:2; overflow-y:auto;">
           
           <!-- THANH TIẾN ĐỘ & STREAK -->
-          <div style="width:100%; max-width:860px; display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-            <div style="font-size:0.95rem; font-weight:800; color:#cbd5e1;">
+          <div style="width:100%; max-width:860px; display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+            <div style="font-size:${isMobile?'0.82rem':'0.95rem'}; font-weight:800; color:#cbd5e1;">
               Câu hỏi ${qIndex + 1} / ${questions.length}
             </div>
-            <div style="display:flex; align-items:center; gap:0.5rem;">
-              <span style="font-size:1.2rem;">🔥</span>
-              <span style="font-weight:900; font-size:1.05rem; color:#f97316;">Streak: ${streak}</span>
-              <span style="background:#fef08a; color:#854d0e; padding:0.15rem 0.5rem; border-radius:8px; font-weight:900; font-size:0.82rem; margin-left:0.5rem;">${score} pts</span>
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <span style="font-size:1rem;">🔥</span>
+              <span style="font-weight:900; font-size:${isMobile?'0.9rem':'1.05rem'}; color:#f97316;">Streak: ${streak}</span>
+              <span style="background:#fef08a; color:#854d0e; padding:0.12rem 0.45rem; border-radius:8px; font-weight:900; font-size:0.8rem; margin-left:0.3rem;">${score} pts</span>
             </div>
           </div>
 
           <!-- NỘI DUNG CÂU HỎI -->
-          <div style="width:100%; max-width:860px; background:rgba(255,255,255,0.07); backdrop-filter:blur(16px); border:2px solid rgba(255,255,255,0.18); border-radius:24px; padding:2rem; margin-bottom:1.5rem; box-shadow:0 20px 50px rgba(0,0,0,0.5); text-align:center;">
-            <div style="font-size:1.45rem; font-weight:800; line-height:1.5; color:#ffffff;">
+          <div style="width:100%; max-width:860px; background:rgba(255,255,255,0.07); backdrop-filter:blur(16px); border:2px solid rgba(255,255,255,0.18); border-radius:${isMobile?'16px':'24px'}; padding:${qPad}; margin-bottom:${isMobile?'0.85rem':'1.5rem'}; box-shadow:0 20px 50px rgba(0,0,0,0.5); text-align:center;">
+            <div style="font-size:${qFontSize}; font-weight:800; line-height:1.5; color:#ffffff;">
               ${q.questionText || q.question || q.q || 'Nội dung câu hỏi'}
             </div>
           </div>
 
           <!-- 4 Ô ĐÁP ÁN QUIZIZZ RỰC RỠ -->
-          <div style="width:100%; max-width:860px; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div style="width:100%; max-width:860px; display:grid; grid-template-columns:${ansGrid}; gap:${isMobile?'0.6rem':'1rem'};">
             ${opts.map((opt, i) => `
-              <button class="btn-quizizz-choice" data-idx="${i}" style="background:${colors[i%4].bg}; border:2.5px solid ${colors[i%4].border}; border-radius:18px; padding:1.25rem 1.5rem; color:#ffffff; font-weight:800; font-size:1.15rem; cursor:pointer; display:flex; align-items:center; gap:0.85rem; text-align:left; box-shadow:0 10px 25px rgba(0,0,0,0.35); transition:transform 0.1s, box-shadow 0.1s;">
-                <span style="font-size:1.5rem; flex-shrink:0;">${colors[i%4].icon}</span>
+              <button class="btn-quizizz-choice" data-idx="${i}" style="background:${colors[i%4].bg}; border:2.5px solid ${colors[i%4].border}; border-radius:${isMobile?'12px':'18px'}; padding:${ansPad}; color:#ffffff; font-weight:800; font-size:${ansFontSz}; cursor:pointer; display:flex; align-items:center; gap:0.65rem; text-align:left; box-shadow:0 8px 20px rgba(0,0,0,0.35); transition:transform 0.1s, box-shadow 0.1s;">
+                <span style="font-size:${isMobile?'1.2rem':'1.5rem'}; flex-shrink:0;">${colors[i%4].icon}</span>
                 <span style="flex:1;">${String.fromCharCode(65 + i)}. ${opt}</span>
               </button>
             `).join('')}
           </div>
         </div>
-
-        <!-- CAMERA AI FLOATING PIP (GÓC DƯỚI MÀN HÌNH - CHUẨN GIÁM SÁT PHÒNG THI) -->
-        <div id="quizizz-cam-pip-panel" style="position:fixed; bottom:20px; right:20px; width:190px; background:#0f172a; border:2px solid #38bdf8; border-radius:16px; overflow:hidden; box-shadow:0 12px 35px rgba(0,0,0,0.6); z-index:99999999; display:flex; flex-direction:column;">
-          <div style="background:#1e293b; padding:0.35rem 0.6rem; display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; font-weight:800; color:#38bdf8;">
-            <span>📷 CAMERA AI</span>
-            <span style="color:#10b981;">● Live</span>
-          </div>
-          <div style="width:100%; height:110px; background:#000; position:relative;">
-            <video id="quizizz-pip-video" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover;"></video>
-            <div style="position:absolute; bottom:4px; left:6px; right:6px; background:rgba(0,0,0,0.65); border-radius:6px; height:6px; overflow:hidden;">
-              <div id="quizizz-mic-level-bar" style="width:20%; height:100%; background:linear-gradient(90deg,#10b981,#ef4444); transition:width 0.1s;"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MODAL CẢNH BÁO VI PHẠM (GIỐNG THI THƯỜNG 100%) -->
-        <div id="quizizz-violation-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.95); backdrop-filter:blur(12px); z-index:999999999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem;">
-          <div style="background:#ffffff; color:#0f172a; border-radius:24px; padding:2rem; max-width:540px; width:100%; box-shadow:0 25px 60px rgba(0,0,0,0.5); border:3px solid #ef4444;">
-            <div style="font-size:3.5rem; margin-bottom:0.5rem;">⚠️🚫</div>
-            <h2 style="color:#dc2626; font-weight:900; margin:0 0 0.5rem 0; font-size:1.6rem;">CẢNH BÁO VI PHẠM QUY CHẾ!</h2>
-            <div style="background:#fef2f2; border:1.5px solid #fecaca; padding:0.85rem; border-radius:12px; margin-bottom:1.25rem;">
-              <div id="quizizz-violation-reason" style="font-weight:700; color:#b91c1c; font-size:0.95rem;">Phát hiện hành vi không hợp lệ!</div>
-              <div style="font-size:0.85rem; color:#7f1d1d; margin-top:0.3rem;">Số lần vi phạm: <strong id="quizizz-vcount-modal">1/4</strong> (Quá 4 lần bài thi sẽ tự động bị hủy)</div>
-            </div>
-            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:0.75rem; margin-bottom:1.25rem; text-align:left;">
-              <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.88rem; font-weight:700; color:#1e293b;">
-                <input type="checkbox" id="chk-quizizz-commit" style="width:18px; height:18px; accent-color:#dc2626;">
-                <span>Tôi cam kết tuân thủ quy chế, không chuyển tab hay trao đổi.</span>
-              </label>
-            </div>
-            <button id="btn-quizizz-commit-ack" disabled style="width:100%; padding:0.9rem; border-radius:14px; border:none; background:#cbd5e1; color:#fff; font-weight:800; font-size:1rem; cursor:not-allowed;">
-              ✅ TIẾP TỤC BÀI THI
-            </button>
-          </div>
-        </div>
       `;
 
-      // Reconnect video stream if present
-      if (mediaStream) {
-        const vid = modal.querySelector('#quizizz-pip-video');
-        if (vid) { vid.srcObject = mediaStream; vid.play().catch(() => {}); }
-      }
-
-      // Violation commit checkbox
-      const commitChk = modal.querySelector('#chk-quizizz-commit');
-      const ackBtn = modal.querySelector('#btn-quizizz-commit-ack');
-      if (commitChk && ackBtn) {
-        commitChk.onchange = () => {
-          if (commitChk.checked) {
-            ackBtn.disabled = false;
-            ackBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-            ackBtn.style.cursor = 'pointer';
-          } else {
-            ackBtn.disabled = true;
-            ackBtn.style.background = '#cbd5e1';
-            ackBtn.style.cursor = 'not-allowed';
-          }
-        };
-        ackBtn.onclick = () => {
-          isShowingViolationModal = false;
-          modal.querySelector('#quizizz-violation-overlay').style.display = 'none';
-          requestFullScreenMode();
-          setTimeout(requestFullScreenMode, 100);
-          setTimeout(requestFullScreenMode, 300);
-        };
-      }
-
       // Choice handlers
-      modal.querySelectorAll('.btn-quizizz-choice').forEach(btn => {
+      arenaMain.querySelectorAll('.btn-quizizz-choice').forEach(btn => {
         btn.onclick = () => {
           const pickedIdx = parseInt(btn.dataset.idx);
           const isCorrect = (pickedIdx === (q.correctAnswer || 0));
@@ -12836,7 +13193,7 @@ render_ai_geometry(dom) {
             playSoundEffect('wrong');
             btn.style.background = '#991b1b';
           }
-          modal.querySelectorAll('.btn-quizizz-choice').forEach(b => b.disabled = true);
+          arenaMain.querySelectorAll('.btn-quizizz-choice').forEach(b => b.disabled = true);
           setTimeout(() => {
             qIndex++;
             renderQuestion();
@@ -12845,7 +13202,7 @@ render_ai_geometry(dom) {
       });
 
       // Sound toggle
-      const sndBtn = modal.querySelector('#btn-toggle-quizizz-sound');
+      const sndBtn = arenaMain.querySelector('#btn-toggle-quizizz-sound');
       if (sndBtn) {
         sndBtn.onclick = () => {
           isMusicOn = !isMusicOn;
@@ -12855,7 +13212,7 @@ render_ai_geometry(dom) {
       }
 
       // Quit button
-      const quitBtn = modal.querySelector('#btn-quit-quizizz');
+      const quitBtn = arenaMain.querySelector('#btn-quit-quizizz');
       if (quitBtn) {
         quitBtn.onclick = () => {
           if (confirm('🚪 Bạn có chắc chắn muốn rời khỏi Đấu Trường Quizizz Arena?')) {
@@ -12868,7 +13225,7 @@ render_ai_geometry(dom) {
       // Timer countdown
       timerInterval = setInterval(() => {
         timeLeft--;
-        const tSpan = modal.querySelector('#quizizz-timer-text');
+        const tSpan = arenaMain.querySelector('#quizizz-timer-text');
         if (tSpan) tSpan.innerText = `${timeLeft}s`;
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
@@ -12881,6 +13238,7 @@ render_ai_geometry(dom) {
       }, 1000);
     };
   }
+
   // === MODAL 1: RÚT NGẪU NHIÊN TỪ NGÂN HÀNG ĐỀ ===
   showRandomFromQuestionBankModal(subjectId, parentDom, isExamParam) {
     const oldModal = document.getElementById('random-qbank-modal');
@@ -16239,29 +16597,32 @@ render_ai_geometry(dom) {
     const exams = (typeof db !== 'undefined' && db.getExams) ? db.getExams() : [];
     const examResults = (typeof db !== 'undefined' && db.getExamResults) ? db.getExamResults() : [];
 
-    const totalSharedLectures = Math.max(sharedFiles.length, 6);
-    const totalAssignedHomework = Math.max(myAssignments.length, 1);
-    const totalAssignedExams = Math.max(exams.length, 1);
+    const totalSharedLectures = sharedFiles.length + sharedLessons.length;
+    const totalAssignedHomework = myAssignments.length;
+    const totalAssignedExams = exams.length;
 
     const stSubmissions = submissions.filter(s => s.studentId === studentId);
     const stExams = examResults.filter(r => r.studentId === studentId);
 
-    const studyCount = Math.min(sharedFiles.length, totalSharedLectures);
-    const studyPercent = Math.round((studyCount / totalSharedLectures) * 100);
+    const studyCount = 0;
+    const studyPercent = totalSharedLectures > 0 ? Math.round((studyCount / totalSharedLectures) * 100) : 0;
 
-    const homeworkCount = stSubmissions.length > 0 ? stSubmissions.length : 1;
-    const homeworkPercent = Math.round((homeworkCount / totalAssignedHomework) * 100);
+    const homeworkCount = stSubmissions.length;
+    const homeworkPercent = totalAssignedHomework > 0 ? Math.round((homeworkCount / totalAssignedHomework) * 100) : 0;
 
-    const examCount = stExams.length > 0 ? stExams.length : 1;
-    const examPercent = Math.round((examCount / totalAssignedExams) * 100);
+    const examCount = stExams.length;
+    const examPercent = totalAssignedExams > 0 ? Math.round((examCount / totalAssignedExams) * 100) : 0;
 
-    const aiDone = 4;
-    const aiPercent = 80;
+    const aiDone = 0;
+    const aiPercent = 0;
 
-    const overallRate = Math.round((studyPercent + homeworkPercent + examPercent + aiPercent) / 4);
+    let overallRate = 100;
     let evalText = 'Tốt';
-    if (overallRate < 60) evalText = 'Cần cố gắng';
-    else if (overallRate < 80) evalText = 'Khá';
+    if (totalSharedLectures + totalAssignedHomework + totalAssignedExams > 0) {
+      overallRate = Math.round((studyPercent + homeworkPercent + examPercent + aiPercent) / 4);
+      if (overallRate < 60) evalText = 'Cần cố gắng';
+      else if (overallRate < 80) evalText = 'Khá';
+    }
 
     if (!this.currentStudentStudySubject) {
       dom.innerHTML = `
@@ -16283,35 +16644,47 @@ render_ai_geometry(dom) {
             </div>
 
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;">
-              <div style="background:#ffffff; padding:0.95rem; border-radius:12px; border:1.5px solid #e2e8f0; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
-                <div style="font-size:0.75rem; color:#64748b; font-weight:700;">📖 LỚP HỌC CỦA TÔI</div>
+              <div onclick="if(window.app) window.app.switchView('study');" style="background:#ffffff; padding:0.95rem; border-radius:14px; border:1.5px solid #bae6fd; box-shadow:0 3px 10px rgba(2,132,199,0.06); cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:0.75rem; color:#0284c7; font-weight:700;">📖 LỚP HỌC CỦA TÔI</span>
+                  <span style="font-size:0.75rem; color:#0284c7;">→</span>
+                </div>
                 <div style="font-size:1.2rem; font-weight:800; color:#0284c7; margin:0.2rem 0;">${studyCount}/${totalSharedLectures} bài (${studyPercent}%)</div>
-                <div style="width:100%; height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden;">
+                <div style="width:100%; height:6px; background:#e0f2fe; border-radius:3px; overflow:hidden;">
                   <div style="width:${studyPercent}%; height:100%; background:#0284c7; border-radius:3px;"></div>
                 </div>
               </div>
 
-              <div style="background:#ffffff; padding:0.95rem; border-radius:12px; border:1.5px solid #e2e8f0; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
-                <div style="font-size:0.75rem; color:#64748b; font-weight:700;">✏️ BÀI TẬP CẦN NỘP</div>
+              <div onclick="if(window.app) window.app.switchView('student_assignments');" style="background:#ffffff; padding:0.95rem; border-radius:14px; border:1.5px solid #fed7aa; box-shadow:0 3px 10px rgba(217,119,6,0.06); cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:0.75rem; color:#d97706; font-weight:700;">✏️ BÀI TẬP CẦN NỘP</span>
+                  <span style="font-size:0.75rem; color:#d97706;">→</span>
+                </div>
                 <div style="font-size:1.2rem; font-weight:800; color:#d97706; margin:0.2rem 0;">${homeworkCount}/${totalAssignedHomework} bài (${homeworkPercent}%)</div>
-                <div style="width:100%; height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden;">
+                <div style="width:100%; height:6px; background:#ffedd5; border-radius:3px; overflow:hidden;">
                   <div style="width:${homeworkPercent}%; height:100%; background:#d97706; border-radius:3px;"></div>
                 </div>
               </div>
 
-              <div style="background:#ffffff; padding:0.95rem; border-radius:12px; border:1.5px solid #e2e8f0; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
-                <div style="font-size:0.75rem; color:#64748b; font-weight:700;">✍️ KIỂM TRA ONLINE</div>
+              <div onclick="if(window.app) window.app.switchView('student_exams');" style="background:#ffffff; padding:0.95rem; border-radius:14px; border:1.5px solid #fbcfe8; box-shadow:0 3px 10px rgba(219,39,119,0.06); cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:0.75rem; color:#db2777; font-weight:700;">✍️ KIỂM TRA ONLINE</span>
+                  <span style="font-size:0.75rem; color:#db2777;">→</span>
+                </div>
                 <div style="font-size:1.2rem; font-weight:800; color:#db2777; margin:0.2rem 0;">${examCount}/${totalAssignedExams} đề (${examPercent}%)</div>
-                <div style="width:100%; height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden;">
+                <div style="width:100%; height:6px; background:#fdf2f8; border-radius:3px; overflow:hidden;">
                   <div style="width:${examPercent}%; height:100%; background:#db2777; border-radius:3px;"></div>
                 </div>
               </div>
 
-              <div style="background:#ffffff; padding:0.95rem; border-radius:12px; border:1.5px solid #e2e8f0; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
-                <div style="font-size:0.75rem; color:#64748b; font-weight:700;">🎮 LUYỆN TẬP AI</div>
+              <div onclick="if(window.app) window.app.switchView('quizizz_practice');" style="background:#ffffff; padding:0.95rem; border-radius:14px; border:1.5px solid #e9d5ff; box-shadow:0 3px 10px rgba(126,34,206,0.06); cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span style="font-size:0.75rem; color:#7e22ce; font-weight:700;">🎮 LUYỆN TẬP AI</span>
+                  <span style="font-size:0.75rem; color:#7e22ce;">→</span>
+                </div>
                 <div style="font-size:1.2rem; font-weight:800; color:#7e22ce; margin:0.2rem 0;">${aiDone}/5 bài (${aiPercent}%)</div>
-                <div style="width:100%; height:6px; background:#e2e8f0; border-radius:3px; overflow:hidden;">
-                  <div style="width:${aiPercent}%; height:100%; background:${'#7e22ce'}; border-radius:3px;"></div>
+                <div style="width:100%; height:6px; background:#f5f3ff; border-radius:3px; overflow:hidden;">
+                  <div style="width:${aiPercent}%; height:100%; background:#7e22ce; border-radius:3px;"></div>
                 </div>
               </div>
             </div>
@@ -16387,6 +16760,28 @@ render_ai_geometry(dom) {
     const subFiles = sharedFiles.filter(f => !f.subjectId || this.normalizeSubjectId(f.subjectId) === subNorm);
     const subLessons = sharedLessons.filter(l => !l.subjectId || this.normalizeSubjectId(l.subjectId) === subNorm);
     const subAsms = myAssignments.filter(a => !a.subjectId || this.normalizeSubjectId(a.subjectId) === subNorm);
+
+    // Get exams for this subject
+    const isExamItem = (item) => {
+      if (!item) return false;
+      const col = String(item.targetGradeColumn || '').toUpperCase();
+      return col.startsWith('TX') || col === 'GK' || col === 'CK' || 
+             item.examCategory === 'tx' || item.examCategory === 'midterm' || item.examCategory === 'final' ||
+             item.isOfficial || item.format === 'exam' || item.isExam;
+    };
+    const combinedAllExams = [...exams];
+    const combinedExIds = new Set(combinedAllExams.map(e => e.id));
+    assignments.forEach(a => {
+      if (isExamItem(a) && !combinedExIds.has(a.id)) {
+        combinedAllExams.push(a);
+        combinedExIds.add(a.id);
+      }
+    });
+    const mySubExams = combinedAllExams.filter(e => {
+      const hasClasses = (Array.isArray(e.classIds) && e.classIds.length > 0) || Boolean(e.classId);
+      if (hasClasses && !this.isClassMatching(e.classIds, e.classId, classId)) return false;
+      return !e.subjectId || this.normalizeSubjectId(e.subjectId) === subNorm;
+    });
 
     const videoExts = ['.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm', '.m4v', '.3gp', '.mpeg'];
 
@@ -16484,6 +16879,67 @@ render_ai_geometry(dom) {
           `}
         </div>
 
+        <!-- SECTION 1.5: ĐỀ KIỂM TRA TRỰC TUYẾN MÔN HỌC (TX / GIỮA KỲ / CUỐI KỲ) -->
+        <div style="margin-bottom:2rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #fbcfe8;">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span style="font-size:1.3rem;">⏱️</span>
+              <h3 style="margin:0;font-family:var(--font-title);font-weight:700;font-size:1.15rem;color:#9d174d;">
+                Đề Kiểm Tra Trực Tuyến Môn ${subject.name} (${mySubExams.length} đề thi)
+              </h3>
+            </div>
+            <button onclick="if(window.app) { window.app.currentStudentExamSubject = '${subId}'; window.app.switchView('student_exams'); }" style="background:#fdf2f8; border:1.5px solid #fbcfe8; color:#db2777; padding:0.35rem 0.85rem; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer;">
+              Vào phòng thi riêng →
+            </button>
+          </div>
+
+          ${mySubExams.length === 0 ? `
+            <div style="text-align:center;padding:2rem 1.5rem;background:#fff5f7;border-radius:16px;border:2px dashed #fbcfe8;">
+              <div style="font-size:2.2rem;margin-bottom:0.4rem;">⏱️</div>
+              <div style="font-weight:600;color:#9d174d;font-size:0.95rem;">Môn ${subject.name} chưa có đề kiểm tra trực tuyến nào</div>
+              <div style="font-size:0.82rem;color:#64748b;margin-top:0.2rem;">Khi giáo viên phát hành đề thi TX/GK/CK, đề kiểm tra sẽ xuất hiện ngay tại đây</div>
+            </div>
+          ` : `
+            <div style="display:flex;flex-direction:column;gap:0.85rem;">
+              ${mySubExams.map(exam => {
+                const now = new Date();
+                const attempts = (typeof db !== 'undefined' && db.getExamAttempts) ? db.getExamAttempts() : [];
+                const myAttempts = attempts.filter(a => a.examId === exam.id && a.studentId === studentId);
+                const hasTaken = myAttempts.length > 0;
+                const maxAttempts = exam.maxAttempts || 1;
+                const attemptsDone = myAttempts.length;
+                const attemptsLeft = maxAttempts === 0 ? null : (maxAttempts - attemptsDone);
+                const bestScore = hasTaken ? Math.max(...myAttempts.map(a => a.score || 0)) : null;
+                const timeLimit = exam.timeLimit ? `${exam.timeLimit} phút` : 'Không giới hạn';
+                const isClosed = exam.closeTime && new Date(exam.closeTime) < now;
+                const isNotOpen = exam.openTime && new Date(exam.openTime) > now;
+                const isExhausted = maxAttempts > 0 && attemptsDone >= maxAttempts;
+
+                let statusBadge = hasTaken ? `<span style="background:#dcfce7;color:#15803d;padding:0.2rem 0.6rem;border-radius:6px;font-weight:600;">✅ Điểm: ${bestScore}/10</span>` : `<span style="background:#fee2e2;color:#dc2626;padding:0.2rem 0.55rem;border-radius:6px;font-weight:600;">Chưa thi</span>`;
+                let btnLabel = hasTaken ? '🔁 Thi Lại' : '🖊️ Làm Bài Thi';
+
+                return `
+                  <div class="glass-card" style="padding:1.15rem;border-radius:14px;border:1.5px solid #fbcfe8;display:flex;flex-wrap:wrap;align-items:center;gap:1rem;background:#ffffff;box-shadow:0 3px 10px rgba(219,39,119,0.04);">
+                    <div style="font-size:1.8rem;">⏱️</div>
+                    <div style="flex:1;min-width:200px;">
+                      <div style="font-weight:700;font-size:1rem;color:#0f172a;font-family:var(--font-title);margin-bottom:0.25rem;">${exam.title || 'Đề kiểm tra'}</div>
+                      <div style="display:flex;flex-wrap:wrap;gap:0.4rem;font-size:0.78rem;font-weight:500;">
+                        <span style="background:#f1f5f9;color:#475569;padding:0.2rem 0.55rem;border-radius:6px;">⏱️ ${timeLimit}</span>
+                        ${statusBadge}
+                      </div>
+                    </div>
+                    <div>
+                      <button class="btn-do-exam-study-view" data-exam-id="${exam.id}" style="background:linear-gradient(135deg,#db2777 0%,#be185d 100%);color:#fff;border:none;padding:0.55rem 1.1rem;border-radius:10px;font-weight:700;font-size:0.85rem;cursor:pointer;box-shadow:0 3px 10px rgba(219,39,119,0.3);">
+                        ${btnLabel}
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+
         <!-- SECTION 2: NHIỆM VỤ & BÀI TẬP CẦN NỘP MÔN NÀY -->
         <div>
           <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid #e2e8f0;">
@@ -16540,6 +16996,18 @@ render_ai_geometry(dom) {
       btn.onclick = () => {
         const asmId = btn.getAttribute('data-asm-id');
         this.showDoAssignmentModal(asmId);
+      };
+    });
+
+    dom.querySelectorAll('.btn-do-exam-study-view').forEach(btn => {
+      btn.onclick = () => {
+        const examId = btn.getAttribute('data-exam-id');
+        const exam = (mySubExams || []).find(e => e.id === examId);
+        if (exam && (exam.examSubType === 'quizizz' || exam.format === 'quizizz' || exam.isQuizizz)) {
+          this.runQuizizzGameTest(exam, dom);
+        } else {
+          this.startExamSession(examId);
+        }
       };
     });
 
@@ -16795,7 +17263,16 @@ render_ai_geometry(dom) {
     const assignments = (typeof db !== 'undefined' && db.getAssignments) ? db.getAssignments() : [];
     const submissions = (typeof db !== 'undefined' && db.getSubmissions) ? db.getSubmissions() : [];
 
-    const myAssignments = assignments.filter(a => this.isClassMatching(a.classIds, a.classId, classId));
+    const isExamItem = (item) => {
+      if (!item) return false;
+      const col = String(item.targetGradeColumn || '').toUpperCase();
+      return col.startsWith('TX') || col === 'GK' || col === 'CK' || 
+             item.examCategory === 'tx' || item.examCategory === 'midterm' || item.examCategory === 'final' ||
+             item.isOfficial || item.format === 'exam' || item.isExam;
+    };
+
+    // ONLY show regular homework assignments (EXCLUDE all TX, GK, CK exams!)
+    const myAssignments = assignments.filter(a => !isExamItem(a) && this.isClassMatching(a.classIds, a.classId, classId));
 
     if (!this.currentStudentAssignmentSubject) {
       dom.innerHTML = `
@@ -16938,10 +17415,33 @@ render_ai_geometry(dom) {
     const classId = this.currentUser?.classId || '6A';
     const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
     const exams = (typeof db !== 'undefined' && db.getExams) ? db.getExams() : [];
+    const assignments = (typeof db !== 'undefined' && db.getAssignments) ? db.getAssignments() : [];
     const attempts = (typeof db !== 'undefined' && db.getExamAttempts) ? db.getExamAttempts() : [];
 
-    const myExams = exams.filter(e => {
-      if (e.published === false) return false;
+    const isExamItem = (item) => {
+      if (!item) return false;
+      const col = String(item.targetGradeColumn || '').toUpperCase();
+      return col.startsWith('TX') || col === 'GK' || col === 'CK' || 
+             item.examCategory === 'tx' || item.examCategory === 'midterm' || item.examCategory === 'final' ||
+             item.isOfficial || item.format === 'exam' || item.isExam;
+    };
+
+    // Combine all exams + all TX / GK / CK tests so they ALL show in Kiểm tra trực tuyến!
+    const combinedExams = [...exams];
+    const exIds = new Set(combinedExams.map(e => e.id));
+    assignments.forEach(a => {
+      if (isExamItem(a) && !exIds.has(a.id)) {
+        combinedExams.push({
+          ...a,
+          examCategory: a.examCategory || (String(a.targetGradeColumn || '').toUpperCase().startsWith('TX') ? 'tx' : (a.targetGradeColumn === 'GK' ? 'midterm' : 'final'))
+        });
+        exIds.add(a.id);
+      }
+    });
+
+    const myExams = combinedExams.filter(e => {
+      const hasClasses = (Array.isArray(e.classIds) && e.classIds.length > 0) || Boolean(e.classId);
+      if (!hasClasses) return false; // Ẩn đề nháp chưa giao lớp nào
       return this.isClassMatching(e.classIds, e.classId, classId);
     });
 
@@ -17146,7 +17646,7 @@ render_ai_geometry(dom) {
         const rem = openTs - Date.now();
         if (rem <= 0) {
           // Đề đã mở — re-render để cập nhật nút
-          this.render_student_exams_subject(dom);
+          this.render_student_exams(dom);
           return;
         }
         const hh = String(Math.floor(rem / 3600000)).padStart(2, '0');
@@ -17191,8 +17691,8 @@ render_ai_geometry(dom) {
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;">
             ${subjects.map(sub => `
               <div class="student-prac-card" data-sub-id="${sub.id}" style="background:#fff;border-radius:16px;padding:1.4rem;cursor:pointer;border:2px solid #e2e8f0;box-shadow:0 4px 15px rgba(0,0,0,0.04);position:relative;transition:all 0.2s;">
-                <div style="position:absolute;top:-8px;right:-8px;background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color: #0f172a;font-weight: 500;font-size:0.75rem;padding:0.2rem 0.65rem;border-radius:20px;box-shadow:0 4px 12px rgba(220,38,38,0.4);z-index:2;">
-                  🔴 AI Sẵn sàng
+                <div style="position:absolute;top:-8px;right:-8px;background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);color: #ffffff;font-weight: 700;font-size:0.75rem;padding:0.2rem 0.65rem;border-radius:20px;box-shadow:0 4px 12px rgba(37,99,235,0.3);z-index:2;">
+                  ⚡ Luyện tập AI
                 </div>
                 <div style="display:flex;align-items:center;gap:0.85rem;margin-bottom:0.75rem;">
                   <div style="width:48px;height:48px;background:#f3e8ff;color:#7c3aed;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;">${sub.icon || '🎮'}</div>
@@ -23320,6 +23820,10 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
     `;
 
     const startMinerBtn = winnerDisp.querySelector('#btn-start-miner-quiz-card');
+    const minerActiveQuestions = (passedQuestions && Array.isArray(passedQuestions) && passedQuestions.length > 0)
+      ? passedQuestions 
+      : (window._activeGameQuestions || (typeof window.AITeachingTools !== 'undefined' ? window.AITeachingTools._goldMinerQuestions : null));
+
     if (startMinerBtn) {
       startMinerBtn.onclick = () => {
         if (typeof window.openStudentInteractiveQuestionChallenge === 'function') {
@@ -23329,6 +23833,7 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
             gameKey: 'goldminer',
             subjectId: sId,
             grade: activeGrade,
+            questions: minerActiveQuestions,
             startImmediately: true,
             onNextRound: () => {
               if (hook) hook.state = 'swinging';
@@ -23355,6 +23860,7 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
           gameKey: 'goldminer',
           subjectId: sId,
           grade: activeGrade,
+          questions: minerActiveQuestions,
           onNextRound: () => {
             if (hook) hook.state = 'swinging';
           }

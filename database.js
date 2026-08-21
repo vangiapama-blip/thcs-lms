@@ -1667,17 +1667,7 @@ const DEFAULT_CHAPTERS = [
   { id: 'gdcd_c1', subjectId: 'gdcd', title: 'Chủ đề 1: Tự hào về truyền thống gia đình' }
 ];
 
-const DEFAULT_LESSONS = [
-  { id: 'toan_c1_b1', chapterId: 'toan_c1', subjectId: 'toan', title: 'Bài 1: Tập hợp. Phần tử của tập hợp' },
-  { id: 'toan_c1_b2', chapterId: 'toan_c1', subjectId: 'toan', title: 'Bài 2: Các phép tính cộng, trừ, nhân, chia số tự nhiên' },
-  { id: 'toan_c2_b1', chapterId: 'toan_c2', subjectId: 'toan', title: 'Bài 1: Quan hệ chia hết và Tính chất chia hết' },
-  { id: 'van_c1_b1', chapterId: 'van_c1', subjectId: 'van', title: 'Bài 1: Truyền thuyết Thánh Gióng' },
-  { id: 'van_c1_b2', chapterId: 'van_c1', subjectId: 'van', title: 'Bài 2: Truyện cổ tích Thạch Sanh' },
-  { id: 'anh_c1_b1', chapterId: 'anh_c1', subjectId: 'anh', title: 'Lesson 1: Vocabulary & Grammar (Present Simple)' },
-  { id: 'tin_c1_b1', chapterId: 'tin_c1', subjectId: 'tin', title: 'Bài 1: Thông tin và Dữ liệu' },
-  { id: 'tin_c2_b1', chapterId: 'tin_c2', subjectId: 'tin', title: 'Bài 1: Khái niệm Mạng máy tính và Internet' },
-  { id: 'khtn_c1_b1', chapterId: 'khtn_c1', subjectId: 'khtn', title: 'Bài 1: Giới thiệu về Khoa học Tự nhiên và Phép đo' }
-];
+const DEFAULT_LESSONS = [];
 
 const DEFAULT_QUESTIONS = [
   // --- PHẦN 1: TRẮC NGHIỆM CHỌN ĐÁP ÁN (3.0 điểm - TNKQ) ---
@@ -1840,127 +1830,13 @@ const DEFAULT_QUESTIONS = [
   }
 ];
 
-const DEFAULT_ASSIGNMENTS = [
-  {
-    id: 'asm_1',
-    title: 'Bài tập tuần 1: Tập hợp & Phần tử',
-    subjectId: 'toan',
-    classId: '6A',
-    dueDate: '2026-07-20T23:59',
-    description: 'Yêu cầu các em làm bài tập 1, 2, 3 trang 8 SGK Toán 6 (Tập 1). Chụp ảnh bài làm trong vở và đính kèm file ảnh tại đây để cô chấm điểm.',
-    teacherId: 'gv_huong'
-  }
-];
+const DEFAULT_ASSIGNMENTS = [];
 
-const DEFAULT_SUBMISSIONS = [
-  {
-    id: 'sub_1',
-    assignmentId: 'asm_1',
-    studentId: 'hs_khoi',
-    submitDate: '2026-07-13T10:30',
-    content: 'Em thưa cô, em đã hoàn thành bài tập tuần 1 trong vở bài tập Toán ạ. Em gửi cô file ảnh bài làm.',
-    fileUrl: 'bai_lam_toan_khoi.jpg',
-    score: 9,
-    comment: 'Bài làm rất sạch sẽ, giải đúng tất cả các câu hỏi tập hợp. Trình bày rõ ràng. Cố gắng phát huy nhé!',
-    gradedBy: 'gv_huong'
-  },
-  {
-    id: 'sub_2',
-    assignmentId: 'asm_1',
-    studentId: 'hs_vy',
-    submitDate: '2026-07-13T11:15',
-    content: 'Em gửi bài tập về nhà ạ.',
-    fileUrl: 'bai_lam_toan_vy.jpg',
-    score: null,
-    comment: '',
-    gradedBy: null
-  }
-];
+const DEFAULT_SUBMISSIONS = [];
 
-const DEFAULT_EXAMS = [
-  {
-    id: 'exam_tx_1',
-    title: 'Kiểm tra Thường Xuyên số 1 - Toán 6 (Tập hợp & Số tự nhiên)',
-    subjectId: 'toan',
-    classId: '6A',
-    classIds: ['6A'],
-    targetClasses: ['6A'],
-    durationMinutes: 15,
-    timeLimit: 15,
-    maxAttempts: 1,
-    dueDate: '2026-07-28T12:00',
-    questionIds: ['q1', 'q2', 'q_tf_1', 'q_sa_1', 'q_essay_1'],
-    teacherId: 'gv_huong',
-    published: true,
-    isOfficial: false,
-    examCategory: 'tx',
-    category: 'tx',
-    examSubType: 'regular',
-    format: 'standard',
-    targetGradeColumn: 'TX1',
-    mode: 'thi_that',
-    createdAt: Date.now() - 86400000 * 2
-  },
-  {
-    id: 'exam_1',
-    title: 'Bài kiểm tra Định kỳ Giữa kỳ I - Toán 6 (Theo CV 7991)',
-    subjectId: 'toan',
-    classId: '6A',
-    classIds: ['6A'],
-    targetClasses: ['6A'],
-    durationMinutes: 45,
-    timeLimit: 45,
-    maxAttempts: 1,
-    dueDate: '2026-07-28T12:00',
-    questionIds: ['q1', 'q2', 'q_tf_1', 'q_sa_1', 'q_essay_1'],
-    teacherId: 'gv_huong',
-    published: true,
-    isOfficial: true,
-    examCategory: 'midterm',
-    category: 'midterm',
-    examSubType: 'regular',
-    format: 'standard',
-    targetGradeColumn: 'GK',
-    mode: 'thi_that',
-    createdAt: Date.now() - 86400000
-  },
-  {
-    id: 'exam_ck_1',
-    title: 'Bài kiểm tra Định kỳ Cuối kỳ II - Toán 6 (Tổng hợp kiến thức cả năm)',
-    subjectId: 'toan',
-    classId: '6A',
-    classIds: ['6A'],
-    targetClasses: ['6A'],
-    durationMinutes: 60,
-    timeLimit: 60,
-    maxAttempts: 1,
-    dueDate: '2026-07-28T12:00',
-    questionIds: ['q1', 'q2', 'q_tf_1', 'q_sa_1', 'q_essay_1'],
-    teacherId: 'gv_huong',
-    published: true,
-    isOfficial: true,
-    examCategory: 'final',
-    category: 'final',
-    examSubType: 'regular',
-    format: 'standard',
-    targetGradeColumn: 'CK',
-    mode: 'thi_that',
-    createdAt: Date.now()
-  }
-];
+const DEFAULT_EXAMS = [];
 
-const DEFAULT_EXAM_ATTEMPTS = [
-  {
-    id: 'att_1',
-    examId: 'exam_1',
-    studentId: 'hs_khoi',
-    startTime: '2026-07-13T09:00',
-    submitTime: '2026-07-13T09:12',
-    answers: { 'q1': 1, 'q2': 1, 'q_tf_1': [true, false, true, true], 'q_sa_1': '40', 'q_essay_1': 'Bài làm tự luận tự động sinh của Khôi.' },
-    score: 8.5,
-    details: 'Trắc nghiệm: Đúng 2/2. Đúng-Sai: Đúng 4/4. Trả lời ngắn: Đúng.'
-  }
-];
+const DEFAULT_EXAM_ATTEMPTS = [];
 
 const DEFAULT_ATTENDANCE = [
   { date: '2026-07-13', studentId: 'hs_khoi', status: 'present' },
@@ -1975,386 +1851,7 @@ const DEFAULT_MESSAGES = [
 ];
 
 
-const DEFAULT_FILES = [
-  {
-    id: 'khbd_toan6_tap_hop',
-    name: '1+2-ThongTin-va-DuLieu.docx',
-    fileType: 'khbd',
-    ext: '.docx',
-    subjectId: 'toan',
-    grade: 6,
-    author: 'Nguyễn Thị Hương',
-    uploadDate: '2026-07-20',
-    isShared: true,
-    description: 'Kế hoạch bài dạy chi tiết môn Toán/Tin học lớp 6 - Thông tin và Dữ liệu (Theo CV 5512/BGDĐT)',
-    content: `<div style="font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a; padding:0.5rem;">
-  <p style="margin:0 0 1rem 0; font-size:1.05rem; color:#1e293b; border-bottom:1.5px solid #cbd5e1; padding-bottom:0.75rem;">
-    <strong>Môn học:</strong> TIN HỌC - Khối 6 | <strong>Tên bài dạy:</strong> THÔNG TIN VÀ DỮ LIỆU
-  </p>
-  
-  <h3 style="color:#0369a1; margin-top:1.2rem;">I. MỤC TIÊU BÀI HỌC</h3>
-  <p><strong>1. Về kiến thức:</strong></p>
-  <ul>
-    <li>Nhận biết và phân biệt được khái niệm Thông tin, Dữ liệu và Vật mang tin.</li>
-    <li>Nêu được các dạng dữ liệu cơ bản: dữ liệu số, dữ liệu chữ, dữ liệu hình ảnh, âm thanh.</li>
-    <li>Hiểu được vai trò quan trọng của thông tin trong đời sống và học tập.</li>
-  </ul>
-  
-  <p><strong>2. Về năng lực:</strong></p>
-  <ul>
-    <li>Năng lực tự chủ và tự học: Tự nghiên cứu bài học SGK và làm bài tập theo hướng dẫn.</li>
-    <li>Năng lực giao tiếp và hợp tác: Thảo luận nhóm 4 người giải quyết tình huống bài học.</li>
-    <li>Năng lực giải quyết vấn đề: Phân tích các ví dụ thông tin thực tế từ môi trường xung quanh.</li>
-  </ul>
-  
-  <p><strong>3. Về phẩm chất:</strong></p>
-  <ul>
-    <li>Chăm chỉ, trung thực, có tinh thần trách nhiệm cao khi tham gia làm việc nhóm.</li>
-  </ul>
-  
-  <h3 style="color:#0369a1; margin-top:1.5rem;">II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU</h3>
-  <p><strong>1. Giáo viên:</strong> Máy tính, máy chiếu, bài giảng PowerPoint, phiếu học tập nhóm số 1 & 2.</p>
-  <p><strong>2. Học sinh:</strong> Sách giáo khoa, vở ghi bài, dụng cụ học tập.</p>
-  
-  <h3 style="color:#0369a1; margin-top:1.5rem;">III. TIẾN TRÌNH DẠY HỌC CHI TIẾT (4 HOẠT ĐỘNG DẠY HỌC TRỌNG TÂM)</h3>
-  
-  <h4 style="color:#047857; margin-top:1.2rem;">1. HOẠT ĐỘNG 1: MỞ ĐẦU (KHỞI ĐỘNG - 5 PHÚT)</h4>
-  <p><strong>a) Mục tiêu:</strong> Tạo tâm thế hứng thú học tập, kết nối tri thức thực tế của học sinh dẫn dắt vào bài học mới.</p>
-  <p><strong>b) Nội dung:</strong> GV chiếu hình ảnh bảng tin trường và đặt câu hỏi gợi mở: <em>"Em nhìn thấy những thông tin gì trên bảng tin?"</em>.</p>
-  <p><strong>c) Sản phẩm:</strong> Câu trả lời cá nhân của học sinh về các thông tin bài đăng, hình ảnh và số liệu trên bảng tin.</p>
-  <p><strong>d) Tổ chức thực hiện:</strong></p>
-  <ul>
-    <li><em>Bước 1: Chuyển giao nhiệm vụ:</em> GV chiếu màn hình, chia lớp thành các nhóm đôi và yêu cầu quan sát trả lời câu hỏi.</li>
-    <li><em>Bước 2: Thực hiện nhiệm vụ:</em> Học sinh thảo luận theo cặp đôi trong thời gian 2 phút.</li>
-    <li><em>Bước 3: Báo cáo, thảo luận:</em> GV gọi đại diện 2-3 học sinh xung phong trả lời. Học sinh khác lắng nghe, nhận xét.</li>
-    <li><em>Bước 4: Kết luận, nhận xét:</em> GV đánh giá câu trả lời, chốt lại ý kiến đúng và dẫn dắt trực tiếp vào Bài 1: Thông tin và Dữ liệu.</li>
-  </ul>
-  
-  <h4 style="color:#047857; margin-top:1.5rem;">2. HOẠT ĐỘNG 2: HÌNH THÀNH KIẾN THỨC MỚI (25 PHÚT)</h4>
-  <p style="color:#0284c7; font-weight: 400;">Mục 1: Tìm hiểu khái niệm Thông tin và Dữ liệu</p>
-  <p><strong>a) Mục tiêu:</strong> Học sinh phân biệt rõ ràng khái niệm Thông tin, Dữ liệu và Vật mang tin.</p>
-  <p><strong>b) Nội dung:</strong> HS nghiên cứu SGK trang 5, 6 và làm việc nhóm 4 người hoàn thành Phiếu học tập số 1.</p>
-  <p><strong>c) Sản phẩm:</strong> Phiếu học tập số 1 đã hoàn thành phân loại các dạng dữ liệu số, chữ, hình ảnh, âm thanh.</p>
-  <p><strong>d) Tổ chức thực hiện:</strong></p>
-  <ul>
-    <li><em>Bước 1 (Giao nhiệm vụ):</em> GV chia lớp thành 4 nhóm, phát Phiếu học tập số 1 cho các nhóm.</li>
-    <li><em>Bước 2 (Thực hiện):</em> Các nhóm thảo luận thống nhất đáp án trong 7 phút. GV di chuyển giữa các nhóm hỗ trợ.</li>
-    <li><em>Bước 3 (Báo cáo):</em> Đại diện Nhóm 1 trình bày kết quả, Nhóm 2 phản biện, bổ sung ý kiến.</li>
-    <li><em>Bước 4 (Đánh giá):</em> GV chiếu đáp án chuẩn, nhận xét tinh thần làm việc của các nhóm và kết luận kiến thức trọng tâm.</li>
-  </ul>
-
-  <p style="color:#0284c7; font-weight: 400; margin-top:1rem;">Mục 2: Tìm hiểu khái niệm Vật mang tin</p>
-  <p><strong>a) Mục tiêu:</strong> Hiểu được thế nào là vật mang tin và kể tên được các vật mang tin thông dụng.</p>
-  <p><strong>b) Nội dung:</strong> HS làm việc cá nhân quan sát các vật dụng xung quanh lớp học (sách, thẻ nhớ, USB, bảng tin).</p>
-  <p><strong>c) Sản phẩm:</strong> Danh sách các vật mang tin được ghi vào vở cá nhân.</p>
-  <p><strong>d) Tổ chức thực hiện:</strong> GV tổ chức trò chơi "Ai nhanh hơn", HS nêu tên vật mang tin ➔ GV chốt khái niệm Vật mang tin.</p>
-  
-  <h4 style="color:#047857; margin-top:1.5rem;">3. HOẠT ĐỘNG 3: LUYỆN TẬP (10 PHÚT)</h4>
-  <p><strong>a) Mục tiêu:</strong> Củng cố kiến thức đã học, rèn luyện kỹ năng nhận biết thông tin và dữ liệu qua bài tập thực hành.</p>
-  <p><strong>b) Nội dung:</strong> Học sinh giải Bài tập 1, Bài tập 2 trong SGK trang 7 và trả lời câu hỏi trắc nghiệm nhanh trên máy chiếu.</p>
-  <p><strong>c) Sản phẩm:</strong> Đáp án bài tập 1, 2 vào vở và kết quả phiếu trắc nghiệm cá nhân.</p>
-  <p><strong>d) Tổ chức thực hiện:</strong></p>
-  <ul>
-    <li>GV chiếu 4 câu hỏi trắc nghiệm củng cố ➔ Học sinh suy nghĩ làm bài cá nhân trong 5 phút.</li>
-    <li>GV gọi 3 HS đọc đáp án ➔ Chữa bài trực tiếp trên máy chiếu ➔ Tuyên dương học sinh làm tốt.</li>
-  </ul>
-  
-  <h4 style="color:#047857; margin-top:1.5rem;">4. HOẠT ĐỘNG 4: VẬN DỤNG & DẶN DÒ (5 PHÚT)</h4>
-  <p><strong>a) Mục tiêu:</strong> Vận dụng kiến thức bài học vào xử lý các tình huống thực tiễn hàng ngày.</p>
-  <p><strong>b) Nội dung:</strong> Yêu cầu học sinh tìm 3 ví dụ về dữ liệu và thông tin mà em tiếp nhận được khi đi từ nhà đến trường.</p>
-  <p><strong>c) Sản phẩm:</strong> Bài thu hoạch cá nhân viết vào vở bài tập.</p>
-  <p><strong>d) Tổ chức thực hiện:</strong> GV dặn dò học sinh hoàn thành bài tập vận dụng ở nhà, truy cập hệ thống THCS LMS làm bài kiểm tra 10 phút và đọc trước bài học mới.</p>
-</div>`
-  },
-  {
-    id: 'khbd_mang_may_tinh',
-    name: '7+8-MangMayTinh.docx',
-    fileType: 'khbd',
-    ext: '.docx',
-    subjectId: 'tin',
-    grade: 6,
-    author: 'Chu Văn Giáp',
-    uploadDate: '2026-07-25',
-    isShared: true,
-    description: 'Kế hoạch bài dạy môn Tin học 6 - Bài 7 & 8: Mạng máy tính và Internet (Chuẩn CV 5512)',
-    content: `<div style="font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a;">
-        <h2 style="text-align:center; color:#1e3a8a; font-weight: 400; margin-bottom:0.2rem;">KẾ HOẠCH BÀI DẠY (GIÁO ÁN THEO CÔNG VĂN 5512/BGDĐT)</h2>
-        <p style="text-align:center; font-weight: 400; margin-top:0;">Trường TH-THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>
-        <hr style="border:none; border-top:1.5px solid #cbd5e1; margin:1rem 0;">
-        
-        <p><strong>Môn học:</strong> TOÁN HỌC / TIN HỌC / NGỮ VĂN | <strong>Khối lớp:</strong> Khối 6 - THCS</p>
-        <p><strong>Tên bài dạy:</strong> BÀI HỌC VÀ TIẾN TRÌNH DẠY HỌC TRỌNG TÂM</p>
-        <p><strong>Thời lượng thực hiện:</strong> 02 Tiết (90 phút)</p>
-        
-        <h3 style="color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;">I. MỤC TIÊU BÀI HỌC</h3>
-        <p><strong>1. Về kiến thức:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li>Học sinh nhận biết và nắm vững các khái niệm, định nghĩa và nguyên lý cốt lõi của bài học.</li>
-          <li>Phân biệt rõ ràng các khái niệm trọng tâm, ứng dụng lý thuyết vào giải quyết các bài tập thực hành.</li>
-          <li>Hiểu được vai trò và ý nghĩa thực tiễn của bài học trong đời sống xã hội và học tập.</li>
-        </ul>
-        
-        <p><strong>2. Về năng lực:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li><em>Năng lực chung:</em> Năng lực tự chủ và tự học (chủ động đọc SGK, hoàn thành phiếu học tập cá nhân); Năng lực giao tiếp và hợp tác (thảo luận nhóm tích cực); Năng lực giải quyết vấn đề và sáng tạo.</li>
-          <li><em>Năng lực đặc thù môn học:</em> Năng lực tư duy logic, phân tích tổng hợp dữ liệu, năng lực ứng dụng công nghệ và thực hành trực quan.</li>
-        </ul>
-        
-        <p><strong>3. Về phẩm chất:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li>Chăm chỉ, trung thực, có tinh thần trách nhiệm cao trong các hoạt động học tập tập thể.</li>
-          <li>Yêu thích môn học, có ý thức vận dụng tri thức vào thực tiễn cuộc sống hàng ngày.</li>
-        </ul>
-        
-        <h3 style="color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;">II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU</h3>
-        <p><strong>1. Giáo viên:</strong> Bài giảng điện tử PowerPoint sinh động, máy tính kết nối máy chiếu, các hình ảnh và video minh họa trực quan, phiếu học tập nhóm, thước thẳng, bảng phụ.</p>
-        <p><strong>2. Học sinh:</strong> Sách giáo khoa, vở ghi bài, đồ dùng học tập cá nhân, đọc trước nội dung bài mới theo dặn dò của giáo viên.</p>
-        
-        <h3 style="color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;">III. TIẾN TRÌNH DẠY HỌC CHI TIẾT (CÁC HOẠT ĐỘNG DẠY HỌC)</h3>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem;">1. HOẠT ĐỘNG 1: MỞ ĐẦU (KHỞI ĐỘNG - 7 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Tạo tâm thế hứng thú học tập, kết nối tri thức thực tế của học sinh dẫn dắt vào bài học mới.</p>
-        <p><strong>b) Nội dung:</strong> GV chiếu hình ảnh tình huống thực tế và đặt câu hỏi gợi mở yêu cầu học sinh quan sát, suy nghĩ trả lời.</p>
-        <p><strong>c) Sản phẩm:</strong> Câu trả lời cá nhân của học sinh và sự tò mò khám phá nội dung bài mới.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li><em>Bước 1: Chuyển giao nhiệm vụ:</em> GV phổ biến câu hỏi và yêu cầu HS quan sát màn hình chiếu.</li>
-          <li><em>Bước 2: Thực hiện nhiệm vụ:</em> HS làm việc cá nhân trong 2 phút.</li>
-          <li><em>Bước 3: Báo cáo thảo luận:</em> GV mời 2-3 HS trình bày ý kiến trước lớp.</li>
-          <li><em>Bước 4: Kết luận, nhận xét:</em> GV đánh giá ý kiến HS và dẫn dắt trực tiếp vào bài học mới.</li>
-        </ul>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;">2. HOẠT ĐỘNG 2: HÌNH THÀNH KIẾN THỨC MỚI (25 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Học sinh tự khám phá, thảo luận và hình thành nên các khái niệm, quy tắc trọng tâm của bài học.</p>
-        <p><strong>b) Nội dung:</strong> HS đọc SGK, hoạt động nhóm 4 người hoàn thành Phiếu học tập số 1 và số 2.</p>
-        <p><strong>c) Sản phẩm:</strong> Kết quả điền trên Phiếu học tập của các nhóm và nội dung ghi vở của học sinh.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li><em>Nội dung 1 (Tìm hiểu khái niệm cốt lõi):</em> GV chia nhóm ➔ Các nhóm thảo luận 7 phút ➔ Đại diện nhóm 1 và nhóm 3 báo cáo ➔ Các nhóm khác nhận xét phản biện ➔ GV chốt đáp án chuẩn.</li>
-          <li><em>Nội dung 2 (Phân tích tính chất & quy tắc):</em> GV hướng dẫn HS phân tích các ví dụ mẫu SGK ➔ Rút ra định lý/quy tắc trọng tâm ➔ HS ghi bài vào vở.</li>
-        </ul>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;">3. HOẠT ĐỘNG 3: LUYỆN TẬP (10 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Củng cố và nâng cao kỹ năng vận dụng lý thuyết vừa học vào giải các bài tập thực hành.</p>
-        <p><strong>b) Nội dung:</strong> Giải Bài tập 1, Bài tập 2 trong SGK theo hình thức cá nhân và cặp đôi.</p>
-        <p><strong>c) Sản phẩm:</strong> Bài giải hoàn chỉnh trong vở bài tập của học sinh.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong> GV phát phiếu trắc nghiệm nhanh ➔ HS làm bài ➔ GV thu bài ngẫu nhiên 5 HS để chấm điểm và gọi HS lên bảng chữa bài ➔ GV nhận xét bài làm.</li>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;">4. HOẠT ĐỘNG 4: VẬN DỤNG & DẶN DÒ (3 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Vận dụng tri thức đã học vào thực tiễn cuộc sống và rèn luyện tự học ở nhà.</p>
-        <p><strong>b) Nội dung:</strong> GV giao thử thách tìm 2 ví dụ thực tế liên quan đến bài học và chuẩn bị bài mới.</p>
-        <p><strong>c) Sản phẩm:</strong> Bài làm nộp trên hệ thống THCS LMS của học sinh.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong> GV dặn dò HS ôn tập lý thuyết, hoàn thành bài tập về nhà và làm kiểm tra trực tuyến trên Cổng trường học số LMS.</p>
-      </div>`
-  },
-  {
-    id: 'khbd_van7_truyen_co_tich',
-    name: 'GiaoAn_NguVan7_TruyenCoTich.pdf',
-    fileType: 'khbd',
-    ext: '.pdf',
-    subjectId: 'van',
-    grade: 7,
-    author: 'Lê Thu Lan',
-    uploadDate: '2026-07-22',
-    isShared: true,
-    description: 'Giáo án Ngữ văn 7 - Chủ đề Truyện cổ tích Việt Nam & Thế giới (Định dạng PDF)',
-    content: `<div style="font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a;">
-        <h2 style="text-align:center; color:#1e3a8a; font-weight: 400; margin-bottom:0.2rem;">KẾ HOẠCH BÀI DẠY (GIÁO ÁN THEO CÔNG VĂN 5512/BGDĐT)</h2>
-        <p style="text-align:center; font-weight: 400; margin-top:0;">Trường TH-THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>
-        <hr style="border:none; border-top:1.5px solid #cbd5e1; margin:1rem 0;">
-        
-        <p><strong>Môn học:</strong> TOÁN HỌC / TIN HỌC / NGỮ VĂN | <strong>Khối lớp:</strong> Khối 6 - THCS</p>
-        <p><strong>Tên bài dạy:</strong> BÀI HỌC VÀ TIẾN TRÌNH DẠY HỌC TRỌNG TÂM</p>
-        <p><strong>Thời lượng thực hiện:</strong> 02 Tiết (90 phút)</p>
-        
-        <h3 style="color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;">I. MỤC TIÊU BÀI HỌC</h3>
-        <p><strong>1. Về kiến thức:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li>Học sinh nhận biết và nắm vững các khái niệm, định nghĩa và nguyên lý cốt lõi của bài học.</li>
-          <li>Phân biệt rõ ràng các khái niệm trọng tâm, ứng dụng lý thuyết vào giải quyết các bài tập thực hành.</li>
-          <li>Hiểu được vai trò và ý nghĩa thực tiễn của bài học trong đời sống xã hội và học tập.</li>
-        </ul>
-        
-        <p><strong>2. Về năng lực:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li><em>Năng lực chung:</em> Năng lực tự chủ và tự học (chủ động đọc SGK, hoàn thành phiếu học tập cá nhân); Năng lực giao tiếp và hợp tác (thảo luận nhóm tích cực); Năng lực giải quyết vấn đề và sáng tạo.</li>
-          <li><em>Năng lực đặc thù môn học:</em> Năng lực tư duy logic, phân tích tổng hợp dữ liệu, năng lực ứng dụng công nghệ và thực hành trực quan.</li>
-        </ul>
-        
-        <p><strong>3. Về phẩm chất:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li>Chăm chỉ, trung thực, có tinh thần trách nhiệm cao trong các hoạt động học tập tập thể.</li>
-          <li>Yêu thích môn học, có ý thức vận dụng tri thức vào thực tiễn cuộc sống hàng ngày.</li>
-        </ul>
-        
-        <h3 style="color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;">II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU</h3>
-        <p><strong>1. Giáo viên:</strong> Bài giảng điện tử PowerPoint sinh động, máy tính kết nối máy chiếu, các hình ảnh và video minh họa trực quan, phiếu học tập nhóm, thước thẳng, bảng phụ.</p>
-        <p><strong>2. Học sinh:</strong> Sách giáo khoa, vở ghi bài, đồ dùng học tập cá nhân, đọc trước nội dung bài mới theo dặn dò của giáo viên.</p>
-        
-        <h3 style="color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;">III. TIẾN TRÌNH DẠY HỌC CHI TIẾT (CÁC HOẠT ĐỘNG DẠY HỌC)</h3>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem;">1. HOẠT ĐỘNG 1: MỞ ĐẦU (KHỞI ĐỘNG - 7 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Tạo tâm thế hứng thú học tập, kết nối tri thức thực tế của học sinh dẫn dắt vào bài học mới.</p>
-        <p><strong>b) Nội dung:</strong> GV chiếu hình ảnh tình huống thực tế và đặt câu hỏi gợi mở yêu cầu học sinh quan sát, suy nghĩ trả lời.</p>
-        <p><strong>c) Sản phẩm:</strong> Câu trả lời cá nhân của học sinh và sự tò mò khám phá nội dung bài mới.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li><em>Bước 1: Chuyển giao nhiệm vụ:</em> GV phổ biến câu hỏi và yêu cầu HS quan sát màn hình chiếu.</li>
-          <li><em>Bước 2: Thực hiện nhiệm vụ:</em> HS làm việc cá nhân trong 2 phút.</li>
-          <li><em>Bước 3: Báo cáo thảo luận:</em> GV mời 2-3 HS trình bày ý kiến trước lớp.</li>
-          <li><em>Bước 4: Kết luận, nhận xét:</em> GV đánh giá ý kiến HS và dẫn dắt trực tiếp vào bài học mới.</li>
-        </ul>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;">2. HOẠT ĐỘNG 2: HÌNH THÀNH KIẾN THỨC MỚI (25 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Học sinh tự khám phá, thảo luận và hình thành nên các khái niệm, quy tắc trọng tâm của bài học.</p>
-        <p><strong>b) Nội dung:</strong> HS đọc SGK, hoạt động nhóm 4 người hoàn thành Phiếu học tập số 1 và số 2.</p>
-        <p><strong>c) Sản phẩm:</strong> Kết quả điền trên Phiếu học tập của các nhóm và nội dung ghi vở của học sinh.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li><em>Nội dung 1 (Tìm hiểu khái niệm cốt lõi):</em> GV chia nhóm ➔ Các nhóm thảo luận 7 phút ➔ Đại diện nhóm 1 và nhóm 3 báo cáo ➔ Các nhóm khác nhận xét phản biện ➔ GV chốt đáp án chuẩn.</li>
-          <li><em>Nội dung 2 (Phân tích tính chất & quy tắc):</em> GV hướng dẫn HS phân tích các ví dụ mẫu SGK ➔ Rút ra định lý/quy tắc trọng tâm ➔ HS ghi bài vào vở.</li>
-        </ul>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;">3. HOẠT ĐỘNG 3: LUYỆN TẬP (10 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Củng cố và nâng cao kỹ năng vận dụng lý thuyết vừa học vào giải các bài tập thực hành.</p>
-        <p><strong>b) Nội dung:</strong> Giải Bài tập 1, Bài tập 2 trong SGK theo hình thức cá nhân và cặp đôi.</p>
-        <p><strong>c) Sản phẩm:</strong> Bài giải hoàn chỉnh trong vở bài tập của học sinh.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong> GV phát phiếu trắc nghiệm nhanh ➔ HS làm bài ➔ GV thu bài ngẫu nhiên 5 HS để chấm điểm và gọi HS lên bảng chữa bài ➔ GV nhận xét bài làm.</li>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;">4. HOẠT ĐỘNG 4: VẬN DỤNG & DẶN DÒ (3 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Vận dụng tri thức đã học vào thực tiễn cuộc sống và rèn luyện tự học ở nhà.</p>
-        <p><strong>b) Nội dung:</strong> GV giao thử thách tìm 2 ví dụ thực tế liên quan đến bài học và chuẩn bị bài mới.</p>
-        <p><strong>c) Sản phẩm:</strong> Bài làm nộp trên hệ thống THCS LMS của học sinh.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong> GV dặn dò HS ôn tập lý thuyết, hoàn thành bài tập về nhà và làm kiểm tra trực tuyến trên Cổng trường học số LMS.</p>
-      </div>`
-  },
-  {
-    id: 'khbd_anh8_unit1',
-    name: 'LessonPlan_English8_Unit1.doc',
-    fileType: 'khbd',
-    ext: '.doc',
-    subjectId: 'anh',
-    grade: 8,
-    author: 'Trần Hải Nam',
-    uploadDate: '2026-07-24',
-    isShared: true,
-    description: 'Lesson Plan English Grade 8 - Unit 1: Leisure Time & Hobbies (Doc Format)',
-    content: `<div style="font-family:'Times New Roman', Times, serif; line-height:1.75; color:#0f172a;">
-        <h2 style="text-align:center; color:#1e3a8a; font-weight: 400; margin-bottom:0.2rem;">KẾ HOẠCH BÀI DẠY (GIÁO ÁN THEO CÔNG VĂN 5512/BGDĐT)</h2>
-        <p style="text-align:center; font-weight: 400; margin-top:0;">Trường TH-THCS Ama Trang Lơng | Tổ Khối Chuyên Môn THCS</p>
-        <hr style="border:none; border-top:1.5px solid #cbd5e1; margin:1rem 0;">
-        
-        <p><strong>Môn học:</strong> TOÁN HỌC / TIN HỌC / NGỮ VĂN | <strong>Khối lớp:</strong> Khối 6 - THCS</p>
-        <p><strong>Tên bài dạy:</strong> BÀI HỌC VÀ TIẾN TRÌNH DẠY HỌC TRỌNG TÂM</p>
-        <p><strong>Thời lượng thực hiện:</strong> 02 Tiết (90 phút)</p>
-        
-        <h3 style="color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;">I. MỤC TIÊU BÀI HỌC</h3>
-        <p><strong>1. Về kiến thức:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li>Học sinh nhận biết và nắm vững các khái niệm, định nghĩa và nguyên lý cốt lõi của bài học.</li>
-          <li>Phân biệt rõ ràng các khái niệm trọng tâm, ứng dụng lý thuyết vào giải quyết các bài tập thực hành.</li>
-          <li>Hiểu được vai trò và ý nghĩa thực tiễn của bài học trong đời sống xã hội và học tập.</li>
-        </ul>
-        
-        <p><strong>2. Về năng lực:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li><em>Năng lực chung:</em> Năng lực tự chủ và tự học (chủ động đọc SGK, hoàn thành phiếu học tập cá nhân); Năng lực giao tiếp và hợp tác (thảo luận nhóm tích cực); Năng lực giải quyết vấn đề và sáng tạo.</li>
-          <li><em>Năng lực đặc thù môn học:</em> Năng lực tư duy logic, phân tích tổng hợp dữ liệu, năng lực ứng dụng công nghệ và thực hành trực quan.</li>
-        </ul>
-        
-        <p><strong>3. Về phẩm chất:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li>Chăm chỉ, trung thực, có tinh thần trách nhiệm cao trong các hoạt động học tập tập thể.</li>
-          <li>Yêu thích môn học, có ý thức vận dụng tri thức vào thực tiễn cuộc sống hàng ngày.</li>
-        </ul>
-        
-        <h3 style="color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;">II. THIẾT BỊ DẠY HỌC VÀ HỌC LIỆU</h3>
-        <p><strong>1. Giáo viên:</strong> Bài giảng điện tử PowerPoint sinh động, máy tính kết nối máy chiếu, các hình ảnh và video minh họa trực quan, phiếu học tập nhóm, thước thẳng, bảng phụ.</p>
-        <p><strong>2. Học sinh:</strong> Sách giáo khoa, vở ghi bài, đồ dùng học tập cá nhân, đọc trước nội dung bài mới theo dặn dò của giáo viên.</p>
-        
-        <h3 style="color:#0369a1; border-bottom:1px solid #e2e8f0; padding-bottom:0.3rem; margin-top:1.5rem;">III. TIẾN TRÌNH DẠY HỌC CHI TIẾT (CÁC HOẠT ĐỘNG DẠY HỌC)</h3>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem;">1. HOẠT ĐỘNG 1: MỞ ĐẦU (KHỞI ĐỘNG - 7 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Tạo tâm thế hứng thú học tập, kết nối tri thức thực tế của học sinh dẫn dắt vào bài học mới.</p>
-        <p><strong>b) Nội dung:</strong> GV chiếu hình ảnh tình huống thực tế và đặt câu hỏi gợi mở yêu cầu học sinh quan sát, suy nghĩ trả lời.</p>
-        <p><strong>c) Sản phẩm:</strong> Câu trả lời cá nhân của học sinh và sự tò mò khám phá nội dung bài mới.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li><em>Bước 1: Chuyển giao nhiệm vụ:</em> GV phổ biến câu hỏi và yêu cầu HS quan sát màn hình chiếu.</li>
-          <li><em>Bước 2: Thực hiện nhiệm vụ:</em> HS làm việc cá nhân trong 2 phút.</li>
-          <li><em>Bước 3: Báo cáo thảo luận:</em> GV mời 2-3 HS trình bày ý kiến trước lớp.</li>
-          <li><em>Bước 4: Kết luận, nhận xét:</em> GV đánh giá ý kiến HS và dẫn dắt trực tiếp vào bài học mới.</li>
-        </ul>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;">2. HOẠT ĐỘNG 2: HÌNH THÀNH KIẾN THỨC MỚI (25 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Học sinh tự khám phá, thảo luận và hình thành nên các khái niệm, quy tắc trọng tâm của bài học.</p>
-        <p><strong>b) Nội dung:</strong> HS đọc SGK, hoạt động nhóm 4 người hoàn thành Phiếu học tập số 1 và số 2.</p>
-        <p><strong>c) Sản phẩm:</strong> Kết quả điền trên Phiếu học tập của các nhóm và nội dung ghi vở của học sinh.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong></p>
-        <ul style="margin-top:0.2rem;">
-          <li><em>Nội dung 1 (Tìm hiểu khái niệm cốt lõi):</em> GV chia nhóm ➔ Các nhóm thảo luận 7 phút ➔ Đại diện nhóm 1 và nhóm 3 báo cáo ➔ Các nhóm khác nhận xét phản biện ➔ GV chốt đáp án chuẩn.</li>
-          <li><em>Nội dung 2 (Phân tích tính chất & quy tắc):</em> GV hướng dẫn HS phân tích các ví dụ mẫu SGK ➔ Rút ra định lý/quy tắc trọng tâm ➔ HS ghi bài vào vở.</li>
-        </ul>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;">3. HOẠT ĐỘNG 3: LUYỆN TẬP (10 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Củng cố và nâng cao kỹ năng vận dụng lý thuyết vừa học vào giải các bài tập thực hành.</p>
-        <p><strong>b) Nội dung:</strong> Giải Bài tập 1, Bài tập 2 trong SGK theo hình thức cá nhân và cặp đôi.</p>
-        <p><strong>c) Sản phẩm:</strong> Bài giải hoàn chỉnh trong vở bài tập của học sinh.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong> GV phát phiếu trắc nghiệm nhanh ➔ HS làm bài ➔ GV thu bài ngẫu nhiên 5 HS để chấm điểm và gọi HS lên bảng chữa bài ➔ GV nhận xét bài làm.</li>
-        
-        <h4 style="color:#047857; margin-bottom:0.3rem; margin-top:1.2rem;">4. HOẠT ĐỘNG 4: VẬN DỤNG & DẶN DÒ (3 PHÚT)</h4>
-        <p><strong>a) Mục tiêu:</strong> Vận dụng tri thức đã học vào thực tiễn cuộc sống và rèn luyện tự học ở nhà.</p>
-        <p><strong>b) Nội dung:</strong> GV giao thử thách tìm 2 ví dụ thực tế liên quan đến bài học và chuẩn bị bài mới.</p>
-        <p><strong>c) Sản phẩm:</strong> Bài làm nộp trên hệ thống THCS LMS của học sinh.</p>
-        <p><strong>d) Tổ chức thực hiện:</strong> GV dặn dò HS ôn tập lý thuyết, hoàn thành bài tập về nhà và làm kiểm tra trực tuyến trên Cổng trường học số LMS.</p>
-      </div>`
-  },
-  {
-    id: 'slide_powerpoint_toan6',
-    name: 'Slide_BaiGiang_PowerPoint_Toan6.pptx',
-    fileType: 'slide',
-    ext: '.pptx',
-    subjectId: 'toan',
-    grade: 6,
-    author: 'Chu Văn Giáp',
-    uploadDate: '2026-07-25',
-    isShared: true,
-    description: 'Slide bài giảng PowerPoint môn Toán 6 - Thiết kế trình chiếu 3D tương tác',
-    content: `SLIDE_TITLE: 🎯 BÀI GIẢNG ĐIỆN TỬ TOÁN HỌC KHỐI 6
-SUBTITLE: Bài giảng Trực quan & Trò chơi Học tập Tương tác THCS LMS
-PRESENTER: Giáo viên: Chu Văn Giáp | Trường TH-THCS Ama Trang Lơng
-SUBJECT: Môn: TOÁN HỌC - KHỐI 6
-
---- SLIDE_BREAK ---
-
-SLIDE_HEADER: 🎯 1. Mục tiêu Bài học & Chuẩn bị
-• Nắm vững kiến thức trọng tâm của bài học và vận dụng giải bài tập
-• Rèn luyện kỹ năng phát biểu, tư duy nhóm và giải quyết vấn đề
-• Tạo không khí thi đua sôi nổi, hứng thú học tập cao cho học sinh cả lớp
-
---- SLIDE_BREAK ---
-
-SLIDE_HEADER: 📚 2. Nội dung Lý thuyết Trọng tâm
-• Khái niệm 1: Định nghĩa và các ví dụ minh họa trực quan
-• Tính chất 2: Phân tích công thức và sơ đồ tư duy hệ thống
-• Lưu ý: Các dạng bài tập dễ nhầm lẫn và phương pháp khắc phục hiệu quả
-
---- SLIDE_BREAK ---
-
-SLIDE_HEADER: ✍️ 3. Bài tập Luyện tập & Thử thách Nhanh
-• Thử thách 1: Giải nhanh câu hỏi trắc nghiệm củng cố lý thuyết
-• Thử thách 2: Bài tập tình huống thực tế ứng dụng trong đời sống
-• Hướng dẫn giải đáp thắc mắc và chấm điểm trực tiếp cho học sinh
-
---- SLIDE_BREAK ---
-
-SLIDE_HEADER: 💡 4. Củng cố Tiết học & Dặn dò Về nhà
-• Tuyên dương các cá nhân và nhóm học sinh tích cực phát biểu
-• Hoàn thành các bài tập về nhà trên hệ thống THCS LMS
-• Ôn tập và đọc trước nội dung bài học mới cho tiết tiếp theo`
-  }
-];
-
+const DEFAULT_FILES = [];
 
 const INITIAL_STATE = {
   schoolInfo: {
@@ -2787,6 +2284,7 @@ class LMSDatabase {
     this._migrateStudentCredentials();
     this._migrateUploadedFiles();
     this._migrateDefaultExams();
+    this._migrateAssignmentsAndSubmissions();
   }
 
   _migrateTeacherCredentials() {
@@ -2818,20 +2316,21 @@ class LMSDatabase {
   }
 
   _migrateDefaultExams() {
+    if (!this.state) this.state = {};
     if (!this.state.exams || !Array.isArray(this.state.exams)) {
-      this.state.exams = JSON.parse(JSON.stringify(DEFAULT_EXAMS));
-      this.save();
-      return;
+      this.state.exams = [];
     }
-    const existingIds = new Set(this.state.exams.map(e => e.id));
-    let changed = false;
-    DEFAULT_EXAMS.forEach(de => {
-      if (!existingIds.has(de.id)) {
-        this.state.exams.push(JSON.parse(JSON.stringify(de)));
-        changed = true;
-      }
-    });
-    // Ensure all exams have examCategory
+    if (!this.state.examAttempts || !Array.isArray(this.state.examAttempts)) {
+      this.state.examAttempts = [];
+    }
+
+    // Clean out any legacy demo exams created for testing (exam_tx_1, exam_1, exam_ck_1)
+    const demoIds = new Set(['exam_tx_1', 'exam_1', 'exam_ck_1', 'exam_demo_1', 'exam_demo_2']);
+    const prevLen = this.state.exams.length;
+    this.state.exams = this.state.exams.filter(e => !demoIds.has(e.id));
+    this.state.examAttempts = this.state.examAttempts.filter(a => !demoIds.has(a.examId));
+
+    let changed = (this.state.exams.length !== prevLen);
     this.state.exams.forEach(e => {
       if (!e.examCategory) {
         if (e.targetGradeColumn === 'CK' || (e.title && e.title.toLowerCase().includes('cuối'))) e.examCategory = 'final';
@@ -2847,48 +2346,52 @@ class LMSDatabase {
     if (changed) this.save();
   }
 
+  _migrateAssignmentsAndSubmissions() {
+    if (!this.state) this.state = {};
+    if (!this.state.assignments || !Array.isArray(this.state.assignments)) {
+      this.state.assignments = [];
+    }
+    if (!this.state.submissions || !Array.isArray(this.state.submissions)) {
+      this.state.submissions = [];
+    }
+
+    // Purge demo assignments and submissions (asm_1, sub_1, sub_2)
+    const demoAsmIds = new Set(['asm_1', 'asm_demo_1']);
+    const demoSubIds = new Set(['sub_1', 'sub_2', 'sub_demo_1']);
+
+    const prevAsmLen = this.state.assignments.length;
+    const prevSubLen = this.state.submissions.length;
+
+    this.state.assignments = this.state.assignments.filter(a => !demoAsmIds.has(a.id));
+    this.state.submissions = this.state.submissions.filter(s => !demoSubIds.has(s.id) && !demoAsmIds.has(s.assignmentId));
+
+    if (this.state.assignments.length !== prevAsmLen || this.state.submissions.length !== prevSubLen) {
+      if (this.save) this.save();
+    }
+  }
+
   _migrateUploadedFiles() {
     if (!this.state) this.state = {};
-    if (!this.state.uploadedFiles || !Array.isArray(this.state.uploadedFiles) || this.state.uploadedFiles.length === 0) {
-      this.state.uploadedFiles = JSON.parse(JSON.stringify(DEFAULT_FILES));
-      this.save();
-      return;
+    if (!this.state.uploadedFiles || !Array.isArray(this.state.uploadedFiles)) {
+      this.state.uploadedFiles = [];
     }
-    let changed = false;
-    const fullRichKhbd = ``;
-
-    this.state.uploadedFiles.forEach(f => {
-      if (!f.fileType) {
-        const nameLower = (f.name || '').toLowerCase();
-        if (nameLower.includes('slide') || nameLower.includes('ppt') || nameLower.includes('bai_giang')) {
-          f.fileType = 'slide';
-        } else {
-          f.fileType = 'khbd';
-        }
-        changed = true;
-      }
-      if (!f.ext) {
-        f.ext = f.fileType === 'khbd' ? '.docx' : '.pptx';
-        changed = true;
-      }
-      // Force update any short/old KHBD content in localStorage to the full rich 5512 lesson plan with all 4 activities!
-      if (f.fileType === 'khbd' && (!f.content || !f.content.includes('HOẠT ĐỘNG 4'))) {
-        f.content = fullRichKhbd;
-        changed = true;
-      }
-    });
-
-    if (this.state.uploadedFiles.length < 4) {
-      const existingIds = new Set(this.state.uploadedFiles.map(f => f.id));
-      DEFAULT_FILES.forEach(df => {
-        if (!existingIds.has(df.id)) {
-          this.state.uploadedFiles.push(JSON.parse(JSON.stringify(df)));
-          changed = true;
-        }
-      });
+    if (!this.state.lessons || !Array.isArray(this.state.lessons)) {
+      this.state.lessons = [];
     }
 
-    if (changed) this.save();
+    // Purge demo mock files so user has a clean slate
+    const demoFileIds = new Set(['khbd_toan6_tap_hop', 'khbd_toan6_bai2', 'slide_powerpoint_toan6', 'nanobanana_slide_math', 'nanobanana_infographic']);
+    const demoLessonIds = new Set(['toan_c1_b1', 'toan_c1_b2', 'toan_c2_b1', 'van_c1_b1', 'van_c1_b2', 'anh_c1_b1', 'tin_c1_b1', 'tin_c2_b1', 'khtn_c1_b1']);
+    
+    const prevFilesLen = this.state.uploadedFiles.length;
+    const prevLessonsLen = this.state.lessons.length;
+
+    this.state.uploadedFiles = this.state.uploadedFiles.filter(f => !demoFileIds.has(f.id));
+    this.state.lessons = this.state.lessons.filter(l => !demoLessonIds.has(l.id));
+
+    if (this.state.uploadedFiles.length !== prevFilesLen || this.state.lessons.length !== prevLessonsLen) {
+      if (this.save) this.save();
+    }
   }
 
   _migrateStudentCredentials() {
@@ -3423,13 +2926,22 @@ class LMSDatabase {
     this.save();
   }
   updateAssignment(id, updatedData) {
-    const sId = String(id);
-    if (!this.state.assignments) return;
-    const idx = this.state.assignments.findIndex(a => String(a.id) === sId);
-    if (idx !== -1) {
-      this.state.assignments[idx] = { ...this.state.assignments[idx], ...updatedData };
-      this.save();
+    if (!this.state.assignments) this.state.assignments = [];
+    let realId = id;
+    let data = updatedData;
+    if (typeof id === 'object' && id !== null) {
+      data = id;
+      realId = data.id;
     }
+    if (!realId && data && data.id) realId = data.id;
+
+    const idx = this.state.assignments.findIndex(a => String(a.id) === String(realId));
+    if (idx !== -1) {
+      this.state.assignments[idx] = { ...this.state.assignments[idx], ...data };
+    } else if (data) {
+      this.state.assignments.unshift({ ...data, id: realId || ('asm_' + Date.now()) });
+    }
+    this.save();
   }
 
   getSubmissions() { return this.state.submissions || []; }
@@ -3473,11 +2985,21 @@ class LMSDatabase {
   }
   updateExam(id, updatedData) {
     if (!this.state.exams) this.state.exams = [];
-    const idx = this.state.exams.findIndex(e => String(e.id) === String(id));
-    if (idx !== -1) {
-      this.state.exams[idx] = { ...this.state.exams[idx], ...updatedData };
-      this.save();
+    let realId = id;
+    let data = updatedData;
+    if (typeof id === 'object' && id !== null) {
+      data = id;
+      realId = data.id;
     }
+    if (!realId && data && data.id) realId = data.id;
+
+    const idx = this.state.exams.findIndex(e => String(e.id) === String(realId));
+    if (idx !== -1) {
+      this.state.exams[idx] = { ...this.state.exams[idx], ...data };
+    } else if (data) {
+      this.state.exams.unshift({ ...data, id: realId || ('exam_' + Date.now()) });
+    }
+    this.save();
   }
 
   getExamAttempts() { return this.state.examAttempts || []; }
