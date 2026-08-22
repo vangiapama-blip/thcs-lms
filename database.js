@@ -3256,14 +3256,15 @@ class LMSDatabase {
     return true;
   }
 
-  /** Ghi nhật ký vi phạm trong phiên thi */
-  addExamViolationLog(examId, studentId, violationType, timestamp) {
+  /** Ghi nhật ký vi phạm trong phiên thi (kèm ảnh chụp bằng chứng snapshot) */
+  addExamViolationLog(examId, studentId, violationType, timestamp, snapshot = null) {
     if (!this.state.examViolationLogs) this.state.examViolationLogs = [];
     this.state.examViolationLogs.push({
-      id: `viol_${Date.now()}`,
+      id: `viol_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       examId,
       studentId,
       type: violationType,
+      snapshot: snapshot || null,
       timestamp: timestamp || new Date().toISOString()
     });
     this.save();

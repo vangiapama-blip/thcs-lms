@@ -51,6 +51,188 @@ if (typeof window !== 'undefined') {
 /* FORCE_CACHE_PURGE_BUILD_20260802_114000 */
 var db = (typeof window !== 'undefined' && window.db) ? window.db : (typeof globalThis !== 'undefined' && globalThis.db) ? globalThis.db : null;
 
+// =========================================================================
+// 🛡️ UNIVERSAL AI CAMERA PROCTORING ENGINE (DUAL-ENGINE YCbCr + SPATIAL WEIGHTING)
+// GIÁM SÁT KHUÔN MẶT, CHE CAMERA, NHIỀU NGƯỜI & ĐẾM 4 GIÂY CẢNH BÁO VI PHẠM
+// =========================================================================
+window.createUniversalProctoringAI = function(opts) {
+  const { videoEl, statusEl, onViolation, stream, isActiveCallback } = opts || {};
+  if (!videoEl || !stream) return { stop: () => {} };
+
+  videoEl.srcObject = stream;
+  const ensurePlay = () => {
+    if (videoEl && videoEl.paused) {
+      videoEl.play().catch(() => {});
+    }
+  };
+  ensurePlay();
+  videoEl.addEventListener('loadedmetadata', ensurePlay);
+  videoEl.addEventListener('canplay', ensurePlay);
+  if (typeof document !== 'undefined') {
+    document.addEventListener('click', ensurePlay, { once: true });
+  }
+
+  let fd = null;
+  if (typeof window !== 'undefined' && 'FaceDetector' in window) {
+    try { fd = new FaceDetector({ fastMode: true, maxDetectedFaces: 3 }); } catch(e) {}
+  }
+
+  let evalCanvas = null;
+  let evalCtx = null;
+  if (typeof document !== 'undefined') {
+    evalCanvas = document.createElement('canvas');
+    evalCanvas.width = 64;
+    evalCanvas.height = 48;
+    evalCtx = evalCanvas.getContext('2d', { willReadFrequently: true });
+  }
+
+  let faceAbsentTimer = 0;
+  let multiPersonTimer = 0;
+  let isChecking = false;
+
+  if (statusEl) {
+    statusEl.textContent = '● Đang giám sát AI';
+    statusEl.style.color = '#16a34a';
+  }
+
+  const intervalId = setInterval(async () => {
+    if (typeof isActiveCallback === 'function' && !isActiveCallback()) return;
+    if (isChecking || !evalCtx) return;
+    isChecking = true;
+
+    try {
+      ensurePlay();
+
+      // Check if video is rendering frames
+      if (videoEl.videoWidth === 0 || videoEl.videoHeight === 0) {
+        if (statusEl) {
+          statusEl.textContent = '⏳ Đang đồng bộ Camera...';
+          statusEl.style.color = '#f59e0b';
+        }
+        isChecking = false;
+        return;
+      }
+
+      // Draw current video frame to 64x48
+      evalCtx.drawImage(videoEl, 0, 0, 64, 48);
+      const imgData = evalCtx.getImageData(0, 0, 64, 48);
+      const d = imgData.data;
+
+      let totLuma = 0;
+      let faceZoneSkinPixels = 0;
+      // Vùng khuôn mặt trực diện phía trên-giữa (x: 18..46, y: 8..32) -> 28 x 24 = 672 pixels
+      const faceZoneTotalPixels = 28 * 24;
+
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2];
+        const Y  =  0.299 * r + 0.587 * g + 0.114 * b;
+        const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
+        const Cr =  0.500 * r - 0.419 * g - 0.081 * b + 128;
+
+        totLuma += Y;
+
+        const px = (i / 4) % 64;
+        const py = Math.floor((i / 4) / 64);
+
+        // Vùng trọng tâm khuôn mặt trực diện (mắt, mũi, trán, miệng khi nhìn thẳng vào màn hình)
+        if (px >= 18 && px <= 46 && py >= 8 && py <= 32) {
+          // Chuẩn nhận diện màu da YCbCr chính xác
+          if (Y > 18 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) {
+            faceZoneSkinPixels++;
+          }
+        }
+      }
+
+      const meanLuma = totLuma / (64 * 48);
+      const faceZoneSkinRatio = faceZoneSkinPixels / faceZoneTotalPixels;
+
+      // 1. Camera bị che hoặc phòng quá tối
+      if (meanLuma < 12) {
+        faceAbsentTimer++;
+        if (statusEl) {
+          statusEl.textContent = `⚠️ Camera bị che / Tối (${faceAbsentTimer}/4)`;
+          statusEl.style.color = '#ef4444';
+        }
+        if (faceAbsentTimer >= 4) {
+          faceAbsentTimer = 0;
+          if (typeof onViolation === 'function') onViolation('Camera bị che hoặc phòng thi quá tối không thấy học sinh!');
+        }
+        isChecking = false;
+        return;
+      }
+
+      // 2. Kiểm tra FaceDetector nội bộ của trình duyệt nếu hỗ trợ
+      let nativeFaces = -1;
+      if (fd) {
+        try {
+          const detected = await fd.detect(videoEl);
+          nativeFaces = detected.length;
+        } catch(e) {}
+      }
+
+      // 3. Phát hiện nhiều người trước camera
+      if (nativeFaces > 1) {
+        multiPersonTimer++;
+        if (statusEl) {
+          statusEl.textContent = `⚠️ Nhiều người! (${multiPersonTimer}/3)`;
+          statusEl.style.color = '#ef4444';
+        }
+        if (multiPersonTimer >= 3) {
+          multiPersonTimer = 0;
+          if (typeof onViolation === 'function') onViolation('Phát hiện nhiều người trước camera trong không gian thi!');
+        }
+        isChecking = false;
+        return;
+      } else {
+        multiPersonTimer = 0;
+      }
+
+      // 4. Nhận diện khuôn mặt hiện diện trực diện (Nhạy tuyệt đối khi cúi đầu, nghiêng đầu, rời camera):
+      // - Nếu có FaceDetector: nativeFaces === 1 -> Có mặt; nativeFaces === 0 -> Vắng mặt/Cúi đầu
+      // - Nếu không có FaceDetector: tỷ lệ da vùng mặt trực diện faceZoneSkinRatio phải >= 0.10 (10%)
+      let hasFace = false;
+      if (nativeFaces === 1) {
+        // Có 1 khuôn mặt và vùng mặt trực diện còn hiện diện
+        hasFace = (faceZoneSkinRatio >= 0.06);
+      } else if (nativeFaces === 0) {
+        // FaceDetector không thấy mặt (đã cúi đầu hoặc rời đi)
+        hasFace = false;
+      } else {
+        // Fallback YCbCr vùng khuôn mặt trực diện
+        hasFace = (faceZoneSkinRatio >= 0.10);
+      }
+
+      if (!hasFace) {
+        faceAbsentTimer++;
+        if (statusEl) {
+          statusEl.textContent = `⚠️ Không thấy mặt (${faceAbsentTimer}/4)`;
+          statusEl.style.color = '#ef4444';
+        }
+        if (faceAbsentTimer >= 4) {
+          faceAbsentTimer = 0;
+          if (typeof onViolation === 'function') onViolation('Không phát hiện khuôn mặt / Học sinh đã rời khỏi màn hình camera quá 4 giây!');
+        }
+      } else {
+        faceAbsentTimer = 0;
+        if (statusEl) {
+          statusEl.textContent = '● Đang giám sát AI';
+          statusEl.style.color = '#16a34a';
+        }
+      }
+    } catch(err) {
+      console.warn('Proctoring scan error:', err);
+    } finally {
+      isChecking = false;
+    }
+  }, 1000);
+
+  return {
+    stop: () => {
+      clearInterval(intervalId);
+    }
+  };
+};
+
 class LMSApp {
   restoreRememberedCredentials() {
     try {
@@ -9947,6 +10129,320 @@ render_ai_geometry(dom) {
 
 
   // =====================================================
+  
+  // =====================================================
+  // BỘ MÁY GIÁM SÁT CAMERA AI V2 (PROCTORING ENGINE V2)
+  // Phân tích ma trận sinh trắc học, Head Pose, và Snapshot Proof
+  // =====================================================
+  _analyzeProctorFrame(videoEl, evalCanvas, refFaceData) {
+    if (!videoEl || videoEl.videoWidth === 0 || videoEl.videoHeight === 0) {
+      return { hasFace: false, confidence: 0, pose: 'NO_VIDEO', reason: 'Không có tín hiệu camera', bbox: null, multi: false };
+    }
+    const W = 80, H = 60;
+    evalCanvas.width = W;
+    evalCanvas.height = H;
+    const ctx = evalCanvas.getContext('2d', { willReadFrequently: true });
+    try {
+      ctx.drawImage(videoEl, 0, 0, W, H);
+    } catch(e) {
+      return { hasFace: false, confidence: 0, pose: 'ERROR', reason: 'Lỗi đọc frame', bbox: null, multi: false };
+    }
+
+    let imgData;
+    try {
+      imgData = ctx.getImageData(0, 0, W, H);
+    } catch(e) {
+      return { hasFace: false, confidence: 0, pose: 'ERROR', reason: 'Lỗi canvas', bbox: null, multi: false };
+    }
+
+    const d = imgData.data;
+    let totLuma = 0;
+    let skinPixels = 0;
+    let minX = W, maxX = 0, minY = H, maxY = 0;
+    let sumX = 0, sumY = 0;
+    
+    // Spatial 4x4 sector luminance for template & pose
+    const sectors = new Float32Array(16);
+    const sectorCount = new Uint16Array(16);
+
+    // Dynamic Skin segmentation (YCbCr + RGB rules for Asian / Vietnamese skin)
+    const skinMap = new Uint8Array(W * H);
+
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const idx = (y * W + x) * 4;
+        const r = d[idx], g = d[idx + 1], b = d[idx + 2];
+        const Y  =  0.299 * r + 0.587 * g + 0.114 * b;
+        const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
+        const Cr =  0.500 * r - 0.419 * g - 0.081 * b + 128;
+
+        totLuma += Y;
+
+        const sX = Math.min(3, Math.floor(x / (W / 4)));
+        const sY = Math.min(3, Math.floor(y / (H / 4)));
+        const sIdx = sY * 4 + sX;
+        sectors[sIdx] += Y;
+        sectorCount[sIdx]++;
+
+        // Multi-color-space skin detection
+        const isSkin = (
+          (Y > 22 && Cb >= 72 && Cb <= 135 && Cr >= 130 && Cr <= 180) ||
+          (r > 65 && g > 40 && b > 20 && (r - g > 12) && (r > b) && Math.abs(r - g) >= 10)
+        );
+
+        if (isSkin) {
+          skinMap[y * W + x] = 1;
+          skinPixels++;
+          sumX += x;
+          sumY += y;
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    const meanLuma = totLuma / (W * H);
+    if (meanLuma < 14) {
+      return { hasFace: false, confidence: 0, pose: 'DARK', reason: 'Camera quá tối hoặc bị che', bbox: null, multi: false, meanLuma };
+    }
+
+    const totalArea = W * H;
+    const skinRatio = skinPixels / totalArea;
+
+    // Reject if too few skin pixels (person left chair or covered face)
+    if (skinPixels < 120 || skinRatio < 0.035) {
+      return { hasFace: false, confidence: 0, pose: 'ABSENT', reason: 'Không thấy học sinh trước camera', bbox: null, multi: false, skinRatio };
+    }
+
+    // Centroid of face cluster
+    const cx = sumX / skinPixels;
+    const cy = sumY / skinPixels;
+    const boxW = Math.max(1, maxX - minX);
+    const boxH = Math.max(1, maxY - minY);
+
+    // Check Multiple Person clusters (left half vs right half disconnected centroids)
+    let leftSkin = 0, rightSkin = 0;
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        if (skinMap[y * W + x]) {
+          if (x < W * 0.4) leftSkin++;
+          if (x > W * 0.6) rightSkin++;
+        }
+      }
+    }
+    const isMultiPerson = (leftSkin > 160 && rightSkin > 160 && Math.abs(leftSkin - rightSkin) < 180 && boxW > W * 0.75);
+
+    // Check contrast between upper third (forehead/eyes) and middle third (cheeks/nose)
+    let topSkin = 0, midSkin = 0, bottomSkin = 0;
+    for (let y = minY; y <= maxY; y++) {
+      const rowThird = Math.floor(((y - minY) / boxH) * 3);
+      for (let x = minX; x <= maxX; x++) {
+        if (skinMap[y * W + x]) {
+          if (rowThird === 0) topSkin++;
+          else if (rowThird === 1) midSkin++;
+          else bottomSkin++;
+        }
+      }
+    }
+
+    // Pose Estimation
+    let pose = 'CENTER';
+    let reason = 'Khóa mục tiêu chuẩn xác';
+    let confidence = Math.min(99, Math.max(75, Math.round((skinRatio * 280) + 55)));
+
+    if (isMultiPerson) {
+      pose = 'MULTI';
+      reason = 'Phát hiện nhiều người trong phòng thi';
+      confidence = 45;
+    } else if (cx < W * 0.22) {
+      pose = 'LEFT';
+      reason = 'Học sinh lệch sang trái / nhìn ra ngoài';
+      confidence = 55;
+    } else if (cx > W * 0.78) {
+      pose = 'RIGHT';
+      reason = 'Học sinh lệch sang phải / nhìn ra ngoài';
+      confidence = 55;
+    } else if (cy > H * 0.75 || topSkin < 12) {
+      pose = 'DOWN';
+      reason = 'Học sinh cúi đầu nhìn xuống';
+      confidence = 50;
+    } else if (boxW < W * 0.16 || boxH < H * 0.2) {
+      pose = 'FAR';
+      reason = 'Học sinh ngồi quá xa camera';
+      confidence = 60;
+    }
+
+    // Normalize 4x4 spatial sectors for face comparison
+    for (let i = 0; i < 16; i++) {
+      if (sectorCount[i] > 0) sectors[i] = sectors[i] / sectorCount[i];
+    }
+
+    // Compare with Step 1 Registered Face template if available
+    let templateSimilarity = 100;
+    if (refFaceData && refFaceData.sectors && refFaceData.sectors.length === 16) {
+      let dot = 0, normA = 0, normB = 0;
+      for (let i = 0; i < 16; i++) {
+        dot += sectors[i] * refFaceData.sectors[i];
+        normA += sectors[i] * sectors[i];
+        normB += refFaceData.sectors[i] * refFaceData.sectors[i];
+      }
+      if (normA > 0 && normB > 0) {
+        templateSimilarity = Math.round((dot / (Math.sqrt(normA) * Math.sqrt(normB))) * 100);
+      }
+    }
+
+    // Bounding Box in video pixel space
+    const bbox = {
+      x: Math.max(0, minX - 4),
+      y: Math.max(0, minY - 4),
+      w: Math.min(W - minX + 4, boxW + 8),
+      h: Math.min(H - minY + 4, boxH + 8),
+      cx, cy,
+      normW: W, normH: H
+    };
+
+    const hasFace = (pose !== 'DARK' && pose !== 'ABSENT');
+
+    return {
+      hasFace,
+      confidence,
+      pose,
+      reason,
+      bbox,
+      multi: isMultiPerson,
+      templateSimilarity,
+      sectors
+    };
+  }
+
+  // Vẽ Canvas AI HUD hiển thị khung ngắm công nghệ cao
+  _drawProctorHUD(hudCanvas, analysis, absentCountdown = 0) {
+    if (!hudCanvas) return;
+    const W = hudCanvas.width || 140;
+    const H = hudCanvas.height || 105;
+    const ctx = hudCanvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+
+    const isOk = analysis && analysis.hasFace && analysis.pose === 'CENTER' && absentCountdown === 0;
+    const mainColor = isOk ? '#10b981' : (absentCountdown > 0 ? '#ef4444' : '#f59e0b');
+    const glowColor = isOk ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.5)';
+
+    // 1. Draw Corner brackets of HUD viewport
+    ctx.strokeStyle = mainColor;
+    ctx.lineWidth = 2;
+    const bracketLen = 10;
+    // Top-Left
+    ctx.beginPath(); ctx.moveTo(4, 4 + bracketLen); ctx.lineTo(4, 4); ctx.lineTo(4 + bracketLen, 4); ctx.stroke();
+    // Top-Right
+    ctx.beginPath(); ctx.moveTo(W - 4 - bracketLen, 4); ctx.lineTo(W - 4, 4); ctx.lineTo(W - 4, 4 + bracketLen); ctx.stroke();
+    // Bottom-Left
+    ctx.beginPath(); ctx.moveTo(4, H - 4 - bracketLen); ctx.lineTo(4, H - 4); ctx.lineTo(4 + bracketLen, H - 4); ctx.stroke();
+    // Bottom-Right
+    ctx.beginPath(); ctx.moveTo(W - 4 - bracketLen, H - 4); ctx.lineTo(W - 4, H - 4); ctx.lineTo(W - 4, H - 4 - bracketLen); ctx.stroke();
+
+    // 2. Draw Target Bounding Box around Face
+    if (analysis && analysis.bbox && analysis.hasFace) {
+      const scaleX = W / analysis.bbox.normW;
+      const scaleY = H / analysis.bbox.normH;
+      const bx = analysis.bbox.x * scaleX;
+      const by = analysis.bbox.y * scaleY;
+      const bw = analysis.bbox.w * scaleX;
+      const bh = analysis.bbox.h * scaleY;
+
+      ctx.save();
+      ctx.strokeStyle = mainColor;
+      ctx.lineWidth = 1.8;
+      ctx.shadowColor = glowColor;
+      ctx.shadowBlur = 6;
+
+      if (!isOk) {
+        ctx.setLineDash([4, 3]);
+      }
+
+      // Draw rounded face box
+      ctx.strokeRect(bx, by, bw, bh);
+
+      // Draw corner highlights on face box
+      const cb = 6;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      // TL
+      ctx.moveTo(bx, by + cb); ctx.lineTo(bx, by); ctx.lineTo(bx + cb, by);
+      // TR
+      ctx.moveTo(bx + bw - cb, by); ctx.lineTo(bx + bw, by); ctx.lineTo(bx + bw, by + cb);
+      // BL
+      ctx.moveTo(bx, by + bh - cb); ctx.lineTo(bx, by + bh); ctx.lineTo(bx + cb, by + bh);
+      // BR
+      ctx.moveTo(bx + bw - cb, by + bh); ctx.lineTo(bx + bw, by + bh); ctx.lineTo(bx + bw, by + bh - cb);
+      ctx.stroke();
+
+      // Center crosshair
+      const cx = bx + bw / 2;
+      const cy = by + bh / 2;
+      ctx.strokeStyle = mainColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, cy); ctx.lineTo(cx + 5, cy);
+      ctx.moveTo(cx, cy - 5); ctx.lineTo(cx, cy + 5);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // 3. Top HUD Bar: AI LOCK & CONFIDENCE
+    ctx.fillStyle = 'rgba(15,23,42,0.8)';
+    ctx.fillRect(4, 4, W - 8, 16);
+    ctx.fillStyle = isOk ? '#34d399' : '#f87171';
+    ctx.font = 'bold 8px monospace';
+    ctx.textBaseline = 'middle';
+    const confText = isOk ? `● LOCK: ${analysis ? analysis.confidence : 95}%` : (absentCountdown > 0 ? `⚠️ MẤT DẤU ${absentCountdown}/4s` : `⚠️ ${analysis ? analysis.pose : 'WARN'}`);
+    ctx.fillText(confText, 8, 12);
+
+    // 4. Bottom HUD Bar: POSE & STATUS
+    ctx.fillStyle = 'rgba(15,23,42,0.8)';
+    ctx.fillRect(4, H - 18, W - 8, 14);
+    ctx.fillStyle = isOk ? '#6ee7b7' : '#fca5a5';
+    ctx.font = 'bold 7.5px sans-serif';
+    const statusText = isOk ? 'KHUÔN MẶT HỢP LỆ' : (analysis ? analysis.reason : 'KIỂM TRA LẠI');
+    ctx.fillText(statusText.substring(0, 24), 8, H - 11);
+  }
+
+  // Chụp ảnh frame sắc nét làm bằng chứng vi phạm
+  _captureProctorSnapshot(videoEl, studentName, violationReason) {
+    try {
+      if (!videoEl || videoEl.videoWidth === 0) return null;
+      const capCanvas = document.createElement('canvas');
+      capCanvas.width = 360;
+      capCanvas.height = 270;
+      const ctx = capCanvas.getContext('2d');
+      ctx.drawImage(videoEl, 0, 0, 360, 270);
+
+      // Watermark footer
+      ctx.fillStyle = 'rgba(15,23,42,0.88)';
+      ctx.fillRect(0, 215, 360, 55);
+
+      // Red warning badge
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(0, 215, 360, 4);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText(`🚨 BẰNG CHỨNG VI PHẠM: ${violationReason}`, 8, 232);
+
+      ctx.font = '9px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      const timeStr = new Date().toLocaleString('vi-VN');
+      ctx.fillText(`👤 ${studentName || 'Học sinh'} | ⏰ ${timeStr} | 🏫 THCS AMA TRANG LƠNG`, 8, 250);
+
+      return capCanvas.toDataURL('image/jpeg', 0.85);
+    } catch(e) {
+      console.warn('Cannot capture snapshot:', e);
+      return null;
+    }
+  }
+
   async startExamSession(examId, isPreviewMode = false) {
     const exam = (db.getExams() || []).find(e => e.id === examId);
     if (!exam) { this.showToast('Không tìm thấy đề thi!', 'error'); return; }
@@ -10167,35 +10663,50 @@ render_ai_geometry(dom) {
       };
 
       const runDetect = async () => {
-        if (video.readyState < 2) return;
+        if (video.videoWidth === 0 || video.videoHeight === 0) return;
+        let nativeFaces = -1;
         if (fd) {
           try {
             const faces = await fd.detect(video);
-            if (faces.length === 0) {
-              faceOk = false; setStatus('⚠️ Không phát hiện khuôn mặt — hãy nhìn vào camera', 'err');
-            } else if (faces.length > 1) {
-              faceOk = false; setStatus('⚠️ Nhiều người trước camera — chỉ học sinh thi được ngồi trước', 'warn');
-            } else {
-              faceOk = true; setStatus('✅ Phát hiện 1 khuôn mặt — nhấn Chụp để xác nhận', 'ok');
+            nativeFaces = faces.length;
+          } catch(e) {}
+        }
+
+        let skinRatio = 0;
+        let centerSkinRatio = 0;
+        try {
+          const tc = document.createElement('canvas'); tc.width = 64; tc.height = 48;
+          const tx = tc.getContext('2d'); tx.drawImage(video, 0, 0, 64, 48);
+          const d = tx.getImageData(0, 0, 64, 48).data;
+          let skin = 0;
+          let centerSkin = 0;
+          for (let i = 0; i < d.length; i += 4) {
+            const r = d[i], g = d[i+1], b = d[i+2];
+            const Y  =  0.299 * r + 0.587 * g + 0.114 * b;
+            const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
+            const Cr =  0.500 * r - 0.419 * g - 0.081 * b + 128;
+            if (Y > 15 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) {
+              skin++;
+              const px = (i / 4) % 64;
+              const py = Math.floor((i / 4) / 64);
+              if (px >= 14 && px <= 50 && py >= 8 && py <= 42) {
+                centerSkin++;
+              }
             }
-          } catch(e) { faceOk = true; setStatus('✅ Camera sẵn sàng — nhấn Chụp', 'ok'); }
+          }
+          skinRatio = skin / (64 * 48);
+          centerSkinRatio = centerSkin / (36 * 34);
+        } catch(e) {}
+
+        if (nativeFaces > 1) {
+          faceOk = false;
+          setStatus('⚠️ Nhiều người trước camera — chỉ học sinh thi được ngồi trước', 'warn');
+        } else if (nativeFaces === 1 || centerSkinRatio >= 0.03 || skinRatio >= 0.035) {
+          faceOk = true;
+          setStatus('✅ Phát hiện khuôn mặt — nhấn Chụp để xác nhận', 'ok');
         } else {
-          // YCbCr skin tone detection fallback
-          try {
-            const tc = document.createElement('canvas'); tc.width = 124; tc.height = 93;
-            const tx = tc.getContext('2d'); tx.drawImage(video, 0, 0, 124, 93);
-            const d = tx.getImageData(0, 0, 124, 93).data;
-            let skin = 0;
-            for (let i = 0; i < d.length; i += 4) {
-              const Y  =  0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-              const Cb = -0.169 * d[i] - 0.331 * d[i+1] + 0.500 * d[i+2] + 128;
-              const Cr =  0.500 * d[i] - 0.419 * d[i+1] - 0.081 * d[i+2] + 128;
-              if (Y > 15 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) skin++;
-            }
-            faceOk = (skin / (124 * 93)) > 0.035;
-            if (faceOk) setStatus('✅ Phát hiện khuôn mặt — nhấn Chụp', 'ok');
-            else setStatus('⚠️ Không thấy mặt rõ — hãy nhìn thẳng vào camera', 'err');
-          } catch(e) { faceOk = true; }
+          faceOk = false;
+          setStatus('⚠️ Không phát hiện khuôn mặt — hãy nhìn thẳng vào camera', 'err');
         }
         if (faceOk) {
           captureBtn.disabled = false;
@@ -10234,10 +10745,31 @@ render_ai_geometry(dom) {
           if (Y > 15 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) skinCount++;
         }
 
+        // Compute spatial 4x4 sectors for face comparison
+        const sectors = new Float32Array(16);
+        const sectorCount = new Uint16Array(16);
+        for (let y = 0; y < 48; y++) {
+          for (let x = 0; x < 64; x++) {
+            const idx = (y * 64 + x) * 4;
+            const Y = 0.299 * id.data[idx] + 0.587 * id.data[idx+1] + 0.114 * id.data[idx+2];
+            const sX = Math.min(3, Math.floor(x / 16));
+            const sY = Math.min(3, Math.floor(y / 12));
+            const sIdx = sY * 4 + sX;
+            sectors[sIdx] += Y;
+            sectorCount[sIdx]++;
+          }
+        }
+        for (let i = 0; i < 16; i++) {
+          if (sectorCount[i] > 0) sectors[i] = sectors[i] / sectorCount[i];
+        }
+
+        const snapData = refCanvas.toDataURL('image/jpeg', 0.85);
         this._examFaceRef = {
           grayData: gray,
           skinRatio: skinCount / (64 * 48),
           meanLuma: totLuma / (64 * 48),
+          sectors: Array.from(sectors),
+          snapshot: snapData,
           captured: true
         };
 
@@ -10493,11 +11025,16 @@ render_ai_geometry(dom) {
       : allLogs.map((l, i) => {
           const dt = new Date(l.timestamp);
           const ts = isNaN(dt) ? l.timestamp : dt.toLocaleString('vi-VN');
+          const snapThumb = l.snapshot ? `
+            <img src="${l.snapshot}" style="width:48px;height:36px;object-fit:cover;border-radius:6px;border:1.5px solid #cbd5e1;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.1);" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${l.snapshot}')" title="Nhấp để xem phóng to ảnh bằng chứng" />
+          ` : '<span style="color:#94a3b8;font-size:0.75rem;">(Không có ảnh)</span>';
+
           return `<tr style="background:${i % 2 === 0 ? '#f8fafc' : '#fff'};">
             <td style="padding:0.6rem 0.8rem;font-size:0.82rem;color:#475569;white-space:nowrap;">${ts}</td>
             <td style="padding:0.6rem 0.8rem;font-size:0.82rem;font-weight:600;color:#0f172a;">${getName(l.studentId)}</td>
             <td style="padding:0.6rem 0.8rem;font-size:0.82rem;color:#374151;">${l.type || ''}</td>
-            <td style="padding:0.6rem 0.8rem;font-size:0.82rem;text-align:center;font-weight:700;color:#dc2626;">L\u1ea7n ${i + 1}</td>
+            <td style="padding:0.4rem 0.6rem;text-align:center;">${snapThumb}</td>
+            <td style="padding:0.6rem 0.8rem;font-size:0.82rem;text-align:center;font-weight:700;color:#dc2626;">Lần ${i + 1}</td>
           </tr>`;
         }).join('');
 
@@ -10531,10 +11068,11 @@ render_ai_geometry(dom) {
           <table style="width:100%;border-collapse:collapse;">
             <thead>
               <tr style="background:#1e3a8a;color:#fff;">
-                <th style="padding:0.7rem 0.8rem;text-align:left;font-size:0.82rem;font-weight:700;">\u23f0 Th\u1eddi gian</th>
-                <th style="padding:0.7rem 0.8rem;text-align:left;font-size:0.82rem;font-weight:700;">\u{1F464} H\u1ecdc sinh</th>
-                <th style="padding:0.7rem 0.8rem;text-align:left;font-size:0.82rem;font-weight:700;">\u26a0\ufe0f Lo\u1ea1i vi ph\u1ea1m</th>
-                <th style="padding:0.7rem 0.8rem;text-align:center;font-size:0.82rem;font-weight:700;">L\u1ea7n</th>
+                <th style="padding:0.7rem 0.8rem;text-align:left;font-size:0.82rem;font-weight:700;">⏰ Thời gian</th>
+                <th style="padding:0.7rem 0.8rem;text-align:left;font-size:0.82rem;font-weight:700;">👤 Học sinh</th>
+                <th style="padding:0.7rem 0.8rem;text-align:left;font-size:0.82rem;font-weight:700;">⚠️ Loại vi phạm</th>
+                <th style="padding:0.7rem 0.8rem;text-align:center;font-size:0.82rem;font-weight:700;">📸 Bằng chứng</th>
+                <th style="padding:0.7rem 0.8rem;text-align:center;font-size:0.82rem;font-weight:700;">Lần</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
@@ -10720,14 +11258,20 @@ render_ai_geometry(dom) {
       </div>
 
       ${(exam.enableCamera && stream) ? `
-        <div id="cam-pip-panel" style="position:fixed;top:60px;right:12px;z-index:100000;width:132px;background:#ffffff;border:2px solid #10b981;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.18);display:flex;flex-direction:column;align-items:center;padding:0.3rem 0.3rem 0.4rem;gap:0.2rem;cursor:grab;user-select:none;touch-action:none;">
+        <div id="cam-pip-panel" style="position:fixed;top:60px;right:12px;z-index:100000;width:148px;background:#0f172a;border:2px solid #10b981;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;padding:0.35rem 0.35rem 0.45rem;gap:0.25rem;cursor:grab;user-select:none;touch-action:none;transition:all 0.2s;">
           <div style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 0.25rem;cursor:grab;">
-            <span style="font-size:0.6rem;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.4px;">📷 CAMERA AI</span>
-            <span style="font-size:0.6rem;color:#64748b;cursor:grab;" title="Kéo để di chuyển">✥</span>
+            <span style="font-size:0.62rem;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:0.4px;display:flex;align-items:center;gap:0.3rem;">
+              <span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;"></span>
+              CAMERA AI HUD
+            </span>
+            <span style="font-size:0.65rem;color:#94a3b8;cursor:grab;" title="Kéo để di chuyển">✥</span>
           </div>
-          <video id="exam-pip-video" autoplay muted playsinline style="width:118px;height:88px;border-radius:8px;object-fit:cover;pointer-events:none;"></video>
-          <canvas id="exam-pip-canvas" style="display:none;"></canvas>
-          <div id="cam-status" style="font-size:0.62rem;font-weight:700;color:#16a34a;">● Giám sát mặt</div>
+          <div style="position:relative;width:138px;height:104px;border-radius:8px;overflow:hidden;background:#000;">
+            <video id="exam-pip-video" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"></video>
+            <canvas id="exam-pip-hud" width="138" height="104" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
+            <canvas id="exam-pip-canvas" style="display:none;"></canvas>
+          </div>
+          <div id="cam-status" style="font-size:0.63rem;font-weight:700;color:#34d399;text-align:center;line-height:1.2;">● Đang giám sát AI</div>
         </div>
       ` : ''}
 
@@ -10832,7 +11376,7 @@ render_ai_geometry(dom) {
     if (commitBox)  { commitBox.onclick = triggerResume; }
     if (ackBtn)     { ackBtn.onclick = triggerResume; }
 
-    // Violation handler
+    // Violation handler with Automatic Snapshot Proof
     const handleViolation = (type) => {
       if (isSubmitting || isShowingViolationModal) return;
       isShowingViolationModal = true;
@@ -10840,25 +11384,43 @@ render_ai_geometry(dom) {
       const vc = this._examViolationCount;
       const vcEl = overlay.querySelector('#vcount');
       if (vcEl) vcEl.textContent = vc;
-      if (db.addExamViolationLog) db.addExamViolationLog(exam.id || this._examSessionId, this._examStudentId, type);
+
+      // Capture violation snapshot proof
+      const pipVid = overlay.querySelector('#exam-pip-video');
+      const studentObj = (db.getStudents ? db.getStudents() : []).find(s => s.id === this._examStudentId) || {};
+      const studentName = studentObj.name || this.currentUser?.name || this._examStudentId;
+      const snapshotUrl = this._captureProctorSnapshot(pipVid, studentName, type);
+
+      if (db.addExamViolationLog) {
+        db.addExamViolationLog(exam.id || this._examSessionId, this._examStudentId, type, new Date().toISOString(), snapshotUrl);
+      }
+
       const warningOverlay = overlay.querySelector('#violation-warning-overlay');
       const titleEl = overlay.querySelector('#violation-title');
       const msgEl   = overlay.querySelector('#violation-msg');
       if (commitChk) commitChk.checked = false;
+
+      const snapHtml = snapshotUrl ? `
+        <div style="margin-top:0.6rem;text-align:center;background:#fff;border-radius:10px;padding:0.4rem;border:1.5px solid #fca5a5;">
+          <img src="${snapshotUrl}" style="max-height:135px;max-width:100%;object-fit:contain;border-radius:6px;display:block;margin:0 auto;" />
+          <div style="font-size:0.72rem;color:#b91c1c;font-weight:700;margin-top:0.25rem;">📸 Bằng chứng camera đã được chụp và lưu vào hồ sơ thi của bạn</div>
+        </div>
+      ` : '';
+
       if (vc === 1) {
         if (titleEl) titleEl.textContent = '⚠️ CẢNH BÁO VI PHẠM LẦN 1/4';
-        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ Bạn đã vi phạm quy chế phòng thi. Tích chọn cam kết hoặc bấm nút bên dưới để tiếp tục bài thi!`;
+        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ Bạn đã vi phạm quy chế phòng thi. Tích chọn cam kết hoặc bấm nút bên dưới để tiếp tục bài thi!${snapHtml}`;
       } else if (vc === 2) {
         if (titleEl) titleEl.textContent = '⏱️ VI PHẠM LẦN 2/4 — TRỪ 30% THỜI GIAN';
-        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ <strong>Xử phạt:</strong> Thời gian còn lại đã bị trừ 30%! Hãy bấm cam kết không tái phạm để làm tiếp!`;
+        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ <strong>Xử phạt:</strong> Thời gian còn lại đã bị trừ 30%! Hãy bấm cam kết không tái phạm để làm tiếp!${snapHtml}`;
         if (timeLimitSec > 0) secondsLeft = Math.floor(secondsLeft * 0.7);
       } else if (vc === 3) {
         if (titleEl) titleEl.textContent = '⏱️ VI PHẠM LẦN 3/4 — TRỪ 70% THỜI GIAN';
-        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ <strong>Xử phạt:</strong> Thời gian còn lại đã bị trừ 70%! Cảnh báo cuối cùng trước khi tự động nộp bài!`;
+        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ <strong>Xử phạt:</strong> Thời gian còn lại đã bị trừ 70%! Cảnh báo cuối cùng trước khi tự động nộp bài!${snapHtml}`;
         if (timeLimitSec > 0) secondsLeft = Math.floor(secondsLeft * 0.3);
       } else if (vc >= 4) {
         if (titleEl) titleEl.textContent = '🚨 VI PHẠM LẦN 4/4 — TỰ ĐỘNG NỘP BÀI!';
-        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>🚨 Bạn đã vi phạm 4 lần. Hệ thống tự động nộp bài kiểm tra ngay lập tức!`;
+        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>🚨 Bạn đã vi phạm 4 lần. Hệ thống tự động nộp bài kiểm tra ngay lập tức!${snapHtml}`;
         if (commitChk) commitChk.checked = true;
         if (ackBtn) { ackBtn.style.background = '#dc2626'; ackBtn.textContent = '✅ NỘP BÀI THI & XEM KẾT QUẢ'; }
         setTimeout(() => submitExam(true), 2500);
@@ -11353,134 +11915,114 @@ render_ai_geometry(dom) {
         });
       } catch(e) { console.warn('Mic init error:', e); }
     }
-    // Face detection — Dual Engine (Native FaceDetector + Real-time YCbCr Skin Tone & Spatial Presence)
+    // 📷 AI Vision Proctoring V2 Engine (Multi-Zone Biometric Contour & HUD)
     if (exam.enableCamera && stream) {
-      const vidEl  = overlay.querySelector('#exam-pip-video');
-      const canEl  = overlay.querySelector('#exam-pip-canvas');
-      if (vidEl && canEl) {
-        const camSt = overlay.querySelector('#cam-status');
+      const vidEl   = overlay.querySelector('#exam-pip-video');
+      const hudEl   = overlay.querySelector('#exam-pip-hud');
+      const pipPane = overlay.querySelector('#cam-pip-panel');
+      const camSt   = overlay.querySelector('#cam-status');
+
+      if (vidEl) {
+        const evalC = document.createElement('canvas');
         let multiCount = 0;
+        let poseViolationTimer = 0;
 
-        const startFaceDetect = async () => {
+        const startFaceDetect = () => {
           if (faceInterval) return;
-          let fd = null;
-          if ('FaceDetector' in window) {
-            try { fd = new FaceDetector({ fastMode: true, maxDetectedFaces: 3 }); } catch(e) {}
-          }
-
-          // Small canvas for high-performance pixel evaluation
-          const evalC = document.createElement('canvas');
-          evalC.width = 64; evalC.height = 48;
-          const evalX = evalC.getContext('2d');
-
           if (camSt) {
-            camSt.textContent = '● Đang giám sát AI';
-            camSt.style.color = '#16a34a';
+            camSt.textContent = '🟢 AI Đang Giám Sát';
+            camSt.style.color = '#34d399';
           }
 
-          faceInterval = setInterval(async () => {
-            if (!this.isProctoringActive || vidEl.readyState < 2) {
-              if (vidEl && vidEl.paused) vidEl.play().catch(() => {});
+          faceInterval = setInterval(() => {
+            if (!this.isProctoringActive || isSubmitting) return;
+            if (vidEl.readyState < 2) {
+              if (vidEl.paused) vidEl.play().catch(() => {});
               return;
             }
 
-            // 1. Draw video frame & extract pixels
-            try { evalX.drawImage(vidEl, 0, 0, 64, 48); } catch(e) { return; }
-            let imgD; try { imgD = evalX.getImageData(0, 0, 64, 48); } catch(e) { return; }
+            const analysis = this._analyzeProctorFrame(vidEl, evalC, this._examFaceRef);
 
-            const d = imgD.data;
-            let totLuma = 0;
-            let skinPixels = 0;
-            let centerSkinPixels = 0;
-            const curGray = new Uint8Array(64 * 48);
+            // Update HUD Canvas
+            this._drawProctorHUD(hudEl, analysis, faceAbsentTimer);
 
-            for (let i = 0; i < d.length; i += 4) {
-              const r = d[i], g = d[i+1], b = d[i+2];
-              const Y  =  0.299 * r + 0.587 * g + 0.114 * b;
-              const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
-              const Cr =  0.500 * r - 0.419 * g - 0.081 * b + 128;
-
-              curGray[i/4] = Math.round(Y);
-              totLuma += Y;
-
-              // YCbCr skin tone detection
-              if (Y > 15 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) {
-                skinPixels++;
-                const px = (i / 4) % 64;
-                const py = Math.floor((i / 4) / 64);
-                // Center box (x: 16..48, y: 8..40)
-                if (px >= 16 && px <= 48 && py >= 8 && py <= 40) {
-                  centerSkinPixels++;
-                }
-              }
-            }
-
-            const meanLuma = totLuma / (64 * 48);
-            const skinRatio = skinPixels / (64 * 48);
-            const centerSkinRatio = centerSkinPixels / (32 * 32);
-
-            // Check camera covered / too dark
-            if (meanLuma < 10) {
+            // Handle Camera Covered / Too Dark
+            if (analysis.pose === 'DARK') {
               faceAbsentTimer++;
-              if (camSt) { camSt.textContent = '⚠️ Camera bị che / Quá tối (' + faceAbsentTimer + '/4)'; camSt.style.color = '#ef4444'; }
+              if (pipPane) pipPane.style.borderColor = '#ef4444';
+              if (camSt) {
+                camSt.textContent = `⚠️ Quá tối / Che cam (${faceAbsentTimer}/4)`;
+                camSt.style.color = '#ef4444';
+              }
               if (faceAbsentTimer >= 4) {
                 faceAbsentTimer = 0;
-                handleViolation('Camera bị che hoặc phòng thi quá tối không thấy học sinh!');
+                handleViolation('Camera bị che khuất hoặc phòng thi quá tối không thấy học sinh!');
               }
               return;
             }
 
-            // 2. Native FaceDetector check (if browser supports)
-            let nativeFacesCount = -1;
-            if (fd) {
-              try {
-                const faces = await fd.detect(vidEl);
-                nativeFacesCount = faces.length;
-              } catch(e) {}
-            }
-
-            // 3. Multi-person check
-            if (nativeFacesCount > 1) {
+            // Handle Multiple Persons
+            if (analysis.multi || analysis.pose === 'MULTI') {
               multiCount++;
-              if (camSt) { camSt.textContent = '⚠️ Nhiều người! (' + multiCount + '/3)'; camSt.style.color = '#ef4444'; }
+              if (pipPane) pipPane.style.borderColor = '#ef4444';
+              if (camSt) {
+                camSt.textContent = `⚠️ Nhiều người! (${multiCount}/3)`;
+                camSt.style.color = '#ef4444';
+              }
               if (multiCount >= 3) {
                 multiCount = 0;
-                handleViolation('Phát hiện nhiều người trước camera trong không gian thi!');
+                handleViolation('Phát hiện nhiều người xuất hiện trước camera trong không gian thi!');
               }
               return;
             } else {
               multiCount = 0;
             }
 
-            // 4. Face presence evaluation
-            // - If native FaceDetector is available: use native detector result
-            // - Else (standard Edge/Chrome/Firefox/Safari): use YCbCr skin tone + center composition
-            const hasFace = (nativeFacesCount === 1) || (nativeFacesCount === -1 && (skinRatio >= 0.025 || centerSkinRatio >= 0.03));
-
-            if (!hasFace) {
+            // Handle Absent (Left camera screen)
+            if (!analysis.hasFace || analysis.pose === 'ABSENT') {
               faceAbsentTimer++;
+              if (pipPane) pipPane.style.borderColor = '#ef4444';
               if (camSt) {
-                camSt.textContent = '⚠️ Không thấy mặt (' + faceAbsentTimer + '/4)';
+                camSt.textContent = `⚠️ Mất khuôn mặt (${faceAbsentTimer}/4s)`;
                 camSt.style.color = '#ef4444';
               }
               if (faceAbsentTimer >= 4) {
                 faceAbsentTimer = 0;
                 handleViolation('Không phát hiện khuôn mặt / Học sinh đã rời khỏi màn hình camera quá 4 giây!');
               }
-            } else {
-              // Face is detected & verified present!
-              faceAbsentTimer = 0;
+              return;
+            }
+
+            // Handle Looking Away / Bowing Down (Gian lận nhìn tài liệu / quay sang hỏi bài)
+            if (analysis.pose === 'LEFT' || analysis.pose === 'RIGHT' || analysis.pose === 'DOWN') {
+              poseViolationTimer++;
+              if (pipPane) pipPane.style.borderColor = '#f59e0b';
               if (camSt) {
-                camSt.textContent = '● Đang giám sát AI';
-                camSt.style.color = '#16a34a';
+                camSt.textContent = `⚠️ ${analysis.reason} (${poseViolationTimer}/4)`;
+                camSt.style.color = '#f59e0b';
               }
+              if (poseViolationTimer >= 4) {
+                poseViolationTimer = 0;
+                handleViolation(`Góc nhìn bất thường: ${analysis.reason}!`);
+              }
+              return;
+            } else {
+              poseViolationTimer = 0;
+            }
+
+            // Face is verified and fully normal
+            faceAbsentTimer = 0;
+            if (pipPane) pipPane.style.borderColor = '#10b981';
+            if (camSt) {
+              camSt.textContent = `● Khóa mục tiêu: ${analysis.confidence}% [OK]`;
+              camSt.style.color = '#34d399';
             }
           }, 1000);
         };
 
         if (!vidEl.srcObject) vidEl.srcObject = stream;
         vidEl.addEventListener('playing', () => startFaceDetect(), { once: true });
-        setTimeout(() => { if (!faceInterval) startFaceDetect(); }, 2000);
+        setTimeout(() => { if (!faceInterval) startFaceDetect(); }, 1500);
         vidEl.play().catch(() => { document.addEventListener('click', () => vidEl.play().catch(() => {}), { once: true }); });
       }
     }
@@ -12469,14 +13011,20 @@ render_ai_geometry(dom) {
               <div id="quizizz-arena-main" style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between; position:relative; z-index:2;"></div>
 
               ${mediaStream ? `
-                <div id="cam-pip-panel" style="position:fixed;top:60px;right:12px;z-index:100000;width:132px;background:#ffffff;border:2px solid #10b981;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.18);display:flex;flex-direction:column;align-items:center;padding:0.3rem 0.3rem 0.4rem;gap:0.2rem;cursor:grab;user-select:none;touch-action:none;">
+                <div id="cam-pip-panel" style="position:fixed;top:60px;right:12px;z-index:100000;width:148px;background:#0f172a;border:2px solid #10b981;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;padding:0.35rem 0.35rem 0.45rem;gap:0.25rem;cursor:grab;user-select:none;touch-action:none;transition:all 0.2s;">
                   <div style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 0.25rem;cursor:grab;">
-                    <span style="font-size:0.6rem;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.4px;">📷 CAMERA AI</span>
-                    <span style="font-size:0.6rem;color:#64748b;cursor:grab;" title="Kéo để di chuyển">✥</span>
+                    <span style="font-size:0.62rem;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:0.4px;display:flex;align-items:center;gap:0.3rem;">
+                      <span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;"></span>
+                      CAMERA AI HUD
+                    </span>
+                    <span style="font-size:0.65rem;color:#94a3b8;cursor:grab;" title="Kéo để di chuyển">✥</span>
                   </div>
-                  <video id="exam-pip-video" autoplay muted playsinline style="width:118px;height:88px;border-radius:8px;object-fit:cover;pointer-events:none;"></video>
-                  <canvas id="exam-pip-canvas" style="display:none;"></canvas>
-                  <div id="cam-status" style="font-size:0.62rem;font-weight:700;color:#16a34a;">● Đang giám sát AI</div>
+                  <div style="position:relative;width:138px;height:104px;border-radius:8px;overflow:hidden;background:#000;">
+                    <video id="exam-pip-video" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"></video>
+                    <canvas id="exam-pip-hud" width="138" height="104" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
+                    <canvas id="exam-pip-canvas" style="display:none;"></canvas>
+                  </div>
+                  <div id="cam-status" style="font-size:0.63rem;font-weight:700;color:#34d399;text-align:center;line-height:1.2;">● Đang giám sát AI</div>
                 </div>
               ` : ''}
 
@@ -12502,97 +13050,61 @@ render_ai_geometry(dom) {
             requestFullScreenMode();
             startBGM();
 
-            // 📷 Kết nối Camera và khởi chạy bộ máy Giám Sát AI chuẩn 100%
+                        // 📷 AI Vision Proctoring V2 Engine (Quizizz Mode)
             if (mediaStream) {
-              const vidEl = modal.querySelector('#exam-pip-video');
-              const camSt = modal.querySelector('#cam-status');
+              const vidEl   = modal.querySelector('#exam-pip-video');
+              const hudEl   = modal.querySelector('#exam-pip-hud');
+              const pipPane = modal.querySelector('#cam-pip-panel');
+              const camSt   = modal.querySelector('#cam-status');
+
               if (vidEl) {
-                vidEl.srcObject = mediaStream;
-                vidEl.play().catch(() => {});
-                
-                let quizFd = null;
-                if ('FaceDetector' in window) {
-                  try { quizFd = new FaceDetector({ fastMode: true, maxDetectedFaces: 3 }); } catch(e) {}
-                }
                 const evalC = document.createElement('canvas');
-                evalC.width = 64; evalC.height = 48;
-                const evalX = evalC.getContext('2d');
                 let faceAbsentTimer = 0;
                 let multiCount = 0;
+                let poseTimer = 0;
 
                 const startQuizProctoring = () => {
                   if (faceInterval) return;
                   if (camSt) {
-                    camSt.textContent = '● Đang giám sát AI';
-                    camSt.style.color = '#16a34a';
+                    camSt.textContent = '🟢 AI Đang Giám Sát';
+                    camSt.style.color = '#34d399';
                   }
 
-                  faceInterval = setInterval(async () => {
+                  faceInterval = setInterval(() => {
                     if (!document.getElementById('quizizz-game-test-modal')) {
                       clearInterval(faceInterval);
                       return;
                     }
+                    if (isShowingViolationModal) return;
                     if (vidEl.readyState < 2) {
                       if (vidEl.paused) vidEl.play().catch(() => {});
                       return;
                     }
 
-                    // 1. Chụp frame và tính toán sắc thái
-                    try { evalX.drawImage(vidEl, 0, 0, 64, 48); } catch(e) { return; }
-                    let imgD; try { imgD = evalX.getImageData(0, 0, 64, 48); } catch(e) { return; }
+                    const analysis = this._analyzeProctorFrame(vidEl, evalC, this._examFaceRef);
+                    this._drawProctorHUD(hudEl, analysis, faceAbsentTimer);
 
-                    const d = imgD.data;
-                    let totLuma = 0;
-                    let skinPixels = 0;
-                    let centerSkinPixels = 0;
-
-                    for (let i = 0; i < d.length; i += 4) {
-                      const r = d[i], g = d[i+1], b = d[i+2];
-                      const Y  =  0.299 * r + 0.587 * g + 0.114 * b;
-                      const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
-                      const Cr =  0.500 * r - 0.419 * g - 0.081 * b + 128;
-
-                      totLuma += Y;
-
-                      if (Y > 15 && Cb >= 75 && Cb <= 130 && Cr >= 130 && Cr <= 175) {
-                        skinPixels++;
-                        const px = (i / 4) % 64;
-                        const py = Math.floor((i / 4) / 64);
-                        // Vùng trung tâm khuôn mặt (x: 16..48, y: 8..40)
-                        if (px >= 16 && px <= 48 && py >= 8 && py <= 40) {
-                          centerSkinPixels++;
-                        }
-                      }
-                    }
-
-                    const meanLuma = totLuma / (64 * 48);
-                    const skinRatio = skinPixels / (64 * 48);
-                    const centerSkinRatio = centerSkinPixels / (32 * 32);
-
-                    // Quá tối hoặc bị che
-                    if (meanLuma < 10) {
+                    if (analysis.pose === 'DARK') {
                       faceAbsentTimer++;
-                      if (camSt) { camSt.textContent = '⚠️ Camera bị che / Quá tối (' + faceAbsentTimer + '/4)'; camSt.style.color = '#ef4444'; }
+                      if (pipPane) pipPane.style.borderColor = '#ef4444';
+                      if (camSt) {
+                        camSt.textContent = `⚠️ Quá tối / Che cam (${faceAbsentTimer}/4)`;
+                        camSt.style.color = '#ef4444';
+                      }
                       if (faceAbsentTimer >= 4) {
                         faceAbsentTimer = 0;
-                        triggerViolation('Camera bị che hoặc phòng thi quá tối không thấy học sinh!');
+                        triggerViolation('Camera bị che khuất hoặc phòng thi quá tối không thấy học sinh!');
                       }
                       return;
                     }
 
-                    // 2. Native FaceDetector check
-                    let nativeFacesCount = -1;
-                    if (quizFd) {
-                      try {
-                        const faces = await quizFd.detect(vidEl);
-                        nativeFacesCount = faces.length;
-                      } catch(e) {}
-                    }
-
-                    // 3. Multi-person check
-                    if (nativeFacesCount > 1) {
+                    if (analysis.multi || analysis.pose === 'MULTI') {
                       multiCount++;
-                      if (camSt) { camSt.textContent = '⚠️ Nhiều người! (' + multiCount + '/3)'; camSt.style.color = '#ef4444'; }
+                      if (pipPane) pipPane.style.borderColor = '#ef4444';
+                      if (camSt) {
+                        camSt.textContent = `⚠️ Nhiều người! (${multiCount}/3)`;
+                        camSt.style.color = '#ef4444';
+                      }
                       if (multiCount >= 3) {
                         multiCount = 0;
                         triggerViolation('Phát hiện nhiều người trước camera trong không gian thi!');
@@ -12602,33 +13114,51 @@ render_ai_geometry(dom) {
                       multiCount = 0;
                     }
 
-                    // 4. Face presence evaluation (Nhạy tuyệt đối theo vị trí trung tâm màn hình)
-                    const hasFace = (nativeFacesCount === 1) || (nativeFacesCount === -1 && (skinRatio >= 0.025 || centerSkinRatio >= 0.03));
-
-                    if (!hasFace) {
+                    if (!analysis.hasFace || analysis.pose === 'ABSENT') {
                       faceAbsentTimer++;
+                      if (pipPane) pipPane.style.borderColor = '#ef4444';
                       if (camSt) {
-                        camSt.textContent = '⚠️ Không thấy mặt (' + faceAbsentTimer + '/4)';
+                        camSt.textContent = `⚠️ Mất khuôn mặt (${faceAbsentTimer}/4s)`;
                         camSt.style.color = '#ef4444';
                       }
                       if (faceAbsentTimer >= 4) {
                         faceAbsentTimer = 0;
                         triggerViolation('Không phát hiện khuôn mặt / Học sinh đã rời khỏi màn hình camera quá 4 giây!');
                       }
-                    } else {
-                      faceAbsentTimer = 0;
+                      return;
+                    }
+
+                    if (analysis.pose === 'LEFT' || analysis.pose === 'RIGHT' || analysis.pose === 'DOWN') {
+                      poseTimer++;
+                      if (pipPane) pipPane.style.borderColor = '#f59e0b';
                       if (camSt) {
-                        camSt.textContent = '● Đang giám sát AI';
-                        camSt.style.color = '#16a34a';
+                        camSt.textContent = `⚠️ ${analysis.reason} (${poseTimer}/4)`;
+                        camSt.style.color = '#f59e0b';
                       }
+                      if (poseTimer >= 4) {
+                        poseTimer = 0;
+                        triggerViolation(`Góc nhìn bất thường: ${analysis.reason}!`);
+                      }
+                      return;
+                    } else {
+                      poseTimer = 0;
+                    }
+
+                    faceAbsentTimer = 0;
+                    if (pipPane) pipPane.style.borderColor = '#10b981';
+                    if (camSt) {
+                      camSt.textContent = `● Khóa mục tiêu: ${analysis.confidence}% [OK]`;
+                      camSt.style.color = '#34d399';
                     }
                   }, 1000);
                 };
 
+                vidEl.srcObject = mediaStream;
                 vidEl.addEventListener('playing', () => startQuizProctoring(), { once: true });
                 setTimeout(() => { if (!faceInterval) startQuizProctoring(); }, 1500);
+                vidEl.play().catch(() => {});
               }
-
+            }
               // Draggable PiP
               const pip = modal.querySelector('#cam-pip-panel');
               if (pip) {
@@ -12655,7 +13185,6 @@ render_ai_geometry(dom) {
                 document.addEventListener('touchmove', e => { const t = e.touches[0]; onMove(t.clientX, t.clientY); }, { passive: true });
                 document.addEventListener('touchend', onUp);
               }
-            }
 
             // Gán sự kiện cam kết vi phạm (giống 100% thi thường)
             const resumeFromViolation = () => {
