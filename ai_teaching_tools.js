@@ -86,7 +86,12 @@ window.AITeachingTools = {
       mysterypuzzle: 'Lật Mảnh Ghép Bí Ẩn',
       crossword: 'Ô Chữ Khóa Bí Mật',
       wordhunt: 'Đuổi Hình Bắt Chữ',
-      multiverse: 'Đấu Trường Đa Vũ Trụ'
+      multiverse: 'Đấu Trường Đa Vũ Trụ',
+      treasure: 'Thám Tử Tìm Kho Báu',
+      challengewheel: 'Vòng Quay Thử Thách AI',
+      spacejourney: 'Du Hành Vũ Trụ Kiến Thức',
+      knowledgearena: 'Đấu Trường Kiến Thức',
+      stations7: 'Hành Trình 7 Trạm AI'
     };
     return TOOL_NAMES[toolKey] || 'Công Cụ Giảng Dạy';
   },
@@ -111,7 +116,12 @@ window.AITeachingTools = {
       mysterypuzzle: '🧩',
       crossword: '🔤',
       wordhunt: '🖼️',
-      multiverse: '🌌'
+      multiverse: '🌌',
+      treasure: '🕵️‍♂️',
+      challengewheel: '🎡',
+      spacejourney: '🚀',
+      knowledgearena: '⚔️',
+      stations7: '🚩'
     };
     return TOOL_ICONS[toolKey] || '🎮';
   },
@@ -910,6 +920,46 @@ window.AITeachingTools = {
       <div class="ait-text-box">
         <span class="ait-tab-num">GAME 19</span>
         <span class="ait-tab-name">Đấu Trường Đa Vũ Trụ</span>
+      </div>
+    </button>
+
+    <button id="ait-tab-treasure" class="ait-tab-deluxe ${this.currentTab==='treasure'?'ait-tab-on':''}" style="--tab-theme:#d97706;--tab-bg:#fffbeb;">
+      <div class="ait-icon-box" style="background:#fef3c7;color:#b45309;">🕵️‍♂️</div>
+      <div class="ait-text-box">
+        <span class="ait-tab-num">GAME 20 (HOT 🌟)</span>
+        <span class="ait-tab-name">Thám Tử Tìm Kho Báu</span>
+      </div>
+    </button>
+
+    <button id="ait-tab-challengewheel" class="ait-tab-deluxe ${this.currentTab==='challengewheel'?'ait-tab-on':''}" style="--tab-theme:#0284c7;--tab-bg:#f0f9ff;">
+      <div class="ait-icon-box" style="background:#e0f2fe;color:#0369a1;">🎡</div>
+      <div class="ait-text-box">
+        <span class="ait-tab-num">GAME 21</span>
+        <span class="ait-tab-name">Vòng Quay Thử Thách AI</span>
+      </div>
+    </button>
+
+    <button id="ait-tab-spacejourney" class="ait-tab-deluxe ${this.currentTab==='spacejourney'?'ait-tab-on':''}" style="--tab-theme:#6366f1;--tab-bg:#eef2ff;">
+      <div class="ait-icon-box" style="background:#e0e7ff;color:#4338ca;">🚀</div>
+      <div class="ait-text-box">
+        <span class="ait-tab-num">GAME 22</span>
+        <span class="ait-tab-name">Du Hành Vũ Trụ</span>
+      </div>
+    </button>
+
+    <button id="ait-tab-knowledgearena" class="ait-tab-deluxe ${this.currentTab==='knowledgearena'?'ait-tab-on':''}" style="--tab-theme:#dc2626;--tab-bg:#fef2f2;">
+      <div class="ait-icon-box" style="background:#fee2e2;color:#b91c1c;">⚔️</div>
+      <div class="ait-text-box">
+        <span class="ait-tab-num">GAME 23 (2 ĐỘI VS)</span>
+        <span class="ait-tab-name">Đấu Trường Kiến Thức</span>
+      </div>
+    </button>
+
+    <button id="ait-tab-stations7" class="ait-tab-deluxe ${this.currentTab==='stations7'?'ait-tab-on':''}" style="--tab-theme:#059669;--tab-bg:#ecfdf5;">
+      <div class="ait-icon-box" style="background:#d1fae5;color:#047857;">🚩</div>
+      <div class="ait-text-box">
+        <span class="ait-tab-num">GAME 24 (GDPT 2018)</span>
+        <span class="ait-tab-name">Hành Trình 7 Trạm AI</span>
       </div>
     </button>
 
@@ -8414,127 +8464,433 @@ window.AITeachingTools = {
     }
   },
 
-  _getRealLessonDeck(subId, grade, lessonName) {
-    const subNames = { toan: 'Toán học', van: 'Ngữ văn', anh: 'Tiếng Anh', khtn: 'Khoa học tự nhiên', su: 'Lịch sử & Địa lý' };
-    const name = subNames[subId] || 'Toán học';
-    return {
-      title: lessonName || `Bài học ${name} Khối ${grade}`,
-      grade: grade || '6',
-      subject: name,
-      slides: [
-        { title: '🎯 MỤC TIÊU BÀI HỌC', content: '• Nắm vững khái niệm và định nghĩa cốt lõi\n• Thực hành giải bài tập và vận dụng thực tiễn\n• Phát triển năng lực số và tư duy sáng tạo' },
-        { title: '📖 HOẠT ĐỘNG KHỞI ĐỘNG', content: '• Quan sát hình ảnh thực tế và phát hiện quy luật\n• Thảo luận nhóm 2 phút để tìm ra câu trả lời' },
-        { title: '💡 KIẾN THỨC TRỌNG TÂM', content: '• Khắc sâu định lý, công thức và quy tắc quan trọng\n• Ví dụ minh họa chi tiết từng bước' },
-        { title: '✏️ LUYỆN TẬP & THỰC HÀNH', content: '• Làm việc theo cặp hoàn thành phiếu học tập\n• Đại diện trình bày kết quả trước lớp' },
-        { title: '🌟 VẬN DỤNG & NĂNG LỰC SỐ (NLS)', content: '• Ứng dụng AI và CNTT để tìm kiếm tài liệu mở rộng\n• Bài tập thực tế kết nối kiến thức với cuộc sống' }
-      ]
-    };
+  // =========================================================================
+  // 🎨 TAB 1: SLIDE & INFOGRAPHICS AI (TRUNG TÂM PHƯƠNG PHÁP SƯ PHẠM & NOTEBOOKLM STUDIO)
+  // =========================================================================
+  _getSlidePrompts(level, topic, grade, numSlides) {
+    const t = topic || '[Tên bài học / Chủ đề]';
+    const g = grade || (level==='cap1'?'[Khối lớp 1-5]':(level==='cap2'?'[Khối lớp 6-9]':'[Khối lớp 10-12]'));
+    const n = numSlides || '[Số lượng slide dự kiến]';
+
+    if (level === 'cap1') {
+      return `1. PROMPT DÀNH CHO CẤP 1 - TIỂU HỌC
+(Ưu tiên trực quan cụ thể, thao tác từng bước, vần điệu dễ nhớ)
+
+Bạn là Chuyên gia Phương pháp Giảng dạy và Thiết kế Slide Giáo dục Tiểu học. Nhiệm vụ của bạn là xây dựng dàn ý slide bài giảng rõ ràng, dễ hiểu, dẫn dắt học sinh khám phá kiến thức từ trực quan sinh động đến tư duy cụ thể.
+
+THÔNG TIN BÀI HỌC
+- Tên bài: ${t}
+- Khối lớp: ${g}
+- Số slide dự kiến: ${n}
+
+NGUYÊN TẮC SƯ PHẠM VÀ THIẾT KẾ DÀNH CHO TIỂU HỌC
+- Chữ viết: Font to, rõ ràng. Tối đa 2-3 dòng/slide. Ưu tiên gạch đầu dòng ngắn.
+- Hình ảnh: Đồ họa tươi sáng, hình ảnh thực tế quen thuộc với đời sống của các em.
+- Mạch bài: Quan sát hiện tượng cụ thể -> Rút ra quy luật/kiến thức đơn giản -> Thực hành lặp lại. Đặc biệt phân chia các bước thao tác thực hành thật rõ ràng.
+- Hoạt động: Trò chơi tương tác, chọn đáp án đúng/sai, tìm điểm khác biệt, thi đua nhóm.
+- Ngôn ngữ: Dễ hiểu, khích lệ. Bắt buộc tạo 1-2 "khẩu quyết" có vần điệu để các em đồng thanh đọc và ghi nhớ bài.
+
+YÊU CẦU ĐẦU RA CHO MỖI SLIDE
+Trình bày lần lượt từng slide theo cấu trúc chuẩn:
+- Slide [Số thứ tự]: [Tiêu đề]
+- Mục tiêu slide: (Học sinh cần nắm được thao tác/kiến thức gì?)
+- Text trên slide: (Nội dung chữ chính xác, tối đa 3 dòng)
+- Gợi ý Hình ảnh/Visual: (Mô tả icon, hình ảnh minh họa, sơ đồ mũi tên từng bước)
+- Câu hỏi dẫn dắt/Hoạt động: (Câu hỏi mở hoặc hoạt động nhóm nhỏ)
+- Ghi chú/Lời giảng cho Giáo viên: (Cách giáo viên làm mẫu hoặc hướng dẫn)`;
+    } else if (level === 'cap2') {
+      return `2. PROMPT DÀNH CHO CẤP 2 – THCS (mức độ 1)
+(Ưu tiên tư duy logic, phản biện, sơ đồ hóa)
+
+Bạn là Chuyên gia Phương pháp Giảng dạy và Thiết kế Slide Giáo dục THCS. Nhiệm vụ của bạn là xây dựng dàn ý slide bài giảng logic, có tính hệ thống cao, kích thích tư duy phản biện và khả năng liên hệ thực tế của học sinh.
+
+THÔNG TIN BÀI HỌC
+- Tên bài: ${t}
+- Khối lớp: ${g}
+- Số slide dự kiến: ${n}
+
+NGUYÊN TẮC SƯ PHẠM VÀ THIẾT KẾ DÀNH CHO THCS
+- Chữ viết: Tối đa 5 dòng/slide. Sử dụng từ khóa thay vì câu hoàn chỉnh.
+- Hình ảnh: Bắt buộc sử dụng Sơ đồ khối, Mindmap, Infographics, và hình ảnh thực tế (khoa học, công nghệ, xã hội).
+- Mạch bài: Đặt vấn đề có tính mâu thuẫn/thực tế -> Học sinh dự đoán/thảo luận -> Chốt kiến thức chuẩn -> Áp dụng giải quyết vấn đề.
+- Hoạt động: Câu hỏi "Vì sao?", "Làm thế nào?", bài tập tình huống (case-study), dự án nhỏ.
+- Ngôn ngữ: Chuẩn mực, logic, khơi gợi sự tò mò. Tôn trọng góc nhìn cá nhân của lứa tuổi dậy thì. Toán/Lý/Hóa/Tin học trình bày theo logic thuật toán hoặc công thức (dùng chuẩn LaTeX).
+
+YÊU CẦU ĐẦU RA CHO MỖI SLIDE
+Trình bày lần lượt từng slide theo cấu trúc chuẩn:
+- Slide [Số thứ tự]: [Tiêu đề]
+- Điểm nhấn tư duy: (Slide này giải quyết nút thắt nhận thức nào?)
+- Text trên slide: (Nội dung chữ tinh gọn bằng Bullet point)
+- Bố cục Trực quan: (Gợi ý cách vẽ sơ đồ, bảng so sánh, biểu đồ hoặc hình ảnh minh họa)
+- Hoạt động Thảo luận/Câu hỏi: (Câu hỏi đào sâu vấn đề cho học sinh)
+- Chìa khóa vàng: (1 câu chốt lại bản chất của slide)`;
+    } else {
+      return `3. PROMPT DÀNH CHO CẤP THCS (mức độ 2) & THPT
+(Ưu tiên tư duy trừu tượng, hệ thống hóa, tối giản và chuyên sâu)
+
+Bạn là Chuyên gia Thiết kế Slide và Phương pháp Giảng dạy THPT. Nhiệm vụ của bạn là xây dựng dàn bài giảng học thuật, tư duy cao, giúp học sinh hệ thống hóa kiến thức phức tạp và ứng dụng vào các dạng bài thi.
+
+THÔNG TIN BÀI HỌC
+- Tên bài: ${t}
+- Khối lớp: ${g}
+- Số slide dự kiến: ${n}
+
+NGUYÊN TẮC SƯ PHẠM VÀ THIẾT KẾ DÀNH CHO THPT
+- Chữ viết: Rút gọn thành các keyword cốt lõi. Tối ưu hóa không gian cho tư duy hình ảnh.
+- Hình ảnh/Visual: Thiết kế theo phong cách Tối giản (Minimalism), chuyên nghiệp. Sử dụng biểu đồ dữ liệu, sơ đồ tư duy phức tạp, mô hình không gian.
+- Mạch bài: Tổng quan hệ thống -> Đi sâu phân tích bản chất/Chứng minh -> So sánh/Đánh giá -> Luyện tập các dạng bài tập/câu hỏi thi.
+- Hoạt động: Tranh biện (Debate), thuyết trình, giải quyết bài toán phức hợp nhiều bước.
+- Ngôn ngữ: Học thuật, khách quan, súc tích, mang tính định hướng phương pháp. Công thức trình bày chuẩn LaTeX.
+
+YÊU CẦU ĐẦU RA CHO MỖI SLIDE
+Trình bày lần lượt từng slide theo cấu trúc chuẩn:
+- Slide [Số thứ tự]: [Tiêu đề]
+- Trọng tâm học thuật: (Kiến thức/kỹ năng cốt lõi của slide)
+- Text hiển thị: (Từ khóa, định lý, quy tắc - Cực kỳ súc tích)
+- Data/Visual: (Cấu trúc bảng biểu, sơ đồ hệ thống, hoặc biểu đồ)
+- Vận dụng/Phản biện: (Câu hỏi dạng Vận dụng cao hoặc bẫy sai lầm thường gặp)
+- Note cho GV: (Lưu ý về phương pháp chứng minh hoặc cách giải nhanh)`;
+    }
   },
 
   _renderSlides() {
     const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
-    if (!this.slides) this.slides = { grade: '6', subjectId: 'toan', lessonName: 'Khái niệm trọng tâm', periods: '1' };
-    if (!this.slides.deck) {
-      const subId = this.slides.subjectId || 'toan';
-      const grade = this.slides.grade || '6';
-      const lessonName = this.slides.lessonName || 'Hình có trục đối xứng';
-      this.slides.deck = this._getRealLessonDeck(subId, grade, lessonName);
-    }
-
-    const st = this.slides;
-    const subKey = st.subjectId || 'toan';
-    const subName = (subKey === 'toan' ? 'Toán học' : (subKey === 'van' ? 'Ngữ văn' : (subKey === 'anh' ? 'Tiếng Anh' : (subKey === 'khtn' ? 'Khoa học tự nhiên' : 'Lịch sử & Địa lý'))));
-
     area.innerHTML = `
-      <div class="ait-card" style="background:linear-gradient(180deg,#ffffff 0%,#f0f9ff 100%);border:2.5px solid #3b82f6;border-radius:24px;padding:1.75rem;box-shadow:0 10px 35px rgba(37,99,235,0.12);">
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease;">
         
-        <!-- BẢNG ĐIỀU KHIỂN: TIÊU ĐỀ BÀI HỌC, KHỐI LỚP & KHO DÙNG CHUNG TOÀN TRƯỜNG -->
-        <div style="background:#ffffff;border:2.5px solid #3b82f6;border-radius:20px;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.25rem;margin-bottom:1.5rem;box-shadow:0 6px 20px rgba(0,0,0,0.04);">
-          <div style="display:flex;align-items:center;gap:.85rem;flex:1;min-width:300px;">
-            <span style="font-size:1.8rem;background:#eff6ff;padding:.4rem .7rem;border-radius:12px;border:1.5px solid #3b82f6;">🎨</span>
-            <div style="flex:1;">
-              <label style="font-size:.82rem;font-weight:900;color:#1e40af;display:block;text-transform:uppercase;margin-bottom:.25rem;letter-spacing:0.3px;">Tên Tiêu Đề Bài Học / Chủ Đề Giảng Dạy:</label>
-              <input id="dash-lesson-title" type="text" class="ait-input" value="${st.lessonName || 'Bài 1: Khái niệm & Mục tiêu bài học'}" style="font-weight:900;color:#1e293b;font-size:1.05rem;border:2.5px solid #3b82f6;padding:.6rem 1rem;border-radius:12px;width:100%;box-sizing:border-box;outline:none;" placeholder="Ví dụ: Bài 1: Khái niệm..." />
+        <!-- 🌟 HERO BANNER SANG TRỌNG -->
+        <div style="background:linear-gradient(135deg, #091e3a 0%, #173b75 50%, #1e40af 100%); color:#fff; border-radius:26px; padding:2rem 2.4rem; margin-bottom:1.6rem; border:2.5px solid #38bdf8; box-shadow:0 14px 40px rgba(30,64,175,0.3); position:relative; overflow:hidden;">
+          <div style="position:absolute; right:-30px; top:-30px; width:220px; height:220px; background:radial-gradient(circle, rgba(56,189,248,0.25) 0%, rgba(30,64,175,0) 70%); border-radius:50%; pointer-events:none;"></div>
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.4rem; position:relative; z-index:2;">
+            <div style="display:flex; align-items:center; gap:1.4rem;">
+              <div style="width:76px; height:76px; border-radius:22px; background:radial-gradient(circle, #38bdf8 0%, #2563eb 60%, #1e3a8a 100%); display:flex; align-items:center; justify-content:center; font-size:3.2rem; border:3px solid #bae6fd; box-shadow:0 0 35px rgba(56,189,248,0.8); animation:bounce 2s infinite;">
+                ⚡
+              </div>
+              <div>
+                <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.35rem;">
+                  <span style="background:#38bdf8; color:#082f49; font-weight:900; font-size:0.8rem; padding:0.25rem 0.75rem; border-radius:8px; letter-spacing:0.5px;">CHUẨN SƯ PHẠM GDPT 2018</span>
+                  <span style="background:rgba(255,255,255,0.18); color:#e0f2fe; font-weight:800; font-size:0.8rem; padding:0.25rem 0.75rem; border-radius:8px;">GOOGLE NOTEBOOKLM STUDIO</span>
+                </div>
+                <h1 style="margin:0; font-size:2.2rem; font-weight:900; background:linear-gradient(90deg, #e0f2fe, #fde047, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
+                  TRỢ LÝ TẠO SLIDE & INFOGRAPHICS AI
+                </h1>
+                <p style="margin:0.35rem 0 0 0; color:#cbd5e1; font-size:1rem; line-height:1.4;">
+                  Hệ thống câu lệnh Prompt sư phạm chuyên sâu theo từng cấp học kết hợp sức mạnh Studio của Google NotebookLM
+                </p>
+              </div>
             </div>
-          </div>
 
-          <div style="display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;">
-            <div style="display:flex;align-items:center;gap:.4rem;">
-              <span style="font-size:.92rem;font-weight:900;color:#1e40af;">🎓 Khối Lớp:</span>
-              <select id="dash-grade" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #2563eb;color:#1e40af;outline:none;cursor:pointer;">
-                ${['6','7','8','9'].map(g => `<option value="${g}" ${String(st.grade)===g?'selected':''}>Khối ${g}</option>`).join('')}
-              </select>
-            </div>
-
-            <button id="btn-dash-save-lib" class="btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(16,185,129,0.35);display:flex;align-items:center;gap:.45rem;">
-              <span>💾</span> LƯU BÀI HỌC VÀO KHO DÙNG CHUNG
-            </button>
-
-            <button id="btn-dash-open-lib" class="btn" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(99,102,241,0.35);display:flex;align-items:center;gap:.45rem;">
-              <span>🏫</span> KHO BÀI GIẢNG DÙNG CHUNG (${(typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'slides').length : 0} bài)
-            </button>
+            <a href="https://notebooklm.google.com" target="_blank" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); color:#fff; text-decoration:none; padding:0.85rem 1.6rem; border-radius:16px; font-weight:900; font-size:1.05rem; display:flex; align-items:center; gap:0.5rem; box-shadow:0 8px 25px rgba(37,99,235,0.4); border:2px solid #93c5fd; transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-3px) scale(1.02)';" onmouseout="this.style.transform='translateY(0) scale(1)';">
+              <span>🚀</span> MỞ GOOGLE NOTEBOOKLM
+            </a>
           </div>
         </div>
 
-        <!-- DASHBOARD HEADER -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;border-bottom:2px solid #dbeafe;padding-bottom:1rem;">
-          <div style="display:flex;align-items:center;gap:.75rem;">
-            <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:0 6px 18px rgba(37,99,235,0.3);">
-              🎨
-            </div>
-            <div>
-              <h2 style="font-size:1.35rem;font-weight:900;color:#1e3a8a;margin:0;">TRỢ LÝ TẠO & NÂNG CẤP SLIDE BÀI GIẢNG AI (TÍCH HỢP NĂNG LỰC SỐ)</h2>
-              <p style="font-size:.85rem;color:#3b82f6;margin:.2rem 0 0;font-weight:700;">Tạo mới hoặc Nâng cấp PowerPoint sang Bài Giảng Tương Tác Năng Lực Số (NLS) & AI chuẩn GDPT 2018</p>
-            </div>
+        <!-- 🚀 QUY TRÌNH 4 BƯỚC THAO TÁC SƯ PHẠM CHUẨN (WORKFLOW PIPELINE) -->
+        <div style="background:#ffffff; border:2.5px solid #e2e8f0; border-radius:24px; padding:1.6rem 2rem; margin-bottom:1.6rem; box-shadow:0 8px 30px rgba(0,0,0,0.04);">
+          <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:1.2rem;">
+            <span style="font-size:1.5rem;">📋</span>
+            <h3 style="margin:0; font-size:1.2rem; font-weight:900; color:#1e293b;">QUY TRÌNH 4 BƯỚC TẠO BÀI GIẢNG ĐẠT CHUẨN TRÊN NOTEBOOKLM:</h3>
           </div>
-          <button id="btn-start-slide-deck" class="btn" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;font-weight:900;font-size:1rem;padding:.75rem 1.8rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(37,99,235,0.35);display:flex;align-items:center;gap:.5rem;">
-            <span>🚀</span> TRÌNH CHIẾU SLIDE BÀI GIẢNG
-          </button>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1.2rem; position:relative;">
+            
+            <div style="background:linear-gradient(145deg, #f8fafc, #f1f5f9); border:2px solid #cbd5e1; border-radius:18px; padding:1.3rem; display:flex; flex-direction:column; gap:0.5rem; position:relative;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="background:#0284c7; color:#fff; font-weight:900; font-size:0.85rem; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">1</span>
+                <span style="font-size:1.3rem;">📂</span>
+              </div>
+              <div style="font-weight:900; font-size:1.02rem; color:#0f172a; margin-top:0.2rem;">Đăng nhập & Nạp Nguồn</div>
+              <div style="font-size:0.88rem; color:#475569; line-height:1.45;">
+                Mở Google NotebookLM, tải bài học, SGK hoặc giáo án Word/PDF vào mục <strong>Nguồn (Sources)</strong>.
+              </div>
+            </div>
+
+            <div style="background:linear-gradient(145deg, #f8fafc, #f1f5f9); border:2px solid #cbd5e1; border-radius:18px; padding:1.3rem; display:flex; flex-direction:column; gap:0.5rem; position:relative;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="background:#0284c7; color:#fff; font-weight:900; font-size:0.85rem; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">2</span>
+                <span style="font-size:1.3rem;">⚙️</span>
+              </div>
+              <div style="font-weight:900; font-size:1.02rem; color:#0f172a; margin-top:0.2rem;">Vào Studio Bản Trình Bày</div>
+              <div style="font-size:0.88rem; color:#475569; line-height:1.45;">
+                Trên bảng điều khiển NotebookLM, chọn <strong>Studio ➔ Bản trình bày ➔ Tùy chỉnh bản trình bày</strong>.
+              </div>
+            </div>
+
+            <div style="background:linear-gradient(145deg, #f8fafc, #f1f5f9); border:2px solid #cbd5e1; border-radius:18px; padding:1.3rem; display:flex; flex-direction:column; gap:0.5rem; position:relative;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="background:#0284c7; color:#fff; font-weight:900; font-size:0.85rem; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">3</span>
+                <span style="font-size:1.3rem;">✨</span>
+              </div>
+              <div style="font-weight:900; font-size:1.02rem; color:#0f172a; margin-top:0.2rem;">Dán Prompt & Bấm Tạo</div>
+              <div style="font-size:0.88rem; color:#475569; line-height:1.45;">
+                Copy câu lệnh ở 1 trong 3 Cấp học bên dưới, dán (<strong>Ctrl + V</strong>) vào ô mô tả rồi bấm <strong>Tạo</strong>.
+              </div>
+            </div>
+
+            <div style="background:linear-gradient(145deg, #f8fafc, #f1f5f9); border:2px solid #cbd5e1; border-radius:18px; padding:1.3rem; display:flex; flex-direction:column; gap:0.5rem; position:relative;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <span style="background:#10b981; color:#fff; font-weight:900; font-size:0.85rem; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;">4</span>
+                <span style="font-size:1.3rem;">🎉</span>
+              </div>
+              <div style="font-weight:900; font-size:1.02rem; color:#065f46; margin-top:0.2rem;">Nhận Slide & Trình Chiếu</div>
+              <div style="font-size:0.88rem; color:#475569; line-height:1.45;">
+                Nhận dàn slide bài giảng chuẩn mực, có thể trình chiếu trực tiếp hoặc xuất <strong>PDF</strong> phát cho học sinh.
+              </div>
+            </div>
+
+          </div>
         </div>
 
-        <!-- SLIDES PREVIEW LIST -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;">
-          ${st.deck.slides.map((sl, i) => `
-            <div style="background:#ffffff;border:2px solid #bfdbfe;border-radius:16px;padding:1.15rem;box-shadow:0 4px 14px rgba(37,99,235,0.06);">
-              <div style="font-size:.78rem;font-weight:900;color:#2563eb;margin-bottom:.35rem;">SLIDE ${i+1}</div>
-              <div style="font-size:1rem;font-weight:900;color:#0f172a;margin-bottom:.5rem;">${sl.title}</div>
-              <div style="font-size:.82rem;color:#475569;white-space:pre-line;line-height:1.4;">${sl.content}</div>
+        <!-- 🎓 BỘ 3 CARD PROMPT SƯ PHẠM CHUYÊN SÂU (3 CẤP HỌC) -->
+        <div style="margin-bottom:1.6rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.8rem;">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span style="font-size:1.6rem;">💎</span>
+              <h2 style="margin:0; font-size:1.3rem; font-weight:900; color:#0f172a;">CHỌN CẤP HỌC ĐỂ COPY PROMPT SƯ PHẠM:</h2>
             </div>
-          `).join('')}
+            <div style="font-size:0.88rem; font-weight:800; color:#64748b;">
+              Nhấn nút <strong>"Sao Chép Prompt"</strong> để lấy câu lệnh chuẩn cho từng đối tượng học sinh
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:1.4rem;">
+            
+            <!-- CARD 1: CẤP 1 - TIỂU HỌC -->
+            <div style="background:linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%); border:3px solid #10b981; border-radius:24px; padding:1.8rem; box-shadow:0 10px 30px rgba(16,185,129,0.15); display:flex; flex-direction:column; justify-content:space-between; gap:1.2rem; position:relative; overflow:hidden;">
+              <div style="position:absolute; top:0; left:0; width:100%; height:6px; background:linear-gradient(90deg, #34d399, #10b981);"></div>
+              
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                  <span style="background:#d1fae5; color:#065f46; font-weight:900; font-size:0.82rem; padding:0.25rem 0.75rem; border-radius:8px;">LỚP 1 - 2 - 3 - 4 - 5</span>
+                  <span style="font-size:2.2rem;">🎒</span>
+                </div>
+                <h3 style="margin:0 0 0.5rem; font-size:1.4rem; font-weight:900; color:#065f46;">CẤP 1 • TIỂU HỌC</h3>
+                <p style="margin:0 0 1rem; font-size:0.88rem; color:#475569; font-weight:700;">
+                  Ưu tiên trực quan cụ thể, thao tác từng bước, ngôn ngữ vần điệu dễ nhớ.
+                </p>
+
+                <div style="background:#ffffff; border:1.5px solid #a7f3d0; border-radius:14px; padding:0.9rem; font-size:0.85rem; color:#334155; display:flex; flex-direction:column; gap:0.4rem;">
+                  <div>• <strong>Chữ viết:</strong> Tối đa 2-3 dòng, font to rõ ràng.</div>
+                  <div>• <strong>Hình ảnh:</strong> Đồ họa tươi sáng, quen thuộc đời sống.</div>
+                  <div>• <strong>Mạch bài:</strong> Quan sát ➔ Quy luật ➔ Thực hành lặp lại.</div>
+                  <div>• <strong>Đặc biệt:</strong> Bắt buộc có <em>Khẩu quyết vần điệu</em> đồng thanh.</div>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                <button id="btn-card-copy-cap1" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding:0.85rem 1.2rem; border-radius:14px; font-weight:900; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 18px rgba(16,185,129,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                  📋 SAO CHÉP PROMPT TIỂU HỌC
+                </button>
+                <button id="btn-view-prompt-cap1" style="background:#ecfdf5; color:#047857; border:1.5px solid #a7f3d0; padding:0.5rem; border-radius:10px; font-weight:800; font-size:0.82rem; cursor:pointer;">
+                  👁️ Xem Nội Dung Câu Lệnh
+                </button>
+              </div>
+            </div>
+
+            <!-- CARD 2: CẤP 2 - THCS -->
+            <div style="background:linear-gradient(145deg, #ffffff 0%, #eff6ff 100%); border:3px solid #3b82f6; border-radius:24px; padding:1.8rem; box-shadow:0 10px 30px rgba(59,130,246,0.15); display:flex; flex-direction:column; justify-content:space-between; gap:1.2rem; position:relative; overflow:hidden;">
+              <div style="position:absolute; top:0; left:0; width:100%; height:6px; background:linear-gradient(90deg, #60a5fa, #2563eb);"></div>
+              
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                  <span style="background:#dbeafe; color:#1e40af; font-weight:900; font-size:0.82rem; padding:0.25rem 0.75rem; border-radius:8px;">LỚP 6 - 7 - 8 - 9</span>
+                  <span style="font-size:2.2rem;">📘</span>
+                </div>
+                <h3 style="margin:0 0 0.5rem; font-size:1.4rem; font-weight:900; color:#1e40af;">CẤP 2 • THCS (MỨC 1)</h3>
+                <p style="margin:0 0 1rem; font-size:0.88rem; color:#475569; font-weight:700;">
+                  Ưu tiên tư duy logic, phản biện đa chiều, sơ đồ hóa và Mindmap.
+                </p>
+
+                <div style="background:#ffffff; border:1.5px solid #bfdbfe; border-radius:14px; padding:0.9rem; font-size:0.85rem; color:#334155; display:flex; flex-direction:column; gap:0.4rem;">
+                  <div>• <strong>Chữ viết:</strong> Tối đa 5 dòng, sử dụng Bullet keywords.</div>
+                  <div>• <strong>Hình ảnh:</strong> Sơ đồ khối, Mindmap, Infographics 4 nhánh.</div>
+                  <div>• <strong>Mạch bài:</strong> Đặt vấn đề mâu thuẫn ➔ Thảo luận ➔ Chốt chuẩn.</div>
+                  <div>• <strong>Đặc biệt:</strong> Đúc kết 1 câu <em>Chìa khóa vàng</em> cho mỗi slide.</div>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                <button id="btn-card-copy-cap2" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); color:#fff; border:none; padding:0.85rem 1.2rem; border-radius:14px; font-weight:900; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 18px rgba(37,99,235,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                  📋 SAO CHÉP PROMPT THCS
+                </button>
+                <button id="btn-view-prompt-cap2" style="background:#eff6ff; color:#1e40af; border:1.5px solid #bfdbfe; padding:0.5rem; border-radius:10px; font-weight:800; font-size:0.82rem; cursor:pointer;">
+                  👁️ Xem Nội Dung Câu Lệnh
+                </button>
+              </div>
+            </div>
+
+            <!-- CARD 3: CẤP 3 - THPT -->
+            <div style="background:linear-gradient(145deg, #ffffff 0%, #faf5ff 100%); border:3px solid #8b5cf6; border-radius:24px; padding:1.8rem; box-shadow:0 10px 30px rgba(139,92,246,0.15); display:flex; flex-direction:column; justify-content:space-between; gap:1.2rem; position:relative; overflow:hidden;">
+              <div style="position:absolute; top:0; left:0; width:100%; height:6px; background:linear-gradient(90deg, #c084fc, #7c3aed);"></div>
+              
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                  <span style="background:#ede9fe; color:#5b21b6; font-weight:900; font-size:0.82rem; padding:0.25rem 0.75rem; border-radius:8px;">LỚP 9 (NÂNG CAO) & 10 - 11 - 12</span>
+                  <span style="font-size:2.2rem;">🎓</span>
+                </div>
+                <h3 style="margin:0 0 0.5rem; font-size:1.4rem; font-weight:900; color:#5b21b6;">CẤP 3 • THPT & CHUYÊN SÂU</h3>
+                <p style="margin:0 0 1rem; font-size:0.88rem; color:#475569; font-weight:700;">
+                  Tư duy trừu tượng, hệ thống hóa học thuật, tối giản và giải bài thi.
+                </p>
+
+                <div style="background:#ffffff; border:1.5px solid #ddd6fe; border-radius:14px; padding:0.9rem; font-size:0.85rem; color:#334155; display:flex; flex-direction:column; gap:0.4rem;">
+                  <div>• <strong>Chữ viết:</strong> Tinh giản tối đa (Minimalism), tập trung keyword.</div>
+                  <div>• <strong>Visual:</strong> Biểu đồ dữ liệu, mô hình không gian, LaTeX.</div>
+                  <div>• <strong>Mạch bài:</strong> Hệ thống ➔ Chứng minh ➔ Ma trận bài thi VDC.</div>
+                  <div>• <strong>Đặc biệt:</strong> Phân tích bẫy sai lầm & Phương pháp giải nhanh.</div>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                <button id="btn-card-copy-cap3" style="background:linear-gradient(135deg, #7c3aed, #6d28d9); color:#fff; border:none; padding:0.85rem 1.2rem; border-radius:14px; font-weight:900; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 18px rgba(124,58,237,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                  📋 SAO CHÉP PROMPT THPT
+                </button>
+                <button id="btn-view-prompt-cap3" style="background:#faf5ff; color:#6d28d9; border:1.5px solid #ddd6fe; padding:0.5rem; border-radius:10px; font-weight:800; font-size:0.82rem; cursor:pointer;">
+                  👁️ Xem Nội Dung Câu Lệnh
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 💡 BẢNG SO SÁNH NGUYÊN TẮC THIẾT KẾ GIỮA 3 CẤP HỌC -->
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.5rem 1.8rem; box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+          <div style="font-weight:900; font-size:1.05rem; color:#1e293b; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+            <span>📊</span> BẢNG TỔNG HỢP NGUYÊN TẮC SƯ PHẠM THEO TỪNG LỨA TUỔI:
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.88rem; text-align:left;">
+              <thead>
+                <tr style="background:#f8fafc; border-bottom:2px solid #cbd5e1;">
+                  <th style="padding:0.75rem 1rem; color:#475569; font-weight:900;">Tiêu Chí</th>
+                  <th style="padding:0.75rem 1rem; color:#059669; font-weight:900;">Cấp 1 (Tiểu Học)</th>
+                  <th style="padding:0.75rem 1rem; color:#2563eb; font-weight:900;">Cấp 2 (THCS)</th>
+                  <th style="padding:0.75rem 1rem; color:#7c3aed; font-weight:900;">Cấp 3 (THPT)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid #f1f5f9;">
+                  <td style="padding:0.75rem 1rem; font-weight:800; color:#334155;">Mật độ chữ</td>
+                  <td style="padding:0.75rem 1rem; color:#065f46;">2-3 dòng/slide, chữ to rõ</td>
+                  <td style="padding:0.75rem 1rem; color:#1e40af;">Tối đa 5 dòng, từ khóa</td>
+                  <td style="padding:0.75rem 1rem; color:#5b21b6;">Siêu tối giản (Minimalism)</td>
+                </tr>
+                <tr style="border-bottom:1px solid #f1f5f9; background:#fafafa;">
+                  <td style="padding:0.75rem 1rem; font-weight:800; color:#334155;">Yếu tố hình ảnh</td>
+                  <td style="padding:0.75rem 1rem; color:#065f46;">Đồ họa rực rỡ, quen thuộc</td>
+                  <td style="padding:0.75rem 1rem; color:#1e40af;">Sơ đồ khối, Mindmap 4 nhánh</td>
+                  <td style="padding:0.75rem 1rem; color:#5b21b6;">Mô hình không gian, đồ thị LaTeX</td>
+                </tr>
+                <tr>
+                  <td style="padding:0.75rem 1rem; font-weight:800; color:#334155;">Điểm nhấn sư phạm</td>
+                  <td style="padding:0.75rem 1rem; color:#065f46;">Khẩu quyết vần điệu dễ nhớ</td>
+                  <td style="padding:0.75rem 1rem; color:#1e40af;">Chìa khóa vàng đúc kết bản chất</td>
+                  <td style="padding:0.75rem 1rem; color:#5b21b6;">Phân tích bẫy thi & Thuật toán giải</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>
     `;
 
-    const btnSaveLib = area.querySelector('#btn-dash-save-lib');
-    if (btnSaveLib) {
-      btnSaveLib.onclick = () => {
-        const title = area.querySelector('#dash-lesson-title')?.value.trim() || st.lessonName;
-        const grade = area.querySelector('#dash-grade')?.value || st.grade;
-        this.showSaveToolModal('slides', title, {
-          slides: st.deck.slides,
-          grade: grade,
-          subjectId: subKey,
-          subjectName: subName
-        }, () => {
-          this._renderSlides();
+    // Modal to view and copy prompt details
+    const showPromptModal = (targetLvl, name) => {
+      const promptText = this._getSlidePrompts(targetLvl, '', '', '');
+      const old = document.getElementById('view-prompt-modal');
+      if (old) old.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'view-prompt-modal';
+      modal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.85); backdrop-filter:blur(10px); z-index:9999999; display:flex; align-items:center; justify-content:center; padding:1.5rem; animation:fadeIn 0.2s ease; font-family:var(--font-title, system-ui, sans-serif); color:#fff;';
+      document.body.appendChild(modal);
+
+      modal.innerHTML = `
+        <div style="background:#ffffff; color:#0f172a; border-radius:24px; padding:2rem 2.4rem; max-width:800px; width:92%; max-height:85vh; display:flex; flex-direction:column; gap:1.2rem; box-shadow:0 25px 70px rgba(0,0,0,0.7); position:relative;">
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e2e8f0; padding-bottom:0.8rem;">
+            <div>
+              <span style="background:#dbeafe; color:#1e40af; font-size:0.78rem; font-weight:900; padding:0.2rem 0.6rem; border-radius:6px;">PROMPT SƯ PHẠM CHUẨN</span>
+              <h2 style="margin:0.2rem 0 0; font-size:1.35rem; font-weight:900; color:#1e3a8a;">${name.toUpperCase()}</h2>
+            </div>
+            <button id="btn-close-view-prompt" style="background:#ef4444; color:#fff; border:none; border-radius:10px; width:36px; height:36px; font-weight:900; font-size:1.1rem; cursor:pointer;">✕</button>
+          </div>
+
+          <div style="flex:1; overflow-y:auto;">
+            <textarea id="txt-modal-prompt-content" readonly style="width:100%; height:320px; border-radius:14px; border:2px solid #cbd5e1; padding:1rem; font-family:monospace; font-size:0.9rem; line-height:1.5; color:#1e293b; background:#f8fafc; resize:none; box-sizing:border-box; outline:none;">${promptText}</textarea>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px solid #e2e8f0; padding-top:0.8rem;">
+            <span style="font-size:0.85rem; color:#64748b; font-weight:700;">Dán vào phần mô tả bản trình bày trên Google NotebookLM</span>
+            <div style="display:flex; gap:0.6rem;">
+              <button id="btn-modal-copy-now" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding:0.65rem 1.4rem; border-radius:12px; font-weight:900; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem;">
+                📋 Sao Chép Câu Lệnh
+              </button>
+            </div>
+          </div>
+
+        </div>
+      `;
+
+      const closeBtn = modal.querySelector('#btn-close-view-prompt');
+      if (closeBtn) closeBtn.onclick = () => modal.remove();
+
+      const copyBtn = modal.querySelector('#btn-modal-copy-now');
+      if (copyBtn) {
+        copyBtn.onclick = () => {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(promptText).then(() => {
+              if (typeof app !== 'undefined' && app.showToast) app.showToast(`✅ Đã sao chép Prompt ${name}!`, 'success');
+              modal.remove();
+            });
+          }
+        };
+      }
+    };
+
+    const copyDirectly = (targetLvl, name) => {
+      const promptText = this._getSlidePrompts(targetLvl, '', '', '');
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(promptText).then(() => {
+          if (typeof app !== 'undefined' && app.showToast) {
+            app.showToast(`📋 Đã sao chép Prompt ${name}! Thầy/Cô hãy mở NotebookLM và dán (Ctrl + V) vào nhé.`, 'success');
+          } else {
+            alert(`📋 ĐÃ SAO CHÉP PROMPT ${name.toUpperCase()}!\n\nThầy/Cô hãy mở Google NotebookLM (Studio ➔ Bản trình bày ➔ Tùy chỉnh) và dán (Ctrl + V) vào phần mô tả để tạo slide nhé!`);
+          }
+        }).catch(() => {
+          showPromptModal(targetLvl, name);
         });
-      };
-    }
+      } else {
+        showPromptModal(targetLvl, name);
+      }
+    };
 
-    const btnOpenLib = area.querySelector('#btn-dash-open-lib');
-    if (btnOpenLib) {
-      btnOpenLib.onclick = () => this.showSharedToolsLibraryModal('slides');
-    }
+    // Card copy events
+    const b1 = area.querySelector('#btn-card-copy-cap1');
+    if (b1) b1.onclick = () => copyDirectly('cap1', 'Cấp 1 - Tiểu Học');
 
-    const btnStart = area.querySelector('#btn-start-slide-deck');
-    if (btnStart) {
-      btnStart.onclick = () => {
-        alert('🎉 Đang mở chế độ Trình Chiếu Toàn Màn Hình cho lớp học!');
-      };
-    }
+    const b2 = area.querySelector('#btn-card-copy-cap2');
+    if (b2) b2.onclick = () => copyDirectly('cap2', 'Cấp 2 - THCS');
+
+    const b3 = area.querySelector('#btn-card-copy-cap3');
+    if (b3) b3.onclick = () => copyDirectly('cap3', 'Cấp 3 - THPT');
+
+    // View details events
+    const v1 = area.querySelector('#btn-view-prompt-cap1');
+    if (v1) v1.onclick = () => showPromptModal('cap1', 'Cấp 1 - Tiểu Học');
+
+    const v2 = area.querySelector('#btn-view-prompt-cap2');
+    if (v2) v2.onclick = () => showPromptModal('cap2', 'Cấp 2 - THCS');
+
+    const v3 = area.querySelector('#btn-view-prompt-cap3');
+    if (v3) v3.onclick = () => showPromptModal('cap3', 'Cấp 3 - THPT');
   },
 
   _renderIcebreaker() {
@@ -8835,7 +9191,12 @@ window.AITeachingTools = {
     });
 
     area.querySelector('#btn-start-dash-game').onclick = () => {
-      onStartFn(subName);
+      const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+      const selectedSubId = area.querySelector('#dash-sub')?.value || subKey;
+      const timeLimit = parseInt(area.querySelector('#dash-time')?.value) || 30;
+      const pointsPerQ = parseInt(area.querySelector('#dash-points')?.value) || 100;
+      const soundEnabled = area.querySelector('#dash-sound')?.value !== 'false';
+      onStartFn(subName, loadedQs, { grade: selectedGrade, subjectId: selectedSubId, timeLimit, pointsPerQ, soundEnabled });
     };
   },
 
@@ -9030,6 +9391,11 @@ window.AITeachingTools = {
     else if (t === 'crossword')     this._renderCrosswordDashboard();
     else if (t === 'wordhunt')      this._renderWordHuntDashboard();
     else if (t === 'multiverse')    this._renderMultiverseDashboard();
+    else if (t === 'treasure')      this._renderTreasureDashboard();
+    else if (t === 'challengewheel') this._renderChallengeWheelDashboard();
+    else if (t === 'spacejourney')  this._renderSpaceJourneyDashboard();
+    else if (t === 'knowledgearena') this._renderKnowledgeArenaDashboard();
+    else if (t === 'stations7')     this._renderStations7Dashboard();
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -19322,4 +19688,3747 @@ ${notificationMsg ? `
     };
   },
 
+
+
+  // =========================================================================
+  // 🕵️‍♂️ GAME 20: THÁM TỬ TÌM KHO BÁU (TREASURE DETECTIVE AI) - UPBEAT SOUNDTRACK 128 BPM
+  // =========================================================================
+  _getTreasureQuestions() {
+    return this._getLoadedQuestions('treasure') || [
+      { station: "Vịnh Neo Tàu Hải Tặc", q: "Thiết bị nào sau đây được dùng để nhập văn bản và số liệu vào máy tính?", opts: ["Bàn phím (Keyboard)", "Màn hình (Monitor)", "Máy in (Printer)", "Loa ngoài (Speaker)"], a: 0, hint: "Có các hàng phím chữ A, B, C và phím cách Spacebar", points: 100 },
+      { station: "Rừng Rậm Mật Mã Cổ", q: "Trong máy tính, đơn vị cơ bản nhỏ nhất dùng để đo lượng thông tin là gì?", opts: ["Bit (chỉ gồm 0 hoặc 1)", "Byte (8 bit)", "Kilobyte (KB)", "Gigabyte (GB)"], a: 0, hint: "Chỉ nhận một trong hai trạng thái nhị phân 0 hoặc 1", points: 100 },
+      { station: "Cầu Treo Vực Thẳm", q: "Hành động nào sau đây giúp em bảo vệ an toàn thông tin cá nhân trên môi trường mạng?", opts: ["Không cung cấp mật khẩu cho người lạ", "Công khai số điện thoại và CCCD", "Đặt mật khẩu dễ đoán như 123456", "Bấm vào các đường link nhận quà lạ"], a: 0, hint: "Luôn giữ bí mật tuyệt đối tài khoản của mình", points: 100 },
+      { station: "Hang Đầu Lâu Bí Ẩn", q: "Bộ phận nào được ví như 'Bộ Não' chỉ huy và xử lý toàn bộ hoạt động của máy tính?", opts: ["Bộ xử lý trung tâm (CPU)", "Bộ nhớ RAM", "Bộ nguồn Power Supply", "Chuột quang"], a: 0, hint: "Chữ viết tắt của cụm từ Central Processing Unit", points: 100 },
+      { station: "Đền Thờ Rương Vàng", q: "Để lưu trữ bài học và hình ảnh lâu dài kể cả khi đã tắt máy, máy tính sử dụng thiết bị nào?", opts: ["Ổ đĩa cứng (HDD / SSD)", "Bộ nhớ tạm thời RAM", "Thanh ghi Cache", "Bộ nguồn máy tính"], a: 0, hint: "Là bộ nhớ ngoài không bị mất dữ liệu khi mất nguồn điện", points: 100 }
+    ];
+  },
+
+  _renderTreasureDashboard() {
+    this._renderGenericGameDashboard(
+      'treasure',
+      '20. GAME THÁM TỬ TÌM KHO BÁU (TREASURE DETECTIVE)',
+      '🕵️‍♂️',
+      '#d97706',
+      'linear-gradient(180deg, #ffffff 0%, #fffbeb 100%)',
+      'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+      (subName, qs, opts) => this._launchTreasureArena(subName, qs, opts)
+    );
+  },
+
+  _launchTreasureArena(subName, questions, opts = {}) {
+    const old = document.getElementById('treasure-arena-modal');
+    if (old) old.remove();
+
+    let qList = questions;
+    if (!qList || !Array.isArray(qList) || qList.length === 0) {
+      if (typeof subName === 'object' && Array.isArray(subName)) {
+        qList = subName;
+      } else {
+        qList = this._getTreasureQuestions();
+      }
+    }
+
+    let curIdx = 0;
+    let score = 0;
+    let lives = 3;
+    let bgmEnabled = true;
+    let bgmInterval = null;
+    const defaultTimeLimit = (opts && opts.timeLimit) ? opts.timeLimit : 30;
+    let timerSeconds = defaultTimeLimit;
+    let timerInterval = null;
+    let animFrameId = null;
+
+    // High quality Web Audio Context
+    let audioCtx = null;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        audioCtx = new AudioContextClass();
+      }
+    } catch(e) {}
+
+    const synth = this._getAudioSynth();
+
+    const STATIONS = [
+      { name: "Vịnh Neo Tàu Hải Tặc", icon: "⚓", desc: "Bến đậu đầu tiên giải mã phong thư hải trình" },
+      { name: "Rừng Rậm Mật Mã Cổ", icon: "🌴", desc: "Cây đại thụ che giấu mật thư bí ẩn ngàn năm" },
+      { name: "Cầu Treo Vực Thẳm", icon: "🌉", desc: "Vượt qua hẻm núi sâu hiểm trở" },
+      { name: "Hang Đầu Lâu Bí Ẩn", icon: "💀", desc: "Hang động cạm bẫy cất giữ bản đồ đảo" },
+      { name: "Đền Thờ Rương Vàng", icon: "👑", desc: "Đích đến đỉnh cao mở khóa Rương Vàng Đại Dương" }
+    ];
+
+    const modal = document.createElement('div');
+    modal.id = 'treasure-arena-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:#070b19; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s cubic-bezier(0.16,1,0.3,1);';
+    document.body.appendChild(modal);
+
+    // Upbeat Pirate Synth Soundtrack Engine (D minor / Tropical Adventure - 128 BPM)
+    const playSynthNote = (freq, duration, timeOffset, vol = 0.16, type = 'sawtooth') => {
+      if (!bgmEnabled || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const startTime = audioCtx.currentTime + timeOffset;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        // Punchy attack & decay envelope
+        gain.gain.setValueAtTime(0.001, startTime);
+        gain.gain.linearRampToValueAtTime(vol, startTime + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      } catch(e) {}
+    };
+
+    // Percussion Kick & Snare Simulation
+    const playDrumBeat = (timeOffset, isSnare = false) => {
+      if (!bgmEnabled || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const startTime = audioCtx.currentTime + timeOffset;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        if (isSnare) {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(180, startTime);
+          osc.frequency.exponentialRampToValueAtTime(60, startTime + 0.1);
+          gain.gain.setValueAtTime(0.12, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.1);
+        } else {
+          // Kick drum
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(140, startTime);
+          osc.frequency.exponentialRampToValueAtTime(35, startTime + 0.12);
+          gain.gain.setValueAtTime(0.22, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.12);
+        }
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + (isSnare ? 0.1 : 0.12));
+      } catch(e) {}
+    };
+
+    const playUpbeatPirateLoop = () => {
+      if (!bgmEnabled || !audioCtx) return;
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(()=>{});
+      }
+
+      // Step length = 0.18s (Approx 130 BPM)
+      const step = 0.18;
+
+      // 1. Driving Drums
+      for (let i = 0; i < 8; i++) {
+        if (i % 2 === 0) playDrumBeat(i * step, false); // Kick on 1, 3, 5, 7
+        else playDrumBeat(i * step, true);              // Snare on 2, 4, 6, 8
+      }
+
+      // 2. Energetic Bassline (Dm -> F -> G -> A)
+      const bassSeq = [
+        { f: 146.83, t: 0 * step }, // D3
+        { f: 146.83, t: 1 * step }, // D3
+        { f: 174.61, t: 2 * step }, // F3
+        { f: 196.00, t: 3 * step }, // G3
+        { f: 220.00, t: 4 * step }, // A3
+        { f: 196.00, t: 5 * step }, // G3
+        { f: 174.61, t: 6 * step }, // F3
+        { f: 164.81, t: 7 * step }  // E3
+      ];
+      bassSeq.forEach(b => playSynthNote(b.f, 0.15, b.t, 0.14, 'triangle'));
+
+      // 3. Catchy Heroic Brass / Marimba Melody
+      const melodySeq = [
+        { f: 293.66, t: 0 * step, d: 0.16 }, // D4
+        { f: 349.23, t: 1 * step, d: 0.16 }, // F4
+        { f: 392.00, t: 2 * step, d: 0.22 }, // G4
+        { f: 440.00, t: 3 * step, d: 0.32 }, // A4
+        { f: 523.25, t: 4 * step, d: 0.18 }, // C5
+        { f: 440.00, t: 5 * step, d: 0.18 }, // A4
+        { f: 392.00, t: 6 * step, d: 0.22 }, // G4
+        { f: 349.23, t: 7 * step, d: 0.28 }  // F4
+      ];
+      melodySeq.forEach(m => playSynthNote(m.f, m.d, m.t, 0.18, 'sawtooth'));
+    };
+
+    // User gesture trigger to unlock AudioContext
+    const triggerAudioUnlock = () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().then(() => {
+          playUpbeatPirateLoop();
+        }).catch(()=>{});
+      } else {
+        playUpbeatPirateLoop();
+      }
+    };
+
+    // Start BGM loop immediately and on any modal interaction
+    triggerAudioUnlock();
+    modal.addEventListener('click', triggerAudioUnlock, { once: false });
+    bgmInterval = setInterval(() => {
+      if (bgmEnabled) playUpbeatPirateLoop();
+    }, 0.18 * 8 * 1000 + 40); // 1.48 seconds per high-energy loop
+
+    const cleanup = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      if (bgmInterval) clearInterval(bgmInterval);
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      modal.remove();
+    };
+
+    const renderStage = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      timerSeconds = defaultTimeLimit;
+
+      const isFinish = curIdx >= qList.length;
+      if (isFinish) {
+        synth.play('fanfare');
+        modal.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:2rem; background:radial-gradient(circle at center, #1e3a8a 0%, #060913 100%); animation:fadeIn 0.5s ease; position:relative; overflow:hidden;">
+            
+            <div style="position:absolute; inset:0; pointer-events:none; overflow:hidden;">
+              ${Array.from({length: 30}).map((_, i) => `
+                <div style="position:absolute; left:${(i * 3.3).toFixed(1)}%; top:${(Math.random() * 80).toFixed(0)}%; font-size:${(Math.random() * 1.6 + 1.2).toFixed(1)}rem; animation:floatDown ${(Math.random() * 2 + 2).toFixed(1)}s infinite ease-in-out; opacity:0.85;">
+                  ${['🪙','✨','⭐','💎','👑','💰'][i % 6]}
+                </div>
+              `).join('')}
+            </div>
+
+            <div style="position:relative; margin-bottom:1.5rem; z-index:2;">
+              <div style="font-size:9.5rem; filter:drop-shadow(0 0 60px #fde047); animation:bounce 1.6s infinite;">🎁</div>
+              <div style="position:absolute; top:-20px; right:-20px; font-size:4.5rem; animation:pulse 1s infinite;">✨</div>
+            </div>
+            
+            <h1 style="font-size:3.8rem; font-weight:900; background:linear-gradient(90deg, #fde047, #ffffff, #fde047); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:0 0 0.8rem; text-shadow:0 10px 30px rgba(0,0,0,0.6); z-index:2;">
+              VINH DANH ĐẠI THÁM TỬ KHO BÁU!
+            </h1>
+            <p style="font-size:1.65rem; color:#fef08a; margin-bottom:2rem; max-width:880px; line-height:1.5; font-weight:600; z-index:2;">
+              Chúc mừng em đã xuất sắc giải mã toàn bộ <strong>${qList.length} trạm mật thư</strong> và mở khóa Rương Vàng Tri Thức!
+            </p>
+
+            <div style="display:flex; gap:1.8rem; justify-content:center; align-items:center; margin-bottom:2.5rem; flex-wrap:wrap; z-index:2;">
+              <div style="background:rgba(245,158,11,0.25); border:2.5px solid #fde047; padding:1rem 2.4rem; border-radius:24px; font-size:1.7rem; font-weight:900; color:#fde047; box-shadow:0 8px 30px rgba(245,158,11,0.35);">
+                💰 Điểm Số Đạt Được: ${score} Điểm
+              </div>
+              <div style="background:rgba(16,185,129,0.25); border:2.5px solid #6ee7b7; padding:1rem 2.4rem; border-radius:24px; font-size:1.7rem; font-weight:900; color:#6ee7b7; box-shadow:0 8px 30px rgba(16,185,129,0.35);">
+                🏆 Danh Hiệu: Đại Thám Tử Xuất Sắc
+              </div>
+            </div>
+
+            <div style="display:flex; gap:1.2rem; z-index:2;">
+              <button id="btn-tr-play-again" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:3px solid #fef08a; padding:1.1rem 2.8rem; border-radius:50px; font-size:1.35rem; font-weight:900; cursor:pointer; box-shadow:0 10px 30px rgba(245,158,11,0.4); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                🔄 Thám Hiểm Lại
+              </button>
+              <button id="btn-tr-close-win" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:3px solid #86efac; padding:1.1rem 3.2rem; border-radius:50px; font-size:1.35rem; font-weight:900; cursor:pointer; box-shadow:0 10px 30px rgba(16,185,129,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                ✕ Hoàn Thành Cuộc Phiêu Lưu
+              </button>
+            </div>
+          </div>
+        `;
+        const playAgainBtn = modal.querySelector('#btn-tr-play-again');
+        if (playAgainBtn) playAgainBtn.onclick = () => { curIdx = 0; score = 0; lives = 3; renderStage(); };
+        const closeWinBtn = modal.querySelector('#btn-tr-close-win');
+        if (closeWinBtn) closeWinBtn.onclick = cleanup;
+        return;
+      }
+
+      if (lives <= 0) {
+        synth.play('fail');
+        modal.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:2rem; background:radial-gradient(circle at center, #7f1d1d 0%, #070b19 100%); animation:fadeIn 0.4s ease;">
+            <div style="font-size:7.5rem; margin-bottom:1.5rem;">💔🕵️‍♂️</div>
+            <h1 style="font-size:3.4rem; font-weight:900; color:#f87171; margin:0 0 1rem;">
+              THÁM HIỂM CHƯA THÀNH CÔNG!
+            </h1>
+            <p style="font-size:1.5rem; color:#fecaca; margin-bottom:2.2rem; max-width:700px;">
+              Em đã dùng hết 3 kính lúp cơ hội. Hãy đọc lại kiến thức bài học và thử sức lại nhé!
+            </p>
+            <div style="display:flex; gap:1.2rem;">
+              <button id="btn-tr-retry" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; border:none; padding:1.1rem 2.8rem; border-radius:35px; font-size:1.3rem; font-weight:900; cursor:pointer; box-shadow:0 8px 25px rgba(245,158,11,0.4);">
+                🔄 Chơi Lại Từ Đầu
+              </button>
+              <button id="btn-tr-close-fail" style="background:#ef4444; color:#fff; border:none; padding:1.1rem 2.2rem; border-radius:35px; font-size:1.3rem; font-weight:900; cursor:pointer;">
+                ✕ Thoát
+              </button>
+            </div>
+          </div>
+        `;
+        const retryBtn = modal.querySelector('#btn-tr-retry');
+        if (retryBtn) retryBtn.onclick = () => { curIdx = 0; score = 0; lives = 3; renderStage(); };
+        const closeFailBtn = modal.querySelector('#btn-tr-close-fail');
+        if (closeFailBtn) closeFailBtn.onclick = cleanup;
+        return;
+      }
+
+      const q = qList[curIdx];
+      const qText = q.q || q.questionText || q.stmt || 'Nội dung câu hỏi thám tử';
+      const qOpts = Array.isArray(q.opts) ? q.opts : (Array.isArray(q.options) ? q.options : ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"]);
+      const qAns = (typeof q.a !== 'undefined') ? q.a : (typeof q.correctAnswer !== 'undefined' ? q.correctAnswer : 0);
+      const stMeta = STATIONS[curIdx % STATIONS.length];
+
+      modal.innerHTML = `
+        <!-- TOP HUD -->
+        <div style="background:rgba(15,23,42,0.96); border-bottom:2.5px solid #f59e0b; padding:0.85rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:10; box-shadow:0 6px 25px rgba(0,0,0,0.5);">
+          <div style="display:flex; align-items:center; gap:1.2rem;">
+            <div style="width:50px; height:50px; border-radius:15px; background:radial-gradient(circle, #fef08a, #d97706); display:flex; align-items:center; justify-content:center; font-size:2rem; border:2px solid #fff; box-shadow:0 4px 15px rgba(217,119,6,0.4);">
+              ${stMeta.icon}
+            </div>
+            <div>
+              <h3 style="margin:0; font-size:1.4rem; font-weight:900; color:#fde047;">TRẠM ${curIdx + 1}: ${q.station || stMeta.name}</h3>
+              <span style="font-size:0.88rem; color:#bae6fd;">Hải trình thám hiểm Đảo Giấu Vàng</span>
+            </div>
+          </div>
+
+          <!-- LIVES, TIMER, SCORE, BGM BUTTON -->
+          <div style="display:flex; align-items:center; gap:1.2rem;">
+            <!-- BGM TOGGLE -->
+            <button id="btn-tr-bgm-toggle" style="background:${bgmEnabled ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.1)'}; border:2px solid ${bgmEnabled ? '#86efac' : 'rgba(255,255,255,0.3)'}; color:#fff; padding:0.5rem 1.1rem; border-radius:20px; font-weight:900; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:${bgmEnabled ? '0 4px 14px rgba(16,185,129,0.4)' : 'none'};">
+              <span>${bgmEnabled ? '🔊' : '🔇'}</span> <span>${bgmEnabled ? 'Nhạc: BẬT' : 'Nhạc: TẮT'}</span>
+            </button>
+
+            <!-- LIVES (3 KÍNH LÚP) -->
+            <div style="display:flex; align-items:center; gap:0.4rem; background:rgba(255,255,255,0.1); padding:0.45rem 1.1rem; border-radius:20px; border:1.5px solid rgba(255,255,255,0.2);">
+              <span style="font-size:0.88rem; font-weight:800; color:#fca5a5;">Cơ hội:</span>
+              ${[1,2,3].map(i => `<span style="font-size:1.35rem; opacity:${i <= lives ? '1' : '0.2'}; filter:drop-shadow(0 0 8px ${i <= lives ? '#ef4444' : 'none'});">🔍</span>`).join('')}
+            </div>
+
+            <!-- TIMER -->
+            <div style="background:rgba(2,132,199,0.25); border:1.5px solid #38bdf8; padding:0.45rem 1.2rem; border-radius:20px; font-size:1.2rem; font-weight:900; color:#38bdf8; display:flex; align-items:center; gap:0.4rem;">
+              <span>⏱️</span> <span id="tr-timer-sec">${timerSeconds}s</span>
+            </div>
+
+            <!-- SCORE -->
+            <div style="background:rgba(245,158,11,0.25); border:1.5px solid #f59e0b; padding:0.45rem 1.3rem; border-radius:20px; font-size:1.2rem; font-weight:900; color:#fde047;">
+              💰 ${score} Đ
+            </div>
+
+            <button id="btn-tr-close" style="background:#ef4444; color:#fff; border:none; border-radius:12px; width:42px; height:42px; font-size:1.35rem; font-weight:900; cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='scale(1)';">✕</button>
+          </div>
+        </div>
+
+        <!-- MAIN INTERACTIVE ARENA WITH CANVAS BACKGROUND -->
+        <div style="flex:1; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.8rem; overflow:hidden;">
+          
+          <!-- ANIMATED BACKGROUND CANVAS (OCEAN WAVES & ISLAND FX 60 FPS) -->
+          <canvas id="tr-bg-canvas" style="position:absolute; inset:0; width:100%; height:100%; z-index:1;"></canvas>
+
+          <!-- ANIMATED PIRATE TRAIL BAR -->
+          <div style="display:flex; justify-content:space-between; align-items:center; width:88%; max-width:1050px; margin-bottom:2rem; position:relative; z-index:3;">
+            <div style="position:absolute; top:50%; left:4%; right:4%; height:8px; background:rgba(0,0,0,0.3); transform:translateY(-50%); z-index:1; border-radius:10px; border:1px solid rgba(255,255,255,0.15);"></div>
+            <div style="position:absolute; top:50%; left:4%; width:${((curIdx / Math.max(1, qList.length - 1)) * 92).toFixed(0)}%; height:8px; background:linear-gradient(90deg, #f59e0b, #10b981); transform:translateY(-50%); z-index:2; border-radius:10px; transition:width 0.5s ease; box-shadow:0 0 15px rgba(16,185,129,0.6);"></div>
+
+            ${qList.map((_, sIdx) => {
+              const isPast = sIdx < curIdx;
+              const isCur = sIdx === curIdx;
+              return `
+                <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; gap:0.4rem;">
+                  <div style="width:56px; height:56px; border-radius:50%; background:${isPast ? '#10b981' : (isCur ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'rgba(15,23,42,0.85)')}; border:3.5px solid ${isCur ? '#fde047' : (isPast ? '#6ee7b7' : 'rgba(255,255,255,0.3)')}; display:flex; align-items:center; justify-content:center; font-size:1.55rem; font-weight:900; color:#fff; box-shadow:${isCur ? '0 0 35px #f59e0b' : '0 4px 12px rgba(0,0,0,0.4)'}; transform:${isCur ? 'scale(1.25)' : 'scale(1)'}; transition:all 0.3s;">
+                    ${isPast ? '✅' : (isCur ? '🕵️‍♂️' : (sIdx + 1))}
+                  </div>
+                  <span style="font-size:0.82rem; font-weight:800; color:${isCur ? '#fde047' : '#e2e8f0'}; white-space:nowrap; text-shadow:0 2px 4px rgba(0,0,0,0.8);">
+                    ${sIdx === qList.length - 1 ? '👑 Rương Vàng' : ('Trạm ' + (sIdx + 1))}
+                  </span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- PARCHMENT SCROLL QUESTION CARD -->
+          <div style="background:linear-gradient(145deg, #fffbeb 0%, #fef3c7 100%); color:#78350f; border:4.5px solid #b45309; border-radius:32px; padding:2.5rem 3.2rem; max-width:920px; width:92%; box-shadow:0 25px 70px rgba(0,0,0,0.7), 0 0 50px rgba(180,83,9,0.3); position:relative; animation:slideUp 0.35s cubic-bezier(0.16,1,0.3,1); z-index:3;">
+            
+            <div style="position:absolute; top:-24px; left:50%; transform:translateX(-50%); background:#b45309; color:#fef08a; font-weight:900; font-size:1.2rem; padding:0.45rem 2.4rem; border-radius:25px; border:2.5px solid #fde68a; box-shadow:0 6px 20px rgba(0,0,0,0.35); display:flex; align-items:center; gap:0.6rem;">
+              <span>📜</span> MẬT THƯ TRẠM SỐ ${curIdx + 1}
+            </div>
+
+            <h2 style="font-size:1.95rem; font-weight:900; color:#451a03; text-align:center; margin:1rem 0 2rem 0; line-height:1.45; letter-spacing:-0.3px;">
+              ${qText}
+            </h2>
+
+            <!-- 4 CHOICES (2x2 GRID) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.8rem;">
+              ${qOpts.map((opt, oIdx) => `
+                <button class="btn-tr-opt" data-idx="${oIdx}" style="background:#ffffff; color:#78350f; border:2.5px solid #d97706; padding:1.25rem 1.4rem; border-radius:20px; font-size:1.18rem; font-weight:800; cursor:pointer; text-align:left; display:flex; align-items:center; gap:1rem; transition:all 0.15s; box-shadow:0 4px 14px rgba(180,83,9,0.08);" onmouseover="this.style.background='#fef08a'; this.style.transform='translateY(-3px)';" onmouseout="this.style.background='#ffffff'; this.style.transform='translateY(0)';">
+                  <span style="background:#b45309; color:#fff; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.15rem; flex-shrink:0; font-weight:900;">${['A','B','C','D'][oIdx]}</span>
+                  <span style="flex:1; line-height:1.35;">${opt}</span>
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- FOOTER HINT & VOICE TTS -->
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.98rem; color:#92400e; font-weight:700; border-top:1.5px dashed #d97706; padding-top:1.1rem; flex-wrap:wrap; gap:0.8rem;">
+              <div>💡 <strong>Manh mối thám tử:</strong> ${q.hint || 'Hãy phân tích kỹ các đáp án'}</div>
+              <button id="btn-tr-voice-hint" style="background:#b45309; color:#fef08a; border:none; padding:0.5rem 1.2rem; border-radius:12px; font-weight:800; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; box-shadow:0 4px 12px rgba(180,83,9,0.25);">
+                🔊 Đọc câu hỏi
+              </button>
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      // Start Background Canvas Animation (Ocean Waves & Island Lights 60 FPS)
+      const bgCanvas = modal.querySelector('#tr-bg-canvas');
+      if (bgCanvas) {
+        const bgCtx = bgCanvas.getContext('2d');
+        let waveOffset = 0;
+        
+        const resizeCanvas = () => {
+          bgCanvas.width = (bgCanvas.parentElement ? bgCanvas.parentElement.clientWidth : 0) || window.innerWidth || 1200;
+          bgCanvas.height = (bgCanvas.parentElement ? bgCanvas.parentElement.clientHeight : 0) || window.innerHeight || 800;
+        };
+        resizeCanvas();
+
+        const drawCanvasFx = () => {
+          const w = bgCanvas.width;
+          const h = bgCanvas.height;
+          bgCtx.clearRect(0, 0, w, h);
+
+          // Deep Sea Gradient Background
+          const grad = bgCtx.createRadialGradient(w/2, h/2, 50, w/2, h/2, Math.max(w, h));
+          grad.addColorStop(0, '#1e293b');
+          grad.addColorStop(0.6, '#0f172a');
+          grad.addColorStop(1, '#020617');
+          bgCtx.fillStyle = grad;
+          bgCtx.fillRect(0, 0, w, h);
+
+          // Animated Sea Wave 1 (Deep Blue)
+          bgCtx.fillStyle = 'rgba(2, 132, 199, 0.25)';
+          bgCtx.beginPath();
+          bgCtx.moveTo(0, h);
+          for (let x = 0; x <= w; x += 20) {
+            const y = h * 0.70 + Math.sin((x + waveOffset * 2) * 0.008) * 25;
+            bgCtx.lineTo(x, y);
+          }
+          bgCtx.lineTo(w, h);
+          bgCtx.closePath();
+          bgCtx.fill();
+
+          // Animated Sea Wave 2 (Cyan Foam)
+          bgCtx.fillStyle = 'rgba(6, 182, 212, 0.18)';
+          bgCtx.beginPath();
+          bgCtx.moveTo(0, h);
+          for (let x = 0; x <= w; x += 20) {
+            const y = h * 0.76 + Math.cos((x - waveOffset * 2.5) * 0.009) * 20;
+            bgCtx.lineTo(x, y);
+          }
+          bgCtx.lineTo(w, h);
+          bgCtx.closePath();
+          bgCtx.fill();
+
+          // Floating Island Sparkling Stars
+          bgCtx.fillStyle = 'rgba(253, 224, 71, 0.5)';
+          for (let i = 0; i < 24; i++) {
+            const sx = ((i * 137 + waveOffset * 1.5) % w);
+            const sy = ((i * 89) % (h * 0.65));
+            bgCtx.beginPath();
+            bgCtx.arc(sx, sy, (i % 3) + 1.8, 0, Math.PI * 2);
+            bgCtx.fill();
+          }
+
+          waveOffset += 1.8;
+          animFrameId = requestAnimationFrame(drawCanvasFx);
+        };
+
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        animFrameId = requestAnimationFrame(drawCanvasFx);
+      }
+
+      // BGM Toggle Event
+      const bgmBtn = modal.querySelector('#btn-tr-bgm-toggle');
+      if (bgmBtn) {
+        bgmBtn.onclick = () => {
+          bgmEnabled = !bgmEnabled;
+          bgmBtn.innerHTML = `<span>${bgmEnabled ? '🔊' : '🔇'}</span> <span>${bgmEnabled ? 'Nhạc: BẬT' : 'Nhạc: TẮT'}</span>`;
+          bgmBtn.style.background = bgmEnabled ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.1)';
+          bgmBtn.style.borderColor = bgmEnabled ? '#86efac' : 'rgba(255,255,255,0.3)';
+          bgmBtn.style.boxShadow = bgmEnabled ? '0 4px 14px rgba(16,185,129,0.4)' : 'none';
+          if (bgmEnabled) {
+            triggerAudioUnlock();
+          }
+        };
+      }
+
+      const closeBtn = modal.querySelector('#btn-tr-close');
+      if (closeBtn) closeBtn.onclick = cleanup;
+
+      // Voice TTS
+      const voiceBtn = modal.querySelector('#btn-tr-voice-hint');
+      if (voiceBtn) {
+        voiceBtn.onclick = () => {
+          if ('speechSynthesis' in window) {
+            const utter = new SpeechSynthesisUtterance(qText);
+            utter.lang = 'vi-VN';
+            window.speechSynthesis.speak(utter);
+          }
+        };
+      }
+
+      // Countdown Timer
+      const timerSecEl = modal.querySelector('#tr-timer-sec');
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        if (timerSecEl) timerSecEl.textContent = timerSeconds + 's';
+        if (timerSeconds <= 5) {
+          synth.play('pop');
+          if (timerSecEl && timerSecEl.style) timerSecEl.style.color = '#ef4444';
+        }
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          synth.play('wrong');
+          lives--;
+          renderStage();
+        }
+      }, 1000);
+
+      // Option clicks
+      modal.querySelectorAll('.btn-tr-opt').forEach(btn => {
+        btn.onclick = () => {
+          if (timerInterval) clearInterval(timerInterval);
+          const chosen = parseInt(btn.dataset.idx);
+          if (chosen === qAns) {
+            synth.play('correct');
+            btn.style.background = '#10b981';
+            btn.style.borderColor = '#059669';
+            btn.style.color = '#fff';
+            score += (100 + timerSeconds * 2);
+            setTimeout(() => {
+              curIdx++;
+              renderStage();
+            }, 750);
+          } else {
+            synth.play('wrong');
+            btn.style.background = '#ef4444';
+            btn.style.borderColor = '#b91c1c';
+            btn.style.color = '#fff';
+            lives--;
+            setTimeout(() => {
+              renderStage();
+            }, 900);
+          }
+        };
+      });
+    };
+
+    renderStage();
+  },
+
+  // =========================================================================
+  // 🎡 GAME 21: VÒNG QUAY THỬ THÁCH AI (GAMESHOW WHEEL - SOFT GENTLE BGM)
+  // =========================================================================
+  _getChallengeWheelItems() {
+    return this._getLoadedQuestions('challengewheel') || [
+      { id: 1, text: "🎯 Câu Hỏi Bài Học", type: "quiz", q: "Thiết bị nào sau đây dùng để nhập văn bản vào máy tính?", opts: ["Bàn phím (Keyboard)", "Màn hình (Monitor)", "Máy in (Printer)", "Loa ngoài (Speaker)"], a: 0, hint: "Có các hàng phím A, B, C", pts: 100, color: "#ef4444" },
+      { id: 2, text: "⭐ x2 ĐIỂM THƯỞNG", type: "bonus", q: "NHÂN ĐÔI ĐIỂM SỐ: Trong tin học, 1 Byte bằng bao nhiêu Bit nhị phân?", opts: ["8 bit", "16 bit", "10 bit", "1024 bit"], a: 0, hint: "1 Byte = 8 bit nhị phân", pts: 200, color: "#f59e0b" },
+      { id: 3, text: "🤸 Nhún Nhảy 5s", type: "action", q: "Thử thách vận động: Đứng lên làm động tác nhún nhảy ăn mừng 5 giây cho cả lớp vỗ tay!", opts: ["Đã hoàn thành xuất sắc (+100đ)", "Bỏ qua", "Nhường bạn"], a: 0, hint: "Tạo không khí sôi nổi cho lớp học", pts: 100, color: "#10b981" },
+      { id: 4, text: "🎁 Quà May Mắn", type: "gift", q: "Món quà bí mật từ AI: Trả lời đúng để nhận ngay 150 điểm thưởng!", opts: ["CPU là bộ não của máy tính", "Màn hình là bộ não", "Chuột là bộ não", "Bàn phím là bộ não"], a: 0, hint: "Central Processing Unit", pts: 150, color: "#06b6d4" },
+      { id: 5, text: "🎤 Hát / Đọc Thơ", type: "action", q: "Thử thách hoạt náo: Hãy hát 1 đoạn bài hát hoặc đọc 1 câu thơ vui vẻ cho cả lớp cùng nghe!", opts: ["Đã thể hiện xuất sắc (+100đ)", "Bỏ qua", "Nhường bạn"], a: 0, hint: "Tự tin biểu diễn trước lớp", pts: 100, color: "#3b82f6" },
+      { id: 6, text: "💔 MẤT LƯỢT", type: "bad", q: "Rất tiếc! Ô Mất Lượt rồi, hãy nhường quyền quay tiếp theo cho bạn khác nhé!", opts: ["Nhường lượt cho bạn (+0đ)"], a: 0, hint: "Chúc may mắn ở vòng sau", pts: 0, color: "#64748b" },
+      { id: 7, text: "💰 Thưởng 100đ", type: "free", q: "CHÚC MỪNG: Nhận nóng 100 điểm thưởng may mắn từ Vòng Quay AI mà không cần trả lời câu hỏi!", opts: ["Nhận ngay 100 điểm thưởng"], a: 0, hint: "May mắn tuyệt vời", pts: 100, color: "#8b5cf6" },
+      { id: 8, text: "🔄 Đổi Bạn Quay", type: "swap", q: "Quyền năng chỉ định: Hãy chọn một bạn học sinh bất kỳ trong lớp để lên quay lượt tiếp theo!", opts: ["Đã chỉ định bạn khác (+50đ)"], a: 0, hint: "Gọi bạn cùng tham gia", pts: 50, color: "#ec4899" },
+      { id: 9, text: "🧠 Đố Mẹo Nhanh", type: "quiz", q: "Cái gì có cổ nhưng không có miệng?", opts: ["Cái áo", "Cái chai", "Cái ghế", "Cái bàn"], a: 0, hint: "Vật dụng em mặc hàng ngày", pts: 100, color: "#14b8a6" },
+      { id: 10, text: "👑 Ngôi Sao Lớp", type: "star", q: "VINH DANH NGÔI SAO: Đâu là hành động đúng để bảo vệ an toàn thông tin cá nhân trên mạng?", opts: ["Không chia sẻ mật khẩu cho người lạ", "Công khai số CCCD", "Đặt mật khẩu 123456", "Bấm vào mọi link lạ"], a: 0, hint: "Bảo vệ mật khẩu cá nhân", pts: 200, color: "#eab308" },
+      { id: 11, text: "⏱️ Trả Lời 10s", type: "speed", q: "Thử thách tốc độ: Kể tên 3 môn học em yêu thích nhất trong vòng 10 giây!", opts: ["Đã kể xong nhanh chóng (+100đ)", "Chưa kịp"], a: 0, hint: "Toán, Văn, Tin học, Ngoại ngữ...", pts: 100, color: "#6366f1" },
+      { id: 12, text: "🌟 Jackpot 300đ", type: "jackpot", q: "Ô ĐỈNH CAO JACKPOT: Trả lời câu hỏi sau để nhận trọn 300 điểm vô địch:", opts: ["Học đi đôi với hành", "Chỉ học lý thuyết suông", "Bỏ qua bài tập", "Không chú ý nghe giảng"], a: 0, hint: "Phương châm học tập đúng đắn", pts: 300, color: "#f97316" }
+    ];
+  },
+
+  _renderChallengeWheelDashboard() {
+    const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
+    if (!area) return;
+
+    let items = this._getChallengeWheelItems();
+    const savedList = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'challengewheel') : [];
+    const curSubName = (typeof currentSubject !== 'undefined' && currentSubject && currentSubject.name) ? currentSubject.name : 'Tin học';
+
+    area.innerHTML = `
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease;">
+        
+        <!-- HEADER BANNER GAMESHOW -->
+        <div style="background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; margin-bottom:1.5rem; border:2.5px solid #f59e0b; box-shadow:0 12px 35px rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+          <div style="display:flex; align-items:center; gap:1.4rem;">
+            <div style="width:70px; height:70px; border-radius:20px; background:radial-gradient(circle, #fde047 0%, #f59e0b 60%, #b45309 100%); display:flex; align-items:center; justify-content:center; font-size:2.8rem; border:3px solid #fff; box-shadow:0 0 25px rgba(245,158,11,0.7); animation:bounce 2s infinite;">
+              🎡
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.25rem;">
+                <span style="background:#f59e0b; color:#78350f; font-weight:900; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">GAMESHOW VTV</span>
+                <span style="background:rgba(255,255,255,0.15); color:#bae6fd; font-weight:800; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">12 Ô ĐÈN LED 60 FPS</span>
+              </div>
+              <h1 style="margin:0; font-size:2rem; font-weight:900; background:linear-gradient(90deg, #fde047, #38bdf8, #f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
+                21. VÒNG QUAY THỬ THÁCH AI (CHALLENGE WHEEL)
+              </h1>
+              <p style="margin:0.3rem 0 0 0; color:#e2e8f0; font-size:0.98rem;">
+                Vòng quay may mắn đa năng tích hợp Trắc nghiệm kiến thức, Thử thách hoạt náo, Nhân đôi điểm x2 & Hộp quà bí mật
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 ACTION BUTTONS STANDARD -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+          <button id="btn-save-cw-library" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:2px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(16,185,129,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            💾 LƯU VÀO THƯ VIỆN TRƯỜNG
+          </button>
+
+          <button id="btn-open-cw-library" style="background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color:#fff; border:2px solid #c4b5fd; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(139,92,246,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            📁 KHO BÀI ĐÃ LƯU (${savedList.length})
+          </button>
+
+          <button id="btn-ai-generate-cw-sectors" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:2px solid #7dd3fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(2,132,199,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            🤖 AI TỰ ĐỘNG TẠO 12 Ô THEO BÀI
+          </button>
+
+          <button id="btn-start-cw-gameshow-now" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:#fff; border:2.5px solid #fde047; padding:0.95rem 1.1rem; border-radius:16px; font-size:1.08rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(245,158,11,0.45); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03) translateY(-2px)';" onmouseout="this.style.transform='scale(1) translateY(0)';">
+            🚀 BẮT ĐẦU QUAY GAMESHOW
+          </button>
+        </div>
+
+        <!-- SETTINGS PANEL & STUDENT CALL SELECTOR -->
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.2rem 1.6rem; margin-bottom:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+          <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span style="font-weight:800; color:#334155; font-size:0.92rem;">🎯 Chế độ chơi:</span>
+              <select id="cw-game-mode-sel" style="padding:0.45rem 0.85rem; border-radius:12px; border:2px solid #cbd5e1; font-weight:800; color:#0f172a; outline:none; background:#f8fafc;">
+                <option value="single">Cả lớp quay tự do / Tích điểm</option>
+                <option value="student_call">Quay gọi học sinh ngẫu nhiên</option>
+                <option value="team_battle">Thi đấu 2 Đội (Đội Đỏ vs Đội Xanh)</option>
+              </select>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span style="font-weight:800; color:#334155; font-size:0.92rem;">⏱️ Thời gian suy nghĩ:</span>
+              <select id="cw-timer-limit-sel" style="padding:0.45rem 0.85rem; border-radius:12px; border:2px solid #cbd5e1; font-weight:800; color:#0f172a; outline:none; background:#f8fafc;">
+                <option value="15">15 Giây</option>
+                <option value="20">20 Giây</option>
+                <option value="30" selected>30 Giây</option>
+                <option value="45">45 Giây</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.8rem;">
+            <button id="btn-add-new-cw-sector" style="background:#f1f5f9; color:#0f172a; border:2px dashed #94a3b8; padding:0.5rem 1rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem; display:flex; align-items:center; gap:0.4rem;">
+              ➕ Thêm Ô Thử Thách Mới
+            </button>
+            <button id="btn-reset-default-cw-sectors" style="background:#fff; color:#ef4444; border:1.5px solid #fca5a5; padding:0.5rem 0.9rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem;">
+              🔄 Khôi phục mặc định
+            </button>
+          </div>
+        </div>
+
+        <!-- 12 SECTORS VISUAL GRID -->
+        <div style="margin-bottom:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
+            <h3 style="margin:0; font-size:1.25rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:0.5rem;">
+              <span>📋</span> DANH SÁCH 12 Ô THỬ THÁCH TRÊN VÒNG QUAY (${items.length} Ô)
+            </h3>
+            <span style="font-size:0.85rem; color:#64748b; font-weight:700;">Nhấn vào từng ô để chỉnh sửa câu hỏi & phần thưởng</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:1rem;" id="cw-sectors-list-container">
+            ${items.map((item, idx) => `
+              <div style="background:#ffffff; border:2.5px solid ${item.color || '#38bdf8'}; border-radius:18px; padding:1.1rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.15s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                
+                <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:${item.color || '#38bdf8'};"></div>
+
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <span style="background:${item.color || '#38bdf8'}; color:#fff; font-weight:900; font-size:0.75rem; padding:0.18rem 0.55rem; border-radius:6px;">Ô SỐ ${idx + 1}</span>
+                    <span style="font-weight:900; color:#d97706; font-size:1rem;">+${item.pts}đ</span>
+                  </div>
+
+                  <h4 style="margin:0 0 0.4rem; font-size:1.1rem; font-weight:900; color:#0f172a;">${item.text}</h4>
+                  <p style="margin:0 0 0.7rem; font-size:0.88rem; color:#475569; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                    ${item.q || item.text}
+                  </p>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed #e2e8f0; padding-top:0.6rem; margin-top:0.4rem;">
+                  <span style="font-size:0.78rem; font-weight:800; color:#64748b;">Loại: ${item.type === 'quiz' ? '🎯 Trắc nghiệm' : (item.type === 'bonus' ? '⭐ Nhân đôi' : (item.type === 'action' ? '🤸 Vận động' : '🎁 May mắn'))}</span>
+                  <div style="display:flex; gap:0.4rem;">
+                    <button class="btn-edit-cw-item" data-idx="${idx}" style="background:#e0f2fe; color:#0369a1; border:none; padding:0.3rem 0.7rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">✏️ Sửa</button>
+                    <button class="btn-del-cw-item" data-idx="${idx}" style="background:#fee2e2; color:#dc2626; border:none; padding:0.3rem 0.55rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">🗑️</button>
+                  </div>
+                </div>
+
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    // Save Library
+    const saveLibBtn = area.querySelector('#btn-save-cw-library');
+    if (saveLibBtn) {
+      saveLibBtn.onclick = () => {
+        if (typeof showSaveToolModal === 'function') {
+          showSaveToolModal('challengewheel', '21. Vòng Quay Thử Thách AI', items);
+        } else {
+          this._saveGameToCustomStorage('challengewheel', items);
+          if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã lưu bộ Vòng Quay vào thư viện thành công!', 'success');
+          this._renderChallengeWheelDashboard();
+        }
+      };
+    }
+
+    // Open Library
+    const openLibBtn = area.querySelector('#btn-open-cw-library');
+    if (openLibBtn) {
+      openLibBtn.onclick = () => {
+        if (typeof showSharedToolsLibraryModal === 'function') {
+          showSharedToolsLibraryModal('challengewheel', (loaded) => {
+            if (loaded && Array.isArray(loaded)) {
+              this._setLoadedQuestions('challengewheel', loaded);
+              this._renderChallengeWheelDashboard();
+            }
+          });
+        } else {
+          this._openQuestionLoaderModal('challengewheel', (loaded) => {
+            this._setLoadedQuestions('challengewheel', loaded);
+            this._renderChallengeWheelDashboard();
+          });
+        }
+      };
+    }
+
+    // AI Generate 12 Sectors
+    const aiGenBtn = area.querySelector('#btn-ai-generate-cw-sectors');
+    if (aiGenBtn) {
+      aiGenBtn.onclick = () => {
+        const topic = prompt('Nhập chủ đề bài học để AI sinh 12 ô thử thách:', curSubName + ' - Ôn tập kiến thức');
+        if (topic) {
+          if (typeof app !== 'undefined' && app.showToast) app.showToast('🤖 AI đang thiết kế 12 ô thử thách Gameshow...', 'info');
+          setTimeout(() => {
+            const aiGenerated = [
+              { id: 1, text: "🎯 Câu Hỏi 1", type: "quiz", q: "Kiến thức trọng tâm số 1 về " + topic + " là gì?", opts: ["Đáp án đúng chính xác", "Khái niệm chưa chuẩn", "Ý kiến sai", "Không liên quan"], a: 0, hint: "Xem lại SGK bài học", pts: 100, color: "#ef4444" },
+              { id: 2, text: "⭐ x2 ĐIỂM THƯỞNG", type: "bonus", q: "NHÂN ĐÔI ĐIỂM SỐ: Định lý / nguyên lý cốt lõi trong " + topic + "?", opts: ["Đúng chuẩn kiến thức", "Phương án 2", "Phương án 3", "Phương án 4"], a: 0, hint: "Ô nhân đôi điểm x2", pts: 200, color: "#f59e0b" },
+              { id: 3, text: "🤸 Thử Thách Vui", type: "action", q: "Thử thách vận động: Kể tên 3 bạn trong lớp và bắt tay làm quen!", opts: ["Đã hoàn thành xuất sắc (+100đ)", "Bỏ qua"], a: 0, hint: "Tạo không khí hòa đồng", pts: 100, color: "#10b981" },
+              { id: 4, text: "🎁 Quà AI", type: "gift", q: "Món quà AI: Trả lời nhanh để nhận trọn 150 điểm thưởng!", opts: ["Phương án đúng", "Phương án sai 1", "Phương án sai 2", "Phương án sai 3"], a: 0, hint: "Tự tin trả lời", pts: 150, color: "#06b6d4" },
+              { id: 5, text: "🎤 Đọc Thơ / Hát", type: "action", q: "Thử thách văn nghệ: Đọc 1 câu thơ hoặc hát 1 bài về tình thầy trò!", opts: ["Đã thể hiện (+100đ)", "Bỏ qua"], a: 0, hint: "Tự tin biểu diễn", pts: 100, color: "#3b82f6" },
+              { id: 6, text: "💔 MẤT LƯỢT", type: "bad", q: "Ô Mất Lượt rồi, nhường quyền cho bạn bên cạnh nhé!", opts: ["Nhường lượt (+0đ)"], a: 0, hint: "Chúc may mắn lần sau", pts: 0, color: "#64748b" },
+              { id: 7, text: "💰 Thưởng 100đ", type: "free", q: "CHÚC MỪNG: Nhận nóng 100 điểm thưởng từ Vòng Quay AI!", opts: ["Nhận 100đ ngay"], a: 0, hint: "May mắn tuyệt vời", pts: 100, color: "#8b5cf6" },
+              { id: 8, text: "🔄 Đổi Bạn Quay", type: "swap", q: "Hãy chỉ định 1 bạn bất kỳ trong lớp lên quay tiếp theo!", opts: ["Đã chỉ định bạn (+50đ)"], a: 0, hint: "Chỉ định bạn", pts: 50, color: "#ec4899" },
+              { id: 9, text: "🧠 Đố Mẹo Nhanh", type: "quiz", q: "Câu đố rèn luyện tư duy phản xạ nhanh cho chủ đề " + topic + "?", opts: ["Đáp án thông minh", "Đáp án chưa đúng", "Đáp án sai", "Không chắc"], a: 0, hint: "Tư duy logic", pts: 100, color: "#14b8a6" },
+              { id: 10, text: "👑 Ngôi Sao Lớp", type: "star", q: "VINH DANH NGÔI SAO: Ứng dụng thực tế của " + topic + " trong đời sống?", opts: ["Ứng dụng hữu ích", "Không có ứng dụng", "Chưa rõ", "Sai"], a: 0, hint: "Liên hệ thực tế", pts: 200, color: "#eab308" },
+              { id: 11, text: "⏱️ Trả Lời 10s", type: "speed", q: "Thử thách 10 giây: Nêu 2 từ khóa quan trọng nhất của bài học?", opts: ["Đã hoàn thành trong 10s (+100đ)", "Chưa kịp"], a: 0, hint: "Phản xạ nhanh", pts: 100, color: "#6366f1" },
+              { id: 12, text: "🌟 Jackpot 300đ", type: "jackpot", q: "Ô JACKPOT 300Đ: Tổng kết toàn diện kiến thức bài học " + topic + "?", opts: ["Câu trả lời xuất sắc tuyệt đối", "Chưa chuẩn", "Sai", "Thiếu ý"], a: 0, hint: "Điểm thưởng vô địch", pts: 300, color: "#f97316" }
+            ];
+            this._setLoadedQuestions('challengewheel', aiGenerated);
+            if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã tạo thành công 12 ô thử thách mới!', 'success');
+            this._renderChallengeWheelDashboard();
+          }, 600);
+        }
+      };
+    }
+
+    // Start Gameshow Arena
+    const startBtn = area.querySelector('#btn-start-cw-gameshow-now');
+    if (startBtn) {
+      startBtn.onclick = () => {
+        const modeEl = area.querySelector('#cw-game-mode-sel');
+        const timerEl = area.querySelector('#cw-timer-limit-sel');
+        const opts = {
+          mode: modeEl ? modeEl.value : 'single',
+          timeLimit: timerEl ? parseInt(timerEl.value) : 30
+        };
+        this._launchChallengeWheelArena(curSubName, items, opts);
+      };
+    }
+
+    // Reset default
+    const resetBtn = area.querySelector('#btn-reset-default-cw-sectors');
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (confirm('Khôi phục 12 ô thử thách về mặc định?')) {
+          this._setLoadedQuestions('challengewheel', null);
+          this._renderChallengeWheelDashboard();
+        }
+      };
+    }
+
+    // Add new sector
+    const addBtn = area.querySelector('#btn-add-new-cw-sector');
+    if (addBtn) {
+      addBtn.onclick = () => {
+        const newTitle = prompt('Nhập tên ô thử thách mới:', '🎯 Ô Thử Thách Mới');
+        if (newTitle) {
+          items.push({
+            id: items.length + 1,
+            text: newTitle,
+            type: "quiz",
+            q: "Nội dung câu hỏi hoặc thử thách cho " + newTitle,
+            opts: ["Đáp án đúng", "Đáp án sai 1", "Đáp án sai 2", "Đáp án sai 3"],
+            a: 0,
+            hint: "Gợi ý",
+            pts: 100,
+            color: "#3b82f6"
+          });
+          this._setLoadedQuestions('challengewheel', items);
+          this._renderChallengeWheelDashboard();
+        }
+      };
+    }
+
+    // Edit and Delete buttons
+    area.querySelectorAll('.btn-edit-cw-item').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx);
+        const cur = items[idx];
+        const newText = prompt('Tên hiển thị trên vòng quay:', cur.text);
+        if (newText !== null) {
+          const newQ = prompt('Nội dung chi tiết câu hỏi / thử thách:', cur.q);
+          const newPts = prompt('Điểm thưởng khi hoàn thành:', cur.pts);
+          cur.text = newText;
+          if (newQ) cur.q = newQ;
+          if (newPts) cur.pts = parseInt(newPts) || 100;
+          this._setLoadedQuestions('challengewheel', items);
+          this._renderChallengeWheelDashboard();
+        }
+      };
+    });
+
+    area.querySelectorAll('.btn-del-cw-item').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx);
+        if (items.length <= 4) {
+          alert('Vòng quay cần tối thiểu 4 ô để hoạt động!');
+          return;
+        }
+        if (confirm('Xóa ô này khỏi vòng quay?')) {
+          items.splice(idx, 1);
+          this._setLoadedQuestions('challengewheel', items);
+          this._renderChallengeWheelDashboard();
+        }
+      };
+    });
+  },
+
+  _launchChallengeWheelArena(subName, questions, opts = {}) {
+    const old = document.getElementById('cw-arena-modal');
+    if (old) old.remove();
+
+    let items = questions;
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      if (typeof subName === 'object' && Array.isArray(subName)) {
+        items = subName;
+      } else {
+        items = this._getChallengeWheelItems();
+      }
+    }
+
+    const mode = (opts && opts.mode) ? opts.mode : 'single';
+    const defaultTimerLimit = (opts && opts.timeLimit) ? opts.timeLimit : 30;
+
+    let score = 0;
+    let redTeamScore = 0;
+    let blueTeamScore = 0;
+    let curTurnTeam = 'red';
+    let spinCount = 0;
+    let bgmEnabled = true;
+    let bgmInterval = null;
+    let animFrameId = null;
+    let isSpinning = false;
+    let currentAngle = 0;
+    let ledTick = 0;
+
+    // Student roster for student_call mode
+    const defaultStudents = [
+      "Nguyễn Văn An", "Trần Thị Bích", "Lê Hoàng Cường", "Phạm Thu Dung",
+      "Vũ Hải Đăng", "Đỗ Minh Khang", "Bùi Lan Hương", "Hoàng Quốc Huy",
+      "Đặng Thanh Mai", "Phan Gia Phúc", "Ngô Phương Thảo", "Trịnh Tiến Đạt"
+    ];
+    let curCalledStudent = "Cả lớp sẵn sàng!";
+
+    let audioCtx = null;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) audioCtx = new AudioContextClass();
+    } catch(e) {}
+
+    const synth = this._getAudioSynth();
+
+    const modal = document.createElement('div');
+    modal.id = 'cw-arena-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
+    document.body.appendChild(modal);
+
+    // Soft, Gentle, Elegant Ambient Gameshow BGM (Very gentle volume, warm sine/triangle waves)
+    const playSoftNote = (freq, duration, timeOffset, vol = 0.035, type = 'sine') => {
+      if (!bgmEnabled || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const startTime = audioCtx.currentTime + timeOffset;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, startTime);
+        
+        // Soft attack and smooth decay
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(vol, startTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      } catch(e) {}
+    };
+
+    const playSoftBassBeat = (timeOffset) => {
+      if (!bgmEnabled || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const startTime = audioCtx.currentTime + timeOffset;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(110, startTime);
+        osc.frequency.exponentialRampToValueAtTime(45, startTime + 0.15);
+        gain.gain.setValueAtTime(0.04, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + 0.15);
+      } catch(e) {}
+    };
+
+    const playFullGentleLoop = () => {
+      if (!bgmEnabled || !audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+
+      const step = 0.28; // Relaxed gentle tempo
+
+      // Soft bass heartbeat
+      for (let i = 0; i < 8; i += 2) {
+        playSoftBassBeat(i * step);
+      }
+
+      // Gentle warm chords (C major -> Em -> Am -> F)
+      const chordSeq = [
+        { f: 261.63, t: 0 * step }, // C4
+        { f: 329.63, t: 1 * step }, // E4
+        { f: 392.00, t: 2 * step }, // G4
+        { f: 440.00, t: 3 * step }, // A4
+        { f: 392.00, t: 4 * step }, // G4
+        { f: 329.63, t: 5 * step }, // E4
+        { f: 293.66, t: 6 * step }, // D4
+        { f: 261.63, t: 7 * step }  // C4
+      ];
+      chordSeq.forEach(c => playSoftNote(c.f, 0.35, c.t, 0.035, 'triangle'));
+    };
+
+    const triggerAudioUnlock = () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().then(() => playFullGentleLoop()).catch(()=>{});
+      } else {
+        playFullGentleLoop();
+      }
+    };
+
+    triggerAudioUnlock();
+    modal.addEventListener('click', triggerAudioUnlock, { once: false });
+    bgmInterval = setInterval(() => {
+      if (bgmEnabled) playFullGentleLoop();
+    }, 0.28 * 8 * 1000 + 100);
+
+    const cleanup = () => {
+      if (bgmInterval) clearInterval(bgmInterval);
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      modal.remove();
+    };
+
+    // TV Gameshow Studio Layout
+    modal.innerHTML = `
+      <!-- TOP GAMESHOW HEADER -->
+      <div style="background:rgba(15,23,42,0.96); border-bottom:3px solid #f59e0b; padding:0.85rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:10; box-shadow:0 8px 30px rgba(0,0,0,0.6);">
+        <div style="display:flex; align-items:center; gap:1.2rem;">
+          <div style="width:54px; height:54px; border-radius:18px; background:radial-gradient(circle, #fde047, #f59e0b, #b45309); display:flex; align-items:center; justify-content:center; font-size:2.4rem; border:2.5px solid #fff; box-shadow:0 0 25px rgba(245,158,11,0.6);">
+            🎡
+          </div>
+          <div>
+            <h3 style="margin:0; font-size:1.5rem; font-weight:900; background:linear-gradient(90deg, #fde047, #38bdf8, #f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
+              TRƯỜNG QUAY VÒNG QUAY THỬ THÁCH AI
+            </h3>
+            <span style="font-size:0.88rem; color:#fde68a;">
+              ${mode === 'student_call' ? 'Chế độ: 🎲 Quay Gọi Học Sinh Ngẫu Nhiên' : (mode === 'team_battle' ? 'Chế độ: ⚔️ Thi Đấu 2 Đội (Đỏ vs Xanh)' : 'Chế độ: 🎯 Tích Điểm Gameshow')}
+            </span>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:1.2rem;">
+          <!-- BGM TOGGLE -->
+          <button id="btn-cw-bgm-toggle" style="background:${bgmEnabled ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.1)'}; border:2px solid ${bgmEnabled ? '#86efac' : 'rgba(255,255,255,0.3)'}; color:#fff; padding:0.5rem 1.1rem; border-radius:20px; font-weight:900; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:${bgmEnabled ? '0 4px 14px rgba(16,185,129,0.4)' : 'none'};">
+            <span>${bgmEnabled ? '🔊' : '🔇'}</span> <span>${bgmEnabled ? 'Nhạc: BẬT' : 'Nhạc: TẮT'}</span>
+          </button>
+
+          <!-- SPIN COUNT -->
+          <div style="background:rgba(99,102,241,0.25); border:1.5px solid #818cf8; padding:0.45rem 1.2rem; border-radius:20px; font-size:1.15rem; font-weight:900; color:#818cf8;">
+            🎯 Lượt quay: <span id="cw-spin-count">0</span>
+          </div>
+
+          <!-- SCORE DISPLAY ACCORDING TO MODE -->
+          ${mode === 'team_battle' ? `
+            <div style="display:flex; gap:0.6rem;">
+              <div style="background:rgba(239,68,68,0.25); border:2px solid #ef4444; padding:0.45rem 1.1rem; border-radius:20px; font-size:1.15rem; font-weight:900; color:#f87171;">
+                🔴 Đỏ: <span id="cw-score-red">0</span>đ
+              </div>
+              <div style="background:rgba(59,130,246,0.25); border:2px solid #3b82f6; padding:0.45rem 1.1rem; border-radius:20px; font-size:1.15rem; font-weight:900; color:#60a5fa;">
+                🔵 Xanh: <span id="cw-score-blue">0</span>đ
+              </div>
+            </div>
+          ` : `
+            <div style="background:rgba(245,158,11,0.25); border:2px solid #fde047; padding:0.45rem 1.4rem; border-radius:20px; font-size:1.25rem; font-weight:900; color:#fde047; box-shadow:0 0 15px rgba(245,158,11,0.3);">
+              💰 Điểm: <span id="cw-total-score">0</span> Đ
+            </div>
+          `}
+
+          <button id="btn-cw-close" style="background:#ef4444; color:#fff; border:none; border-radius:12px; width:42px; height:42px; font-size:1.35rem; font-weight:900; cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='scale(1)';">✕</button>
+        </div>
+      </div>
+
+      <!-- MAIN GAMESHOW STAGE WITH DUAL COLUMNS -->
+      <div style="flex:1; position:relative; display:flex; align-items:center; justify-content:center; padding:1.5rem; gap:2.5rem; overflow:hidden;">
+        
+        <!-- CANVAS BACKGROUND (GAMESHOW STAGE LIGHTS 60 FPS) -->
+        <canvas id="cw-bg-canvas" style="position:absolute; inset:0; width:100%; height:100%; z-index:1;"></canvas>
+
+        <!-- COLUMN 1: GIANT LED WHEEL (VÒNG QUAY 24 ĐÈN LED) -->
+        <div style="position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+          
+          <!-- STUDENT CALL BADGE (IF STUDENT CALL MODE) -->
+          ${mode === 'student_call' ? `
+            <div style="background:linear-gradient(135deg, #0284c7, #0369a1); border:2px solid #7dd3fc; border-radius:20px; padding:0.5rem 1.8rem; margin-bottom:1rem; font-size:1.15rem; font-weight:900; color:#fff; display:flex; align-items:center; gap:0.6rem; box-shadow:0 6px 20px rgba(2,132,199,0.4);">
+              <span>🧑‍🎓 Người quay:</span> <span id="cw-student-name-disp" style="color:#fde047;">${curCalledStudent}</span>
+            </div>
+          ` : ''}
+
+          <div style="position:relative; filter:drop-shadow(0 25px 60px rgba(0,0,0,0.9));">
+            <canvas id="cw-wheel-canvas" width="580" height="580" style="max-width:88vw; max-height:56vh; border-radius:50%;"></canvas>
+            
+            <!-- CENTER GAMESHOW SPIN BADGE -->
+            <div id="cw-center-badge" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:92px; height:92px; border-radius:50%; background:radial-gradient(circle, #fef08a 0%, #f59e0b 60%, #92400e 100%); border:4.5px solid #ffffff; box-shadow:0 0 35px rgba(253,224,71,0.9); display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:900; font-size:1.1rem; color:#78350f; cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='translate(-50%, -50%) scale(1.1)';" onmouseout="this.style.transform='translate(-50%, -50%) scale(1)';">
+              <span style="font-size:1.6rem; line-height:1;">🎯</span>
+              <span style="font-size:0.75rem; letter-spacing:0.5px;">QUAY</span>
+            </div>
+          </div>
+
+          <!-- BIG SPIN ACTION BUTTON -->
+          <button id="btn-spin-wheel-now" style="margin-top:1.5rem; background:linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); color:#fff; border:3.5px solid #fef08a; padding:1.1rem 4.5rem; border-radius:50px; font-size:1.65rem; font-weight:900; cursor:pointer; box-shadow:0 12px 35px rgba(245,158,11,0.6), 0 0 40px rgba(253,224,71,0.4); transition:all 0.15s; letter-spacing:0.5px;" onmouseover="this.style.transform='scale(1.06) translateY(-3px)';" onmouseout="this.style.transform='scale(1) translateY(0)';">
+            🎡 BẤM ĐỂ QUAY GAMESHOW!
+          </button>
+        </div>
+
+        <!-- COLUMN 2: GAMESHOW SECTOR BOARD & LIVE STATS -->
+        <div style="position:relative; z-index:2; background:rgba(15,23,42,0.85); backdrop-filter:blur(12px); border:2.5px solid #f59e0b; border-radius:26px; padding:1.4rem 1.8rem; width:340px; max-width:90vw; max-height:60vh; overflow-y:auto; box-shadow:0 15px 40px rgba(0,0,0,0.6); display:flex; flex-direction:column; gap:0.8rem;">
+          <div style="font-weight:900; font-size:1.15rem; color:#fde047; text-align:center; border-bottom:1.5px solid rgba(253,224,71,0.3); padding-bottom:0.6rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+            <span>📋</span> BẢNG 12 Ô THỬ THÁCH
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:0.45rem;">
+            ${items.map((it, idx) => `
+              <div style="background:rgba(255,255,255,0.06); border:1px solid ${it.color || '#38bdf8'}88; border-radius:10px; padding:0.5rem 0.8rem; display:flex; justify-content:space-between; align-items:center; font-size:0.88rem; font-weight:800;">
+                <span style="color:${it.color || '#fff'};">${idx + 1}. ${it.text}</span>
+                <span style="background:${it.color || '#38bdf8'}; color:#fff; font-size:0.75rem; padding:0.15rem 0.5rem; border-radius:6px;">+${it.pts}đ</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    const closeBtn = modal.querySelector('#btn-cw-close');
+    if (closeBtn) closeBtn.onclick = cleanup;
+
+    // BGM Toggle
+    const bgmBtn = modal.querySelector('#btn-cw-bgm-toggle');
+    if (bgmBtn) {
+      bgmBtn.onclick = () => {
+        bgmEnabled = !bgmEnabled;
+        bgmBtn.innerHTML = `<span>${bgmEnabled ? '🔊' : '🔇'}</span> <span>${bgmEnabled ? 'Nhạc: BẬT' : 'Nhạc: TẮT'}</span>`;
+        bgmBtn.style.background = bgmEnabled ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.1)';
+        bgmBtn.style.borderColor = bgmEnabled ? '#86efac' : 'rgba(255,255,255,0.3)';
+        bgmBtn.style.boxShadow = bgmEnabled ? '0 4px 14px rgba(16,185,129,0.4)' : 'none';
+        if (bgmEnabled) triggerAudioUnlock();
+      };
+    }
+
+    // Party Background Canvas 60 FPS
+    const bgCanvas = modal.querySelector('#cw-bg-canvas');
+    if (bgCanvas) {
+      const bgCtx = bgCanvas.getContext('2d');
+      let lightAngle = 0;
+
+      const resizeBg = () => {
+        bgCanvas.width = (bgCanvas.parentElement && bgCanvas.parentElement.clientWidth) ? bgCanvas.parentElement.clientWidth : (window.innerWidth || 1200);
+        bgCanvas.height = (bgCanvas.parentElement && bgCanvas.parentElement.clientHeight) ? bgCanvas.parentElement.clientHeight : (window.innerHeight || 800);
+      };
+      resizeBg();
+
+      const drawBg = () => {
+        const w = bgCanvas.width;
+        const h = bgCanvas.height;
+        bgCtx.clearRect(0, 0, w, h);
+
+        const bgGrad = bgCtx.createRadialGradient(w/2, h/2, 60, w/2, h/2, Math.max(w, h));
+        bgGrad.addColorStop(0, '#1e1b4b');
+        bgGrad.addColorStop(0.5, '#0f172a');
+        bgGrad.addColorStop(1, '#020617');
+        bgCtx.fillStyle = bgGrad;
+        bgCtx.fillRect(0, 0, w, h);
+
+        // Sweeping Spotlight Beams
+        bgCtx.save();
+        bgCtx.translate(w/2, h/2);
+        for (let i = 0; i < 6; i++) {
+          bgCtx.rotate(Math.PI / 3);
+          const beamGrad = bgCtx.createLinearGradient(0, 0, w, 0);
+          beamGrad.addColorStop(0, 'rgba(245, 158, 11, 0.08)');
+          beamGrad.addColorStop(1, 'transparent');
+          bgCtx.fillStyle = beamGrad;
+          bgCtx.beginPath();
+          bgCtx.moveTo(0, 0);
+          bgCtx.arc(0, 0, Math.max(w, h), lightAngle, lightAngle + 0.25);
+          bgCtx.closePath();
+          bgCtx.fill();
+        }
+        bgCtx.restore();
+
+        lightAngle += 0.008;
+        animFrameId = requestAnimationFrame(drawBg);
+      };
+
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      animFrameId = requestAnimationFrame(drawBg);
+    }
+
+    // Wheel Canvas Engine with 24 Flashing LED Lights 60 FPS
+    const wheelCanvas = modal.querySelector('#cw-wheel-canvas');
+    const wheelCtx = wheelCanvas.getContext('2d');
+    let pointerBounce = 0;
+
+    const drawWheel = () => {
+      const numSegments = items.length;
+      const arc = (2 * Math.PI) / numSegments;
+      const cx = 290;
+      const cy = 290;
+      const radius = 265;
+
+      wheelCtx.clearRect(0, 0, 580, 580);
+      ledTick += 0.08;
+
+      // 1. Outer Metallic Gold Ring with 24 Flashing LED Bulbs
+      wheelCtx.beginPath();
+      wheelCtx.arc(cx, cy, radius, 0, 2 * Math.PI);
+      const rimGrad = wheelCtx.createLinearGradient(0, 0, 580, 580);
+      rimGrad.addColorStop(0, '#fef08a');
+      rimGrad.addColorStop(0.3, '#d97706');
+      rimGrad.addColorStop(0.7, '#78350f');
+      rimGrad.addColorStop(1, '#fde047');
+      wheelCtx.fillStyle = rimGrad;
+      wheelCtx.fill();
+      wheelCtx.lineWidth = 6;
+      wheelCtx.strokeStyle = '#ffffff';
+      wheelCtx.stroke();
+
+      // 24 LED Bulbs Around the Rim
+      const numLeds = 24;
+      for (let l = 0; l < numLeds; l++) {
+        const lAngle = (l * (2 * Math.PI / numLeds));
+        const lx = cx + Math.cos(lAngle) * (radius - 10);
+        const ly = cy + Math.sin(lAngle) * (radius - 10);
+        const isLit = (Math.sin(ledTick + l * 0.8) > 0);
+
+        wheelCtx.beginPath();
+        wheelCtx.arc(lx, ly, 6, 0, 2 * Math.PI);
+        wheelCtx.fillStyle = isLit ? '#fde047' : '#78350f';
+        wheelCtx.shadowColor = isLit ? '#fde047' : 'transparent';
+        wheelCtx.shadowBlur = isLit ? 12 : 0;
+        wheelCtx.fill();
+        wheelCtx.strokeStyle = '#fff';
+        wheelCtx.lineWidth = 1.5;
+        wheelCtx.stroke();
+      }
+      wheelCtx.shadowBlur = 0;
+
+      // 2. Sectors
+      wheelCtx.save();
+      wheelCtx.translate(cx, cy);
+      wheelCtx.rotate(currentAngle);
+
+      for (let i = 0; i < numSegments; i++) {
+        const angle = i * arc;
+        wheelCtx.beginPath();
+        wheelCtx.fillStyle = items[i].color || '#3b82f6';
+        wheelCtx.moveTo(0, 0);
+        wheelCtx.arc(0, 0, radius - 22, angle, angle + arc);
+        wheelCtx.lineTo(0, 0);
+        wheelCtx.fill();
+        wheelCtx.strokeStyle = 'rgba(255,255,255,0.85)';
+        wheelCtx.lineWidth = 2.5;
+        wheelCtx.stroke();
+
+        // Sector Text Label
+        wheelCtx.save();
+        wheelCtx.rotate(angle + arc / 2);
+        wheelCtx.fillStyle = '#ffffff';
+        wheelCtx.font = 'bold 15px sans-serif';
+        wheelCtx.shadowColor = 'rgba(0,0,0,0.9)';
+        wheelCtx.shadowBlur = 5;
+        wheelCtx.textAlign = 'right';
+        const txt = (items[i].text || items[i].q || 'Thử thách').substring(0, 18);
+        wheelCtx.fillText(txt, radius - 42, 6);
+        wheelCtx.restore();
+      }
+      wheelCtx.restore();
+
+      // 3. Pointer at 3 o'clock with Physical Bounce
+      wheelCtx.save();
+      wheelCtx.translate(565, cy);
+      wheelCtx.rotate(pointerBounce);
+      wheelCtx.beginPath();
+      wheelCtx.moveTo(0, -20);
+      wheelCtx.lineTo(-48, 0);
+      wheelCtx.lineTo(0, 20);
+      wheelCtx.closePath();
+      wheelCtx.fillStyle = '#fde047';
+      wheelCtx.shadowColor = '#000';
+      wheelCtx.shadowBlur = 12;
+      wheelCtx.fill();
+      wheelCtx.strokeStyle = '#ffffff';
+      wheelCtx.lineWidth = 3.5;
+      wheelCtx.stroke();
+      wheelCtx.restore();
+    };
+
+    drawWheel();
+
+    // Popup LED Gameshow Challenge Modal
+    const showChallengeModal = (item) => {
+      synth.play('win');
+      const isQuiz = item.opts && Array.isArray(item.opts) && item.opts.length > 0;
+      const qText = item.q || item.text || 'Thử thách đặc biệt!';
+      const qOpts = item.opts || ["Đã hoàn thành (+100đ)", "Bỏ qua"];
+      const qAns = (typeof item.a !== 'undefined') ? item.a : 0;
+      const rewardPts = item.pts || 100;
+
+      let timerSec = defaultTimerLimit;
+      let modalTimerInterval = null;
+
+      const popup = document.createElement('div');
+      popup.style.cssText = 'position:absolute; inset:0; background:rgba(4,7,20,0.9); backdrop-filter:blur(12px); z-index:50; display:flex; align-items:center; justify-content:center; padding:1.5rem; animation:fadeIn 0.25s ease-out;';
+
+      popup.innerHTML = `
+        <div style="background:linear-gradient(145deg, #0f172a 0%, #1e1b4b 100%); color:#fff; border:4px solid #f59e0b; border-radius:32px; padding:2.5rem 3rem; max-width:780px; width:92%; box-shadow:0 25px 80px rgba(0,0,0,0.8), 0 0 40px rgba(245,158,11,0.4); position:relative; text-align:center;">
+          
+          <div style="position:absolute; top:-24px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; font-weight:900; font-size:1.2rem; padding:0.45rem 2.4rem; border-radius:25px; border:2.5px solid #fef08a; box-shadow:0 6px 20px rgba(245,158,11,0.5);">
+            🎉 TRÚNG Ô: ${item.text.toUpperCase()} (+${rewardPts} Điểm)
+          </div>
+
+          <!-- TIMER HUD -->
+          <div style="position:absolute; top:18px; right:25px; background:rgba(2,132,199,0.25); border:1.5px solid #38bdf8; padding:0.3rem 0.9rem; border-radius:15px; font-weight:900; color:#38bdf8; font-size:1.05rem;">
+            ⏱️ <span id="cw-modal-timer">${timerSec}s</span>
+          </div>
+
+          <h2 style="font-size:2rem; font-weight:900; color:#fde047; margin:1.2rem 0 1.8rem; line-height:1.45; text-shadow:0 4px 15px rgba(0,0,0,0.6);">
+            ${qText}
+          </h2>
+
+          <div style="display:grid; grid-template-columns:${isQuiz ? '1fr 1fr' : '1fr'}; gap:1.1rem; margin-bottom:1.8rem;">
+            ${qOpts.map((opt, oIdx) => `
+              <button class="btn-cw-opt" data-idx="${oIdx}" style="background:rgba(255,255,255,0.08); color:#fff; border:2.5px solid #64748b; padding:1.2rem; border-radius:18px; font-size:1.15rem; font-weight:800; cursor:pointer; text-align:left; display:flex; align-items:center; gap:0.9rem; transition:all 0.15s;" onmouseover="this.style.background='rgba(56, 189, 248, 0.2)'; this.style.borderColor='#38bdf8';" onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='#64748b';">
+                <span style="background:#f59e0b; color:#78350f; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; flex-shrink:0;">${['A','B','C','D'][oIdx] || '⭐'}</span>
+                <span style="flex:1;">${opt}</span>
+              </button>
+            `).join('')}
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed rgba(255,255,255,0.2); padding-top:1.1rem;">
+            <div style="font-size:0.95rem; color:#94a3b8; font-weight:700;">
+              💡 <strong>Gợi ý AI:</strong> ${item.hint || 'Tự tin hoàn thành để nhận điểm'}
+            </div>
+            <button id="btn-cw-voice-tts" style="background:#f59e0b; color:#78350f; border:none; padding:0.5rem 1.2rem; border-radius:12px; font-weight:900; font-size:0.9rem; cursor:pointer; box-shadow:0 4px 12px rgba(245,158,11,0.3);">
+              🔊 Đọc thử thách
+            </button>
+          </div>
+
+        </div>
+      `;
+
+      modal.appendChild(popup);
+
+      // Countdown Timer
+      const timerEl = popup.querySelector('#cw-modal-timer');
+      modalTimerInterval = setInterval(() => {
+        timerSec--;
+        if (timerEl) timerEl.textContent = timerSec + 's';
+        if (timerSec <= 5) {
+          synth.play('pop');
+          if (timerEl) timerEl.style.color = '#ef4444';
+        }
+        if (timerSec <= 0) {
+          clearInterval(modalTimerInterval);
+          synth.play('wrong');
+          popup.remove();
+        }
+      }, 1000);
+
+      // Voice TTS
+      const voiceBtn = popup.querySelector('#btn-cw-voice-tts');
+      if (voiceBtn) {
+        voiceBtn.onclick = () => {
+          if ('speechSynthesis' in window) {
+            const utter = new SpeechSynthesisUtterance(qText);
+            utter.lang = 'vi-VN';
+            window.speechSynthesis.speak(utter);
+          }
+        };
+      }
+
+      // Option clicks
+      popup.querySelectorAll('.btn-cw-opt').forEach(btn => {
+        btn.onclick = () => {
+          if (modalTimerInterval) clearInterval(modalTimerInterval);
+          const chosen = parseInt(btn.dataset.idx);
+          if (chosen === qAns) {
+            synth.play('correct');
+            btn.style.background = '#10b981';
+            btn.style.borderColor = '#059669';
+
+            if (mode === 'team_battle') {
+              if (curTurnTeam === 'red') {
+                redTeamScore += rewardPts;
+                const rEl = modal.querySelector('#cw-score-red');
+                if (rEl) rEl.textContent = redTeamScore;
+                curTurnTeam = 'blue';
+              } else {
+                blueTeamScore += rewardPts;
+                const bEl = modal.querySelector('#cw-score-blue');
+                if (bEl) bEl.textContent = blueTeamScore;
+                curTurnTeam = 'red';
+              }
+            } else {
+              score += rewardPts;
+              const scoreDisp = modal.querySelector('#cw-total-score');
+              if (scoreDisp) scoreDisp.textContent = score;
+            }
+
+            setTimeout(() => popup.remove(), 750);
+          } else {
+            synth.play('wrong');
+            btn.style.background = '#ef4444';
+            btn.style.borderColor = '#dc2626';
+            if (mode === 'team_battle') {
+              curTurnTeam = (curTurnTeam === 'red') ? 'blue' : 'red';
+            }
+            setTimeout(() => popup.remove(), 900);
+          }
+        };
+      });
+    };
+
+    // True Uniform Random Spin Execution (Target-Driven Physics)
+    const startSpin = () => {
+      if (isSpinning) return;
+      isSpinning = true;
+      spinCount++;
+      const spinCountEl = modal.querySelector('#cw-spin-count');
+      if (spinCountEl) spinCountEl.textContent = spinCount;
+
+      // In student_call mode, pick a random student
+      if (mode === 'student_call') {
+        const randStudent = defaultStudents[Math.floor(Math.random() * defaultStudents.length)];
+        curCalledStudent = randStudent;
+        const studentDisp = modal.querySelector('#cw-student-name-disp');
+        if (studentDisp) studentDisp.textContent = randStudent;
+      }
+
+      synth.play('pop');
+
+      const numSegments = items.length;
+      const arc = (2 * Math.PI) / numSegments;
+
+      // 1. True Uniform Random Target Index (100% ngẫu nhiên đều giữa tất cả các ô)
+      const targetIdx = Math.floor(Math.random() * numSegments);
+      const target = items[targetIdx];
+
+      // 2. Random angle inside the winning sector (between 20% and 80% to avoid border)
+      const inSectorOffset = (Math.random() * 0.6 + 0.2) * arc;
+
+      // 3. Extra full rotations (4 to 7 full circles)
+      const extraRotations = (Math.floor(Math.random() * 4) + 5) * (2 * Math.PI);
+
+      // Target final angle so pointer at 3 o'clock (0 rad) points directly to targetIdx
+      const startAngle = currentAngle % (2 * Math.PI);
+      const destinationAngle = extraRotations + (2 * Math.PI - (targetIdx * arc + inSectorOffset));
+      const deltaAngle = destinationAngle - startAngle;
+
+      const duration = 2800; // 2.8 seconds crisp spin
+      const startTime = performance.now();
+      let lastSegment = -1;
+
+      // Ease-out cubic formula
+      const easeOutCubic = (t) => (--t) * t * t + 1;
+
+      const animateWheel = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const ease = easeOutCubic(progress);
+
+        currentAngle = startAngle + deltaAngle * ease;
+
+        // Needle ticking audio & bounce
+        const normalized = (2 * Math.PI - (currentAngle % (2 * Math.PI))) % (2 * Math.PI);
+        const curSegment = Math.floor(normalized / arc) % numSegments;
+
+        if (curSegment !== lastSegment) {
+          lastSegment = curSegment;
+          synth.play('click');
+          pointerBounce = -0.32 * (1 - progress * 0.7);
+        } else {
+          pointerBounce *= 0.85;
+        }
+
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animateWheel);
+        } else {
+          isSpinning = false;
+          pointerBounce = 0;
+          drawWheel();
+          setTimeout(() => showChallengeModal(target), 350);
+        }
+      };
+
+      requestAnimationFrame(animateWheel);
+    };
+
+    const spinBtn = modal.querySelector('#btn-spin-wheel-now');
+    if (spinBtn) spinBtn.onclick = startSpin;
+
+    const centerPin = modal.querySelector('#cw-center-badge');
+    if (centerPin) centerPin.onclick = startSpin;
+  },
+
+  // =========================================================================
+  // 🚀 GAME 22: DU HÀNH VŨ TRỤ KIẾN THỨC (SPACE JOURNEY AI MASTERPIECE)
+  // =========================================================================
+  _getSpaceJourneyStations() {
+    return this._getLoadedQuestions('spacejourney') || [
+      { id: 1, planet: "Bệ Phóng Trái Đất", icon: "🚀", q: "Thiết bị nào sau đây đóng vai trò là 'Bộ Não' xử lý toàn bộ dữ liệu máy tính?", opts: ["Bộ xử lý trung tâm (CPU)", "Bộ nhớ tạm thời RAM", "Màn hình hiển thị", "Bộ nguồn máy tính"], a: 0, hint: "Central Processing Unit", pts: 100 },
+      { id: 2, planet: "Trạm Vệ Tinh Mặt Trăng", icon: "🌕", q: "Trong các đơn vị đo dung lượng thông tin, 1 Byte tương ứng bằng bao nhiêu Bit?", opts: ["8 bit nhị phân", "16 bit nhị phân", "10 bit nhị phân", "1024 bit nhị phân"], a: 0, hint: "Gồm 8 bit nhị phân 0 và 1", pts: 100 },
+      { id: 3, planet: "Sao Hỏa Đỏ Bí Ẩn", icon: "🔴", q: "Để bảo vệ an toàn thông tin cá nhân trên không gian mạng, em nên làm gì?", opts: ["Không cung cấp mật khẩu cho người lạ", "Công khai số CCCD lên mạng xã hội", "Đặt mật khẩu dễ đoán như 123456", "Bấm vào các liên kết nhận quà lạ"], a: 0, hint: "Bảo mật tài khoản cá nhân", pts: 100 },
+      { id: 4, planet: "Vành Đai Sao Thổ Kỳ Vĩ", icon: "🪐", q: "Thiết bị nào sau đây dùng để lưu trữ dữ liệu lâu dài không bị mất khi tắt máy?", opts: ["Ổ đĩa cứng (HDD / SSD)", "Bộ nhớ trong RAM", "Thanh ghi Cache", "Bộ nguồn máy tính"], a: 0, hint: "Bộ nhớ ngoài lưu trữ vĩnh viễn", pts: 100 },
+      { id: 5, planet: "Tinh Vân Thiên Hà Tri Thức", icon: "🌌", q: "Đâu là quy tắc chuẩn mực khi tham gia giao tiếp và học tập trực tuyến?", opts: ["Tôn trọng, lịch sự và bảo mật thông tin", "Dùng ngôn từ công kích bạn bè", "Chia sẻ thông tin chưa kiểm chứng", "Sử dụng tài khoản của người khác"], a: 0, hint: "Văn hóa ứng xử trên môi trường số", pts: 100 }
+    ];
+  },
+
+  _renderSpaceJourneyDashboard() {
+    const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
+    if (!area) return;
+
+    let stations = this._getSpaceJourneyStations();
+    const savedList = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'spacejourney') : [];
+    const curSubName = (typeof currentSubject !== 'undefined' && currentSubject && currentSubject.name) ? currentSubject.name : 'Tin học';
+
+    area.innerHTML = `
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease;">
+        
+        <!-- HEADER BANNER SPACE SCI-FI -->
+        <div style="background:linear-gradient(135deg, #090d16 0%, #1e1b4b 50%, #312e81 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; margin-bottom:1.5rem; border:2.5px solid #6366f1; box-shadow:0 12px 35px rgba(0,0,0,0.4); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+          <div style="display:flex; align-items:center; gap:1.4rem;">
+            <div style="width:72px; height:72px; border-radius:20px; background:radial-gradient(circle, #818cf8 0%, #4338ca 60%, #1e1b4b 100%); display:flex; align-items:center; justify-content:center; font-size:3rem; border:3px solid #c7d2fe; box-shadow:0 0 30px rgba(99,102,241,0.7); animation:pulse 2s infinite;">
+              🚀
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.25rem;">
+                <span style="background:#6366f1; color:#fff; font-weight:900; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">SCI-FI SPACE 60 FPS</span>
+                <span style="background:rgba(255,255,255,0.15); color:#c7d2fe; font-weight:800; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">5 TRẠM HÀNH TINH HYPERDRIVE</span>
+              </div>
+              <h1 style="margin:0; font-size:2rem; font-weight:900; background:linear-gradient(90deg, #c7d2fe, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
+                22. DU HÀNH VŨ TRỤ KIẾN THỨC (SPACE JOURNEY AI)
+              </h1>
+              <p style="margin:0.3rem 0 0 0; color:#e2e8f0; font-size:0.98rem;">
+                Điều khiển phi thuyền không gian vượt qua 5 trạm hành tinh dải Ngân Hà bằng việc giải mã tín hiệu tri thức
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 ACTION BUTTONS STANDARD -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+          <button id="btn-save-space-library" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:2px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(16,185,129,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            💾 LƯU VÀO THƯ VIỆN TRƯỜNG
+          </button>
+
+          <button id="btn-open-space-library" style="background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color:#fff; border:2px solid #c4b5fd; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(139,92,246,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            📁 KHO BÀI ĐÃ LƯU (${savedList.length})
+          </button>
+
+          <button id="btn-ai-generate-space-stations" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:2px solid #7dd3fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(2,132,199,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            🤖 AI TẠO 5 TRẠM VŨ TRỤ THEO BÀI
+          </button>
+
+          <button id="btn-start-space-journey-now" style="background:linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color:#fff; border:2.5px solid #a5b4fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1.08rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(99,102,241,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03) translateY(-2px)';" onmouseout="this.style.transform='scale(1) translateY(0)';">
+            🚀 BẮT ĐẦU DU HÀNH VŨ TRỤ
+          </button>
+        </div>
+
+        <!-- SETTINGS PANEL & CONTROLS -->
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.2rem 1.6rem; margin-bottom:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+          <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span style="font-weight:800; color:#334155; font-size:0.92rem;">⏱️ Thời gian Oxy mỗi trạm:</span>
+              <select id="space-timer-limit-sel" style="padding:0.45rem 0.85rem; border-radius:12px; border:2px solid #cbd5e1; font-weight:800; color:#0f172a; outline:none; background:#f8fafc;">
+                <option value="15">15 Giây</option>
+                <option value="20">20 Giây</option>
+                <option value="30" selected>30 Giây</option>
+                <option value="45">45 Giây</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.8rem;">
+            <button id="btn-add-space-station" style="background:#f1f5f9; color:#0f172a; border:2px dashed #94a3b8; padding:0.5rem 1rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem; display:flex; align-items:center; gap:0.4rem;">
+              ➕ Thêm Trạm Hành Tinh Mới
+            </button>
+            <button id="btn-reset-default-space-stations" style="background:#fff; color:#ef4444; border:1.5px solid #fca5a5; padding:0.5rem 0.9rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem;">
+              🔄 Khôi phục 5 trạm gốc
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 PLANETARY STATIONS GRID -->
+        <div style="margin-bottom:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
+            <h3 style="margin:0; font-size:1.25rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:0.5rem;">
+              <span>🪐</span> HẢI TRÌNH 5 TRẠM HÀNH TINH DU HÀNH (${stations.length} Trạm)
+            </h3>
+            <span style="font-size:0.85rem; color:#64748b; font-weight:700;">Nhấn vào từng trạm để chỉnh sửa câu hỏi & manh mối</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
+            ${stations.map((st, idx) => `
+              <div style="background:#ffffff; border:2.5px solid #6366f1; border-radius:18px; padding:1.1rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.15s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                
+                <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:#6366f1;"></div>
+
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <span style="background:#e0e7ff; color:#4338ca; font-weight:900; font-size:0.78rem; padding:0.2rem 0.6rem; border-radius:6px;">TRẠM ${idx + 1}: ${st.planet}</span>
+                    <span style="font-weight:900; color:#6366f1; font-size:1.25rem;">${st.icon || '🪐'}</span>
+                  </div>
+
+                  <h4 style="margin:0 0 0.4rem; font-size:1.05rem; font-weight:900; color:#0f172a; line-height:1.4;">${st.q}</h4>
+                  <p style="margin:0 0 0.7rem; font-size:0.85rem; color:#64748b;">
+                    💡 <em>Gợi ý: ${st.hint || 'Không có gợi ý'}</em>
+                  </p>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed #e2e8f0; padding-top:0.6rem; margin-top:0.4rem;">
+                  <span style="font-size:0.8rem; font-weight:800; color:#10b981;">+${st.pts || 100} Điểm</span>
+                  <div style="display:flex; gap:0.4rem;">
+                    <button class="btn-edit-space-st" data-idx="${idx}" style="background:#e0e7ff; color:#4338ca; border:none; padding:0.3rem 0.7rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">✏️ Sửa</button>
+                    <button class="btn-del-space-st" data-idx="${idx}" style="background:#fee2e2; color:#dc2626; border:none; padding:0.3rem 0.55rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">🗑️</button>
+                  </div>
+                </div>
+
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    // Events
+    const saveLibBtn = area.querySelector('#btn-save-space-library');
+    if (saveLibBtn) {
+      saveLibBtn.onclick = () => {
+        if (typeof showSaveToolModal === 'function') {
+          showSaveToolModal('spacejourney', '22. Du Hành Vũ Trụ Kiến Thức', stations);
+        } else {
+          this._saveGameToCustomStorage('spacejourney', stations);
+          if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã lưu hải trình vũ trụ vào thư viện thành công!', 'success');
+          this._renderSpaceJourneyDashboard();
+        }
+      };
+    }
+
+    const openLibBtn = area.querySelector('#btn-open-space-library');
+    if (openLibBtn) {
+      openLibBtn.onclick = () => {
+        if (typeof showSharedToolsLibraryModal === 'function') {
+          showSharedToolsLibraryModal('spacejourney', (loaded) => {
+            if (loaded && Array.isArray(loaded)) {
+              this._setLoadedQuestions('spacejourney', loaded);
+              this._renderSpaceJourneyDashboard();
+            }
+          });
+        } else {
+          this._openQuestionLoaderModal('spacejourney', (loaded) => {
+            this._setLoadedQuestions('spacejourney', loaded);
+            this._renderSpaceJourneyDashboard();
+          });
+        }
+      };
+    }
+
+    const aiGenBtn = area.querySelector('#btn-ai-generate-space-stations');
+    if (aiGenBtn) {
+      aiGenBtn.onclick = () => {
+        const topic = prompt('Nhập chủ đề bài học để AI thiết kế 5 Trạm Vũ Trụ:', curSubName + ' - Ôn tập kiến thức');
+        if (topic) {
+          if (typeof app !== 'undefined' && app.showToast) app.showToast('🤖 AI đang thiết kế hải trình 5 Trạm Hành Tinh...', 'info');
+          setTimeout(() => {
+            const aiStations = [
+              { id: 1, planet: "Bệ Phóng Trái Đất", icon: "🚀", q: "Khái niệm mở đầu quan trọng nhất về " + topic + " là gì?", opts: ["Đáp án đúng chuẩn xác", "Khái niệm sai", "Chưa đầy đủ", "Không liên quan"], a: 0, hint: "Xem lại phần mở đầu bài học", pts: 100 },
+              { id: 2, planet: "Trạm Vệ Tinh Mặt Trăng", icon: "🌕", q: "Nguyên lý / công thức trọng tâm trong " + topic + " là gì?", opts: ["Công thức đúng", "Công thức sai 1", "Công thức sai 2", "Công thức sai 3"], a: 0, hint: "Công thức cơ bản SGK", pts: 100 },
+              { id: 3, planet: "Sao Hỏa Đỏ Bí Ẩn", icon: "🔴", q: "Ý nghĩa thực tiễn nổi bật nhất của " + topic + " là gì?", opts: ["Ứng dụng thực tiễn chuẩn xác", "Không có ứng dụng", "Chưa rõ", "Sai"], a: 0, hint: "Liên hệ đời sống", pts: 100 },
+              { id: 4, planet: "Vành Đai Sao Thổ", icon: "🪐", q: "Khi giải bài tập về " + topic + ", bước quan trọng nhất cần nhớ là gì?", opts: ["Phân tích đề bài và áp dụng đúng phương pháp", "Đoán mò đáp án", "Bỏ qua bước kiểm tra", "Làm ngược quy trình"], a: 0, hint: "Phương pháp tư duy logic", pts: 100 },
+              { id: 5, planet: "Tinh Vân Thiên Hà Tri Thức", icon: "🌌", q: "Tổng kết toàn diện kiến thức bài học " + topic + "?", opts: ["Nắm vững toàn bộ lý thuyết và bài tập", "Chỉ học thuộc lòng", "Bỏ qua bài khó", "Không ôn tập"], a: 0, hint: "Chìa khóa chinh phục đỉnh cao", pts: 100 }
+            ];
+            this._setLoadedQuestions('spacejourney', aiStations);
+            if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã tạo thành công 5 Trạm Hành Tinh mới!', 'success');
+            this._renderSpaceJourneyDashboard();
+          }, 600);
+        }
+      };
+    }
+
+    const startBtn = area.querySelector('#btn-start-space-journey-now');
+    if (startBtn) {
+      startBtn.onclick = () => {
+        const timerEl = area.querySelector('#space-timer-limit-sel');
+        const opts = {
+          timeLimit: timerEl ? parseInt(timerEl.value) : 30
+        };
+        this._launchSpaceJourneyArena(curSubName, stations, opts);
+      };
+    }
+
+    const resetBtn = area.querySelector('#btn-reset-default-space-stations');
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (confirm('Khôi phục 5 trạm hành tinh về mặc định?')) {
+          this._setLoadedQuestions('spacejourney', null);
+          this._renderSpaceJourneyDashboard();
+        }
+      };
+    }
+
+    const addBtn = area.querySelector('#btn-add-space-station');
+    if (addBtn) {
+      addBtn.onclick = () => {
+        const newTitle = prompt('Tên Trạm Hành Tinh mới:', '🪐 Trạm Không Gian Mới');
+        if (newTitle) {
+          stations.push({
+            id: stations.length + 1,
+            planet: newTitle,
+            icon: "🪐",
+            q: "Nội dung câu hỏi mã hóa tín hiệu vũ trụ cho " + newTitle,
+            opts: ["Đáp án đúng", "Đáp án sai 1", "Đáp án sai 2", "Đáp án sai 3"],
+            a: 0,
+            hint: "Gợi ý",
+            pts: 100
+          });
+          this._setLoadedQuestions('spacejourney', stations);
+          this._renderSpaceJourneyDashboard();
+        }
+      };
+    }
+
+    area.querySelectorAll('.btn-edit-space-st').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx);
+        const cur = stations[idx];
+        const newPlanet = prompt('Tên Trạm Hành Tinh:', cur.planet);
+        if (newPlanet !== null) {
+          const newQ = prompt('Nội dung câu hỏi mã hóa:', cur.q);
+          const newHint = prompt('Gợi ý manh mối:', cur.hint);
+          cur.planet = newPlanet;
+          if (newQ) cur.q = newQ;
+          if (newHint) cur.hint = newHint;
+          this._setLoadedQuestions('spacejourney', stations);
+          this._renderSpaceJourneyDashboard();
+        }
+      };
+    });
+
+    area.querySelectorAll('.btn-del-space-st').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx);
+        if (stations.length <= 2) {
+          alert('Hải trình vũ trụ cần tối thiểu 2 trạm!');
+          return;
+        }
+        if (confirm('Xóa trạm hành tinh này?')) {
+          stations.splice(idx, 1);
+          this._setLoadedQuestions('spacejourney', stations);
+          this._renderSpaceJourneyDashboard();
+        }
+      };
+    });
+  },
+
+  _launchSpaceJourneyArena(subName, questions, opts = {}) {
+    const old = document.getElementById('space-arena-modal');
+    if (old) old.remove();
+
+    let stations = questions;
+    if (!stations || !Array.isArray(stations) || stations.length === 0) {
+      if (typeof subName === 'object' && Array.isArray(subName)) {
+        stations = subName;
+      } else {
+        stations = this._getSpaceJourneyStations();
+      }
+    }
+
+    let curIdx = 0;
+    let score = 0;
+    let shields = 3;
+    let bgmEnabled = true;
+    let bgmInterval = null;
+    const defaultTimeLimit = (opts && opts.timeLimit) ? opts.timeLimit : 30;
+    let timerSeconds = defaultTimeLimit;
+    let timerInterval = null;
+    let animFrameId = null;
+
+    // Starfield 3D Warp Simulation
+    let stars = [];
+    const NUM_STARS = 160;
+    let warpSpeed = 1.2;
+
+    let audioCtx = null;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) audioCtx = new AudioContextClass();
+    } catch(e) {}
+
+    const synth = this._getAudioSynth();
+
+    const modal = document.createElement('div');
+    modal.id = 'space-arena-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
+    document.body.appendChild(modal);
+
+    // Soft Ambient Sci-Fi Space BGM (Gentle sine/triangle cosmic pads)
+    const playCosmicNote = (freq, duration, timeOffset, vol = 0.035) => {
+      if (!bgmEnabled || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const startTime = audioCtx.currentTime + timeOffset;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
+        
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(vol, startTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      } catch(e) {}
+    };
+
+    const playFullCosmicLoop = () => {
+      if (!bgmEnabled || !audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+
+      const step = 0.35;
+      // Space Chord Sequence: D4 -> F4 -> A4 -> C5 -> A4 -> G4 -> E4 -> D4
+      const cosmicChords = [
+        { f: 293.66, t: 0 * step },
+        { f: 349.23, t: 1 * step },
+        { f: 440.00, t: 2 * step },
+        { f: 523.25, t: 3 * step },
+        { f: 440.00, t: 4 * step },
+        { f: 392.00, t: 5 * step },
+        { f: 329.63, t: 6 * step },
+        { f: 293.66, t: 7 * step }
+      ];
+      cosmicChords.forEach(c => playCosmicNote(c.f, 0.5, c.t, 0.032));
+    };
+
+    const triggerAudioUnlock = () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().then(() => playFullCosmicLoop()).catch(()=>{});
+      } else {
+        playFullCosmicLoop();
+      }
+    };
+
+    triggerAudioUnlock();
+    modal.addEventListener('click', triggerAudioUnlock, { once: false });
+    bgmInterval = setInterval(() => {
+      if (bgmEnabled) playFullCosmicLoop();
+    }, 0.35 * 8 * 1000 + 200);
+
+    const cleanup = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      if (bgmInterval) clearInterval(bgmInterval);
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      modal.remove();
+    };
+
+    const renderStage = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      timerSeconds = defaultTimeLimit;
+
+      const isFinish = curIdx >= stations.length;
+      if (isFinish) {
+        synth.play('fanfare');
+        modal.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:2rem; background:radial-gradient(circle at center, #1e1b4b 0%, #040714 100%); animation:fadeIn 0.5s ease; position:relative; overflow:hidden;">
+            
+            <div style="position:absolute; inset:0; pointer-events:none; overflow:hidden;">
+              ${Array.from({length: 30}).map((_, i) => `
+                <div style="position:absolute; left:${(i * 3.3).toFixed(1)}%; top:${(Math.random() * 80).toFixed(0)}%; font-size:${(Math.random() * 1.6 + 1.2).toFixed(1)}rem; animation:floatDown ${(Math.random() * 2 + 2).toFixed(1)}s infinite ease-in-out; opacity:0.85;">
+                  ${['⭐','✨','🚀','🌌','🪐','💎'][i % 6]}
+                </div>
+              `).join('')}
+            </div>
+
+            <div style="position:relative; margin-bottom:1.5rem; z-index:2;">
+              <div style="font-size:9.5rem; filter:drop-shadow(0 0 60px #818cf8); animation:bounce 1.6s infinite;">🚀</div>
+              <div style="position:absolute; top:-20px; right:-20px; font-size:4.5rem; animation:pulse 1s infinite;">✨</div>
+            </div>
+            
+            <h1 style="font-size:3.6rem; font-weight:900; background:linear-gradient(90deg, #c7d2fe, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:0 0 0.8rem; text-shadow:0 10px 30px rgba(0,0,0,0.6); z-index:2;">
+              VINH DANH CHỈ HUY TRƯỞNG HẠM ĐỘI THIÊN HÀ!
+            </h1>
+            <p style="font-size:1.6rem; color:#e0e7ff; margin-bottom:2rem; max-width:880px; line-height:1.5; font-weight:600; z-index:2;">
+              Chúc mừng em đã xuất sắc điều khiển phi thuyền giải mã toàn bộ <strong>${stations.length} Trạm Hành Tinh</strong> và chinh phục Tinh Vân Tri Thức!
+            </p>
+
+            <div style="display:flex; gap:1.8rem; justify-content:center; align-items:center; margin-bottom:2.5rem; flex-wrap:wrap; z-index:2;">
+              <div style="background:rgba(99,102,241,0.25); border:2.5px solid #a5b4fc; padding:1rem 2.4rem; border-radius:24px; font-size:1.7rem; font-weight:900; color:#c7d2fe; box-shadow:0 8px 30px rgba(99,102,241,0.35);">
+                💰 Điểm Số Vũ Trụ: ${score} Điểm
+              </div>
+              <div style="background:rgba(16,185,129,0.25); border:2.5px solid #6ee7b7; padding:1rem 2.4rem; border-radius:24px; font-size:1.7rem; font-weight:900; color:#6ee7b7; box-shadow:0 8px 30px rgba(16,185,129,0.35);">
+                🏆 Danh Hiệu: Đại Chỉ Huy Vũ Trụ
+              </div>
+            </div>
+
+            <div style="display:flex; gap:1.2rem; z-index:2;">
+              <button id="btn-sp-play-again" style="background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; border:3px solid #c7d2fe; padding:1.1rem 2.8rem; border-radius:50px; font-size:1.35rem; font-weight:900; cursor:pointer; box-shadow:0 10px 30px rgba(99,102,241,0.4); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                🔄 Du Hành Lại
+              </button>
+              <button id="btn-sp-close-win" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:3px solid #86efac; padding:1.1rem 3.2rem; border-radius:50px; font-size:1.35rem; font-weight:900; cursor:pointer; box-shadow:0 10px 30px rgba(16,185,129,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                ✕ Hoàn Thành Nhiệm Vụ
+              </button>
+            </div>
+          </div>
+        `;
+        const playAgainBtn = modal.querySelector('#btn-sp-play-again');
+        if (playAgainBtn) playAgainBtn.onclick = () => { curIdx = 0; score = 0; shields = 3; renderStage(); };
+        const closeWinBtn = modal.querySelector('#btn-sp-close-win');
+        if (closeWinBtn) closeWinBtn.onclick = cleanup;
+        return;
+      }
+
+      if (shields <= 0) {
+        synth.play('fail');
+        modal.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:2rem; background:radial-gradient(circle at center, #7f1d1d 0%, #040714 100%); animation:fadeIn 0.4s ease;">
+            <div style="font-size:7.5rem; margin-bottom:1.5rem;">💥🚀</div>
+            <h1 style="font-size:3.4rem; font-weight:900; color:#f87171; margin:0 0 1rem;">
+              KHIÊN NĂNG LƯỢNG ĐÃ CẠN KIỆT!
+            </h1>
+            <p style="font-size:1.5rem; color:#fecaca; margin-bottom:2.2rem; max-width:700px;">
+              Phi thuyền đã bị va chạm thiên thạch 3 lần. Hãy xem lại kiến thức bài học và nạp năng lượng xuất phát lại nhé!
+            </p>
+            <div style="display:flex; gap:1.2rem;">
+              <button id="btn-sp-retry" style="background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; border:none; padding:1.1rem 2.8rem; border-radius:35px; font-size:1.3rem; font-weight:900; cursor:pointer; box-shadow:0 8px 25px rgba(99,102,241,0.4);">
+                🔄 Xuất Phát Lại
+              </button>
+              <button id="btn-sp-close-fail" style="background:#ef4444; color:#fff; border:none; padding:1.1rem 2.2rem; border-radius:35px; font-size:1.3rem; font-weight:900; cursor:pointer;">
+                ✕ Thoát
+              </button>
+            </div>
+          </div>
+        `;
+        const retryBtn = modal.querySelector('#btn-sp-retry');
+        if (retryBtn) retryBtn.onclick = () => { curIdx = 0; score = 0; shields = 3; renderStage(); };
+        const closeFailBtn = modal.querySelector('#btn-sp-close-fail');
+        if (closeFailBtn) closeFailBtn.onclick = cleanup;
+        return;
+      }
+
+      const st = stations[curIdx];
+      const qText = st.q || st.questionText || 'Nội dung câu hỏi mã hóa không gian';
+      const qOpts = Array.isArray(st.opts) ? st.opts : (Array.isArray(st.options) ? st.options : ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"]);
+      const qAns = (typeof st.a !== 'undefined') ? st.a : (typeof st.correctAnswer !== 'undefined' ? st.correctAnswer : 0);
+
+      modal.innerHTML = `
+        <!-- TOP SCI-FI COCKPIT HUD -->
+        <div style="background:rgba(9,13,22,0.96); border-bottom:2.5px solid #6366f1; padding:0.85rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:10; box-shadow:0 6px 25px rgba(0,0,0,0.6);">
+          <div style="display:flex; align-items:center; gap:1.2rem;">
+            <div style="width:52px; height:52px; border-radius:16px; background:radial-gradient(circle, #818cf8, #4338ca); display:flex; align-items:center; justify-content:center; font-size:2.2rem; border:2px solid #c7d2fe; box-shadow:0 0 20px rgba(99,102,241,0.5);">
+              ${st.icon || '🚀'}
+            </div>
+            <div>
+              <h3 style="margin:0; font-size:1.4rem; font-weight:900; color:#c7d2fe;">TRẠM ${curIdx + 1}: ${st.planet}</h3>
+              <span style="font-size:0.88rem; color:#93c5fd;">Hải trình du hành dải Ngân Hà Tri Thức</span>
+            </div>
+          </div>
+
+          <!-- SHIELDS, OXYGEN TIMER, SCORE, BGM BUTTON -->
+          <div style="display:flex; align-items:center; gap:1.2rem;">
+            <!-- BGM TOGGLE -->
+            <button id="btn-sp-bgm-toggle" style="background:${bgmEnabled ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.1)'}; border:2px solid ${bgmEnabled ? '#86efac' : 'rgba(255,255,255,0.3)'}; color:#fff; padding:0.5rem 1.1rem; border-radius:20px; font-weight:900; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:${bgmEnabled ? '0 4px 14px rgba(16,185,129,0.4)' : 'none'};">
+              <span>${bgmEnabled ? '🔊' : '🔇'}</span> <span>${bgmEnabled ? 'Nhạc: BẬT' : 'Nhạc: TẮT'}</span>
+            </button>
+
+            <!-- 3 ENERGY SHIELDS -->
+            <div style="display:flex; align-items:center; gap:0.4rem; background:rgba(255,255,255,0.08); padding:0.45rem 1.1rem; border-radius:20px; border:1.5px solid rgba(255,255,255,0.2);">
+              <span style="font-size:0.88rem; font-weight:800; color:#93c5fd;">Khiên:</span>
+              ${[1,2,3].map(i => `<span style="font-size:1.35rem; opacity:${i <= shields ? '1' : '0.2'}; filter:drop-shadow(0 0 8px ${i <= shields ? '#38bdf8' : 'none'});">🛡️</span>`).join('')}
+            </div>
+
+            <!-- OXYGEN TIMER -->
+            <div style="background:rgba(2,132,199,0.25); border:1.5px solid #38bdf8; padding:0.45rem 1.2rem; border-radius:20px; font-size:1.2rem; font-weight:900; color:#38bdf8; display:flex; align-items:center; gap:0.4rem;">
+              <span>⏱️ Oxy:</span> <span id="sp-timer-sec">${timerSeconds}s</span>
+            </div>
+
+            <!-- SCORE -->
+            <div style="background:rgba(99,102,241,0.25); border:1.5px solid #818cf8; padding:0.45rem 1.3rem; border-radius:20px; font-size:1.2rem; font-weight:900; color:#c7d2fe;">
+              ⚡ ${score} Điểm
+            </div>
+
+            <button id="btn-sp-close" style="background:#ef4444; color:#fff; border:none; border-radius:12px; width:42px; height:42px; font-size:1.35rem; font-weight:900; cursor:pointer; transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='scale(1)';">✕</button>
+          </div>
+        </div>
+
+        <!-- MAIN ARENA WITH 3D PARALLAX STARFIELD CANVAS -->
+        <div style="flex:1; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.8rem; overflow:hidden;">
+          
+          <!-- STARFIELD CANVAS 60 FPS -->
+          <canvas id="sp-starfield-canvas" style="position:absolute; inset:0; width:100%; height:100%; z-index:1;"></canvas>
+
+          <!-- PLANETARY PROGRESS TRAIL BAR -->
+          <div style="display:flex; justify-content:space-between; align-items:center; width:88%; max-width:1050px; margin-bottom:2rem; position:relative; z-index:3;">
+            <div style="position:absolute; top:50%; left:4%; right:4%; height:8px; background:rgba(255,255,255,0.1); transform:translateY(-50%); z-index:1; border-radius:10px;"></div>
+            <div style="position:absolute; top:50%; left:4%; width:${((curIdx / Math.max(1, stations.length - 1)) * 92).toFixed(0)}%; height:8px; background:linear-gradient(90deg, #6366f1, #38bdf8); transform:translateY(-50%); z-index:2; border-radius:10px; transition:width 0.5s ease; box-shadow:0 0 15px rgba(56,189,248,0.8);"></div>
+
+            ${stations.map((s, sIdx) => {
+              const isPast = sIdx < curIdx;
+              const isCur = sIdx === curIdx;
+              return `
+                <div style="position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; gap:0.4rem;">
+                  <div style="width:58px; height:58px; border-radius:50%; background:${isPast ? '#10b981' : (isCur ? 'radial-gradient(circle, #818cf8, #4338ca)' : 'rgba(15,23,42,0.85)')}; border:3.5px solid ${isCur ? '#38bdf8' : (isPast ? '#6ee7b7' : 'rgba(255,255,255,0.3)')}; display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:900; color:#fff; box-shadow:${isCur ? '0 0 35px #6366f1' : '0 4px 12px rgba(0,0,0,0.5)'}; transform:${isCur ? 'scale(1.25)' : 'scale(1)'}; transition:all 0.3s;">
+                    ${isPast ? '✅' : (isCur ? '🚀' : (s.icon || (sIdx + 1)))}
+                  </div>
+                  <span style="font-size:0.82rem; font-weight:800; color:${isCur ? '#38bdf8' : '#e2e8f0'}; white-space:nowrap; text-shadow:0 2px 4px rgba(0,0,0,0.8);">
+                    ${s.planet}
+                  </span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- SCI-FI COCKPIT RADAR QUESTION CARD -->
+          <div style="background:linear-gradient(145deg, #090d16 0%, #1e1b4b 100%); color:#fff; border:3.5px solid #6366f1; border-radius:32px; padding:2.4rem 3rem; max-width:900px; width:92%; box-shadow:0 25px 70px rgba(0,0,0,0.8), 0 0 50px rgba(99,102,241,0.35); position:relative; animation:slideUp 0.35s ease; z-index:3;">
+            
+            <div style="position:absolute; top:-22px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg, #6366f1, #4338ca); color:#fff; font-weight:900; font-size:1.15rem; padding:0.45rem 2.2rem; border-radius:25px; border:2px solid #a5b4fc; box-shadow:0 6px 20px rgba(99,102,241,0.4); display:flex; align-items:center; gap:0.6rem;">
+              <span>📡</span> TÍN HIỆU VŨ TRỤ TRẠM SỐ ${curIdx + 1}
+            </div>
+
+            <h2 style="font-size:1.9rem; font-weight:900; color:#c7d2fe; text-align:center; margin:1rem 0 2rem 0; line-height:1.45; letter-spacing:-0.3px;">
+              ${qText}
+            </h2>
+
+            <!-- 4 CHOICES (2x2 GRID) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.8rem;">
+              ${qOpts.map((opt, oIdx) => `
+                <button class="btn-sp-opt" data-idx="${oIdx}" style="background:rgba(255,255,255,0.06); color:#fff; border:2.5px solid #6366f1; padding:1.25rem 1.4rem; border-radius:20px; font-size:1.15rem; font-weight:800; cursor:pointer; text-align:left; display:flex; align-items:center; gap:1rem; transition:all 0.15s; box-shadow:0 4px 14px rgba(0,0,0,0.2);" onmouseover="this.style.background='rgba(99,102,241,0.25)'; this.style.borderColor='#a5b4fc'; this.style.transform='translateY(-3px)';" onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.borderColor='#6366f1'; this.style.transform='translateY(0)';">
+                  <span style="background:#6366f1; color:#fff; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.15rem; flex-shrink:0; font-weight:900;">${['A','B','C','D'][oIdx]}</span>
+                  <span style="flex:1; line-height:1.35;">${opt}</span>
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- FOOTER HINT & VOICE TTS -->
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.95rem; color:#94a3b8; font-weight:700; border-top:1.5px dashed rgba(255,255,255,0.15); padding-top:1rem; flex-wrap:wrap; gap:0.8rem;">
+              <div>💡 <strong>Manh mối vệ tinh:</strong> ${st.hint || 'Hãy phân tích kỹ các đáp án'}</div>
+              <button id="btn-sp-voice-hint" style="background:#6366f1; color:#fff; border:none; padding:0.5rem 1.2rem; border-radius:12px; font-weight:800; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; box-shadow:0 4px 12px rgba(99,102,241,0.3);">
+                🔊 Đọc tín hiệu
+              </button>
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      // 3D Parallax Starfield Canvas 60 FPS
+      const bgCanvas = modal.querySelector('#sp-starfield-canvas');
+      if (bgCanvas) {
+        const bgCtx = bgCanvas.getContext('2d');
+        
+        const resizeCanvas = () => {
+          bgCanvas.width = (bgCanvas.parentElement && bgCanvas.parentElement.clientWidth) ? bgCanvas.parentElement.clientWidth : (window.innerWidth || 1200);
+          bgCanvas.height = (bgCanvas.parentElement && bgCanvas.parentElement.clientHeight) ? bgCanvas.parentElement.clientHeight : (window.innerHeight || 800);
+        };
+        resizeCanvas();
+
+        // Initialize Stars in 3D Space (X, Y, Z)
+        if (stars.length === 0) {
+          for (let i = 0; i < NUM_STARS; i++) {
+            stars.push({
+              x: (Math.random() - 0.5) * bgCanvas.width * 2,
+              y: (Math.random() - 0.5) * bgCanvas.height * 2,
+              z: Math.random() * bgCanvas.width,
+              pz: bgCanvas.width
+            });
+          }
+        }
+
+        const drawStarfield = () => {
+          const w = bgCanvas.width;
+          const h = bgCanvas.height;
+          const cx = w / 2;
+          const cy = h / 2;
+
+          bgCtx.fillStyle = '#040714';
+          bgCtx.fillRect(0, 0, w, h);
+
+          // Draw Stars
+          for (let i = 0; i < stars.length; i++) {
+            const s = stars[i];
+            s.z -= (warpSpeed * 3);
+            if (s.z <= 0) {
+              s.z = w;
+              s.x = (Math.random() - 0.5) * w * 2;
+              s.y = (Math.random() - 0.5) * h * 2;
+              s.pz = s.z;
+            }
+
+            const k = 250 / s.z;
+            const px = s.x * k + cx;
+            const py = s.y * k + cy;
+
+            if (px >= 0 && px < w && py >= 0 && py < h) {
+              const size = (1 - s.z / w) * 3.2;
+              const alpha = (1 - s.z / w);
+              bgCtx.beginPath();
+              bgCtx.arc(px, py, Math.max(0.6, size), 0, Math.PI * 2);
+              bgCtx.fillStyle = (i % 5 === 0) ? `rgba(56, 189, 248, ${alpha})` : ((i % 7 === 0) ? `rgba(165, 180, 252, ${alpha})` : `rgba(255, 255, 255, ${alpha})`);
+              bgCtx.fill();
+            }
+          }
+
+          animFrameId = requestAnimationFrame(drawStarfield);
+        };
+
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        animFrameId = requestAnimationFrame(drawStarfield);
+      }
+
+      // BGM Toggle Event
+      const bgmBtn = modal.querySelector('#btn-sp-bgm-toggle');
+      if (bgmBtn) {
+        bgmBtn.onclick = () => {
+          bgmEnabled = !bgmEnabled;
+          bgmBtn.innerHTML = `<span>${bgmEnabled ? '🔊' : '🔇'}</span> <span>${bgmEnabled ? 'Nhạc: BẬT' : 'Nhạc: TẮT'}</span>`;
+          bgmBtn.style.background = bgmEnabled ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.1)';
+          bgmBtn.style.borderColor = bgmEnabled ? '#86efac' : 'rgba(255,255,255,0.3)';
+          bgmBtn.style.boxShadow = bgmEnabled ? '0 4px 14px rgba(16,185,129,0.4)' : 'none';
+          if (bgmEnabled) triggerAudioUnlock();
+        };
+      }
+
+      const closeBtn = modal.querySelector('#btn-sp-close');
+      if (closeBtn) closeBtn.onclick = cleanup;
+
+      // Voice TTS
+      const voiceBtn = modal.querySelector('#btn-sp-voice-hint');
+      if (voiceBtn) {
+        voiceBtn.onclick = () => {
+          if ('speechSynthesis' in window) {
+            const utter = new SpeechSynthesisUtterance(qText);
+            utter.lang = 'vi-VN';
+            window.speechSynthesis.speak(utter);
+          }
+        };
+      }
+
+      // Countdown Timer
+      const timerSecEl = modal.querySelector('#sp-timer-sec');
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        if (timerSecEl) timerSecEl.textContent = timerSeconds + 's';
+        if (timerSeconds <= 5) {
+          synth.play('pop');
+          if (timerSecEl) timerSecEl.style.color = '#ef4444';
+        }
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          synth.play('wrong');
+          shields--;
+          renderStage();
+        }
+      }, 1000);
+
+      // Option clicks
+      modal.querySelectorAll('.btn-sp-opt').forEach(btn => {
+        btn.onclick = () => {
+          if (timerInterval) clearInterval(timerInterval);
+          const chosen = parseInt(btn.dataset.idx);
+          if (chosen === qAns) {
+            synth.play('correct');
+            btn.style.background = '#10b981';
+            btn.style.borderColor = '#059669';
+            btn.style.color = '#fff';
+            score += (100 + timerSeconds * 2);
+            warpSpeed = 8.0; // Hyperdrive Warp Jump speed!
+
+            setTimeout(() => {
+              warpSpeed = 1.2;
+              curIdx++;
+              renderStage();
+            }, 850);
+          } else {
+            synth.play('wrong');
+            btn.style.background = '#ef4444';
+            btn.style.borderColor = '#b91c1c';
+            btn.style.color = '#fff';
+            shields--;
+            setTimeout(() => {
+              renderStage();
+            }, 950);
+          }
+        };
+      });
+    };
+
+    renderStage();
+  },
+
+  // =========================================================================
+  // ⚔️ GAME 23: ĐẤU TRƯỜNG KIẾN THỨC (KNOWLEDGE ARENA 2 TEAMS VS - STEAL TURN MECHANIC)
+  // =========================================================================
+  _getKnowledgeArenaQuestions() {
+    return this._getLoadedQuestions('knowledgearena') || [
+      { id: 1, q: "Bộ phận nào sau đây được ví như 'Bộ Não' xử lý toàn bộ hoạt động của máy tính?", opts: ["Bộ xử lý trung tâm (CPU)", "Bộ nhớ RAM", "Bộ nguồn Power Supply", "Màn hình hiển thị"], a: 0, hint: "Central Processing Unit", pts: 100 },
+      { id: 2, q: "Trong các thiết bị sau, thiết bị nào là thiết bị vào (Input Device) của máy tính?", opts: ["Bàn phím (Keyboard)", "Màn hình (Monitor)", "Máy in (Printer)", "Loa ngoài (Speaker)"], a: 0, hint: "Dùng để nhập văn bản và số liệu", pts: 100 },
+      { id: 3, q: "Trong máy tính, đơn vị cơ bản nhỏ nhất dùng để đo lượng thông tin là gì?", opts: ["Bit (gồm 0 hoặc 1)", "Byte (8 bit)", "Kilobyte (KB)", "Gigabyte (GB)"], a: 0, hint: "Nhận trạng thái 0 hoặc 1", pts: 100 },
+      { id: 4, q: "Hành động nào sau đây giúp bảo vệ an toàn thông tin cá nhân trên mạng xã hội?", opts: ["Không cung cấp mật khẩu cho người lạ", "Công khai số CCCD và địa chỉ nhà", "Đặt mật khẩu dễ đoán như 123456", "Bấm vào mọi liên kết nhận quà lạ"], a: 0, hint: "Bảo mật tài khoản cá nhân", pts: 100 },
+      { id: 5, q: "Để lưu trữ bài học và hình ảnh lâu dài kể cả khi tắt máy, máy tính sử dụng thiết bị nào?", opts: ["Ổ đĩa cứng (HDD / SSD)", "Bộ nhớ tạm thời RAM", "Thanh ghi Cache", "Bộ nguồn máy tính"], a: 0, hint: "Bộ nhớ ngoài lưu trữ vĩnh viễn", pts: 100 },
+      { id: 6, q: "Phần mềm nào sau đây là hệ điều hành phổ biến được dùng trên máy tính?", opts: ["Microsoft Windows", "Microsoft Word", "Microsoft Excel", "Google Chrome"], a: 0, hint: "Hệ điều hành quản lý toàn bộ máy tính", pts: 100 },
+      { id: 7, q: "Khi soạn thảo văn bản, tổ hợp phím nào dùng để Lưu văn bản nhanh chóng?", opts: ["Ctrl + S", "Ctrl + C", "Ctrl + V", "Ctrl + Z"], a: 0, hint: "Viết tắt của từ Save", pts: 100 },
+      { id: 8, q: "Mạng máy tính kết nối các máy tính trên phạm vi toàn cầu được gọi là gì?", opts: ["Mạng Internet", "Mạng LAN cục bộ", "Mạng WAN nội bộ", "Mạng Bluetooth"], a: 0, hint: "Mạng toàn cầu kết nối thế giới", pts: 100 },
+      { id: 9, q: "Đâu là biểu hiện của người có văn hóa và trách nhiệm khi tham gia không gian mạng?", opts: ["Tôn trọng người khác và không lan truyền tin giả", "Sử dụng tài khoản ẩn danh để công kích", "Chia sẻ thông tin khi chưa kiểm chứng", "Đăng ảnh riêng tư của bạn bè"], a: 0, hint: "Văn hóa ứng xử trên môi trường số", pts: 100 },
+      { id: 10, q: "Trong mô hình xử lý thông tin, thứ tự các bước đúng của máy tính là gì?", opts: ["Nhập dữ liệu → Xử lý → Xuất dữ liệu → Lưu trữ", "Xuất dữ liệu → Xử lý → Nhập dữ liệu", "Lưu trữ → Xuất dữ liệu → Nhập dữ liệu", "Xử lý → Nhập dữ liệu → Lưu trữ"], a: 0, hint: "Quy trình xử lý thông tin cơ bản", pts: 100 }
+    ];
+  },
+
+  _renderKnowledgeArenaDashboard() {
+    const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
+    if (!area) return;
+
+    let questions = this._getKnowledgeArenaQuestions();
+    const savedList = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'knowledgearena') : [];
+    const curSubName = (typeof currentSubject !== 'undefined' && currentSubject && currentSubject.name) ? currentSubject.name : 'Tin học';
+
+    area.innerHTML = `
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease;">
+        
+        <!-- HEADER BANNER ARENA VS -->
+        <div style="background:linear-gradient(135deg, #450a0a 0%, #1e1b4b 50%, #082f49 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; margin-bottom:1.5rem; border:2.5px solid #ef4444; box-shadow:0 12px 35px rgba(0,0,0,0.4); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+          <div style="display:flex; align-items:center; gap:1.4rem;">
+            <div style="width:72px; height:72px; border-radius:20px; background:radial-gradient(circle, #f87171 0%, #dc2626 60%, #450a0a 100%); display:flex; align-items:center; justify-content:center; font-size:3rem; border:3px solid #fecaca; box-shadow:0 0 30px rgba(239,68,68,0.7); animation:pulse 2s infinite;">
+              ⚔️
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.25rem;">
+                <span style="background:#dc2626; color:#fff; font-weight:900; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">2 ĐỘI ĐỐI KHÁNG VS</span>
+                <span style="background:rgba(255,255,255,0.15); color:#bae6fd; font-weight:800; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">CƯỚP QUYỀN TRẢ LỜI KHI SAI</span>
+              </div>
+              <h1 style="margin:0; font-size:2rem; font-weight:900; background:linear-gradient(90deg, #f87171, #fde047, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
+                23. ĐẤU TRƯỜNG KIẾN THỨC (2 ĐỘI ĐỐI KHÁNG VS)
+              </h1>
+              <p style="margin:0.3rem 0 0 0; color:#e2e8f0; font-size:0.98rem;">
+                Thi đấu đối kháng đồng đội sôi nổi - Đội nào trả lời sai sẽ bị đối thủ giành quyền cướp điểm câu hỏi đó!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 ACTION BUTTONS STANDARD -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+          <button id="btn-save-arena-library" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:2px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(16,185,129,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            💾 LƯU VÀO THƯ VIỆN TRƯỜNG
+          </button>
+
+          <button id="btn-open-arena-library" style="background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color:#fff; border:2px solid #c4b5fd; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(139,92,246,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            📁 KHO BÀI ĐÃ LƯU (${savedList.length})
+          </button>
+
+          <button id="btn-ai-generate-arena-questions" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:2px solid #7dd3fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(2,132,199,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            🤖 AI TẠO 10 CÂU ĐỐI KHÁNG THEO BÀI
+          </button>
+
+          <button id="btn-start-arena-battle-now" style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%); color:#fff; border:2.5px solid #fecaca; padding:0.95rem 1.1rem; border-radius:16px; font-size:1.08rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(239,68,68,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03) translateY(-2px)';" onmouseout="this.style.transform='scale(1) translateY(0)';">
+            🚀 BẮT ĐẦU ĐẤU TRƯỜNG 2 ĐỘI
+          </button>
+        </div>
+
+        <!-- TEAM NAMES CUSTOMIZATION & SETTINGS PANEL -->
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.4rem 1.8rem; margin-bottom:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; flex-direction:column; gap:1.2rem;">
+          
+          <!-- CUSTOM TEAM NAMES ROW -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
+            
+            <!-- RED TEAM NAME INPUT -->
+            <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:16px; padding:0.9rem 1.2rem; display:flex; align-items:center; gap:0.8rem;">
+              <span style="font-size:1.8rem;">🔴</span>
+              <div style="flex:1;">
+                <label style="display:block; font-size:0.82rem; font-weight:900; color:#b91c1c; margin-bottom:0.2rem;">TÊN ĐỘI ĐỎ (TÙY CHỈNH):</label>
+                <input type="text" id="arena-red-team-name-input" value="🔴 ĐỘI RỒNG LỬA" style="width:100%; padding:0.4rem 0.7rem; border-radius:10px; border:1.5px solid #ef4444; font-weight:900; font-size:1.05rem; color:#b91c1c; outline:none; background:#fff;" placeholder="Nhập tên Đội Đỏ...">
+              </div>
+            </div>
+
+            <!-- BLUE TEAM NAME INPUT -->
+            <div style="background:#f0f9ff; border:2px solid #7dd3fc; border-radius:16px; padding:0.9rem 1.2rem; display:flex; align-items:center; gap:0.8rem;">
+              <span style="font-size:1.8rem;">🔵</span>
+              <div style="flex:1;">
+                <label style="display:block; font-size:0.82rem; font-weight:900; color:#0369a1; margin-bottom:0.2rem;">TÊN ĐỘI XANH (TÙY CHỈNH):</label>
+                <input type="text" id="arena-blue-team-name-input" value="🔵 ĐỘI SẤM SÉT" style="width:100%; padding:0.4rem 0.7rem; border-radius:10px; border:1.5px solid #0284c7; font-weight:900; font-size:1.05rem; color:#0369a1; outline:none; background:#fff;" placeholder="Nhập tên Đội Xanh...">
+              </div>
+            </div>
+
+          </div>
+
+          <!-- TIME CONTROLS -->
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem; border-top:1.5px dashed #e2e8f0; padding-top:1rem;">
+            <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="font-weight:800; color:#334155; font-size:0.92rem;">⏱️ Thời gian suy nghĩ:</span>
+                <select id="arena-timer-limit-sel" style="padding:0.45rem 0.85rem; border-radius:12px; border:2px solid #cbd5e1; font-weight:800; color:#0f172a; outline:none; background:#f8fafc;">
+                  <option value="15">15 Giây</option>
+                  <option value="20">20 Giây</option>
+                  <option value="30" selected>30 Giây</option>
+                  <option value="45">45 Giây</option>
+                </select>
+              </div>
+
+              <div style="background:#fef3c7; color:#92400e; padding:0.4rem 0.9rem; border-radius:10px; font-weight:800; font-size:0.85rem; border:1px solid #fde68a;">
+                ⚖️ Luật đấu: Đội sai mất quyền ➔ Đội kia cướp điểm & giữ lượt câu tiếp theo
+              </div>
+            </div>
+
+            <div style="display:flex; gap:0.8rem;">
+              <button id="btn-add-arena-q" style="background:#f1f5f9; color:#0f172a; border:2px dashed #94a3b8; padding:0.5rem 1rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem; display:flex; align-items:center; gap:0.4rem;">
+                ➕ Thêm Câu Hỏi Mới
+              </button>
+              <button id="btn-reset-default-arena-qs" style="background:#fff; color:#ef4444; border:1.5px solid #fca5a5; padding:0.5rem 0.9rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem;">
+                🔄 Khôi phục 10 câu gốc
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 10 QUESTIONS GRID -->
+        <div style="margin-bottom:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
+            <h3 style="margin:0; font-size:1.25rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:0.5rem;">
+              <span>📋</span> DANH SÁCH CÂU HỎI THI ĐẤU ĐỐI KHÁNG (${questions.length} Câu)
+            </h3>
+            <span style="font-size:0.85rem; color:#64748b; font-weight:700;">Nhấn vào từng câu để chỉnh sửa nội dung & đáp án</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
+            ${questions.map((q, idx) => `
+              <div style="background:#ffffff; border:2.5px solid #cbd5e1; border-radius:18px; padding:1.1rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.15s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                
+                <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:${idx % 2 === 0 ? '#ef4444' : '#0284c7'};"></div>
+
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <span style="background:${idx % 2 === 0 ? '#fee2e2' : '#e0f2fe'}; color:${idx % 2 === 0 ? '#b91c1c' : '#0369a1'}; font-weight:900; font-size:0.78rem; padding:0.2rem 0.6rem; border-radius:6px;">CÂU HỎI ${idx + 1}</span>
+                    <span style="font-weight:900; color:#d97706; font-size:0.95rem;">+${q.pts || 100} Điểm</span>
+                  </div>
+
+                  <h4 style="margin:0 0 0.4rem; font-size:1.05rem; font-weight:900; color:#0f172a; line-height:1.4;">${q.q}</h4>
+                  <p style="margin:0 0 0.7rem; font-size:0.85rem; color:#64748b;">
+                    💡 <em>Gợi ý: ${q.hint || 'Không có gợi ý'}</em>
+                  </p>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed #e2e8f0; padding-top:0.6rem; margin-top:0.4rem;">
+                  <span style="font-size:0.8rem; font-weight:800; color:#475569;">Đáp án đúng: A</span>
+                  <div style="display:flex; gap:0.4rem;">
+                    <button class="btn-edit-arena-q" data-idx="${idx}" style="background:#e0f2fe; color:#0369a1; border:none; padding:0.3rem 0.7rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">✏️ Sửa</button>
+                    <button class="btn-del-arena-q" data-idx="${idx}" style="background:#fee2e2; color:#dc2626; border:none; padding:0.3rem 0.55rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">🗑️</button>
+                  </div>
+                </div>
+
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    // Events
+    const saveLibBtn = area.querySelector('#btn-save-arena-library');
+    if (saveLibBtn) {
+      saveLibBtn.onclick = () => {
+        if (typeof showSaveToolModal === 'function') {
+          showSaveToolModal('knowledgearena', '23. Đấu Trường Kiến Thức (2 Đội VS)', questions);
+        } else {
+          this._saveGameToCustomStorage('knowledgearena', questions);
+          if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã lưu bộ câu hỏi đấu trường vào thư viện thành công!', 'success');
+          this._renderKnowledgeArenaDashboard();
+        }
+      };
+    }
+
+    const openLibBtn = area.querySelector('#btn-open-arena-library');
+    if (openLibBtn) {
+      openLibBtn.onclick = () => {
+        if (typeof showSharedToolsLibraryModal === 'function') {
+          showSharedToolsLibraryModal('knowledgearena', (loaded) => {
+            if (loaded && Array.isArray(loaded)) {
+              this._setLoadedQuestions('knowledgearena', loaded);
+              this._renderKnowledgeArenaDashboard();
+            }
+          });
+        } else {
+          this._openQuestionLoaderModal('knowledgearena', (loaded) => {
+            this._setLoadedQuestions('knowledgearena', loaded);
+            this._renderKnowledgeArenaDashboard();
+          });
+        }
+      };
+    }
+
+    const aiGenBtn = area.querySelector('#btn-ai-generate-arena-questions');
+    if (aiGenBtn) {
+      aiGenBtn.onclick = () => {
+        const topic = prompt('Nhập chủ đề bài học để AI tạo 10 câu đối kháng:', curSubName + ' - Đấu trường kiến thức');
+        if (topic) {
+          if (typeof app !== 'undefined' && app.showToast) app.showToast('🤖 AI đang thiết kế 10 câu hỏi đối kháng...', 'info');
+          setTimeout(() => {
+            const aiQs = [
+              { id: 1, q: "Câu hỏi 1: Kiến thức cơ bản trọng tâm về " + topic + " là gì?", opts: ["Đáp án đúng chính xác", "Phương án sai 1", "Phương án sai 2", "Phương án sai 3"], a: 0, hint: "Xem lại SGK bài học", pts: 100 },
+              { id: 2, q: "Câu hỏi 2: Ý nghĩa cốt lõi trong " + topic + " là gì?", opts: ["Đúng chuẩn kiến thức", "Phương án 2", "Phương án 3", "Phương án 4"], a: 0, hint: "Khái niệm trọng tâm", pts: 100 },
+              { id: 3, q: "Câu hỏi 3: Ứng dụng thực tiễn của " + topic + " trong đời sống?", opts: ["Ứng dụng hữu ích chuẩn xác", "Không có ứng dụng", "Chưa rõ", "Sai"], a: 0, hint: "Liên hệ thực tiễn", pts: 100 },
+              { id: 4, q: "Câu hỏi 4: Đâu là phát biểu đúng nhất về " + topic + "?", opts: ["Phát biểu chuẩn xác", "Phát biểu sai", "Phát biểu thiếu ý", "Chưa rõ"], a: 0, hint: "Phân tích kỹ đề bài", pts: 100 },
+              { id: 5, q: "Câu hỏi 5: Khi thực hành bài tập về " + topic + ", cần lưu ý gì?", opts: ["Thực hiện đúng quy trình chuẩn", "Làm tắt các bước", "Bỏ qua kiểm tra", "Làm ngược lại"], a: 0, hint: "Quy trình thực hành", pts: 100 },
+              { id: 6, q: "Câu hỏi 6: Điểm khác biệt quan trọng trong " + topic + " là gì?", opts: ["Đáp án phân biệt chính xác", "Không có khác biệt", "Chưa rõ", "Sai"], a: 0, hint: "So sánh đối chiếu", pts: 100 },
+              { id: 7, q: "Câu hỏi 7: Tác dụng nổi bật nhất của " + topic + "?", opts: ["Tác dụng tích cực chuẩn", "Không có tác dụng", "Gây hại", "Chưa rõ"], a: 0, hint: "Tác dụng thực tế", pts: 100 },
+              { id: 8, q: "Câu hỏi 8: Cách giải quyết tình huống thường gặp trong " + topic + "?", opts: ["Giải pháp tối ưu và an toàn", "Bỏ qua tình huống", "Làm liều", "Sai"], a: 0, hint: "Kỹ năng xử lý tình huống", pts: 100 },
+              { id: 9, q: "Câu hỏi 9: Nhận định nào sau đây là sai về " + topic + "?", opts: ["Nhận định sai chuẩn xác", "Nhận định đúng 1", "Nhận định đúng 2", "Nhận định đúng 3"], a: 0, hint: "Tìm câu sai", pts: 100 },
+              { id: 10, q: "Câu hỏi 10: Tổng kết toàn diện kiến thức bài học " + topic + "?", opts: ["Nắm vững toàn bộ kiến thức và kỹ năng", "Chỉ học vẹt", "Bỏ qua bài khó", "Không chú ý"], a: 0, hint: "Chìa khóa chiến thắng", pts: 100 }
+            ];
+            this._setLoadedQuestions('knowledgearena', aiQs);
+            if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã tạo thành công 10 câu hỏi đối kháng mới!', 'success');
+            this._renderKnowledgeArenaDashboard();
+          }, 600);
+        }
+      };
+    }
+
+    const startBtn = area.querySelector('#btn-start-arena-battle-now');
+    if (startBtn) {
+      startBtn.onclick = () => {
+        const redInput = area.querySelector('#arena-red-team-name-input');
+        const blueInput = area.querySelector('#arena-blue-team-name-input');
+        const timerEl = area.querySelector('#arena-timer-limit-sel');
+        
+        const opts = {
+          redTeamName: redInput ? (redInput.value.trim() || '🔴 ĐỘI ĐỎ') : '🔴 ĐỘI ĐỎ',
+          blueTeamName: blueInput ? (blueInput.value.trim() || '🔵 ĐỘI XANH') : '🔵 ĐỘI XANH',
+          timeLimit: timerEl ? parseInt(timerEl.value) : 30
+        };
+        this._launchKnowledgeArenaModal(curSubName, questions, opts);
+      };
+    }
+
+    const resetBtn = area.querySelector('#btn-reset-default-arena-qs');
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (confirm('Khôi phục 10 câu hỏi đối kháng về mặc định?')) {
+          this._setLoadedQuestions('knowledgearena', null);
+          this._renderKnowledgeArenaDashboard();
+        }
+      };
+    }
+
+    const addBtn = area.querySelector('#btn-add-arena-q');
+    if (addBtn) {
+      addBtn.onclick = () => {
+        const newQ = prompt('Nhập nội dung câu hỏi đối kháng mới:', 'Câu hỏi đối kháng mới?');
+        if (newQ) {
+          questions.push({
+            id: questions.length + 1,
+            q: newQ,
+            opts: ["Đáp án đúng", "Đáp án sai 1", "Đáp án sai 2", "Đáp án sai 3"],
+            a: 0,
+            hint: "Gợi ý",
+            pts: 100
+          });
+          this._setLoadedQuestions('knowledgearena', questions);
+          this._renderKnowledgeArenaDashboard();
+        }
+      };
+    }
+
+    area.querySelectorAll('.btn-edit-arena-q').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx);
+        const cur = questions[idx];
+        const newQ = prompt('Nội dung câu hỏi:', cur.q);
+        if (newQ !== null) {
+          const newHint = prompt('Gợi ý:', cur.hint);
+          cur.q = newQ;
+          if (newHint) cur.hint = newHint;
+          this._setLoadedQuestions('knowledgearena', questions);
+          this._renderKnowledgeArenaDashboard();
+        }
+      };
+    });
+
+    area.querySelectorAll('.btn-del-arena-q').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx);
+        if (questions.length <= 2) {
+          alert('Đấu trường cần tối thiểu 2 câu hỏi!');
+          return;
+        }
+        if (confirm('Xóa câu hỏi này?')) {
+          questions.splice(idx, 1);
+          this._setLoadedQuestions('knowledgearena', questions);
+          this._renderKnowledgeArenaDashboard();
+        }
+      };
+    });
+  },
+
+  _launchKnowledgeArenaModal(subName, questions, opts = {}) {
+    const old = document.getElementById('arena-battle-modal');
+    if (old) old.remove();
+
+    let qList = questions;
+    if (!qList || !Array.isArray(qList) || qList.length === 0) {
+      if (typeof subName === 'object' && Array.isArray(subName)) {
+        qList = subName;
+      } else {
+        qList = this._getKnowledgeArenaQuestions();
+      }
+    }
+
+    let redName = (opts && opts.redTeamName) ? opts.redTeamName : '🔴 ĐỘI ĐỎ';
+    let blueName = (opts && opts.blueTeamName) ? opts.blueTeamName : '🔵 ĐỘI XANH';
+    const defaultTimeLimit = (opts && opts.timeLimit) ? opts.timeLimit : 30;
+
+    let curIdx = 0;
+    let redScore = 0;
+    let blueScore = 0;
+    let curTurn = 'red'; // 'red' | 'blue'
+    let isStealAttempt = false; // true khi đội bạn vừa sai, đội này đang cướp quyền
+    let disabledOptIdx = -1; // Index đáp án đã bị chọn sai trước đó
+
+    let bgmEnabled = true;
+    let bgmInterval = null;
+    let timerSeconds = defaultTimeLimit;
+    let timerInterval = null;
+    let animFrameId = null;
+
+    let audioCtx = null;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) audioCtx = new AudioContextClass();
+    } catch(e) {}
+
+    const synth = this._getAudioSynth();
+
+    const modal = document.createElement('div');
+    modal.id = 'arena-battle-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:#060a14; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
+    document.body.appendChild(modal);
+
+    // Soft Epic Arena Synth BGM (Gentle heroic harmony & percussion)
+    const playHeroicNote = (freq, duration, timeOffset, vol = 0.038) => {
+      if (!bgmEnabled || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const startTime = audioCtx.currentTime + timeOffset;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, startTime);
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(vol, startTime + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      } catch(e) {}
+    };
+
+    const playFullHeroicLoop = () => {
+      if (!bgmEnabled || !audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+
+      const step = 0.30;
+      const melody = [
+        { f: 329.63, t: 0 * step },
+        { f: 392.00, t: 1 * step },
+        { f: 440.00, t: 2 * step },
+        { f: 493.88, t: 3 * step },
+        { f: 440.00, t: 4 * step },
+        { f: 392.00, t: 5 * step },
+        { f: 329.63, t: 6 * step },
+        { f: 293.66, t: 7 * step }
+      ];
+      melody.forEach(m => playHeroicNote(m.f, 0.45, m.t, 0.035));
+    };
+
+    const triggerAudioUnlock = () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().then(() => playFullHeroicLoop()).catch(()=>{});
+      } else {
+        playFullHeroicLoop();
+      }
+    };
+
+    triggerAudioUnlock();
+    modal.addEventListener('click', triggerAudioUnlock, { once: false });
+    bgmInterval = setInterval(() => {
+      if (bgmEnabled) playFullHeroicLoop();
+    }, 0.30 * 8 * 1000 + 150);
+
+    const cleanup = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      if (bgmInterval) clearInterval(bgmInterval);
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      modal.remove();
+    };
+
+    const renderStage = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      timerSeconds = defaultTimeLimit;
+
+      const isFinish = curIdx >= qList.length;
+      if (isFinish) {
+        synth.play('fanfare');
+        const winner = redScore > blueScore ? redName : (blueScore > redScore ? blueName : 'HÒA NHAU (CẢ 2 ĐỘI VÔ ĐỊCH)');
+        const winnerColor = redScore > blueScore ? '#ef4444' : (blueScore > redScore ? '#0284c7' : '#f59e0b');
+
+        modal.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:2rem; background:radial-gradient(circle at center, #1e1b4b 0%, #060a14 100%); animation:fadeIn 0.5s ease; position:relative; overflow:hidden;">
+            
+            <div style="position:absolute; inset:0; pointer-events:none; overflow:hidden;">
+              ${Array.from({length: 30}).map((_, i) => `
+                <div style="position:absolute; left:${(i * 3.3).toFixed(1)}%; top:${(Math.random() * 80).toFixed(0)}%; font-size:${(Math.random() * 1.6 + 1.2).toFixed(1)}rem; animation:floatDown ${(Math.random() * 2 + 2).toFixed(1)}s infinite ease-in-out; opacity:0.85;">
+                  ${['🏆','👑','⭐','✨','🔥','⚡'][i % 6]}
+                </div>
+              `).join('')}
+            </div>
+
+            <div style="position:relative; margin-bottom:1.5rem; z-index:2;">
+              <div style="font-size:9.5rem; filter:drop-shadow(0 0 60px ${winnerColor}); animation:bounce 1.6s infinite;">🏆</div>
+              <div style="position:absolute; top:-20px; right:-20px; font-size:4.5rem; animation:pulse 1s infinite;">✨</div>
+            </div>
+            
+            <h1 style="font-size:3.6rem; font-weight:900; background:linear-gradient(90deg, #fde047, #ffffff, #fde047); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:0 0 0.8rem; text-shadow:0 10px 30px rgba(0,0,0,0.6); z-index:2;">
+              VINH DANH ĐỘI VÔ ĐỊCH ĐẤU TRƯỜNG!
+            </h1>
+            <p style="font-size:2rem; color:${winnerColor}; margin-bottom:2rem; max-width:880px; line-height:1.5; font-weight:900; z-index:2; text-shadow:0 0 25px ${winnerColor}88;">
+              👑 ${winner.toUpperCase()} 👑
+            </p>
+
+            <div style="display:flex; gap:2.5rem; justify-content:center; align-items:center; margin-bottom:2.5rem; flex-wrap:wrap; z-index:2;">
+              <div style="background:rgba(239,68,68,0.25); border:3px solid #ef4444; padding:1.2rem 2.8rem; border-radius:24px; font-size:1.8rem; font-weight:900; color:#f87171; box-shadow:0 8px 30px rgba(239,68,68,0.35);">
+                ${redName}: ${redScore} Điểm
+              </div>
+              <div style="background:rgba(2,132,199,0.25); border:3px solid #38bdf8; padding:1.2rem 2.8rem; border-radius:24px; font-size:1.8rem; font-weight:900; color:#7dd3fc; box-shadow:0 8px 30px rgba(2,132,199,0.35);">
+                ${blueName}: ${blueScore} Điểm
+              </div>
+            </div>
+
+            <div style="display:flex; gap:1.2rem; z-index:2;">
+              <button id="btn-ar-play-again" style="background:linear-gradient(135deg, #ef4444, #dc2626); color:#fff; border:3px solid #fecaca; padding:1.1rem 2.8rem; border-radius:50px; font-size:1.35rem; font-weight:900; cursor:pointer; box-shadow:0 10px 30px rgba(239,68,68,0.4); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                🔄 Đấu Lại Hiệp Mới
+              </button>
+              <button id="btn-ar-close-win" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:3px solid #86efac; padding:1.1rem 3.2rem; border-radius:50px; font-size:1.35rem; font-weight:900; cursor:pointer; box-shadow:0 10px 30px rgba(16,185,129,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                ✕ Kết Thúc Đấu Trường
+              </button>
+            </div>
+          </div>
+        `;
+        const playAgainBtn = modal.querySelector('#btn-ar-play-again');
+        if (playAgainBtn) playAgainBtn.onclick = () => { curIdx = 0; redScore = 0; blueScore = 0; curTurn = 'red'; isStealAttempt = false; disabledOptIdx = -1; renderStage(); };
+        const closeWinBtn = modal.querySelector('#btn-ar-close-win');
+        if (closeWinBtn) closeWinBtn.onclick = cleanup;
+        return;
+      }
+
+      const q = qList[curIdx];
+      const qText = q.q || q.questionText || 'Nội dung câu hỏi đối kháng';
+      const qOpts = Array.isArray(q.opts) ? q.opts : (Array.isArray(q.options) ? q.options : ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"]);
+      const qAns = (typeof q.a !== 'undefined') ? q.a : (typeof q.correctAnswer !== 'undefined' ? q.correctAnswer : 0);
+
+      const activeTurnName = (curTurn === 'red') ? redName : blueName;
+      const otherTeamName = (curTurn === 'red') ? blueName : redName;
+      const activeColor = (curTurn === 'red') ? '#ef4444' : '#0284c7';
+
+      modal.innerHTML = `
+        <!-- TOP ARENA SCOREBOARD & HUD -->
+        <div style="background:rgba(9,13,22,0.96); border-bottom:3px solid #334155; padding:0.85rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:10; box-shadow:0 8px 30px rgba(0,0,0,0.7);">
+          
+          <!-- RED TEAM SCORE -->
+          <div style="display:flex; align-items:center; gap:1rem; background:rgba(239,68,68,0.18); border:2.5px solid #ef4444; padding:0.5rem 1.4rem; border-radius:20px; box-shadow:0 0 20px rgba(239,68,68,0.3);">
+            <div style="font-size:2rem; animation:${curTurn === 'red' ? 'bounce 1s infinite' : 'none'};">🔥</div>
+            <div>
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <span id="arena-red-title-disp" style="font-weight:900; font-size:1.15rem; color:#fca5a5;">${redName}</span>
+                <button id="btn-rename-red" style="background:none; border:none; color:#fca5a5; cursor:pointer; font-size:0.85rem;" title="Đổi tên Đội Đỏ">✏️</button>
+              </div>
+              <span style="font-size:1.35rem; font-weight:900; color:#fff;">⚡ ${redScore} Điểm</span>
+            </div>
+          </div>
+
+          <!-- CENTER ROUND INFO & TIMER -->
+          <div style="display:flex; flex-direction:column; align-items:center; gap:0.3rem;">
+            <div style="display:flex; align-items:center; gap:0.8rem;">
+              <span style="background:#f59e0b; color:#78350f; font-weight:900; font-size:0.85rem; padding:0.25rem 0.8rem; border-radius:10px;">HIỆP ${curIdx + 1} / ${qList.length}</span>
+              <div style="background:rgba(2,132,199,0.25); border:1.5px solid #38bdf8; padding:0.3rem 1rem; border-radius:15px; font-weight:900; color:#38bdf8; font-size:1.15rem;">
+                ⏱️ <span id="ar-timer-sec">${timerSeconds}s</span>
+              </div>
+            </div>
+
+            <!-- TURN / STEAL BADGE -->
+            ${isStealAttempt ? `
+              <div style="font-size:0.95rem; font-weight:900; color:#fef08a; background:linear-gradient(135deg, #b45309, #d97706); padding:0.3rem 1.2rem; border-radius:12px; border:2px solid #fde047; box-shadow:0 0 15px rgba(245,158,11,0.6); animation:pulse 1s infinite;">
+                ⚡ ${otherTeamName} SAI! ${activeTurnName} ĐANG GIÀNH QUYỀN TRẢ LỜI CÂU NÀY!
+              </div>
+            ` : `
+              <div style="font-size:1rem; font-weight:900; color:${activeColor}; background:rgba(255,255,255,0.08); padding:0.2rem 1.1rem; border-radius:10px; border:1.5px solid ${activeColor};">
+                Lượt chính thức của: ${activeTurnName}
+              </div>
+            `}
+          </div>
+
+          <!-- BLUE TEAM SCORE -->
+          <div style="display:flex; align-items:center; gap:1rem; background:rgba(2,132,199,0.18); border:2.5px solid #0284c7; padding:0.5rem 1.4rem; border-radius:20px; box-shadow:0 0 20px rgba(2,132,199,0.3);">
+            <div style="text-align:right;">
+              <div style="display:flex; align-items:center; gap:0.4rem; justify-content:flex-end;">
+                <button id="btn-rename-blue" style="background:none; border:none; color:#7dd3fc; cursor:pointer; font-size:0.85rem;" title="Đổi tên Đội Xanh">✏️</button>
+                <span id="arena-blue-title-disp" style="font-weight:900; font-size:1.15rem; color:#7dd3fc;">${blueName}</span>
+              </div>
+              <span style="font-size:1.35rem; font-weight:900; color:#fff;">⚡ ${blueScore} Điểm</span>
+            </div>
+            <div style="font-size:2rem; animation:${curTurn === 'blue' ? 'bounce 1s infinite' : 'none'};">⚡</div>
+          </div>
+
+          <!-- BGM & CLOSE -->
+          <div style="display:flex; align-items:center; gap:0.8rem;">
+            <button id="btn-ar-bgm-toggle" style="background:${bgmEnabled ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.1)'}; border:2px solid ${bgmEnabled ? '#86efac' : 'rgba(255,255,255,0.3)'}; color:#fff; padding:0.45rem 0.9rem; border-radius:16px; font-weight:900; font-size:0.85rem; cursor:pointer;">
+              ${bgmEnabled ? '🔊 Nhạc: BẬT' : '🔇 Nhạc: TẮT'}
+            </button>
+            <button id="btn-ar-close" style="background:#ef4444; color:#fff; border:none; border-radius:12px; width:40px; height:40px; font-size:1.3rem; font-weight:900; cursor:pointer;">✕</button>
+          </div>
+
+        </div>
+
+        <!-- MAIN BATTLE ARENA 60 FPS -->
+        <div style="flex:1; position:relative; display:flex; align-items:center; justify-content:center; padding:1.8rem; overflow:hidden;">
+          
+          <!-- ARENA CANVAS 60 FPS -->
+          <canvas id="ar-bg-canvas" style="position:absolute; inset:0; width:100%; height:100%; z-index:1;"></canvas>
+
+          <!-- LEFT TEAM MASCOT (RED DRAGON) -->
+          <div style="position:absolute; left:3%; bottom:8%; z-index:2; display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+            <div style="font-size:6.5rem; filter:drop-shadow(0 0 30px #ef4444); animation:${curTurn === 'red' ? 'pulse 1.2s infinite' : 'none'}; opacity:${curTurn === 'red' ? '1' : '0.5'};">
+              🐲
+            </div>
+            <div style="background:#ef4444; color:#fff; font-weight:900; font-size:1.1rem; padding:0.4rem 1.4rem; border-radius:16px; border:2px solid #fecaca; box-shadow:0 6px 20px rgba(239,68,68,0.5);">
+              ${redName}
+            </div>
+          </div>
+
+          <!-- RIGHT TEAM MASCOT (BLUE EAGLE) -->
+          <div style="position:absolute; right:3%; bottom:8%; z-index:2; display:flex; flex-direction:column; align-items:center; gap:0.5rem;">
+            <div style="font-size:6.5rem; filter:drop-shadow(0 0 30px #0284c7); animation:${curTurn === 'blue' ? 'pulse 1.2s infinite' : 'none'}; opacity:${curTurn === 'blue' ? '1' : '0.5'};">
+              🦅
+            </div>
+            <div style="background:#0284c7; color:#fff; font-weight:900; font-size:1.1rem; padding:0.4rem 1.4rem; border-radius:16px; border:2px solid #bae6fd; box-shadow:0 6px 20px rgba(2,132,199,0.5);">
+              ${blueName}
+            </div>
+          </div>
+
+          <!-- CENTER BATTLE QUESTION CARD -->
+          <div style="background:linear-gradient(145deg, #090d16 0%, #1e1b4b 100%); color:#fff; border:4px solid ${activeColor}; border-radius:32px; padding:2.4rem 3.2rem; max-width:860px; width:88%; box-shadow:0 25px 80px rgba(0,0,0,0.9), 0 0 50px ${activeColor}55; position:relative; animation:slideUp 0.35s ease; z-index:3;">
+            
+            <div style="position:absolute; top:-24px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg, ${activeColor}, #1e1b4b); color:#fff; font-weight:900; font-size:1.18rem; padding:0.45rem 2.5rem; border-radius:25px; border:2.5px solid #fff; box-shadow:0 6px 20px rgba(0,0,0,0.5); white-space:nowrap;">
+              ${isStealAttempt ? `⚡ ${activeTurnName.toUpperCase()} ĐANG CƯỚP ĐIỂM CÂU NÀY!` : `⚔️ LƯỢT TRẢ LỜI CỦA: ${activeTurnName.toUpperCase()}`}
+            </div>
+
+            <h2 style="font-size:1.95rem; font-weight:900; color:#fde047; text-align:center; margin:1rem 0 2rem 0; line-height:1.45; letter-spacing:-0.3px;">
+              ${qText}
+            </h2>
+
+            <!-- 4 CHOICES (2x2 GRID) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.8rem;">
+              ${qOpts.map((opt, oIdx) => {
+                const isEliminated = (oIdx === disabledOptIdx);
+                return `
+                  <button class="btn-ar-opt" data-idx="${oIdx}" ${isEliminated ? 'disabled' : ''} style="background:${isEliminated ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.06)'}; color:${isEliminated ? '#fca5a5' : '#fff'}; border:2.5px solid ${isEliminated ? '#ef4444' : activeColor}; opacity:${isEliminated ? '0.45' : '1'}; cursor:${isEliminated ? 'not-allowed' : 'pointer'}; padding:1.25rem 1.4rem; border-radius:20px; font-size:1.15rem; font-weight:800; text-align:left; display:flex; align-items:center; gap:1rem; transition:all 0.15s; box-shadow:0 4px 14px rgba(0,0,0,0.2);" onmouseover="${isEliminated ? '' : `this.style.background='${activeColor}33'; this.style.transform='translateY(-3px)';`}" onmouseout="${isEliminated ? '' : `this.style.background='rgba(255,255,255,0.06)'; this.style.transform='translateY(0)';`}">
+                    <span style="background:${isEliminated ? '#ef4444' : activeColor}; color:#fff; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.15rem; flex-shrink:0; font-weight:900;">${isEliminated ? '✕' : ['A','B','C','D'][oIdx]}</span>
+                    <span style="flex:1; line-height:1.35; ${isEliminated ? 'text-decoration:line-through;' : ''}">${opt}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- FOOTER HINT & VOICE TTS -->
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.95rem; color:#94a3b8; font-weight:700; border-top:1.5px dashed rgba(255,255,255,0.15); padding-top:1rem; flex-wrap:wrap; gap:0.8rem;">
+              <div>💡 <strong>Manh mối đấu trường:</strong> ${q.hint || 'Hãy phân tích kỹ các đáp án'}</div>
+              <button id="btn-ar-voice-hint" style="background:${activeColor}; color:#fff; border:none; padding:0.5rem 1.2rem; border-radius:12px; font-weight:900; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; box-shadow:0 4px 12px ${activeColor}55;">
+                🔊 Đọc câu hỏi
+              </button>
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      // Arena Canvas Lights 60 FPS
+      const bgCanvas = modal.querySelector('#ar-bg-canvas');
+      if (bgCanvas) {
+        const bgCtx = bgCanvas.getContext('2d');
+        let arenaTick = 0;
+
+        const resizeCanvas = () => {
+          bgCanvas.width = (bgCanvas.parentElement && bgCanvas.parentElement.clientWidth) ? bgCanvas.parentElement.clientWidth : (window.innerWidth || 1200);
+          bgCanvas.height = (bgCanvas.parentElement && bgCanvas.parentElement.clientHeight) ? bgCanvas.parentElement.clientHeight : (window.innerHeight || 800);
+        };
+        resizeCanvas();
+
+        const drawArena = () => {
+          const w = bgCanvas.width;
+          const h = bgCanvas.height;
+          bgCtx.clearRect(0, 0, w, h);
+
+          bgCtx.fillStyle = '#060a14';
+          bgCtx.fillRect(0, 0, w, h);
+
+          const redGrad = bgCtx.createRadialGradient(0, h/2, 50, 0, h/2, w/2);
+          redGrad.addColorStop(0, 'rgba(239, 68, 68, 0.22)');
+          redGrad.addColorStop(1, 'transparent');
+          bgCtx.fillStyle = redGrad;
+          bgCtx.fillRect(0, 0, w/2, h);
+
+          const blueGrad = bgCtx.createRadialGradient(w, h/2, 50, w, h/2, w/2);
+          blueGrad.addColorStop(0, 'rgba(2, 132, 199, 0.22)');
+          blueGrad.addColorStop(1, 'transparent');
+          bgCtx.fillStyle = blueGrad;
+          bgCtx.fillRect(w/2, 0, w/2, h);
+
+          arenaTick += 0.05;
+          bgCtx.fillStyle = 'rgba(253, 224, 71, 0.45)';
+          for (let i = 0; i < 25; i++) {
+            const sx = ((i * 97 + arenaTick * 20) % w);
+            const sy = ((i * 73 + Math.sin(arenaTick + i) * 30) % h);
+            bgCtx.beginPath();
+            bgCtx.arc(sx, sy, (i % 3) + 1.2, 0, Math.PI * 2);
+            bgCtx.fill();
+          }
+
+          animFrameId = requestAnimationFrame(drawArena);
+        };
+
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        animFrameId = requestAnimationFrame(drawArena);
+      }
+
+      // Rename Teams directly in Arena
+      const renameRedBtn = modal.querySelector('#btn-rename-red');
+      if (renameRedBtn) {
+        renameRedBtn.onclick = () => {
+          const newN = prompt('Nhập tên mới cho Đội Đỏ:', redName);
+          if (newN && newN.trim()) {
+            redName = newN.trim();
+            renderStage();
+          }
+        };
+      }
+
+      const renameBlueBtn = modal.querySelector('#btn-rename-blue');
+      if (renameBlueBtn) {
+        renameBlueBtn.onclick = () => {
+          const newN = prompt('Nhập tên mới cho Đội Xanh:', blueName);
+          if (newN && newN.trim()) {
+            blueName = newN.trim();
+            renderStage();
+          }
+        };
+      }
+
+      // BGM Toggle
+      const bgmBtn = modal.querySelector('#btn-ar-bgm-toggle');
+      if (bgmBtn) {
+        bgmBtn.onclick = () => {
+          bgmEnabled = !bgmEnabled;
+          bgmBtn.innerHTML = bgmEnabled ? '🔊 Nhạc: BẬT' : '🔇 Nhạc: TẮT';
+          bgmBtn.style.background = bgmEnabled ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.1)';
+          bgmBtn.style.borderColor = bgmEnabled ? '#86efac' : 'rgba(255,255,255,0.3)';
+          if (bgmEnabled) triggerAudioUnlock();
+        };
+      }
+
+      const closeBtn = modal.querySelector('#btn-ar-close');
+      if (closeBtn) closeBtn.onclick = cleanup;
+
+      // Voice TTS
+      const voiceBtn = modal.querySelector('#btn-ar-voice-hint');
+      if (voiceBtn) {
+        voiceBtn.onclick = () => {
+          if ('speechSynthesis' in window) {
+            const utter = new SpeechSynthesisUtterance(qText);
+            utter.lang = 'vi-VN';
+            window.speechSynthesis.speak(utter);
+          }
+        };
+      }
+
+      // Handle Incorrect / Timeout Steal Transition
+      const handleWrongOrTimeout = () => {
+        synth.play('wrong');
+
+        if (!isStealAttempt) {
+          // First team got it wrong -> The OTHER team gets to steal this question!
+          isStealAttempt = true;
+          curTurn = (curTurn === 'red') ? 'blue' : 'red';
+          setTimeout(() => {
+            renderStage();
+          }, 850);
+        } else {
+          // Second team also got it wrong -> Move to next question, turn belongs to current team!
+          isStealAttempt = false;
+          disabledOptIdx = -1;
+          curIdx++;
+          setTimeout(() => {
+            renderStage();
+          }, 900);
+        }
+      };
+
+      // Countdown Timer
+      const timerSecEl = modal.querySelector('#ar-timer-sec');
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        if (timerSecEl) timerSecEl.textContent = timerSeconds + 's';
+        if (timerSeconds <= 5) {
+          synth.play('pop');
+          if (timerSecEl && timerSecEl.style) timerSecEl.style.color = '#ef4444';
+        }
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          handleWrongOrTimeout();
+        }
+      }, 1000);
+
+      // Option clicks
+      modal.querySelectorAll('.btn-ar-opt').forEach(btn => {
+        btn.onclick = () => {
+          if (btn.disabled) return;
+          if (timerInterval) clearInterval(timerInterval);
+          const chosen = parseInt(btn.dataset.idx);
+
+          if (chosen === qAns) {
+            synth.play('correct');
+            btn.style.background = '#10b981';
+            btn.style.borderColor = '#059669';
+            btn.style.color = '#fff';
+
+            if (curTurn === 'red') {
+              redScore += (100 + timerSeconds * 2);
+            } else {
+              blueScore += (100 + timerSeconds * 2);
+            }
+
+            setTimeout(() => {
+              // If it was a steal attempt and team succeeded -> They KEEP the turn for the NEXT question!
+              // If it was their normal turn and they succeeded -> Turn switches to the other team for next question!
+              if (isStealAttempt) {
+                // Team stole this question successfully, so they keep the turn for the next question (2nd play)!
+                isStealAttempt = false;
+                disabledOptIdx = -1;
+                curIdx++;
+              } else {
+                // Normal turn completed -> switch to other team for next question
+                isStealAttempt = false;
+                disabledOptIdx = -1;
+                curTurn = (curTurn === 'red') ? 'blue' : 'red';
+                curIdx++;
+              }
+              renderStage();
+            }, 800);
+          } else {
+            // Chosen answer is WRONG
+            btn.style.background = '#ef4444';
+            btn.style.borderColor = '#b91c1c';
+            btn.style.color = '#fff';
+            disabledOptIdx = chosen; // Remember this wrong answer so next team cannot pick it
+            handleWrongOrTimeout();
+          }
+        };
+      });
+    };
+
+    renderStage();
+  },
+
+  // =========================================================================
+  // 🚩 GAME 24: BẢN ĐỒ HÒN ĐẢO 7 TRẠM TRI THỨC (INTERACTIVE EMERALD MAP - GDPT 2018)
+  // =========================================================================
+  _getStations7Questions() {
+    return this._getLoadedQuestions('stations7') || [
+      { id: 1, name: "Trạm 1: Khởi Động", type: "Khởi động & Kích hoạt", icon: "🏁", color: "#10b981", x: 140, y: 380, label: "Bến Tàu Khởi Động", desc: "Kích hoạt kiến thức nền tảng mở đầu", q: "Khái niệm mở đầu: Phần mềm bảng tính điện tử phổ biến nhất hiện nay là gì?", opts: ["Microsoft Excel", "Microsoft Word", "Adobe Photoshop", "Microsoft PowerPoint"], a: 0, hint: "Ứng dụng xử lý bảng tính với các hàng và cột", pts: 100 },
+      { id: 2, name: "Trạm 2: Khám Phá", type: "Khám phá tri thức", icon: "🔍", color: "#06b6d4", x: 260, y: 220, label: "Rừng Khám Phá", desc: "Tìm hiểu định nghĩa và cấu trúc cốt lõi", q: "Khám phá kiến thức: Giao của một cột và một hàng trong bảng tính được gọi là gì?", opts: ["Ô tính (Cell)", "Trang tính (Worksheet)", "Bảng dữ liệu (Table)", "Thanh công thức (Formula Bar)"], a: 0, hint: "Có địa chỉ cụ thể như A1, B5, C10", pts: 100 },
+      { id: 3, name: "Trạm 3: Thực Nghiệm", type: "Thực hành & Đo đạc", icon: "🧪", color: "#8b5cf6", x: 420, y: 340, label: "Hồ Thực Nghiệm", desc: "Thực hành áp dụng công thức và thí nghiệm", q: "Thực hành tính toán: Để tính tổng các giá trị trong vùng từ A1 đến A10, ta sử dụng hàm nào?", opts: ["=SUM(A1:A10)", "=AVERAGE(A1:A10)", "=MAX(A1:A10)", "=COUNT(A1:A10)"], a: 0, hint: "Hàm SUM tính tổng dữ liệu số", pts: 100 },
+      { id: 4, name: "Trạm 4: Tư Duy Logic", type: "Giải mã & Phản biện", icon: "🧠", color: "#f59e0b", x: 540, y: 180, label: "Đền Thờ Tư Duy", desc: "Suy luận logic và giải quyết vấn đề", q: "Giải mã quy tắc: Ký tự nào bắt buộc phải nhập đầu tiên khi viết công thức tính toán trong Excel?", opts: ["Dấu bằng (=)", "Dấu cộng (+)", "Dấu chấm (.)", "Dấu hai chấm (:)"], a: 0, hint: "Bắt đầu mọi công thức bằng dấu =", pts: 100 },
+      { id: 5, name: "Trạm 5: Hợp Tác Nhóm", type: "Thảo luận & Phản biện", icon: "🤝", color: "#ec4899", x: 680, y: 320, label: "Làng Hợp Tác", desc: "Cùng làm việc nhóm và bảo vệ quan điểm", q: "Thảo luận nhóm: Ý nghĩa và kết quả trả về của hàm =AVERAGE(B2:B6) là gì?", opts: ["Tính giá trị trung bình cộng", "Tìm giá trị lớn nhất trong vùng", "Đếm số lượng ô chứa số", "Tìm giá trị nhỏ nhất trong vùng"], a: 0, hint: "Average là trung bình cộng", pts: 100 },
+      { id: 6, name: "Trạm 6: Vận Dụng Sáng Tạo", type: "Ứng dụng thực tế", icon: "🚀", color: "#3b82f6", x: 820, y: 190, label: "Xưởng Sáng Chế", desc: "Liên hệ đời sống và công nghệ số", q: "Vận dụng thực tế: Khi biểu diễn cơ cấu tỷ lệ phần trăm các loại học lực của lớp, biểu đồ nào tối ưu nhất?", opts: ["Biểu đồ hình tròn (Pie Chart)", "Biểu đồ cột thẳng đứng", "Biểu đồ đường gấp khúc", "Biểu đồ tán xạ"], a: 0, hint: "Biểu đồ tròn thể hiện tỷ lệ % cơ cấu", pts: 100 },
+      { id: 7, name: "Trạm 7: Về Đích Năng Lực", type: "Tổng kết & Đánh giá", icon: "🏆", color: "#eab308", x: 960, y: 330, label: "Đỉnh Núi Vinh Quang", desc: "Đánh giá chuẩn đầu ra phẩm chất và năng lực", q: "Tổng kết năng lực: Nguyên tắc cốt lõi để bảo đảm an toàn và bảo mật dữ liệu bảng tính trên máy tính là gì?", opts: ["Lưu thường xuyên (Ctrl+S) và sao lưu định kỳ", "Không cần lưu bài khi làm", "Chia sẻ mật khẩu cho mọi người", "Tắt máy đột ngột khi đang làm"], a: 0, hint: "Thao tác lưu bài chuẩn mực", pts: 100 }
+    ];
+  },
+
+  _renderStations7Dashboard() {
+    const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
+    if (!area) return;
+
+    let stations = this._getStations7Questions();
+    const savedList = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'stations7') : [];
+    const curSubName = (typeof currentSubject !== 'undefined' && currentSubject && currentSubject.name) ? currentSubject.name : 'Tin học';
+
+    area.innerHTML = `
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease;">
+        
+        <!-- HEADER BANNER ISLAND MAP -->
+        <div style="background:linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; margin-bottom:1.5rem; border:2.5px solid #34d399; box-shadow:0 12px 35px rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+          <div style="display:flex; align-items:center; gap:1.4rem;">
+            <div style="width:72px; height:72px; border-radius:20px; background:radial-gradient(circle, #6ee7b7 0%, #10b981 60%, #047857 100%); display:flex; align-items:center; justify-content:center; font-size:3rem; border:3px solid #a7f3d0; box-shadow:0 0 30px rgba(16,185,129,0.7); animation:bounce 2s infinite;">
+              🗺️
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.25rem;">
+                <span style="background:#10b981; color:#064e3b; font-weight:900; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">BẢN ĐỒ ĐỒ HỌA 60 FPS</span>
+                <span style="background:rgba(255,255,255,0.15); color:#a7f3d0; font-weight:800; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">HÒN ĐẢO 7 TRẠM TRI THỨC</span>
+              </div>
+              <h1 style="margin:0; font-size:2rem; font-weight:900; background:linear-gradient(90deg, #a7f3d0, #fde047, #34d399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
+                24. BẢN ĐỒ HÒN ĐẢO 7 TRẠM & HỘ CHIẾU NĂNG LỰC
+              </h1>
+              <p style="margin:0.3rem 0 0 0; color:#e2e8f0; font-size:0.98rem;">
+                Bản đồ học tập tương tác trực quan - Khám phá 7 vùng đất tri thức, giải mã nhiệm vụ và đóng dấu Hộ chiếu
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 ACTION BUTTONS STANDARD -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+          <button id="btn-save-st7-library" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:2px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(16,185,129,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            💾 LƯU VÀO THƯ VIỆN TRƯỜNG
+          </button>
+
+          <button id="btn-open-st7-library" style="background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color:#fff; border:2px solid #c4b5fd; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(139,92,246,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            📁 KHO BÀI ĐÃ LƯU (${savedList.length})
+          </button>
+
+          <button id="btn-ai-generate-st7-stations" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:2px solid #7dd3fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(2,132,199,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+            🤖 AI TẠO 7 TRẠM THEO BÀI (GDPT 2018)
+          </button>
+
+          <button id="btn-start-st7-journey-now" style="background:linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%); color:#fff; border:2.5px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1.08rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(5,150,105,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03) translateY(-2px)';" onmouseout="this.style.transform='scale(1) translateY(0)';">
+            🚀 MỞ BẢN ĐỒ 7 TRẠM HỌC TẬP
+          </button>
+        </div>
+
+        <!-- SETTINGS PANEL & CONTROLS -->
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.2rem 1.6rem; margin-bottom:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+          <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:0.5rem;">
+              <span style="font-weight:800; color:#334155; font-size:0.92rem;">⏱️ Thời gian mỗi trạm:</span>
+              <select id="st7-timer-limit-sel" style="padding:0.45rem 0.85rem; border-radius:12px; border:2px solid #cbd5e1; font-weight:800; color:#0f172a; outline:none; background:#f8fafc;">
+                <option value="20">20 Giây</option>
+                <option value="30" selected>30 Giây</option>
+                <option value="45">45 Giây</option>
+                <option value="60">60 Giây</option>
+              </select>
+            </div>
+
+            <div style="background:#ecfdf5; color:#065f46; padding:0.4rem 0.9rem; border-radius:10px; font-weight:800; font-size:0.85rem; border:1px solid #a7f3d0;">
+              🗺️ Bản đồ hòn đảo trực quan: 7 Vùng đất tri thức kết nối bằng con đường học tập sinh động
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.8rem;">
+            <button id="btn-add-st7-station" style="background:#f1f5f9; color:#0f172a; border:2px dashed #94a3b8; padding:0.5rem 1rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem; display:flex; align-items:center; gap:0.4rem;">
+              ➕ Thêm Trạm Mới
+            </button>
+            <button id="btn-reset-default-st7-stations" style="background:#fff; color:#ef4444; border:1.5px solid #fca5a5; padding:0.5rem 0.9rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem;">
+              🔄 Khôi phục 7 trạm chuẩn
+            </button>
+          </div>
+        </div>
+
+        <!-- 7 STATIONS VISUAL GRID -->
+        <div style="margin-bottom:1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
+            <h3 style="margin:0; font-size:1.25rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:0.5rem;">
+              <span>🚩</span> DANH SÁCH 7 TRẠM TRÊN BẢN ĐỒ (${stations.length} Trạm)
+            </h3>
+            <span style="font-size:0.85rem; color:#64748b; font-weight:700;">Nhấn vào từng trạm để chỉnh sửa câu hỏi & gợi ý sư phạm</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
+            ${stations.map((st, idx) => `
+              <div style="background:#ffffff; border:2.5px solid ${st.color || '#059669'}; border-radius:18px; padding:1.1rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.15s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                
+                <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:${st.color || '#059669'};"></div>
+
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <span style="background:${st.color || '#059669'}22; color:${st.color || '#059669'}; font-weight:900; font-size:0.78rem; padding:0.2rem 0.6rem; border-radius:6px;">${st.name || ('TRẠM ' + (idx + 1))}</span>
+                    <span style="font-weight:900; color:${st.color || '#059669'}; font-size:1.25rem;">${st.icon || '🚩'}</span>
+                  </div>
+
+                  <div style="font-size:0.82rem; font-weight:800; color:#64748b; margin-bottom:0.3rem;">Khu vực: ${st.label || st.name}</div>
+                  <h4 style="margin:0 0 0.4rem; font-size:1.02rem; font-weight:900; color:#0f172a; line-height:1.4;">${st.q}</h4>
+                  <p style="margin:0 0 0.7rem; font-size:0.85rem; color:#64748b;">
+                    💡 <em>Gợi ý: ${st.hint || 'Không có gợi ý'}</em>
+                  </p>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed #e2e8f0; padding-top:0.6rem; margin-top:0.4rem;">
+                  <span style="font-size:0.8rem; font-weight:800; color:#059669;">+${st.pts || 100} Điểm</span>
+                  <div style="display:flex; gap:0.4rem;">
+                    <button class="btn-edit-st7-item" data-idx="${idx}" style="background:#d1fae5; color:#047857; border:none; padding:0.3rem 0.7rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">✏️ Sửa</button>
+                    <button class="btn-del-st7-item" data-idx="${idx}" style="background:#fee2e2; color:#dc2626; border:none; padding:0.3rem 0.55rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">🗑️</button>
+                  </div>
+                </div>
+
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    // Events
+    const saveLibBtn = area.querySelector('#btn-save-st7-library');
+    if (saveLibBtn) {
+      saveLibBtn.onclick = () => {
+        if (typeof showSaveToolModal === 'function') {
+          showSaveToolModal('stations7', '24. Bản Đồ Hòn Đảo 7 Trạm & Hộ Chiếu Năng Lực', stations);
+        } else {
+          this._saveGameToCustomStorage('stations7', stations);
+          if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã lưu bản đồ 7 trạm vào thư viện thành công!', 'success');
+          this._renderStations7Dashboard();
+        }
+      };
+    }
+
+    const openLibBtn = area.querySelector('#btn-open-st7-library');
+    if (openLibBtn) {
+      openLibBtn.onclick = () => {
+        if (typeof showSharedToolsLibraryModal === 'function') {
+          showSharedToolsLibraryModal('stations7', (loaded) => {
+            if (loaded && Array.isArray(loaded)) {
+              this._setLoadedQuestions('stations7', loaded);
+              this._renderStations7Dashboard();
+            }
+          });
+        } else {
+          this._openQuestionLoaderModal('stations7', (loaded) => {
+            this._setLoadedQuestions('stations7', loaded);
+            this._renderStations7Dashboard();
+          });
+        }
+      };
+    }
+
+    const aiGenBtn = area.querySelector('#btn-ai-generate-st7-stations');
+    if (aiGenBtn) {
+      aiGenBtn.onclick = () => {
+        const topic = prompt('Nhập chủ đề bài học để AI thiết kế Bản Đồ 7 Trạm:', curSubName + ' - Bài học trọng tâm');
+        if (topic) {
+          if (typeof app !== 'undefined' && app.showToast) app.showToast('🤖 AI đang thiết kế Bản đồ 7 Vùng Đất Tri Thức...', 'info');
+          setTimeout(() => {
+            const aiStations = [
+              { id: 1, name: "Trạm 1: Khởi Động", type: "Khởi động & Kích hoạt", icon: "🏁", color: "#10b981", label: "Bến Tàu Khởi Động", desc: "Kích hoạt kiến thức nền tảng mở đầu", q: "Khởi động & kết nối: Khái niệm mở đầu nền tảng về " + topic + " là gì?", opts: ["Đáp án đúng chính xác", "Khái niệm sai 1", "Khái niệm sai 2", "Chưa rõ"], a: 0, hint: "Xem phần khởi động bài học", pts: 100 },
+              { id: 2, name: "Trạm 2: Khám Phá", type: "Khám phá tri thức", icon: "🔍", color: "#06b6d4", label: "Rừng Khám Phá", desc: "Tìm hiểu định nghĩa và cấu trúc cốt lõi", q: "Khám phá tri thức: Định nghĩa / nguyên lý cốt lõi trong " + topic + " là gì?", opts: ["Đúng chuẩn định nghĩa", "Phương án sai 1", "Phương án sai 2", "Phương án sai 3"], a: 0, hint: "Khám phá kiến thức mới", pts: 100 },
+              { id: 3, name: "Trạm 3: Thực Nghiệm", type: "Thực hành & Đo đạc", icon: "🧪", color: "#8b5cf6", label: "Hồ Thực Nghiệm", desc: "Thực hành áp dụng công thức và thí nghiệm", q: "Thực nghiệm & phân tích: Khi thực hiện thí nghiệm / bài tập " + topic + ", bước cần làm là gì?", opts: ["Thực hiện đúng quy trình an toàn", "Bỏ qua các bước", "Làm ngược lại", "Không cần quan sát"], a: 0, hint: "Thực hành thí nghiệm", pts: 100 },
+              { id: 4, name: "Trạm 4: Tư Duy Logic", type: "Giải mã & Phản biện", icon: "🧠", color: "#f59e0b", label: "Đền Thờ Tư Duy", desc: "Suy luận logic và giải quyết vấn đề", q: "Tư duy phản biện: Giải quyết bài toán tình huống thực tế liên quan đến " + topic + "?", opts: ["Phương án tối ưu logic", "Phương án chưa chuẩn", "Phương án sai", "Không chắc chắn"], a: 0, hint: "Tư duy suy luận logic", pts: 100 },
+              { id: 5, name: "Trạm 5: Hợp Tác Nhóm", type: "Thảo luận & Phản biện", icon: "🤝", color: "#ec4899", label: "Làng Hợp Tác", desc: "Cùng làm việc nhóm và bảo vệ quan điểm", q: "Thảo luận nhóm: Phân tích và so sánh các khía cạnh trong bài học " + topic + "?", opts: ["Nhận định toàn diện chính xác", "Nhận định phiến diện", "Nhận định sai", "Chưa đầy đủ"], a: 0, hint: "Ý kiến tổng hợp nhóm", pts: 100 },
+              { id: 6, name: "Trạm 6: Vận Dụng Sáng Tạo", type: "Ứng dụng thực tế", icon: "🚀", color: "#3b82f6", label: "Xưởng Sáng Chế", desc: "Liên hệ đời sống và công nghệ số", q: "Vận dụng sáng tạo: Ứng dụng thực tiễn của " + topic + " trong đời sống và kỹ thuật số?", opts: ["Ứng dụng hữu ích chuẩn xác", "Không có ứng dụng", "Chưa rõ", "Sai"], a: 0, hint: "Liên hệ thực tiễn", pts: 100 },
+              { id: 7, name: "Trạm 7: Về Đích Năng Lực", type: "Tổng kết & Đánh giá", icon: "🏆", color: "#eab308", label: "Đỉnh Núi Vinh Quang", desc: "Đánh giá chuẩn đầu ra phẩm chất và năng lực", q: "Tổng kết năng lực: Nắm vững toàn diện phẩm chất và năng lực bài học " + topic + "?", opts: ["Nắm vững lý thuyết và thực hành xuất sắc", "Chỉ học thuộc lòng", "Bỏ qua phần khó", "Không ôn tập"], a: 0, hint: "Chinh phục đỉnh cao tri thức", pts: 100 }
+            ];
+            this._setLoadedQuestions('stations7', aiStations);
+            if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã tạo thành công Bản đồ 7 Trạm mới!', 'success');
+            this._renderStations7Dashboard();
+          }, 600);
+        }
+      };
+    }
+
+    const startBtn = area.querySelector('#btn-start-st7-journey-now');
+    if (startBtn) {
+      startBtn.onclick = () => {
+        const timerEl = area.querySelector('#st7-timer-limit-sel');
+        const opts = {
+          timeLimit: timerEl ? parseInt(timerEl.value) : 30
+        };
+        this._launchStations7Arena(curSubName, stations, opts);
+      };
+    }
+
+    const resetBtn = area.querySelector('#btn-reset-default-st7-stations');
+    if (resetBtn) {
+      resetBtn.onclick = () => {
+        if (confirm('Khôi phục 7 trạm học tập về mặc định?')) {
+          this._setLoadedQuestions('stations7', null);
+          this._renderStations7Dashboard();
+        }
+      };
+    }
+
+    const addBtn = area.querySelector('#btn-add-st7-station');
+    if (addBtn) {
+      addBtn.onclick = () => {
+        const newTitle = prompt('Nhập tên Trạm Mới:', '🚩 Trạm Mới: Thử Thách');
+        if (newTitle) {
+          stations.push({
+            id: stations.length + 1,
+            name: newTitle,
+            type: "Phát triển năng lực",
+            icon: "🚩",
+            color: "#10b981",
+            label: newTitle,
+            desc: "Nhiệm vụ học tập bổ sung",
+            q: "Nội dung câu hỏi / nhiệm vụ cho " + newTitle,
+            opts: ["Đáp án đúng", "Đáp án sai 1", "Đáp án sai 2", "Đáp án sai 3"],
+            a: 0,
+            hint: "Gợi ý",
+            pts: 100
+          });
+          this._setLoadedQuestions('stations7', stations);
+          this._renderStations7Dashboard();
+        }
+      };
+    }
+
+    area.querySelectorAll('.btn-edit-st7-item').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx);
+        const cur = stations[idx];
+        const newName = prompt('Tên Trạm:', cur.name);
+        if (newName !== null) {
+          const newQ = prompt('Nội dung câu hỏi nhiệm vụ:', cur.q);
+          const newHint = prompt('Gợi ý manh mối:', cur.hint);
+          cur.name = newName;
+          if (newQ) cur.q = newQ;
+          if (newHint) cur.hint = newHint;
+          this._setLoadedQuestions('stations7', stations);
+          this._renderStations7Dashboard();
+        }
+      };
+    });
+
+    area.querySelectorAll('.btn-del-st7-item').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.idx);
+        if (stations.length <= 2) {
+          alert('Hành trình cần tối thiểu 2 trạm!');
+          return;
+        }
+        if (confirm('Xóa trạm học tập này?')) {
+          stations.splice(idx, 1);
+          this._setLoadedQuestions('stations7', stations);
+          this._renderStations7Dashboard();
+        }
+      };
+    });
+  },
+
+  _launchStations7Arena(subName, questions, opts = {}) {
+    const old = document.getElementById('st7-arena-modal');
+    if (old) old.remove();
+
+    let stations = questions;
+    if (!stations || !Array.isArray(stations) || stations.length === 0) {
+      if (typeof subName === 'object' && Array.isArray(subName)) {
+        stations = subName;
+      } else {
+        stations = this._getStations7Questions();
+      }
+    }
+
+    let completedStamps = new Array(stations.length).fill(false);
+    let activeStationIdx = null; // null = viewing Fullscreen Island Map, 0..N = inside station room
+    let score = 0;
+    let bgmEnabled = true;
+    let bgmInterval = null;
+    const defaultTimeLimit = (opts && opts.timeLimit) ? opts.timeLimit : 30;
+    let timerSeconds = defaultTimeLimit;
+    let timerInterval = null;
+    let animFrameId = null;
+
+    let audioCtx = null;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) audioCtx = new AudioContextClass();
+    } catch(e) {}
+
+    const synth = this._getAudioSynth();
+
+    const modal = document.createElement('div');
+    modal.id = 'st7-arena-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:#022c22; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
+    document.body.appendChild(modal);
+
+    // Inspiring Soft Ambient Acoustic BGM
+    const playInspiringNote = (freq, duration, timeOffset, vol = 0.035) => {
+      if (!bgmEnabled || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const startTime = audioCtx.currentTime + timeOffset;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, startTime);
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.linearRampToValueAtTime(vol, startTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      } catch(e) {}
+    };
+
+    const playFullInspiringLoop = () => {
+      if (!bgmEnabled || !audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+
+      const step = 0.32;
+      const chords = [
+        { f: 392.00, t: 0 * step },
+        { f: 493.88, t: 1 * step },
+        { f: 587.33, t: 2 * step },
+        { f: 659.25, t: 3 * step },
+        { f: 587.33, t: 4 * step },
+        { f: 493.88, t: 5 * step },
+        { f: 440.00, t: 6 * step },
+        { f: 392.00, t: 7 * step }
+      ];
+      chords.forEach(c => playInspiringNote(c.f, 0.5, c.t, 0.032));
+    };
+
+    const triggerAudioUnlock = () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().then(() => playFullInspiringLoop()).catch(()=>{});
+      } else {
+        playFullInspiringLoop();
+      }
+    };
+
+    triggerAudioUnlock();
+    modal.addEventListener('click', triggerAudioUnlock, { once: false });
+    bgmInterval = setInterval(() => {
+      if (bgmEnabled) playFullInspiringLoop();
+    }, 0.32 * 8 * 1000 + 150);
+
+    const cleanup = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      if (bgmInterval) clearInterval(bgmInterval);
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      modal.remove();
+    };
+
+    // Render Function
+    const renderStage = () => {
+      if (timerInterval) clearInterval(timerInterval);
+      timerSeconds = defaultTimeLimit;
+
+      const stampsCount = completedStamps.filter(Boolean).length;
+      const isAllGraduated = (stampsCount === stations.length);
+
+      // Graduation Grand Finale Screen
+      if (isAllGraduated && activeStationIdx === null) {
+        synth.play('fanfare');
+        modal.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:2rem; background:radial-gradient(circle at center, #065f46 0%, #022c22 100%); animation:fadeIn 0.5s ease; position:relative; overflow:hidden;">
+            
+            <div style="position:absolute; inset:0; pointer-events:none; overflow:hidden;">
+              ${Array.from({length: 30}).map((_, i) => `
+                <div style="position:absolute; left:${(i * 3.3).toFixed(1)}%; top:${(Math.random() * 80).toFixed(0)}%; font-size:${(Math.random() * 1.6 + 1.2).toFixed(1)}rem; animation:floatDown ${(Math.random() * 2 + 2).toFixed(1)}s infinite ease-in-out; opacity:0.85;">
+                  ${['🏅','💎','⭐','✨','🚩','🎓'][i % 6]}
+                </div>
+              `).join('')}
+            </div>
+
+            <div style="position:relative; margin-bottom:1.5rem; z-index:2;">
+              <div style="font-size:9.5rem; filter:drop-shadow(0 0 60px #34d399); animation:bounce 1.6s infinite;">🎓</div>
+              <div style="position:absolute; top:-20px; right:-20px; font-size:4.5rem; animation:pulse 1s infinite;">✨</div>
+            </div>
+            
+            <h1 style="font-size:3.5rem; font-weight:900; background:linear-gradient(90deg, #a7f3d0, #fde047, #34d399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin:0 0 0.8rem; text-shadow:0 10px 30px rgba(0,0,0,0.6); z-index:2;">
+              VINH DANH HOÀN TẤT HỘ CHIẾU 7 TRẠM NĂNG LỰC!
+            </h1>
+            <p style="font-size:1.6rem; color:#a7f3d0; margin-bottom:2rem; max-width:880px; line-height:1.5; font-weight:600; z-index:2;">
+              Chúc mừng em đã hoàn thành xuất sắc toàn bộ <strong>7 Trạm Học Tập</strong> trên Bản Đồ Hòn Đảo Tri Thức, thu thập đủ 7 Con Dấu Vàng và được trao Bằng Danh Dự Xuất Sắc GDPT 2018!
+            </p>
+
+            <div style="display:flex; gap:1.8rem; justify-content:center; align-items:center; margin-bottom:2.5rem; flex-wrap:wrap; z-index:2;">
+              <div style="background:rgba(16,185,129,0.25); border:2.5px solid #34d399; padding:1rem 2.4rem; border-radius:24px; font-size:1.7rem; font-weight:900; color:#a7f3d0; box-shadow:0 8px 30px rgba(16,185,129,0.35);">
+                💰 Tổng Điểm Năng Lực: ${score} Điểm
+              </div>
+              <div style="background:rgba(245,158,11,0.25); border:2.5px solid #fde047; padding:1rem 2.4rem; border-radius:24px; font-size:1.7rem; font-weight:900; color:#fde047; box-shadow:0 8px 30px rgba(245,158,11,0.35);">
+                🏆 Đóng Dấu: 7/7 Con Dấu Vàng
+              </div>
+            </div>
+
+            <div style="display:flex; gap:1.2rem; z-index:2;">
+              <button id="btn-st7-play-again" style="background:linear-gradient(135deg, #059669, #047857); color:#fff; border:3px solid #6ee7b7; padding:1.1rem 2.8rem; border-radius:50px; font-size:1.35rem; font-weight:900; cursor:pointer; box-shadow:0 10px 30px rgba(5,150,105,0.4); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                🔄 Mở Hộ Chiếu Mới
+              </button>
+              <button id="btn-st7-close-win" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:3px solid #86efac; padding:1.1rem 3.2rem; border-radius:50px; font-size:1.35rem; font-weight:900; cursor:pointer; box-shadow:0 10px 30px rgba(16,185,129,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                ✕ Hoàn Thành
+              </button>
+            </div>
+          </div>
+        `;
+        const playAgainBtn = modal.querySelector('#btn-st7-play-again');
+        if (playAgainBtn) playAgainBtn.onclick = () => { completedStamps.fill(false); score = 0; activeStationIdx = null; renderStage(); };
+        const closeWinBtn = modal.querySelector('#btn-st7-close-win');
+        if (closeWinBtn) closeWinBtn.onclick = cleanup;
+        return;
+      }
+
+      // VIEW 1: INTERACTIVE EMERALD ISLAND MAP 60 FPS (BẢN ĐỒ ĐỒ HỌA HÒN ĐẢO 7 TRẠM)
+      if (activeStationIdx === null) {
+        modal.innerHTML = `
+          <!-- TOP HEADER HUD -->
+          <div style="background:rgba(6,78,59,0.96); border-bottom:2.5px solid #34d399; padding:0.85rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:10; box-shadow:0 6px 25px rgba(0,0,0,0.6);">
+            <div style="display:flex; align-items:center; gap:1.2rem;">
+              <div style="width:52px; height:52px; border-radius:16px; background:radial-gradient(circle, #34d399, #059669); display:flex; align-items:center; justify-content:center; font-size:2.2rem; border:2px solid #a7f3d0; box-shadow:0 0 20px rgba(52,211,153,0.5);">
+                🗺️
+              </div>
+              <div>
+                <h3 style="margin:0; font-size:1.45rem; font-weight:900; color:#a7f3d0;">BẢN ĐỒ ĐỒ HỌA HÒN ĐẢO 7 TRẠM TRI THỨC</h3>
+                <span style="font-size:0.88rem; color:#6ee7b7;">Nhấn trực tiếp vào Trạm trên Bản đồ để di chuyển & đóng dấu</span>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:1.2rem;">
+              <!-- BGM TOGGLE -->
+              <button id="btn-st7-bgm-toggle" style="background:${bgmEnabled ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.1)'}; border:2px solid ${bgmEnabled ? '#86efac' : 'rgba(255,255,255,0.3)'}; color:#fff; padding:0.5rem 1.1rem; border-radius:20px; font-weight:900; font-size:0.9rem; cursor:pointer;">
+                ${bgmEnabled ? '🔊 Nhạc: BẬT' : '🔇 Nhạc: TẮT'}
+              </button>
+
+              <!-- PASSPORT PROGRESS -->
+              <div style="background:rgba(245,158,11,0.25); border:1.5px solid #fde047; padding:0.45rem 1.2rem; border-radius:20px; font-size:1.15rem; font-weight:900; color:#fde047;">
+                📑 Đã đóng dấu: ${stampsCount}/${stations.length} Trạm
+              </div>
+
+              <!-- TOTAL SCORE -->
+              <div style="background:rgba(52,211,153,0.25); border:1.5px solid #34d399; padding:0.45rem 1.3rem; border-radius:20px; font-size:1.15rem; font-weight:900; color:#a7f3d0;">
+                ⚡ ${score} Điểm
+              </div>
+
+              <button id="btn-st7-close" style="background:#ef4444; color:#fff; border:none; border-radius:12px; width:42px; height:42px; font-size:1.35rem; font-weight:900; cursor:pointer;">✕</button>
+            </div>
+          </div>
+
+          <!-- MAIN INTERACTIVE MAP CANVAS CONTAINER WITH OVERLAY HUDS -->
+          <div style="flex:1; position:relative; overflow:hidden; display:flex;">
+            
+            <!-- FULLSCREEN INTERACTIVE ISLAND CANVAS -->
+            <canvas id="st7-island-map-canvas" style="position:absolute; inset:0; width:100%; height:100%; z-index:1; cursor:pointer;"></canvas>
+
+            <!-- FLOATING PASSPORT CARD (BOTTOM LEFT) -->
+            <div style="position:absolute; bottom:20px; left:20px; z-index:3; background:rgba(6,78,59,0.9); backdrop-filter:blur(10px); border:2.5px solid #fde047; border-radius:22px; padding:1rem 1.4rem; box-shadow:0 12px 35px rgba(0,0,0,0.6); display:flex; align-items:center; gap:1.2rem;">
+              <div style="font-size:2.5rem;">📑</div>
+              <div>
+                <div style="font-weight:900; font-size:1.05rem; color:#fde047;">HỘ CHIẾU GDPT 2018</div>
+                <div style="display:flex; gap:0.4rem; margin-top:0.3rem;">
+                  ${stations.map((st, i) => `
+                    <div style="width:28px; height:28px; border-radius:50%; background:${completedStamps[i] ? '#10b981' : 'rgba(255,255,255,0.1)'}; border:1.5px solid ${completedStamps[i] ? '#a7f3d0' : 'rgba(255,255,255,0.3)'}; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:900; color:#fff;" title="${st.name}">
+                      ${completedStamps[i] ? '✓' : (i+1)}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- INSTRUCTION BADGE (TOP CENTER) -->
+            <div style="position:absolute; top:20px; left:50%; transform:translateX(-50%); z-index:3; background:rgba(6,78,59,0.9); backdrop-filter:blur(10px); border:2px solid #34d399; border-radius:20px; padding:0.5rem 1.8rem; font-weight:900; font-size:1.05rem; color:#a7f3d0; box-shadow:0 8px 25px rgba(0,0,0,0.5); pointer-events:none; display:flex; align-items:center; gap:0.5rem;">
+              <span>👉</span> NHẤN VÀO TRẠM TRÊN BẢN ĐỒ ĐỂ BẮT ĐẦU
+            </div>
+
+          </div>
+        `;
+
+        // Interactive Map Canvas Engine 60 FPS
+        const mapCanvas = modal.querySelector('#st7-island-map-canvas');
+        if (mapCanvas) {
+          const ctx = mapCanvas.getContext('2d');
+          let mapTick = 0;
+          let mouseX = -1;
+          let mouseY = -1;
+
+          const resizeMap = () => {
+            mapCanvas.width = (mapCanvas.parentElement && mapCanvas.parentElement.clientWidth) ? mapCanvas.parentElement.clientWidth : (window.innerWidth || 1200);
+            mapCanvas.height = (mapCanvas.parentElement && mapCanvas.parentElement.clientHeight) ? mapCanvas.parentElement.clientHeight : (window.innerHeight || 800);
+          };
+          resizeMap();
+
+          // Calculate responsive coordinates for 7 stations
+          const getStationCoords = () => {
+            const w = mapCanvas.width;
+            const h = mapCanvas.height;
+            // S-shaped / Island pathway coordinates
+            return [
+              { x: w * 0.12, y: h * 0.72 }, // Trạm 1: Khởi động (Dưới trái)
+              { x: w * 0.24, y: h * 0.35 }, // Trạm 2: Khám phá (Trên trái)
+              { x: w * 0.38, y: h * 0.65 }, // Trạm 3: Thực nghiệm (Giữa dưới)
+              { x: w * 0.52, y: h * 0.28 }, // Trạm 4: Tư duy logic (Đỉnh giữa)
+              { x: w * 0.66, y: h * 0.68 }, // Trạm 5: Hợp tác nhóm (Phải dưới)
+              { x: w * 0.80, y: h * 0.32 }, // Trạm 6: Vận dụng sáng tạo (Phải trên)
+              { x: w * 0.90, y: h * 0.65 }  // Trạm 7: Về đích (Đích đến góc phải)
+            ];
+          };
+
+          const drawMapLoop = () => {
+            const w = mapCanvas.width;
+            const h = mapCanvas.height;
+            ctx.clearRect(0, 0, w, h);
+            mapTick += 0.04;
+
+            // 1. Ocean / Nature Forest Background
+            const bgGrad = ctx.createRadialGradient(w/2, h/2, 80, w/2, h/2, Math.max(w, h));
+            bgGrad.addColorStop(0, '#065f46');
+            bgGrad.addColorStop(0.5, '#064e3b');
+            bgGrad.addColorStop(1, '#022c22');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            const coords = getStationCoords();
+
+            // 2. Draw Golden Glowing Learning Winding Pathway connecting 7 Stations
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(coords[0].x, coords[0].y);
+            for (let i = 1; i < coords.length; i++) {
+              const prev = coords[i - 1];
+              const cur = coords[i];
+              const cpx = (prev.x + cur.x) / 2;
+              const cpy = (prev.y + cur.y) / 2 + ((i % 2 === 0) ? -45 : 45);
+              ctx.quadraticCurveTo(cpx, cpy, cur.x, cur.y);
+            }
+            ctx.lineWidth = 14;
+            ctx.strokeStyle = 'rgba(16, 185, 129, 0.35)';
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Dotted Golden Center Road
+            ctx.setLineDash([12, 12]);
+            ctx.lineDashOffset = -mapTick * 18;
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#fde047';
+            ctx.stroke();
+            ctx.restore();
+
+            // 3. Floating Magical Forest Knowledge Particles
+            ctx.fillStyle = 'rgba(52, 211, 153, 0.4)';
+            for (let p = 0; p < 24; p++) {
+              const px = ((p * 93 + mapTick * 20) % w);
+              const py = ((p * 71 + Math.sin(mapTick + p) * 30) % h);
+              ctx.beginPath();
+              ctx.arc(px, py, (p % 3) + 1.2, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // 4. Draw 7 Station Glowing Hubs / Island Bases
+            for (let i = 0; i < stations.length; i++) {
+              const st = stations[i];
+              const pos = coords[i] || { x: 100, y: 100 };
+              const isDone = completedStamps[i];
+              const dist = Math.hypot(mouseX - pos.x, mouseY - pos.y);
+              const isHover = dist < 48;
+
+              // Outer Pulse Aura
+              const auraSize = 42 + (isHover ? 8 : Math.sin(mapTick * 2 + i) * 4);
+              ctx.beginPath();
+              ctx.arc(pos.x, pos.y, auraSize, 0, Math.PI * 2);
+              ctx.fillStyle = isDone ? 'rgba(16, 185, 129, 0.3)' : (isHover ? 'rgba(253, 224, 71, 0.4)' : `${st.color || '#059669'}33`);
+              ctx.fill();
+
+              // Station Island Base Circle
+              ctx.beginPath();
+              ctx.arc(pos.x, pos.y, 34, 0, Math.PI * 2);
+              ctx.fillStyle = isDone ? '#10b981' : (st.color || '#059669');
+              ctx.shadowColor = isDone ? '#34d399' : (st.color || '#fde047');
+              ctx.shadowBlur = isHover ? 25 : 12;
+              ctx.fill();
+              ctx.lineWidth = 4;
+              ctx.strokeStyle = isDone ? '#a7f3d0' : (isHover ? '#fde047' : '#ffffff');
+              ctx.stroke();
+              ctx.shadowBlur = 0;
+
+              // Station Number / Stamp Check
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 20px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(isDone ? '✓' : (i + 1), pos.x, pos.y);
+
+              // Station Top Flag / Icon Badge
+              ctx.font = '22px sans-serif';
+              ctx.fillText(st.icon || '🚩', pos.x, pos.y - 48);
+
+              // Station Bottom Label Box
+              ctx.save();
+              ctx.font = 'bold 14px sans-serif';
+              const labelTxt = st.label || st.name;
+              const textWidth = ctx.measureText(labelTxt).width;
+
+              ctx.fillStyle = 'rgba(6, 78, 59, 0.92)';
+              ctx.strokeStyle = isDone ? '#34d399' : 'rgba(255, 255, 255, 0.3)';
+              ctx.lineWidth = 1.5;
+              ctx.beginPath();
+              ctx.roundRect(pos.x - textWidth/2 - 10, pos.y + 44, textWidth + 20, 26, 8);
+              ctx.fill();
+              ctx.stroke();
+
+              ctx.fillStyle = isDone ? '#34d399' : '#fde047';
+              ctx.fillText(labelTxt, pos.x, pos.y + 57);
+              ctx.restore();
+            }
+
+            animFrameId = requestAnimationFrame(drawMapLoop);
+          };
+
+          if (animFrameId) cancelAnimationFrame(animFrameId);
+          animFrameId = requestAnimationFrame(drawMapLoop);
+
+          // Track Mouse Hover
+          mapCanvas.onmousemove = (e) => {
+            const rect = mapCanvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+          };
+
+          mapCanvas.onmouseleave = () => {
+            mouseX = -1;
+            mouseY = -1;
+          };
+
+          // Click on Map to Enter Station
+          mapCanvas.onclick = (e) => {
+            const rect = mapCanvas.getBoundingClientRect();
+            const cx = e.clientX - rect.left;
+            const cy = e.clientY - rect.top;
+            const coords = getStationCoords();
+
+            for (let i = 0; i < coords.length; i++) {
+              const pos = coords[i];
+              if (Math.hypot(cx - pos.x, cy - pos.y) <= 48) {
+                synth.play('pop');
+                activeStationIdx = i;
+                renderStage();
+                break;
+              }
+            }
+          };
+        }
+
+        const closeBtn = modal.querySelector('#btn-st7-close');
+        if (closeBtn) closeBtn.onclick = cleanup;
+
+        const bgmBtn = modal.querySelector('#btn-st7-bgm-toggle');
+        if (bgmBtn) {
+          bgmBtn.onclick = () => {
+            bgmEnabled = !bgmEnabled;
+            bgmBtn.innerHTML = bgmEnabled ? '🔊 Nhạc: BẬT' : '🔇 Nhạc: TẮT';
+            if (bgmEnabled) triggerAudioUnlock();
+          };
+        }
+        return;
+      }
+
+      // VIEW 2: INSIDE SPECIFIC STATION CHALLENGE ROOM (PHÒNG THỬ THÁCH TRẠM)
+      const st = stations[activeStationIdx];
+      const qText = st.q || st.questionText || 'Nội dung câu hỏi thử thách trạm';
+      const qOpts = Array.isArray(st.opts) ? st.opts : (Array.isArray(st.options) ? st.options : ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"]);
+      const qAns = (typeof st.a !== 'undefined') ? st.a : (typeof st.correctAnswer !== 'undefined' ? st.correctAnswer : 0);
+
+      modal.innerHTML = `
+        <!-- TOP CHALLENGE HEADER HUD -->
+        <div style="background:rgba(6,78,59,0.96); border-bottom:2.5px solid #34d399; padding:0.85rem 2.2rem; display:flex; justify-content:space-between; align-items:center; z-index:10; box-shadow:0 6px 25px rgba(0,0,0,0.6);">
+          <div style="display:flex; align-items:center; gap:1.2rem;">
+            <button id="btn-back-to-hub-map" style="background:rgba(255,255,255,0.15); border:1.5px solid #a7f3d0; color:#fff; padding:0.45rem 1.1rem; border-radius:12px; font-weight:900; font-size:0.92rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+              <span>🗺️</span> QUAY LẠI BẢN ĐỒ 7 TRẠM
+            </button>
+            <div style="width:48px; height:48px; border-radius:14px; background:${st.color || '#059669'}; display:flex; align-items:center; justify-content:center; font-size:2rem; border:2px solid #fff;">
+              ${st.icon || '🚩'}
+            </div>
+            <div>
+              <h3 style="margin:0; font-size:1.35rem; font-weight:900; color:#a7f3d0;">${st.name.toUpperCase()} (${st.label || st.name})</h3>
+              <span style="font-size:0.85rem; color:#6ee7b7;">Dạng thử thách: ${st.type || 'Phát triển năng lực'}</span>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:1.2rem;">
+            <!-- TIMER -->
+            <div style="background:rgba(245,158,11,0.25); border:1.5px solid #fde047; padding:0.45rem 1.2rem; border-radius:20px; font-size:1.2rem; font-weight:900; color:#fde047; display:flex; align-items:center; gap:0.4rem;">
+              <span>⏱️</span> <span id="st7-timer-sec">${timerSeconds}s</span>
+            </div>
+
+            <!-- SCORE -->
+            <div style="background:rgba(52,211,153,0.25); border:1.5px solid #34d399; padding:0.45rem 1.3rem; border-radius:20px; font-size:1.2rem; font-weight:900; color:#a7f3d0;">
+              ⚡ ${score} Điểm
+            </div>
+
+            <button id="btn-st7-close" style="background:#ef4444; color:#fff; border:none; border-radius:12px; width:42px; height:42px; font-size:1.35rem; font-weight:900; cursor:pointer;">✕</button>
+          </div>
+        </div>
+
+        <!-- MAIN STATION ROOM CONTENT -->
+        <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:2rem; position:relative; overflow:hidden;">
+          
+          <div style="background:linear-gradient(145deg, #064e3b 0%, #022c22 100%); color:#fff; border:3.5px solid ${st.color || '#34d399'}; border-radius:32px; padding:2.5rem 3.2rem; max-width:900px; width:92%; box-shadow:0 25px 70px rgba(0,0,0,0.8), 0 0 50px ${st.color || '#34d399'}44; position:relative; animation:slideUp 0.35s ease; z-index:3;">
+            
+            <div style="position:absolute; top:-22px; left:50%; transform:translateX(-50%); background:linear-gradient(135deg, ${st.color || '#059669'}, #064e3b); color:#fff; font-weight:900; font-size:1.15rem; padding:0.45rem 2.4rem; border-radius:25px; border:2px solid #fff; box-shadow:0 6px 20px rgba(0,0,0,0.5); display:flex; align-items:center; gap:0.6rem;">
+              <span>${st.icon || '🚩'}</span> NHIỆM VỤ: ${st.name.toUpperCase()} (${st.label || st.name})
+            </div>
+
+            <h2 style="font-size:1.95rem; font-weight:900; color:#a7f3d0; text-align:center; margin:1.2rem 0 2rem 0; line-height:1.45; letter-spacing:-0.3px;">
+              ${qText}
+            </h2>
+
+            <!-- 4 CHOICES (2x2 GRID) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.8rem;">
+              ${qOpts.map((opt, oIdx) => `
+                <button class="btn-st7-opt" data-idx="${oIdx}" style="background:rgba(255,255,255,0.06); color:#fff; border:2.5px solid ${st.color || '#059669'}; padding:1.25rem 1.4rem; border-radius:20px; font-size:1.15rem; font-weight:800; cursor:pointer; text-align:left; display:flex; align-items:center; gap:1rem; transition:all 0.15s; box-shadow:0 4px 14px rgba(0,0,0,0.2);" onmouseover="this.style.background='${st.color || '#34d399'}33'; this.style.transform='translateY(-3px)';" onmouseout="this.style.background='rgba(255,255,255,0.06)'; this.style.transform='translateY(0)';">
+                  <span style="background:${st.color || '#059669'}; color:#fff; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.15rem; flex-shrink:0; font-weight:900;">${['A','B','C','D'][oIdx]}</span>
+                  <span style="flex:1; line-height:1.35;">${opt}</span>
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- FOOTER HINT & VOICE TTS -->
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.95rem; color:#a7f3d0; font-weight:700; border-top:1.5px dashed rgba(255,255,255,0.15); padding-top:1rem; flex-wrap:wrap; gap:0.8rem;">
+              <div>💡 <strong>Gợi ý sư phạm:</strong> ${st.hint || 'Hãy phân tích kỹ các phương án'}</div>
+              <button id="btn-st7-voice-hint" style="background:${st.color || '#059669'}; color:#fff; border:none; padding:0.5rem 1.2rem; border-radius:12px; font-weight:800; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                🔊 Đọc câu hỏi
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+      // Back to Hub Map
+      const backBtn = modal.querySelector('#btn-back-to-hub-map');
+      if (backBtn) {
+        backBtn.onclick = () => {
+          activeStationIdx = null;
+          renderStage();
+        };
+      }
+
+      const closeBtn = modal.querySelector('#btn-st7-close');
+      if (closeBtn) closeBtn.onclick = cleanup;
+
+      // Voice TTS
+      const voiceBtn = modal.querySelector('#btn-st7-voice-hint');
+      if (voiceBtn) {
+        voiceBtn.onclick = () => {
+          if ('speechSynthesis' in window) {
+            const utter = new SpeechSynthesisUtterance(qText);
+            utter.lang = 'vi-VN';
+            window.speechSynthesis.speak(utter);
+          }
+        };
+      }
+
+      // Countdown Timer
+      const timerSecEl = modal.querySelector('#st7-timer-sec');
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        if (timerSecEl) timerSecEl.textContent = timerSeconds + 's';
+        if (timerSeconds <= 5) {
+          synth.play('pop');
+          if (timerSecEl && timerSecEl.style) timerSecEl.style.color = '#ef4444';
+        }
+        if (timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          synth.play('wrong');
+          activeStationIdx = null; // Return to Map
+          renderStage();
+        }
+      }, 1000);
+
+      // Option clicks
+      modal.querySelectorAll('.btn-st7-opt').forEach(btn => {
+        btn.onclick = () => {
+          if (timerInterval) clearInterval(timerInterval);
+          const chosen = parseInt(btn.dataset.idx);
+
+          if (chosen === qAns) {
+            synth.play('correct');
+            btn.style.background = '#10b981';
+            btn.style.borderColor = '#059669';
+            btn.style.color = '#fff';
+            score += (100 + timerSeconds * 2);
+            completedStamps[activeStationIdx] = true; // STAMP PASSPORT
+
+            setTimeout(() => {
+              activeStationIdx = null; // Return to Map to see new stamp!
+              renderStage();
+            }, 850);
+          } else {
+            synth.play('wrong');
+            btn.style.background = '#ef4444';
+            btn.style.borderColor = '#b91c1c';
+            btn.style.color = '#fff';
+
+            setTimeout(() => {
+              activeStationIdx = null; // Return to Map
+              renderStage();
+            }, 950);
+          }
+        };
+      });
+    };
+
+    renderStage();
+  }
 };
