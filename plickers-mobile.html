@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Plickers AI - Tay Cầm Quét Thẻ</title>
+  
+  <meta name="theme-color" content="#090d16">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Plickers AI">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/logo.png">
+  
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  
+  <style>
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      background: #090d16;
+      color: #ffffff;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+    
+    /* TOP BAR */
+    header {
+      height: 48px;
+      flex: 0 0 48px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(14px);
+      border-bottom: 1.5px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      z-index: 20;
+    }
+    .brand-title { display: flex; align-items: center; gap: 6px; font-size: 0.92rem; font-weight: 900; }
+    .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; } }
+    .status-badge { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; border-radius: 12px; padding: 3px 8px; font-size: 0.7rem; font-weight: 900; }
+
+    /* MAIN CONTAINER: 2-PART SPLIT LAYOUT */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 12px 12px;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    /* 1. TOP PART: CANVAS-BASED COMPACT CAMERA (NO NATIVE VIDEO PLAYER POPUP) */
+    .camera-frame-box {
+      flex: 0 0 42%;
+      max-height: 42%;
+      background: #000000;
+      border: 2px solid #334155;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* PURE CANVAS DISPLAY: ELIMINATES ZALO / SAFARI PIP POPUPS 100% */
+    canvas#live-display-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 18px;
+    }
+    
+    .laser-scan {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #38bdf8, #ffffff, #38bdf8, transparent);
+      box-shadow: 0 0 14px #38bdf8;
+      animation: scanAnim 2s infinite ease-in-out;
+      pointer-events: none;
+      z-index: 5;
+    }
+    @keyframes scanAnim { 0% { top: 15%; } 50% { top: 85%; } 100% { top: 15%; } }
+
+    .cam-overlay-tag {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      z-index: 10;
+    }
+
+    /* TOAST FEEDBACK */
+    #toast-msg {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(16, 185, 129, 0.95);
+      color: #ffffff;
+      padding: 5px 14px;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: 0.8rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      gap: 5px;
+      z-index: 15;
+      white-space: nowrap;
+    }
+
+    /* 2. BOTTOM PART: EXPANDED TACTILE REMOTE CONTROLLER */
+    .controller-panel {
+      flex: 1;
+      background: #0f172a;
+      border: 2px solid #1e293b;
+      border-radius: 22px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    
+    .stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 4px 6px;
+      border-bottom: 1.5px dashed #334155;
+    }
+    .stats-header .title { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
+    .stats-header .counter { font-size: 1.25rem; font-weight: 900; color: #10b981; }
+
+    /* ACTION BUTTONS */
+    .btn-action-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .btn-big-touch {
+      border: none;
+      border-radius: 18px;
+      padding: 15px 12px;
+      font-weight: 900;
+      font-size: 0.98rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.1s, filter 0.1s;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    }
+    .btn-big-touch:active { transform: scale(0.97); filter: brightness(0.9); }
+
+    /* BUTTON 1: THU THẺ NHANH CẢ LỚP */
+    .btn-sweep-yellow {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #ffffff;
+      border: 1.5px solid #fde68a;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-row-dual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* BUTTON 2: CÔNG BỐ ĐÁP ÁN */
+    .btn-reveal-green {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    }
+
+    /* BUTTON 3: CÂU TIẾP THEO */
+    .btn-next-blue {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+    }
+
+    /* START POPUP */
+    #start-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(9, 13, 22, 0.96);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+      text-align: center;
+    }
+    .start-box {
+      width: min(380px, 100%);
+      background: #0f172a;
+      border: 2.5px solid #10b981;
+      border-radius: 28px;
+      padding: 28px 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .btn-start-launch {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 18px;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45);
+      margin-top: 16px;
+    }
+    .btn-start-launch:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+
+  <!-- HIDDEN SNAPPER FALLBACK -->
+  <input id="hidden-file-input" type="file" accept="image/*" capture="environment" style="display:none;">
+
+  <!-- INVISIBLE OFFSCREEN VIDEO SOURCE (NEVER HIJACKED BY ZALO / SAFARI PIP) -->
+  <video id="camera-video" autoplay muted playsinline webkit-playsinline x5-playsinline x5-video-player-type="h5" x5-video-player-fullscreen="false" disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" style="display:none !important; visibility:hidden !important; pointer-events:none !important;"></video>
+
+  <!-- TOP HEADER HUD -->
+  <header>
+    <div class="brand-title">
+      <div class="brand-dot"></div>
+      <span>PLICKERS LIVE 60 FPS</span>
+    </div>
+    <div class="status-badge" id="hud-status">● ĐÃ KẾT NỐI</div>
+  </header>
+
+  <!-- MAIN SPLIT VIEWPORT -->
+  <main>
+    
+    <!-- 1. COMPACT CAMERA VIEWPORT (NỬA TRÊN - VẼ TRỰC TIẾP LÊN CANVAS) -->
+    <div class="camera-frame-box">
+      <div class="cam-overlay-tag">📷 MÁY QUÉT CAMERA LIVE</div>
+      <canvas id="live-display-canvas"></canvas>
+      <div class="laser-scan"></div>
+
+      <!-- SCAN TOAST -->
+      <div id="toast-msg">
+        <span>✅</span> <span id="toast-text">Đã nhận diện</span>
+      </div>
+    </div>
+
+    <!-- 2. EXPANDED TACTILE REMOTE CONTROLLER (NỬA DƯỚI) -->
+    <div class="controller-panel">
+      
+      <!-- STATS BAR -->
+      <div class="stats-header">
+        <div class="title">TÌNH TRẠNG THU BÀI:</div>
+        <div class="counter"><span id="disp-count">0</span> / <span id="disp-total">35</span> HS</div>
+      </div>
+
+      <!-- 3 PROMINENT TOUCH BUTTONS -->
+      <div class="btn-action-container">
+        
+        <!-- NÚT 1: THU THẺ NHANH CẢ LỚP -->
+        <button class="btn-big-touch btn-sweep-yellow" id="btn-quick-sweep">
+          <span style="font-size:1.25rem;">⚡</span>
+          <span>THU THẺ NHANH CẢ LỚP (35/35)</span>
+        </button>
+
+        <div class="btn-row-dual">
+          <!-- NÚT 2: CÔNG BỐ ĐÁP ÁN -->
+          <button class="btn-big-touch btn-reveal-green" id="btn-remote-reveal">
+            <span style="font-size:1.15rem;">🏆</span>
+            <span>CÔNG BỐ ĐÁP ÁN</span>
+          </button>
+
+          <!-- NÚT 3: CÂU TIẾP THEO -->
+          <button class="btn-big-touch btn-next-blue" id="btn-remote-next">
+            <span style="font-size:1.15rem;">➡️</span>
+            <span>CÂU TIẾP THEO</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- START OVERLAY -->
+  <div id="start-modal">
+    <div class="start-box">
+      <div style="font-size:3.2rem; margin-bottom:8px;">📱📡✨</div>
+      <h2 style="font-size:1.4rem; font-weight:900; color:#f8fafc; margin-bottom:6px;">Plickers AI Di Động</h2>
+      <p style="font-size:0.88rem; color:#94a3b8; line-height:1.5;">Bấm nút bên dưới để mở Camera Live truyền trực tiếp lên máy chiếu và điều khiển buổi học.</p>
+      
+      <button class="btn-start-launch" id="btn-start-camera">
+        <span>📷</span> BẬT CAMERA LIVE 60 FPS
+      </button>
+
+      <div id="fallback-box" style="display:none; margin-top:12px;">
+        <button id="btn-snap-fallback" style="background:#4f46e5;color:#fff;border:none;border-radius:16px;padding:12px;font-weight:900;width:100%;cursor:pointer;">
+          📸 CHỤP ẢNH TRUYỀN MÁY CHIẾU
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // PWA Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+      });
+    }
+
+    const videoEl = document.getElementById('camera-video');
+    const displayCanvas = document.getElementById('live-display-canvas');
+    const displayCtx = displayCanvas.getContext('2d', { willReadFrequently: true });
+    
+    const startModal = document.getElementById('start-modal');
+    const btnStartCam = document.getElementById('btn-start-camera');
+    const fallbackBox = document.getElementById('fallback-box');
+    const btnSnap = document.getElementById('btn-snap-fallback');
+    const fileInput = document.getElementById('hidden-file-input');
+
+    const hudStatus = document.getElementById('hud-status');
+    const toast = document.getElementById('toast-msg');
+    const toastText = document.getElementById('toast-text');
+    const countDisp = document.getElementById('disp-count');
+    const totalDisp = document.getElementById('disp-total');
+
+    let stream = null;
+    let isRunning = false;
+    let isPushing = false;
+    let lastPushTime = 0;
+    let lastCodeStr = '';
+    let lastCodeTime = 0;
+    let scannedSet = new Set();
+
+    let audioCtx = null;
+    function playBeep() {
+      try {
+        if (!audioCtx) {
+          const AudioClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioClass) audioCtx = new AudioClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1046.50, now);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } catch(e) {}
+    }
+
+    function triggerHaptic() {
+      if (navigator.vibrate) navigator.vibrate(50);
+    }
+
+    function showToast(msg) {
+      toastText.textContent = msg;
+      toast.style.display = 'inline-flex';
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    function setOnline(ok, text) {
+      hudStatus.textContent = ok ? '● ' + text : '● MẤT KẾT NỐI';
+      hudStatus.style.color = ok ? '#34d399' : '#fb7185';
+      hudStatus.style.borderColor = ok ? '#10b981' : '#fb7185';
+    }
+
+    async function postJson(path, body) {
+      const r = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+        body: JSON.stringify(body)
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }
+
+    async function handshake() {
+      try {
+        await postJson('/api/plickers/phone-connected', {});
+        setOnline(true, 'LIVE');
+      } catch(e) {
+        setOnline(false, 'OFFLINE');
+      }
+    }
+
+    async function initCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (fallbackBox) fallbackBox.style.display = 'block';
+        return;
+      }
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+
+        videoEl.srcObject = stream;
+        videoEl.setAttribute('playsinline', 'true');
+        videoEl.setAttribute('webkit-playsinline', 'true');
+        videoEl.setAttribute('disablepictureinpicture', 'true');
+        videoEl.setAttribute('controlsList', 'nodownload nofullscreen noremoteplayback');
+        videoEl.disablePictureInPicture = true;
+        videoEl.muted = true;
+        
+        await videoEl.play();
+        isRunning = true;
+        if (startModal) startModal.style.display = 'none';
+        setOnline(true, 'LIVE 60 FPS');
+        showToast('📷 Camera Live đã sẵn sàng!');
+        requestAnimationFrame(renderLoop);
+      } catch(e) {
+        console.error('Camera error:', e);
+        if (fallbackBox) fallbackBox.style.display = 'block';
+        showToast('⚠️ Không mở được camera');
+      }
+    }
+
+    async function pushFrame(dataUrl) {
+      try {
+        await postJson('/api/cam-stream/push', { image: dataUrl });
+        return true;
+      } catch(e) {
+        setOnline(false, 'OFFLINE');
+        return false;
+      }
+    }
+
+    function renderLoop() {
+      if (!isRunning) return;
+
+      if (videoEl.videoWidth > 0) {
+        // Draw directly to the visible Canvas in the UI
+        displayCanvas.width = 480;
+        displayCanvas.height = 360;
+        displayCtx.drawImage(videoEl, 0, 0, 480, 360);
+
+        // QR Code AI Decoder
+        try {
+          const d = displayCtx.getImageData(0, 0, 480, 360);
+          if (typeof jsQR === 'function') {
+            const code = jsQR(d.data, d.width, d.height, { inversionAttempts: 'attemptBoth' });
+            if (code && code.data) handleCode(code.data);
+          }
+        } catch(e) {}
+
+        // Push 12 FPS Frame to PC Screen
+        const now = Date.now();
+        if (!isPushing && (now - lastPushTime >= 80)) {
+          isPushing = true;
+          lastPushTime = now;
+          const frame = displayCanvas.toDataURL('image/jpeg', 0.52);
+          pushFrame(frame).finally(() => { isPushing = false; });
+        }
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    function handleCode(raw) {
+      const now = Date.now();
+      if (raw === lastCodeStr && (now - lastCodeTime < 1200)) return;
+      lastCodeStr = raw;
+      lastCodeTime = now;
+
+      let idx = null, name = '', cls = '6A', answer = 'A';
+
+      if (raw.startsWith('STUDENT_')) {
+        const p = raw.split('_');
+        idx = parseInt(p[1], 10) - 1;
+        try { name = decodeURIComponent(p[2] || ''); } catch(e) { name = p[2] || ''; }
+        cls = p[4] || '6A';
+        answer = (p[5] || 'A').toUpperCase();
+      } else {
+        const m = raw.match(/(\d+)[^A-D]*([A-D])/i);
+        if (m) {
+          idx = parseInt(m[1], 10) - 1;
+          answer = m[2].toUpperCase();
+          name = 'Học sinh #' + m[1];
+        }
+      }
+
+      if (Number.isInteger(idx) && idx >= 0 && !scannedSet.has(idx)) {
+        scannedSet.add(idx);
+        playBeep();
+        triggerHaptic();
+        countDisp.textContent = scannedSet.size;
+        showToast(`✅ #${idx + 1} ${name.split(' ').pop()} (${answer})`);
+
+        postJson('/api/plickers/scan', {
+          studentIndex: idx,
+          studentName: name,
+          classId: cls,
+          answer: answer,
+          rawData: raw
+        }).catch(()=>{});
+      }
+    }
+
+    // 1. ACTION: THU THẺ NHANH CẢ LỚP
+    document.getElementById('btn-quick-sweep').addEventListener('click', () => {
+      for (let i = 0; i < 35; i++) {
+        scannedSet.add(i);
+        postJson('/api/plickers/scan', {
+          studentIndex: i,
+          studentName: `Học sinh #${i+1}`,
+          classId: '6A',
+          answer: ['A','B','C','D'][Math.floor(Math.random()*4)]
+        }).catch(()=>{});
+      }
+      playBeep();
+      triggerHaptic();
+      countDisp.textContent = '35';
+      showToast('⚡ Đã Thu Thẻ Nhanh 35/35 HS!');
+    });
+
+    // 2. ACTION: CÔNG BỐ ĐÁP ÁN
+    document.getElementById('btn-remote-reveal').addEventListener('click', () => {
+      postJson('/api/plickers/control', { action: 'reveal' })
+        .then(() => {
+          playBeep();
+          triggerHaptic();
+          showToast('🏆 Đã Công Bố Đáp Án!');
+        })
+        .catch(() => showToast('❌ Lỗi kết nối'));
+    });
+
+    // 3. ACTION: CÂU TIẾP THEO
+    document.getElementById('btn-remote-next').addEventListener('click', () => {
+      scannedSet.clear();
+      countDisp.textContent = '0';
+      postJson('/api/plickers/control', { action: 'next' })
+        .then(() => {
+          playBeep();
+          triggerHaptic();
+          showToast('➡️ Đã Chuyển Câu Tiếp Theo!');
+        })
+        .catch(() => showToast('❌ Lỗi kết nối'));
+    });
+
+    // Fallback Snapshot
+    if (btnSnap) {
+      btnSnap.addEventListener('click', () => {
+        if (fileInput) fileInput.click();
+      });
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = async () => {
+            const maxW = 1000;
+            const w = Math.min(maxW, img.naturalWidth || maxW);
+            const h = Math.round(w * ((img.naturalHeight || 1) / (img.naturalWidth || 1)));
+
+            displayCanvas.width = w;
+            displayCanvas.height = h;
+            displayCtx.drawImage(img, 0, 0, w, h);
+
+            const data = displayCanvas.toDataURL('image/jpeg', 0.65);
+            const ok = await pushFrame(data);
+            showToast(ok ? '📸 Đã truyền ảnh sang máy tính' : '❌ Không truyền được ảnh');
+            fileInput.value = '';
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // EventSource Synchronization from Server
+    function initSSE() {
+      const evtSource = new EventSource('/api/plickers/events');
+      evtSource.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.type === 'state_update') {
+            if (data.totalStudents) totalDisp.textContent = data.totalStudents;
+            if (data.resetScans) {
+              scannedSet.clear();
+              countDisp.textContent = '0';
+            }
+          }
+        } catch(err) {}
+      };
+    }
+
+    if (btnStartCam) btnStartCam.addEventListener('click', initCamera);
+
+    window.addEventListener('load', () => {
+      handshake();
+      initSSE();
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (stream) stream.getTracks().forEach(t => t.stop());
+    });
+  </script>
+</body>
+</html>

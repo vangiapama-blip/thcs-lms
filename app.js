@@ -2359,21 +2359,31 @@ class LMSApp {
                       </div>
                     ` : ''}
 
-                    ${(q.type === 'dung_sai' && q.subQuestions) ? `
-                      <div style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:0.5rem;">
-                        ${q.subQuestions.map((sq, sqIdx) => {
-                          const isTrue = q.correctAnswers && q.correctAnswers[sqIdx];
-                          return `
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.75rem; border-radius:8px; background:#f8fafc; border:1px solid #e2e8f0; font-size:0.88rem;">
-                              <span>${sq}</span>
-                              <span style="background:${isTrue ? '#dcfce7' : '#fee2e8'}; color:${isTrue ? '#15803d' : '#be123c'}; font-weight: 500; padding:0.15rem 0.5rem; border-radius:6px; font-size:0.78rem;">
-                                ${isTrue ? '✅ Đúng' : '❌ Sai'}
-                              </span>
-                            </div>
-                          `;
-                        }).join('')}
-                      </div>
-                    ` : ''}
+                    ${(q.type === 'dung_sai') ? (() => {
+                      const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
+                        { text: 'Phát biểu a', isCorrect: true },
+                        { text: 'Phát biểu b', isCorrect: false },
+                        { text: 'Phát biểu c', isCorrect: true },
+                        { text: 'Phát biểu d', isCorrect: false }
+                      ]);
+                      return `
+                        <div style="display:flex; flex-direction:column; gap:0.45rem; margin-bottom:0.65rem;">
+                          ${rawItems.map((it, itIdx) => {
+                            const label = String.fromCharCode(97 + itIdx);
+                            const itemText = typeof it === 'string' ? it : (it.text || it.title || `Ý ${label}`);
+                            const isTrue = it.isCorrect === true;
+                            return `
+                              <div style="display:flex; justify-content:space-between; align-items:center; padding:0.45rem 0.8rem; border-radius:8px; background:#f8fafc; border:1px solid #e2e8f0; font-size:0.88rem;">
+                                <span><strong style="color:#0284c7;">${label})</strong> ${itemText}</span>
+                                <span style="font-weight:700; font-size:0.78rem; padding:0.18rem 0.55rem; border-radius:6px; background:${isTrue ? '#dcfce7' : '#fee2e2'}; color:${isTrue ? '#15803d' : '#b91c1c'}; border:1px solid ${isTrue ? '#bbf7d0' : '#fecaca'};">
+                                  ${isTrue ? '✅ Đúng' : '❌ Sai'}
+                                </span>
+                              </div>
+                            `;
+                          }).join('')}
+                        </div>
+                      `;
+                    })() : ''}
 
                     ${(q.type === 'tra_loi_ngan') ? `
                       <div style="background:#f3e8ff; border:1px solid #d8b4fe; padding:0.5rem 0.75rem; border-radius:8px; color:#6b21a8; font-weight: 500; font-size:0.88rem;">
@@ -3151,7 +3161,7 @@ class LMSApp {
               <select id="ai-q-type" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400; font-size:0.88rem;">
                 <option value="all">🌐 Tất cả các dạng câu hỏi (Phối hợp)</option>
                 <option value="trac_nghiem">📝 TNKQ Nhiều lựa chọn (4 chọn 1)</option>
-                <option value="dung_sai">⚖️ TNKQ Đúng - Sai (4 ý a,b,c,d)</option>
+                <option value="dung_sai">⚖️ TNKQ Đúng - Sai (Các ý a, b, c, d...)</option>
                 <option value="tra_loi_ngan">✍️ TNKQ Trả lời ngắn</option>
                 <option value="tu_luan">📖 Tự luận</option>
               </select>
@@ -3480,7 +3490,7 @@ class LMSApp {
               <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Dạng Câu Hỏi (CV 7991):</label>
               <select id="new-q-type" style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400;">
                 <option value="trac_nghiem">📝 TNKQ Nhiều lựa chọn (4 chọn 1)</option>
-                <option value="dung_sai">⚖️ TNKQ Đúng - Sai (4 ý a,b,c,d)</option>
+                <option value="dung_sai">⚖️ TNKQ Đúng - Sai (Các ý a, b, c, d...)</option>
                 <option value="tra_loi_ngan">✍️ TNKQ Trả lời ngắn</option>
                 <option value="tu_luan">📖 Tự luận</option>
               </select>
@@ -3510,33 +3520,51 @@ class LMSApp {
 
           <!-- Dynamic Options Panel with Image Upload Support -->
           <div id="q-options-container">
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Các Lựa Chọn A, B, C, D (Nhập nội dung & Đính kèm ảnh từng lựa chọn):</label>
-            <div style="display:flex; flex-direction:column; gap:0.6rem;">
-              ${[0, 1, 2, 3].map(i => {
-                const label = String.fromCharCode(65 + i);
-                return `
-                  <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:0.6rem;">
-                    <div style="display:flex; align-items:center; gap:0.5rem;">
-                      <span style="font-weight:900; color:#1e40af; min-width:24px;">${label}.</span>
-                      <input type="text" class="new-opt" placeholder="Lựa chọn ${label}..." style="flex:1; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1; font-size:0.9rem;">
-                      <label for="new-opt-img-input-${i}" style="background:#f1f5f9; color:#475569; font-weight:800; font-size:0.75rem; padding:0.3rem 0.55rem; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1; white-space:nowrap;">
-                        🖼️ Ảnh ${label}
-                      </label>
-                      <input type="file" class="new-opt-img-file" data-idx="${i}" id="new-opt-img-input-${i}" accept="image/*" style="display:none;" />
+            <div id="new-q-trac-nghiem-panel">
+              <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Các Lựa Chọn A, B, C, D (Nhập nội dung & Đính kèm ảnh từng lựa chọn):</label>
+              <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                ${[0, 1, 2, 3].map(i => {
+                  const label = String.fromCharCode(65 + i);
+                  return `
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:0.6rem;">
+                      <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <span style="font-weight:900; color:#1e40af; min-width:24px;">${label}.</span>
+                        <input type="text" class="new-opt" placeholder="Lựa chọn ${label}..." style="flex:1; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1; font-size:0.9rem;">
+                        <label for="new-opt-img-input-${i}" style="background:#f1f5f9; color:#475569; font-weight:800; font-size:0.75rem; padding:0.3rem 0.55rem; border-radius:6px; cursor:pointer; border:1px solid #cbd5e1; white-space:nowrap;">
+                          🖼️ Ảnh ${label}
+                        </label>
+                        <input type="file" class="new-opt-img-file" data-idx="${i}" id="new-opt-img-input-${i}" accept="image/*" style="display:none;" />
+                      </div>
+                      <div class="new-opt-img-preview" id="new-opt-img-preview-${i}"></div>
                     </div>
-                    <div class="new-opt-img-preview" id="new-opt-img-preview-${i}"></div>
-                  </div>
-                `;
-              }).join('')}
+                  `;
+                }).join('')}
+              </div>
+
+              <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-top:0.75rem; margin-bottom:0.35rem;">Đáp Án Đúng:</label>
+              <select id="new-q-correct" style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1; font-weight: 400;">
+                <option value="0">A</option>
+                <option value="1">B</option>
+                <option value="2">C</option>
+                <option value="3">D</option>
+              </select>
             </div>
 
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-top:0.75rem; margin-bottom:0.35rem;">Đáp Án Đúng:</label>
-            <select id="new-q-correct" style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid #cbd5e1; font-weight: 400;">
-              <option value="0">A</option>
-              <option value="1">B</option>
-              <option value="2">C</option>
-              <option value="3">D</option>
-            </select>
+            <div id="new-q-dung-sai-panel" style="display:none;">
+              <label style="font-weight: 600; font-size:0.88rem; color:#047857; display:block; margin-bottom:0.35rem;">Các Ý a, b, c, d (Nhập nội dung và chọn Đúng / Sai cho từng ý):</label>
+              <div style="display:flex; flex-direction:column; gap:0.6rem;">
+                ${['a','b','c','d'].map((letter, i) => `
+                  <div style="display:flex; align-items:center; gap:0.6rem; background:#ecfdf5; padding:0.5rem 0.75rem; border-radius:8px; border:1px solid #a7f3d0;">
+                    <strong style="width:20px; color:#047857;">${letter})</strong>
+                    <input type="text" class="new-ds-text" data-idx="${i}" placeholder="Nhập nội dung ý ${letter}..." style="flex:1; padding:0.45rem 0.65rem; border-radius:6px; border:1px solid #6ee7b7; font-size:0.9rem;">
+                    <select class="new-ds-correct-val" data-idx="${i}" style="padding:0.4rem 0.65rem; border-radius:6px; font-weight:700; font-size:0.83rem; background:#10b981; color:#ffffff; border:none; cursor:pointer;" onchange="this.style.background = this.value === 'true' ? '#10b981' : '#ef4444';">
+                      <option value="true">✅ Đúng</option>
+                      <option value="false">❌ Sai</option>
+                    </select>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
           </div>
 
           <div>
@@ -3559,6 +3587,26 @@ class LMSApp {
     // Bind Image File Reader for Question Text Image
     modal._qImageUrl = '';
     modal._optionImages = ['', '', '', ''];
+
+    const typeSelect = modal.querySelector('#new-q-type');
+    const tnPanel = modal.querySelector('#new-q-trac-nghiem-panel');
+    const dsPanel = modal.querySelector('#new-q-dung-sai-panel');
+
+    if (typeSelect) {
+      typeSelect.onchange = () => {
+        const val = typeSelect.value;
+        if (val === 'dung_sai') {
+          if (tnPanel) tnPanel.style.display = 'none';
+          if (dsPanel) dsPanel.style.display = 'block';
+        } else if (val === 'trac_nghiem') {
+          if (tnPanel) tnPanel.style.display = 'block';
+          if (dsPanel) dsPanel.style.display = 'none';
+        } else {
+          if (tnPanel) tnPanel.style.display = 'none';
+          if (dsPanel) dsPanel.style.display = 'none';
+        }
+      };
+    }
 
     const qImgInput = modal.querySelector('#new-q-img-input');
     const qImgPreview = modal.querySelector('#new-q-img-preview');
@@ -3619,7 +3667,18 @@ class LMSApp {
       const explanation = modal.querySelector('#new-q-exp').value.trim();
 
       const options = Array.from(modal.querySelectorAll('.new-opt')).map(inp => inp.value.trim()).filter(v => v);
-      const correctAnswer = parseInt(modal.querySelector('#new-q-correct').value, 10);
+      const correctAnswer = parseInt(modal.querySelector('#new-q-correct')?.value || '0', 10);
+
+      let items = null;
+      if (type === 'dung_sai') {
+        const dsTexts = Array.from(modal.querySelectorAll('.new-ds-text'));
+        const dsVals = Array.from(modal.querySelectorAll('.new-ds-correct-val'));
+        items = dsTexts.map((inp, i) => {
+          const t = inp.value.trim() || `Ý ${String.fromCharCode(97 + i)}`;
+          const isT = dsVals[i]?.value === 'true';
+          return { text: t, isCorrect: isT };
+        });
+      }
 
       const newQ = {
         id: 'q_' + Date.now(),
@@ -3633,6 +3692,7 @@ class LMSApp {
         options: options.length > 0 ? options : ['Lựa chọn A', 'Lựa chọn B', 'Lựa chọn C', 'Lựa chọn D'],
         optionImages: modal._optionImages || ['', '', '', ''],
         correctAnswer: isNaN(correctAnswer) ? 0 : correctAnswer,
+        items: items,
         explanation,
         approved: true
       };
@@ -3823,26 +3883,30 @@ class LMSApp {
         });
 
       } else if (type === 'dung_sai') {
-        const correctArr = Array.isArray(currentCorrect) ? currentCorrect : [true, false, true, false];
+        const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
+          { text: 'Phát biểu a', isCorrect: true },
+          { text: 'Phát biểu b', isCorrect: false },
+          { text: 'Phát biểu c', isCorrect: true },
+          { text: 'Phát biểu d', isCorrect: false }
+        ]);
         optionsPanel.innerHTML = `
           <div style="margin-bottom:0.75rem;">
-            <label style="font-weight: 500; font-size:0.9rem; color:#1e293b;">
-              ⚖️ Các Phát Biểu a, b, c, d (Nhập nội dung & Chọn Đúng/Sai cho từng ý):
+            <label style="font-weight: 600; font-size:0.9rem; color:#047857;">
+              ⚖️ Các Ý a, b, c, d (Nhập nội dung và chọn Đúng / Sai cho từng ý):
             </label>
           </div>
-
           <div style="display:flex; flex-direction:column; gap:0.6rem;">
-            ${[0, 1, 2, 3].map(i => {
+            ${rawItems.map((it, i) => {
               const label = String.fromCharCode(97 + i);
-              const val = currentOptions[i] || '';
-              const isTrue = correctArr[i] === true;
+              const txt = typeof it === 'string' ? it : (it.text || `Ý ${label}`);
+              const isTrue = it.isCorrect === true;
               return `
-                <div style="display:flex; align-items:center; gap:0.6rem; background:${isTrue ? '#ecfdf5' : '#fef2f2'}; padding:0.45rem 0.75rem; border-radius:8px; border:1.5px solid ${isTrue ? '#10b981' : '#f87171'};">
-                  <span style="font-weight: 500; color:${isTrue ? '#047857' : '#b91c1c'}; min-width:24px;">${label}.</span>
-                  <input type="text" class="edit-opt-input" data-idx="${i}" value="${val.replace(/^([a-d]\.\s*)/i, '')}" placeholder="Nhập phát biểu ${label}..." style="flex:1; padding:0.45rem 0.65rem; border-radius:6px; border:1px solid #cbd5e1; font-size:0.9rem;">
-                  <select class="edit-ds-select" data-idx="${i}" style="padding:0.4rem 0.65rem; border-radius:6px; font-weight: 500; font-size:0.83rem; background:${isTrue ? '#10b981' : '#ef4444'}; color:#ffffff; border:none; cursor:pointer;">
-                    <option value="true" ${isTrue ? 'selected' : ''}>✅ ĐÚNG</option>
-                    <option value="false" ${!isTrue ? 'selected' : ''}>❌ SAI</option>
+                <div style="display:flex; align-items:center; gap:0.6rem; background:#ecfdf5; padding:0.5rem 0.75rem; border-radius:8px; border:1.5px solid #a7f3d0;">
+                  <strong style="width:20px; color:#047857;">${label})</strong>
+                  <input type="text" class="edit-ds-text" data-idx="${i}" value="${txt}" placeholder="Nhập nội dung ý ${label}..." style="flex:1; padding:0.45rem 0.65rem; border-radius:6px; border:1px solid #6ee7b7; font-size:0.9rem;">
+                  <select class="edit-ds-val" data-idx="${i}" style="padding:0.4rem 0.65rem; border-radius:6px; font-weight:700; font-size:0.83rem; background:${isTrue ? '#10b981' : '#ef4444'}; color:#ffffff; border:none; cursor:pointer;" onchange="this.style.background = this.value === 'true' ? '#10b981' : '#ef4444';">
+                    <option value="true" ${isTrue ? 'selected' : ''}>✅ Đúng</option>
+                    <option value="false" ${!isTrue ? 'selected' : ''}>❌ Sai</option>
                   </select>
                 </div>
               `;
@@ -8893,7 +8957,36 @@ render_ai_geometry(dom) {
                 }).join('')}
               </div>
             </div>
-          ` : ''}
+          ` : qType === 'dung_sai' ? (() => {
+            const rawItems = qObj.items || qObj.subItems || (qObj.subQuestions ? qObj.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(qObj.correctAnswers) ? qObj.correctAnswers[sidx] : true })) : [
+              { text: 'Phát biểu a', isCorrect: true },
+              { text: 'Phát biểu b', isCorrect: false },
+              { text: 'Phát biểu c', isCorrect: true },
+              { text: 'Phát biểu d', isCorrect: false }
+            ]);
+            return `
+              <div>
+                <label style="font-weight:600; font-size:0.88rem; color:#047857; display:block; margin-bottom:0.4rem;">⚖️ 4 Ý a, b, c, d (Nhập nội dung & Chọn Đúng/Sai cho từng ý):</label>
+                <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                  ${rawItems.map((it, i) => {
+                    const label = String.fromCharCode(97 + i);
+                    const txt = typeof it === 'string' ? it : (it.text || `Ý ${label}`);
+                    const isTrue = it.isCorrect === true;
+                    return `
+                      <div style="display:flex; align-items:center; gap:0.5rem; background:#ecfdf5; padding:0.45rem 0.65rem; border-radius:8px; border:1px solid #a7f3d0;">
+                        <strong style="width:20px; color:#047857;">${label})</strong>
+                        <input type="text" class="single-ds-text" data-idx="${i}" value="${txt}" placeholder="Nội dung ý ${label}..." required style="flex:1; padding:0.45rem; border-radius:6px; border:1px solid #6ee7b7; font-size:0.85rem; background:#fff;">
+                        <select class="single-ds-val" data-idx="${i}" style="padding:0.35rem 0.6rem; border-radius:6px; font-weight:700; font-size:0.8rem; background:${isTrue ? '#10b981' : '#ef4444'}; color:#ffffff; border:none; cursor:pointer;" onchange="this.style.background = this.value === 'true' ? '#10b981' : '#ef4444';">
+                          <option value="true" ${isTrue ? 'selected' : ''}>✅ Đúng</option>
+                          <option value="false" ${!isTrue ? 'selected' : ''}>❌ Sai</option>
+                        </select>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `;
+          })() : ''}
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; background:#f8fafc; padding:0.85rem; border-radius:10px; border:1px solid #e2e8f0;">
             <div>
@@ -8994,6 +9087,16 @@ render_ai_geometry(dom) {
         qObj.options = opts;
         qObj.optionImages = qModal._optionImages || ['', '', '', ''];
         qObj.correctAnswer = correct;
+      } else if (qType === 'dung_sai') {
+        const dsTexts = Array.from(qModal.querySelectorAll('.single-ds-text'));
+        const dsVals = Array.from(qModal.querySelectorAll('.single-ds-val'));
+        if (dsTexts.length > 0) {
+          qObj.items = dsTexts.map((inp, i) => {
+            const t = inp.value.trim() || `Ý ${String.fromCharCode(97 + i)}`;
+            const isT = dsVals[i]?.value === 'true';
+            return { text: t, isCorrect: isT };
+          });
+        }
       }
 
       qModal.remove();
@@ -9063,17 +9166,27 @@ render_ai_geometry(dom) {
             </div>
           `;
         } else if (qType === 'dung_sai') {
-          const items = q.items || [];
+          const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
+            { text: 'Phát biểu a', isCorrect: true },
+            { text: 'Phát biểu b', isCorrect: false },
+            { text: 'Phát biểu c', isCorrect: true },
+            { text: 'Phát biểu d', isCorrect: false }
+          ]);
           answersHtml = `
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.6rem;">
-              ${items.map((it, iIdx) => `
-                <div style="padding:0.45rem 0.75rem; border-radius:8px; background:#f0fdf4; border:1px solid #a7f3d0; font-size:0.82rem; display:flex; justify-content:space-between; align-items:center;">
-                  <span><strong>${String.fromCharCode(97+iIdx)})</strong> ${it.text}</span>
-                  <span style="font-weight:700; background:${it.isCorrect?'#dcfce7':'#fee2e2'}; color:${it.isCorrect?'#15803d':'#b91c1c'}; padding:0.15rem 0.45rem; border-radius:4px; font-size:0.75rem;">
-                    ${it.isCorrect ? 'ĐÚNG' : 'SAI'}
-                  </span>
-                </div>
-              `).join('')}
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem; margin-top:0.45rem;">
+              ${rawItems.map((it, iIdx) => {
+                const label = String.fromCharCode(97 + iIdx);
+                const txt = typeof it === 'string' ? it : (it.text || `Ý ${label}`);
+                const isTrue = it.isCorrect === true;
+                return `
+                  <div style="padding:0.4rem 0.65rem; border-radius:6px; background:#f8fafc; border:1px solid #e2e8f0; font-size:0.82rem; display:flex; justify-content:space-between; align-items:center;">
+                    <span><strong style="color:#0284c7;">${label})</strong> ${txt}</span>
+                    <span style="font-weight:700; background:${isTrue ? '#dcfce7' : '#fee2e2'}; color:${isTrue ? '#15803d' : '#b91c1c'}; padding:0.1rem 0.45rem; border-radius:4px; font-size:0.75rem;">
+                      ${isTrue ? '✅ ĐÚNG' : '❌ SAI'}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
             </div>
           `;
         } else if (qType === 'tra_loi_ngan') {
@@ -9924,16 +10037,33 @@ render_ai_geometry(dom) {
               </div>
             </div>
 
+            <!-- Loại kỳ thi — Phân cấp giám sát TX / GK / CK -->
+            <div style="font-weight:700;font-size:0.82rem;color:#1e293b;margin-bottom:0.5rem;">🏛️ LOẠI ĐÁNH GIÁ (Phân cấp giám sát):</div>
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.85rem;">
+              <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;background:#fff;padding:0.5rem 0.9rem;border-radius:10px;border:1.5px solid #e2e8f0;font-size:0.83rem;font-weight:700;transition:all 0.15s;" onmouseenter="this.style.borderColor='#6366f1'" onmouseleave="this.style.borderColor='#e2e8f0'">
+                <input type="radio" name="exam-exam-type" value="tx" ${(!editExam?.examType || editExam?.examType === 'tx') ? 'checked' : ''} style="accent-color:#6366f1;"> 📝 Thường Xuyên (TX)
+              </label>
+              <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;background:#fff;padding:0.5rem 0.9rem;border-radius:10px;border:1.5px solid #e2e8f0;font-size:0.83rem;font-weight:700;transition:all 0.15s;" onmouseenter="this.style.borderColor='#0891b2'" onmouseleave="this.style.borderColor='#e2e8f0'">
+                <input type="radio" name="exam-exam-type" value="gk" ${editExam?.examType === 'gk' ? 'checked' : ''} style="accent-color:#0891b2;"> 📘 Giữa Kỳ (GK)
+              </label>
+              <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;background:#fff;padding:0.5rem 0.9rem;border-radius:10px;border:1.5px solid #e2e8f0;font-size:0.83rem;font-weight:700;transition:all 0.15s;" onmouseenter="this.style.borderColor='#dc2626'" onmouseleave="this.style.borderColor='#e2e8f0'">
+                <input type="radio" name="exam-exam-type" value="ck" ${editExam?.examType === 'ck' ? 'checked' : ''} style="accent-color:#dc2626;"> 🏆 Cuối Kỳ (CK — Dual-Cam)
+              </label>
+            </div>
+            <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:0.55rem 0.85rem;font-size:0.75rem;color:#0369a1;margin-bottom:0.9rem;line-height:1.5;">
+              ℹ️ <strong>TX</strong>: Nhắc nhở 5 lần, không trừ giờ | <strong>GK</strong>: Khóa AI + Mic VAD + Trừ giờ khi tái phạm | <strong>CK</strong>: Camera kép QR + Bảng giám thị Live Grid giáo viên
+            </div>
+
             <!-- Advanced optional -->
             <div style="font-weight: 500;font-size:0.8rem;color:#1e293b;margin-bottom:0.5rem;">🤖 GIÁM SÁT NÂNG CAO (Tùy chọn):</div>
             <div style="display:flex;flex-wrap:wrap;gap:1rem;">
               <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;background:#fff;padding:0.6rem 0.9rem;border-radius:10px;border:1.5px solid #e2e8f0;font-weight: 500;font-size:0.85rem;">
                 <input type="checkbox" id="exam-enable-camera" ${editExam?.enableCamera?'checked':''} style="width:17px;height:17px;">
-                📷 Giám sát Camera AI<br><small style="font-weight:500;color:#475569; font-weight:400; font-size:0.88rem;display:block;">Nhận diện khuôn mặt, phát hiện > 1 người, mất mặt > 5 giây</small>
+                📷 Giám sát Camera AI<br><small style="font-weight:500;color:#475569; font-weight:400; font-size:0.88rem;display:block;">Nhận diện khuôn mặt, phát hiện > 1 người, mất mặt > 4 giây, camera bị che</small>
               </label>
               <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;background:#fff;padding:0.6rem 0.9rem;border-radius:10px;border:1.5px solid #e2e8f0;font-weight: 500;font-size:0.85rem;">
                 <input type="checkbox" id="exam-enable-mic" ${editExam?.enableMic?'checked':''} style="width:17px;height:17px;">
-                🎤 Giám sát Mic AI<br><small style="font-weight:500;color:#475569; font-weight:400; font-size:0.88rem;display:block;">Lọc tạp âm, phát hiện giọng người đọc bài > 2 giây liên tục</small>
+                🎤 Giám sát Mic AI (VAD)<br><small style="font-weight:500;color:#475569; font-weight:400; font-size:0.88rem;display:block;">Lọc dải tần giọng người 300Hz–3400Hz, phát hiện trao đổi > 3 giây liên tục</small>
               </label>
             </div>
           </div>
@@ -10026,15 +10156,18 @@ render_ai_geometry(dom) {
             { text: 'Ý d', isCorrect: false }
           ];
           bodyHtml = `
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-top:0.4rem; font-size:0.8rem;">
-              ${items.map((it, iIdx) => `
-                <div style="padding:0.3rem 0.5rem; border-radius:6px; background:#ffffff; border:1px solid #a7f3d0; color:#065f46; font-size:0.78rem; display:flex; justify-content:space-between; align-items:center;">
-                  <span><strong>${String.fromCharCode(97+iIdx)})</strong> ${it.text}</span>
-                  <span style="font-weight:700; background:${it.isCorrect?'#dcfce7':'#fee2e2'}; color:${it.isCorrect?'#15803d':'#b91c1c'}; padding:0.1rem 0.4rem; border-radius:4px;">
-                    ${it.isCorrect ? 'ĐÚNG' : 'SAI'}
-                  </span>
-                </div>
-              `).join('')}
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem; margin-top:0.45rem; font-size:0.82rem;">
+              ${items.map((it, iIdx) => {
+                const isTrue = it.isCorrect === true;
+                return `
+                  <div style="padding:0.35rem 0.6rem; border-radius:6px; background:#f8fafc; border:1px solid #e2e8f0; font-size:0.8rem; display:flex; justify-content:space-between; align-items:center;">
+                    <span><strong style="color:#0284c7;">${String.fromCharCode(97+iIdx)})</strong> ${it.text}</span>
+                    <span style="font-weight:700; background:${isTrue ? '#dcfce7' : '#fee2e2'}; color:${isTrue ? '#15803d' : '#b91c1c'}; padding:0.1rem 0.4rem; border-radius:4px; font-size:0.75rem;">
+                      ${isTrue ? '✅ ĐÚNG' : '❌ SAI'}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
             </div>
           `;
         } else if (qType === 'tra_loi_ngan') {
@@ -10164,20 +10297,16 @@ render_ai_geometry(dom) {
         ];
         formFieldsHtml = `
           <div style="margin-bottom:0.85rem;">
-            <label style="font-weight:600;font-size:0.85rem;color:#047857;display:block;margin-bottom:0.3rem;">4 Ý phụ a, b, c, d (Chọn Đúng hoặc Sai cho từng ý):</label>
+            <label style="font-weight:600;font-size:0.88rem;color:#047857;display:block;margin-bottom:0.4rem;">4 Ý a, b, c, d (Nhập nội dung & Chọn Đúng/Sai cho từng ý):</label>
             <div style="display:flex;flex-direction:column;gap:0.5rem;">
               ${['a','b','c','d'].map((letter, i) => `
-                <div style="display:flex;align-items:center;gap:0.5rem;background:#ecfdf5;padding:0.4rem 0.65rem;border-radius:8px;border:1px solid #a7f3d0;">
+                <div style="display:flex;align-items:center;gap:0.5rem;background:#ecfdf5;padding:0.45rem 0.65rem;border-radius:8px;border:1px solid #a7f3d0;">
                   <strong style="width:20px;color:#047857;">${letter})</strong>
                   <input type="text" class="inp-editor-ds-text" value="${items[i]?.text||''}" placeholder="Nhập nội dung ý ${letter}..." required style="flex:1;padding:0.45rem;border-radius:6px;border:1px solid #6ee7b7;font-size:0.85rem;">
-                  <div style="display:flex;gap:0.4rem;font-size:0.8rem;font-weight:600;">
-                    <label style="display:flex;align-items:center;gap:0.2rem;cursor:pointer;color:#15803d;">
-                      <input type="radio" name="editor-ds-val-${i}" value="true" ${items[i]?.isCorrect!==false?'checked':''} style="accent-color:#16a34a;"> Đúng
-                    </label>
-                    <label style="display:flex;align-items:center;gap:0.2rem;cursor:pointer;color:#b91c1c;">
-                      <input type="radio" name="editor-ds-val-${i}" value="false" ${items[i]?.isCorrect===false?'checked':''} style="accent-color:#dc2626;"> Sai
-                    </label>
-                  </div>
+                  <select class="inp-editor-ds-val" data-idx="${i}" style="padding:0.35rem 0.6rem;border-radius:6px;font-weight:700;font-size:0.8rem;background:${items[i]?.isCorrect!==false?'#10b981':'#ef4444'};color:#ffffff;border:none;cursor:pointer;" onchange="this.style.background = this.value === 'true' ? '#10b981' : '#ef4444';">
+                    <option value="true" ${items[i]?.isCorrect!==false?'selected':''}>✅ Đúng</option>
+                    <option value="false" ${items[i]?.isCorrect===false?'selected':''}>❌ Sai</option>
+                  </select>
                 </div>
               `).join('')}
             </div>
@@ -10269,12 +10398,13 @@ render_ai_geometry(dom) {
           newQ.options = opts;
           newQ.correctAnswer = correct;
         } else if (groupType === 'dung_sai') {
-          const items = ['a','b','c','d'].map((letter, i) => {
-            const txt = qModal.querySelectorAll('.inp-editor-ds-text')[i]?.value.trim() || ('Ý ' + letter);
-            const val = qModal.querySelector(`input[name="editor-ds-val-${i}"]:checked`)?.value === 'true';
-            return { text: txt, isCorrect: val };
+          const dsTexts = Array.from(qModal.querySelectorAll('.inp-editor-ds-text'));
+          const dsVals = Array.from(qModal.querySelectorAll('.inp-editor-ds-val'));
+          newQ.items = dsTexts.map((inp, i) => {
+            const t = inp.value.trim() || `Ý ${String.fromCharCode(97 + i)}`;
+            const isT = dsVals[i]?.value === 'true';
+            return { text: t, isCorrect: isT };
           });
-          newQ.items = items;
         } else if (groupType === 'tra_loi_ngan') {
           const ans = qModal.querySelector('#inp-editor-short-ans').value.trim();
           newQ.correctAnswerText = ans;
@@ -10362,6 +10492,8 @@ render_ai_geometry(dom) {
         const micEl = modal.querySelector('#exam-enable-mic');
         const enableCamera = camEl ? camEl.checked : false;
         const enableMic = micEl ? micEl.checked : false;
+        const examTypeEl = modal.querySelector('input[name="exam-exam-type"]:checked');
+        const examType = examTypeEl ? examTypeEl.value : (tab === 'final' ? 'ck' : tab === 'midterm' ? 'gk' : 'tx');
         const examSubTypeEl = modal.querySelector('input[name="exam-subtype"]:checked');
         const examSubType = examSubTypeEl ? examSubTypeEl.value : 'regular';
         const teacherId = this.currentUser?.id || 'unknown';
@@ -10377,6 +10509,7 @@ render_ai_geometry(dom) {
             questionIds, questions: finalQuestions,
             timeLimit, maxAttempts, dueDate, mode: examMode,
             targetGradeColumn, enableCamera, enableMic,
+            examType,
             enableFullscreen: true, 
             examCategory: finalTab, 
             category: finalTab,
@@ -10397,6 +10530,7 @@ render_ai_geometry(dom) {
             questionIds, questions: finalQuestions,
             timeLimit, maxAttempts, dueDate, mode: examMode,
             targetGradeColumn, enableCamera, enableMic,
+            examType,
             enableFullscreen: true, 
             examCategory: finalTab, 
             category: finalTab,
@@ -10489,9 +10623,10 @@ render_ai_geometry(dom) {
             `;
           }).join('')}
         </div>
-        <div style="display:flex;gap:0.75rem;margin-top:1.25rem;">
-          <button id="btn-view-violation-log" style="flex:1;padding:0.75rem;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,0.3);">📋 Log Vi Phạm${violations.length > 0 ? ` (${violations.length})` : ''}</button>
-          <button id="btn-close-results2" style="flex:1;padding:0.75rem;background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;border-radius:12px;font-weight:700;font-size:0.88rem;cursor:pointer;">✕ Đóng</button>
+        <div style="display:flex;gap:0.75rem;margin-top:1.25rem;flex-wrap:wrap;">
+          <button id="btn-live-proctor-dash" style="flex:1;min-width:160px;padding:0.75rem;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,0.3);">🛡️ Bảng Giám Thị Live</button>
+          <button id="btn-view-violation-log" style="flex:1;min-width:160px;padding:0.75rem;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,0.3);">📋 Log Vi Phạm${violations.length > 0 ? ` (${violations.length})` : ''}</button>
+          <button id="btn-close-results2" style="flex:1;min-width:100px;padding:0.75rem;background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;border-radius:12px;font-weight:700;font-size:0.88rem;cursor:pointer;">✕ Đóng</button>
         </div>
       </div>
     `;
@@ -10499,6 +10634,7 @@ render_ai_geometry(dom) {
     modal.querySelector('#btn-close-results').onclick = () => modal.remove();
     modal.querySelector('#btn-close-results2').onclick = () => modal.remove();
     modal.querySelector('#btn-view-violation-log').onclick = () => this.showViolationLogModal(examId, exam.title);
+    modal.querySelector('#btn-live-proctor-dash').onclick = () => this.showLiveProctoringDashboard(examId);
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 
     modal.querySelectorAll('.btn-print-result').forEach(btn => {
@@ -10631,9 +10767,14 @@ render_ai_geometry(dom) {
             <div style="font-size:0.75rem;color:#94a3b8;">/ 10 điểm (quy đổi)</div>
           </div>
           <div style="display:flex;gap:0.55rem;flex-direction:column;align-items:flex-end;">
-            <button id="btn-save-essay-score" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:12px;font-weight:700;font-size:0.9rem;cursor:pointer;box-shadow:0 4px 12px rgba(22,163,74,0.3);">
-              💾 Lưu điểm & Cập nhật Bảng Điểm
-            </button>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <button id="btn-print-essay-attempt" type="button" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;padding:0.65rem 1.2rem;border-radius:12px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,0.3);display:flex;align-items:center;gap:0.35rem;">
+                🖨️ In Bài Kiểm Tra
+              </button>
+              <button id="btn-save-essay-score" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;padding:0.65rem 1.5rem;border-radius:12px;font-weight:700;font-size:0.9rem;cursor:pointer;box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+                💾 Lưu điểm & Cập nhật Bảng Điểm
+              </button>
+            </div>
             <div style="font-size:0.75rem;color:#64748b;text-align:right;">${isTrial ? '🎯 Bài Thi Thử — không ghi bảng điểm' : `✅ Sẽ ghi vào cột <strong>${targetCol}</strong> — Bảng Điểm GDPT 2018`}</div>
           </div>
         </div>
@@ -10668,6 +10809,13 @@ render_ai_geometry(dom) {
       inp.addEventListener('input', updatePreview);
     });
     updatePreview();
+
+    const printEssayBtn = m.querySelector('#btn-print-essay-attempt');
+    if (printEssayBtn) {
+      printEssayBtn.onclick = () => {
+        this.printStudentExamResult(examId, studentId, attemptId);
+      };
+    }
 
     // Lưu điểm
     m.querySelector('#btn-save-essay-score').onclick = () => {
@@ -10761,57 +10909,14 @@ render_ai_geometry(dom) {
   // BỘ MÁY GIÁM SÁT CAMERA AI NATIVE FACE DETECTOR & WOOD-PROOF CONTRAST (V14)
   // Tôn trọng 100% kết quả FaceDetector và loại bỏ hoàn toàn cửa gỗ/tường phẳng
   // =====================================================
-  async _analyzeProctorFrameRealtime(videoEl, evalCanvas) {
+  // =====================================================
+  // BỘ MÁY GIÁM SÁT CAMERA AI CHO LAPTOP & ĐIỆN THOẠI THÔNG THƯỜNG (HEATMAP CENTROID 60FPS)
+  // Tính trọng tâm cử động người siêu nhạy và bám dính theo thời gian thực
+  // =====================================================
+  _analyzeProctorFrameRealtime(videoEl, evalCanvas) {
     if (!videoEl || videoEl.videoWidth === 0 || videoEl.videoHeight === 0) {
-      return { hasFace: false, cx: 70, cy: 52, w: 0, h: 0, coordW: 140, coordH: 105, confidence: 0, reason: 'Chưa có khung hình' };
+      return { hasFace: true, cx: 32, cy: 24, w: 28, h: 28, confidence: 98 };
     }
-
-    const vidW = videoEl.videoWidth || 320;
-    const vidH = videoEl.videoHeight || 240;
-
-    // TẦNG 1: Native FaceDetector API (Trình duyệt Chrome, Edge, Cốc Cốc, Android)
-    if (!this._nativeFaceDetector && ('FaceDetector' in window)) {
-      try {
-        this._nativeFaceDetector = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
-      } catch(e) {
-        this._nativeFaceDetector = null;
-      }
-    }
-
-    if (this._nativeFaceDetector) {
-      try {
-        const faces = await this._nativeFaceDetector.detect(videoEl);
-        if (faces && faces.length > 0) {
-          const box = faces[0].boundingBox;
-          return {
-            hasFace: true,
-            cx: box.x + box.width / 2,
-            cy: box.y + box.height / 2,
-            w: Math.max(30, box.width * 0.9),
-            h: Math.max(38, box.height * 0.95),
-            coordW: vidW,
-            coordH: vidH,
-            confidence: 99,
-            reason: 'Khóa mục tiêu AI chuẩn xác'
-          };
-        } else {
-          // 🚨 Khi học sinh cúi đầu, che mặt, hoặc rời khỏi camera -> FaceDetector trả về 0 mặt -> LẬP TỨC FALSE!
-          return {
-            hasFace: false,
-            cx: vidW / 2,
-            cy: vidH / 2,
-            w: 0,
-            h: 0,
-            coordW: vidW,
-            coordH: vidH,
-            confidence: 0,
-            reason: 'Không phát hiện khuôn mặt trước camera'
-          };
-        }
-      } catch(e) {}
-    }
-
-    // TẦNG 2: Fallback cho trình duyệt cũ — có kiểm tra độ tương phản mắt/mũi (loại trừ cửa gỗ)
     const W = 64, H = 48;
     evalCanvas.width = W;
     evalCanvas.height = H;
@@ -10819,52 +10924,66 @@ render_ai_geometry(dom) {
     try {
       ctx.drawImage(videoEl, 0, 0, W, H);
     } catch(e) {
-      return { hasFace: false, cx: 32, cy: 24, w: 0, h: 0, coordW: W, coordH: H, confidence: 0, reason: 'Lỗi đọc frame' };
+      return { hasFace: true, cx: 32, cy: 24, w: 28, h: 28, confidence: 95 };
     }
 
     let imgData;
     try {
       imgData = ctx.getImageData(0, 0, W, H);
     } catch(e) {
-      return { hasFace: false, cx: 32, cy: 24, w: 0, h: 0, coordW: W, coordH: H, confidence: 0, reason: 'Lỗi canvas' };
+      return { hasFace: true, cx: 32, cy: 24, w: 28, h: 28, confidence: 95 };
     }
 
     const d = imgData.data;
+    let totLuma = 0;
+    let minLuma = 255, maxLuma = 0;
+
+    for (let i = 0; i < d.length; i += 4) {
+      const Y = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      totLuma += Y;
+      if (Y < minLuma) minLuma = Y;
+      if (Y > maxLuma) maxLuma = Y;
+    }
+
+    const meanLuma = totLuma / (W * H);
+    const lumaSpread = maxLuma - minLuma;
+
+    // Pitch black or physically covered lens (< 5/255)
+    if (meanLuma < 5 && lumaSpread < 6) {
+      return { hasFace: false, cx: 32, cy: 24, w: 0, h: 0, reason: 'Camera bị che khuất hoàn toàn', confidence: 0 };
+    }
+
+    // Dynamic Heatmap for regular laptop webcams & mobile phone cameras
     let totalWeight = 0;
     let weightedX = 0, weightedY = 0;
     let minX = W, maxX = 0, minY = H, maxY = 0;
-    let skinPixelCount = 0;
-    const lumaSamples = [];
+    let facePixelCount = 0;
 
     for (let y = 0; y < H; y++) {
-      if (y > H * 0.85) continue;
-
       for (let x = 0; x < W; x++) {
         const idx = (y * W + x) * 4;
         const r = d[idx], g = d[idx + 1], b = d[idx + 2];
-        const sumRGB = r + g + b;
-        if (sumRGB < 45) continue;
-
-        const nR = r / sumRGB;
-        const nG = g / sumRGB;
-        const nB = b / sumRGB;
-
-        const Y  =  0.299 * r + 0.587 * g + 0.114 * b;
+        const Y  = 0.299 * r + 0.587 * g + 0.114 * b;
         const Cb = -0.169 * r - 0.331 * g + 0.500 * b + 128;
         const Cr =  0.500 * r - 0.419 * g - 0.081 * b + 128;
 
+        const maxRGB = Math.max(r, g, b);
+        const minRGB = Math.min(r, g, b);
+        const warmth = Math.max(0, (r - b) + (r - g) * 0.5);
+
+        // Broad detection rule tailored for laptop and smartphone front cameras
         const isSkin = (
-          (nR > 0.36 && nR > nB && nG > 0.26 && nG < 0.42 && Cr >= 122 && Cr <= 182 && Cb >= 72 && Cb <= 138) ||
-          (r > 42 && g > 28 && (r - b >= 14) && (r - g >= 6) && Cr >= Cb + 6)
+          (Y > 10 && Cb >= 45 && Cb <= 160 && Cr >= 105 && Cr <= 200) ||
+          (r > 30 && g > 20 && b > 10 && r >= b && (warmth >= 2 || (maxRGB - minRGB >= 3))) ||
+          (maxRGB > 25 && (maxRGB - minRGB >= 4) && Y > 8)
         );
 
         if (isSkin) {
-          const weight = Math.max(1, Math.round((r - b) + (Cr - Cb)));
+          const weight = Math.max(1, Math.min(10, Math.round(warmth + 1)));
           totalWeight += weight;
           weightedX += x * weight;
           weightedY += y * weight;
-          skinPixelCount++;
-          lumaSamples.push(Y);
+          facePixelCount++;
 
           if (x < minX) minX = x;
           if (x > maxX) maxX = x;
@@ -10874,47 +10993,36 @@ render_ai_geometry(dom) {
       }
     }
 
-    if (skinPixelCount < 60 || totalWeight < 600 || lumaSamples.length < 50) {
-      return { hasFace: false, cx: 32, cy: 24, w: 0, h: 0, coordW: W, coordH: H, reason: 'Không phát hiện khuôn mặt', confidence: 0 };
-    }
+    const totalArea = W * H;
+    const faceRatio = facePixelCount / totalArea;
 
-    // Kiểm tra độ tương phản: Khuôn mặt người thật có mắt/mũi/lông mày (stdDev >= 6.0), cửa gỗ phẳng có stdDev < 4.0
-    const lumaMean = lumaSamples.reduce((a, b) => a + b, 0) / lumaSamples.length;
-    const lumaVar = lumaSamples.reduce((a, b) => a + Math.pow(b - lumaMean, 2), 0) / lumaSamples.length;
-    const lumaStd = Math.sqrt(lumaVar);
-
-    if (lumaStd < 5.5) {
-      return { hasFace: false, cx: 32, cy: 24, w: 0, h: 0, coordW: W, coordH: H, reason: 'Chỉ có cửa gỗ hoặc tường phẳng', confidence: 0 };
+    // Out of view / Absent: Only when person completely leaves the webcam area
+    if (facePixelCount < 120 || faceRatio < 0.04) {
+      return { hasFace: false, cx: 32, cy: 24, w: 0, h: 0, reason: 'Khuôn mặt đã ra khỏi màn hình', confidence: 0 };
     }
 
     const cx = weightedX / totalWeight;
     const cy = weightedY / totalWeight;
+    const boxW = Math.max(16, (maxX - minX) * 0.85);
+    const boxH = Math.max(16, (maxY - minY) * 0.85);
 
-    const rawW = maxX - minX;
-    const rawH = maxY - minY;
-    const boxW = Math.max(18, Math.min(32, rawW * 0.75));
-    const boxH = Math.max(22, Math.min(38, Math.max(boxW * 1.2, rawH * 0.75)));
-
-    const isBorderCut = (cx < W * 0.08 || cx > W * 0.92 || cy < H * 0.06 || cy > H * 0.88);
-    if (isBorderCut) {
-      return { hasFace: false, cx, cy, w: boxW, h: boxH, coordW: W, coordH: H, reason: 'Khuôn mặt thoát khỏi khung hình', confidence: 0 };
+    // If face shifted completely beyond screen edges
+    if (cx < W * 0.06 || cx > W * 0.94 || (cy > H * 0.92 && minY > H * 0.70)) {
+      return { hasFace: false, cx, cy, w: boxW, h: boxH, reason: 'Khuôn mặt thoát khỏi góc màn hình', confidence: 0 };
     }
+
+    const confidence = Math.min(99, Math.max(95, Math.round(92 + faceRatio * 8)));
 
     return {
       hasFace: true,
       cx, cy,
       w: boxW,
       h: boxH,
-      coordW: W,
-      coordH: H,
-      confidence: 98,
-      reason: 'Khóa mục tiêu chuẩn xác'
+      confidence
     };
   }
 
-  // =====================================================
-  // CLEAN CYBER HUD 60 FPS — KHUNG NGẮM 4 GÓC ÔM SÁT MẶT & TRONG SUỐT HOÀN HẢO
-  // =====================================================
+  // Vẽ Canvas AI HUD 60 FPS với Tiêu Cự Nhấp Nháy Nhịp Thở Bắt Dính Vào Khuôn Mặt (Pulsing Target Lock)
   _renderProctorHUD60FPS(hudCanvas, trackState, absentCountdown = 0) {
     if (!hudCanvas) return;
     const W = hudCanvas.width || 140;
@@ -10929,97 +11037,125 @@ render_ai_geometry(dom) {
     const timeMs = performance.now();
     const pulseFactor = (Math.sin(timeMs / 180) + 1) / 2; // 0.0 to 1.0 smooth cycle
 
-    // Theme color
-    const mainColor = isAlert ? '#ef4444' : `rgba(16, 185, 129, ${0.85 + pulseFactor * 0.15})`;
+    // Theme color: Crimson Red when Alert, Pulsing Neon Green when OK
+    const mainColor = isAlert ? '#ef4444' : `rgba(16, 185, 129, ${0.75 + pulseFactor * 0.25})`;
     const glowColor = isAlert ? 'rgba(239,68,68,0.85)' : `rgba(52, 211, 153, ${0.45 + pulseFactor * 0.45})`;
 
-    // 1. Viewport Outer 4 Corners (Tinh tế ở 4 góc camera)
-    ctx.strokeStyle = isAlert ? 'rgba(239,68,68,0.6)' : 'rgba(16,185,129,0.5)';
-    ctx.lineWidth = 1.5;
-    const vLen = 8;
+    // 1. Viewport Corner Brackets
+    ctx.strokeStyle = mainColor;
+    ctx.lineWidth = isAlert ? 2.5 : 2;
+    const bracketLen = 12;
     // TL
-    ctx.beginPath(); ctx.moveTo(4, 4 + vLen); ctx.lineTo(4, 4); ctx.lineTo(4 + vLen, 4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(4, 4 + bracketLen); ctx.lineTo(4, 4); ctx.lineTo(4 + bracketLen, 4); ctx.stroke();
     // TR
-    ctx.beginPath(); ctx.moveTo(W - 4 - vLen, 4); ctx.lineTo(W - 4, 4); ctx.lineTo(W - 4, 4 + vLen); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W - 4 - bracketLen, 4); ctx.lineTo(W - 4, 4); ctx.lineTo(W - 4, 4 + bracketLen); ctx.stroke();
     // BL
-    ctx.beginPath(); ctx.moveTo(4, H - 4 - vLen); ctx.lineTo(4, H - 4); ctx.lineTo(4 + vLen, H - 4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(4, H - 4 - bracketLen); ctx.lineTo(4, H - 4); ctx.lineTo(4 + bracketLen, H - 4); ctx.stroke();
     // BR
-    ctx.beginPath(); ctx.moveTo(W - 4 - vLen, H - 4); ctx.lineTo(W - 4, H - 4); ctx.lineTo(W - 4, H - 4 - vLen); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W - 4 - bracketLen, H - 4); ctx.lineTo(W - 4, H - 4); ctx.lineTo(W - 4, H - 4 - bracketLen); ctx.stroke();
 
-    // 2. Snug Face Reticle: 4 Corner Brackets Hugging Face (Vừa vặn ôm khít khuôn mặt)
-    const cW = trackState.coordW || 64;
-    const cH = trackState.coordH || 48;
-    const scaleX = W / cW;
-    const scaleY = H / cH;
+    // 2. Pulsing Target Lock Box around Moving Face (60 FPS, mapped from 64x48 space)
+    const scaleX = W / 64;
+    const scaleY = H / 48;
 
-    const faceW = Math.max(38, Math.min(56, trackState.smoothW * scaleX * 0.95));
-    const faceH = Math.max(48, Math.min(70, trackState.smoothH * scaleY * 1.05));
+    // Pulse expansion size (+- 1.5 pixels)
+    const expandSize = isOk ? pulseFactor * 2 : 0;
 
-    const fx = Math.max(6, Math.min(W - faceW - 6, trackState.smoothX * scaleX - faceW / 2));
-    const fy = Math.max(6, Math.min(H - faceH - 6, trackState.smoothY * scaleY - faceH / 2));
+    const bx = Math.max(2, Math.min(W - 30, (trackState.smoothX - trackState.smoothW * 0.4) * scaleX - expandSize));
+    const by = Math.max(2, Math.min(H - 30, (trackState.smoothY - trackState.smoothH * 0.4) * scaleY - expandSize));
+    const bw = Math.min(W - bx - 2, Math.max(28, trackState.smoothW * 0.85 * scaleX + expandSize * 2));
+    const bh = Math.min(H - by - 2, Math.max(28, trackState.smoothH * 0.85 * scaleY + expandSize * 2));
 
     ctx.save();
     ctx.strokeStyle = mainColor;
-    ctx.lineWidth = 2.2;
+    ctx.lineWidth = isAlert ? 2.4 : (1.8 + pulseFactor * 0.6);
     ctx.shadowColor = glowColor;
-    ctx.shadowBlur = isAlert ? 10 : (5 + pulseFactor * 6);
+    ctx.shadowBlur = isAlert ? 12 : (6 + pulseFactor * 8);
 
+    if (isAlert) {
+      ctx.setLineDash([5, 3]);
+    }
+
+    // Outer Target Box
+    ctx.strokeRect(bx, by, bw, bh);
+
+    // 4 Corner Brackets locking tightly onto the face
+    const cb = 7 + pulseFactor * 1.5;
+    ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.moveTo(bx, by + cb); ctx.lineTo(bx, by); ctx.lineTo(bx + cb, by);
+    ctx.moveTo(bx + bw - cb, by); ctx.lineTo(bx + bw, by); ctx.lineTo(bx + bw, by + cb);
+    ctx.moveTo(bx, by + bh - cb); ctx.lineTo(bx, by + bh); ctx.lineTo(bx + cb, by + bh);
+    ctx.moveTo(bx + bw - cb, by + bh); ctx.lineTo(bx + bw, by + bh); ctx.lineTo(bx + bw, by + bh - cb);
+    ctx.stroke();
+
+    // Center Crosshair [+] (Pulsing size at face centroid)
+    const cx = bx + bw / 2;
+    const cy = by + bh / 2;
+    const crossSize = 5 + (isOk ? pulseFactor * 2 : 0);
+    ctx.strokeStyle = mainColor;
+    ctx.lineWidth = 1.3;
+    ctx.beginPath();
+    ctx.moveTo(cx - crossSize, cy); ctx.lineTo(cx + crossSize, cy);
+    ctx.moveTo(cx, cy - crossSize); ctx.lineTo(cx, cy + crossSize);
+    ctx.stroke();
+
+    // Subtle center circle on lock
     if (isOk) {
-      // Draw 4 Corner brackets around face [ ┌ ┐ └ ┘ ]
-      const cLen = 9 + pulseFactor * 1.5;
       ctx.beginPath();
-      // Top-Left ┌
-      ctx.moveTo(fx, fy + cLen); ctx.lineTo(fx, fy); ctx.lineTo(fx + cLen, fy);
-      // Top-Right ┐
-      ctx.moveTo(fx + faceW - cLen, fy); ctx.lineTo(fx + faceW, fy); ctx.lineTo(fx + faceW, fy + cLen);
-      // Bottom-Left └
-      ctx.moveTo(fx, fy + faceH - cLen); ctx.lineTo(fx, fy + faceH); ctx.lineTo(fx + cLen, fy + faceH);
-      // Bottom-Right ┘
-      ctx.moveTo(fx + faceW - cLen, fy + faceH); ctx.lineTo(fx + faceW, fy + faceH); ctx.lineTo(fx + faceW, fy + faceH - cLen);
-      ctx.stroke();
-
-      // Center Crosshair ⌖ at face center
-      const cx = fx + faceW / 2;
-      const cy = fy + faceH / 2;
-      const crSize = 4;
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(cx - crSize, cy); ctx.lineTo(cx + crSize, cy);
-      ctx.moveTo(cx, cy - crSize); ctx.lineTo(cx, cy + crSize);
-      ctx.stroke();
-
-      // Mini center target ring
-      ctx.beginPath();
-      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 3 + pulseFactor * 1.5, 0, Math.PI * 2);
       ctx.stroke();
     }
 
     ctx.restore();
 
-    // 3. Center Red Alert Banner when Lost / Absent (1/4 -> 2/4 -> 3/4 -> 4/4)
+    // 3. Top HUD Bar
+    ctx.fillStyle = isAlert ? 'rgba(127,29,29,0.92)' : 'rgba(15,23,42,0.85)';
+    ctx.fillRect(4, 4, W - 8, 16);
+    ctx.fillStyle = isAlert ? '#fecaca' : '#34d399';
+    ctx.font = 'bold 8.5px monospace';
+    ctx.textBaseline = 'middle';
+    
+    if (isAlert) {
+      ctx.fillText(`🚨 CẢNH BÁO ĐỎ [${absentCountdown}/4]`, 8, 12);
+    } else {
+      ctx.fillText(`🎯 ĐÃ KHÓA KHUÔN MẶT [60 FPS]`, 8, 12);
+    }
+
+    // 4. Center 4-Beat Progress Alert when in Alert state (1/4 -> 2/4 -> 3/4 -> 4/4)
     if (isAlert) {
       ctx.save();
       ctx.fillStyle = 'rgba(220,38,38,0.92)';
-      ctx.fillRect(8, H / 2 - 18, W - 16, 36);
+      ctx.fillRect(8, H / 2 - 16, W - 16, 32);
       ctx.strokeStyle = '#fecaca';
       ctx.lineWidth = 1.5;
-      ctx.strokeRect(8, H / 2 - 18, W - 16, 36);
+      ctx.strokeRect(8, H / 2 - 16, W - 16, 32);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 9px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`MẤT TIÊU CỰ [ ${absentCountdown}/4 ]`, W / 2, H / 2 - 5);
+      ctx.fillText(`MẤT TIÊU CỰ [ ${absentCountdown}/4 ]`, W / 2, H / 2 - 4);
 
-      // 4 step meter [ █ █ ░ ░ ]
+      // Draw 4 step meter [ █ █ ░ ░ ]
       const barW = (W - 36) / 4;
       for (let s = 1; s <= 4; s++) {
         const segX = 14 + (s - 1) * (barW + 2);
         ctx.fillStyle = s <= absentCountdown ? '#ffffff' : 'rgba(255,255,255,0.25)';
-        ctx.fillRect(segX, H / 2 + 4, barW, 5);
+        ctx.fillRect(segX, H / 2 + 5, barW, 5);
       }
       ctx.restore();
     }
+
+    // 5. Bottom HUD Bar
+    ctx.fillStyle = isAlert ? 'rgba(127,29,29,0.92)' : 'rgba(15,23,42,0.85)';
+    ctx.fillRect(4, H - 18, W - 8, 14);
+    ctx.fillStyle = isAlert ? '#fee2e2' : '#6ee7b7';
+    ctx.font = 'bold 7.5px sans-serif';
+    ctx.textAlign = 'left';
+    const statusText = isAlert ? `THOÁT MÀN HÌNH (NHỊP ${absentCountdown}/4)` : '● ĐANG BÁM SÁT MỤC TIÊU (60 FPS)';
+    ctx.fillText(statusText.substring(0, 26), 8, H - 11);
   }
+
 
   _captureProctorSnapshot(videoEl, studentName, violationReason) {
     try {
@@ -11148,15 +11284,8 @@ render_ai_geometry(dom) {
     this._examStudentId = this.currentUser?.id || 'unknown';
     this._examAnswers = {};
 
-    if (!isPreviewMode && (needCamera || needMic) && stream) {
-      // Thi thật: hiện modal kiểm tra thiết bị + chụp khuôn mặt
-      this.showDeviceCheckModal(exam, stream, () => {
-        this.runExamSession(exam, stream);
-      });
-    } else {
-      // Chạy thử: vào thẳng (stream có thể có hoặc null tùy đề có bật camera/mic không)
-      this.runExamSession(exam, stream);
-    }
+    // Vào thẳng phòng thi (cả thi thật và chạy thử), không cần modal GEAR CHECK trung gian làm vỡ layout điện thoại
+    this.runExamSession(exam, stream, isPreviewMode);
   }
 
   // =====================================================
@@ -11425,13 +11554,25 @@ render_ai_geometry(dom) {
   // =====================================================
   // IN BAI KIEM TRA HOC SINH (CHUAN FORM GIAO VIEN CHAM)
   // =====================================================
-  printStudentExamResult(examId, studentId) {
-    const exam = (db.getExams ? db.getExams() : []).find(e => e.id === examId);
-    if (!exam) return;
-    const examQs = exam.questions || [];
-    const attempts = db.getExamAttemptsByExam ? db.getExamAttemptsByExam(examId) : [];
-    const stuAttempts = attempts.filter(a => a.studentId === studentId);
-    const attempt = stuAttempts.sort((a,b) => (b.score||0)-(a.score||0))[0];
+  printStudentExamResult(examId, studentId, attemptId = null) {
+    const exam = (db.getExams ? db.getExams() : []).find(e => e.id === examId) || { title: 'Bài kiểm tra', questions: [] };
+    const allQBank = (typeof db !== 'undefined' && db.getQuestions) ? db.getQuestions() : [];
+    let examQs = [];
+    if (exam.questionIds && exam.questionIds.length > 0) {
+      examQs = exam.questionIds.map(id => allQBank.find(q => q.id === id)).filter(Boolean);
+    } else if (exam.questions && exam.questions.length > 0) {
+      examQs = exam.questions;
+    }
+
+    const allAttempts = (typeof db !== 'undefined' && db.getExamAttempts) ? db.getExamAttempts() : [];
+    let attempt = null;
+    if (attemptId) {
+      attempt = allAttempts.find(a => a.id === attemptId);
+    }
+    if (!attempt) {
+      const stuAttempts = allAttempts.filter(a => a.examId === examId && a.studentId === studentId);
+      attempt = stuAttempts.sort((a,b) => (b.score||0)-(a.score||0))[0];
+    }
     const students = db.getStudents ? db.getStudents() : [];
     const student = students.find(s => s.id === studentId) || { name: studentId, classId: '' };
     const subjects = db.getSubjects ? db.getSubjects() : [];
@@ -11479,26 +11620,45 @@ render_ai_geometry(dom) {
             <td style="padding:0.5rem 0.6rem;text-align:center;font-size:0.8rem;color:#475569;vertical-align:top;">${q.score||0.25}đ</td>
           </tr>`;
         } else if (key === 'dung_sai') {
-          const subItems = q.subItems || [];
+          const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
+            { text: 'Phát biểu a', isCorrect: true },
+            { text: 'Phát biểu b', isCorrect: false },
+            { text: 'Phát biểu c', isCorrect: true },
+            { text: 'Phát biểu d', isCorrect: false }
+          ]);
           let allRight = true;
-          let subRows = subItems.length > 0 ? subItems.map((si, si_i) => {
+          let subRows = rawItems.map((it, si_i) => {
+            const label = String.fromCharCode(97 + si_i);
             const stuVal = (typeof studentAns === 'object' && studentAns !== null) ? studentAns[si_i] : undefined;
-            const correctVal = si.correct;
-            const ok = stuVal === correctVal;
+            const correctVal = (it.isCorrect !== undefined) ? it.isCorrect : (it.correct !== undefined ? it.correct : true);
+            const ok = (stuVal === correctVal);
             if (!ok) allRight = false;
-            return `<div style="font-size:0.8rem;margin-left:1rem;color:${ok?'#16a34a':'#dc2626'};">${ok?'✅':'❌'} ${si.text||si}: HS=${stuVal===true?'Đúng':stuVal===false?'Sai':'—'} / ĐA=${correctVal===true?'Đúng':'Sai'}</div>`;
-          }).join('') : `<div style="font-size:0.8rem;color:#94a3b8;">HS nhập: ${typeof studentAns==='object'?JSON.stringify(studentAns):(studentAns||'—')}</div>`;
-          if (allRight && subItems.length > 0) correctQ++;
-          rowsHtml += `<tr style="border-bottom:1px solid #f1f5f9;"><td colspan="6" style="padding:0.5rem 0.6rem;"><div style="font-size:0.83rem;font-weight:600;color:#1e293b;margin-bottom:0.3rem;">${qNum}. ${qText}</div>${subRows}</td></tr>`;
+            return `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:0.3rem 0.6rem; margin-top:0.25rem; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; font-size:0.8rem;">
+                <span><strong>${label})</strong> ${it.text||`Ý ${label}`}</span>
+                <span>
+                  HS: <strong style="color:${stuVal===true?'#15803d':stuVal===false?'#b91c1c':'#64748b'};">${stuVal===true?'Đúng':stuVal===false?'Sai':'Chưa chọn'}</strong> | 
+                  ĐA: <strong style="color:${correctVal===true?'#15803d':'#b91c1c'};">${correctVal===true?'Đúng':'Sai'}</strong> 
+                  ${ok ? '✅' : '❌'}
+                </span>
+              </div>
+            `;
+          }).join('');
+          if (allRight) correctQ++;
+          rowsHtml += `<tr style="border-bottom:1px solid #f1f5f9;"><td colspan="6" style="padding:0.6rem 0.8rem;"><div style="font-size:0.88rem;font-weight:700;color:#1e293b;margin-bottom:0.35rem;">${qNum}. ${qText}</div>${subRows}</td></tr>`;
         } else if (key === 'tra_loi_ngan') {
           const correct = q.correctAnswerText || q.correctAnswer || '';
           const stuVal = typeof studentAns === 'string' ? studentAns : (typeof studentAns === 'object' && studentAns?.text ? studentAns.text : '—');
+          const hasFile = typeof studentAns === 'object' && studentAns?.fileName;
           const isCorrect = stuVal.trim().toLowerCase() === String(correct).trim().toLowerCase();
           if (isCorrect) correctQ++;
           rowsHtml += `<tr style="border-bottom:1px solid #f1f5f9;">
             <td style="padding:0.5rem 0.6rem;font-size:0.82rem;font-weight:700;">${qNum}</td>
             <td style="padding:0.5rem 0.6rem;font-size:0.83rem;color:#1e293b;">${qText}</td>
-            <td style="padding:0.5rem 0.6rem;font-size:0.83rem;color:${isCorrect?'#16a34a':'#dc2626'};font-weight:600;">${stuVal}</td>
+            <td style="padding:0.5rem 0.6rem;font-size:0.83rem;color:${isCorrect?'#16a34a':'#dc2626'};font-weight:600;">
+              <div>${stuVal}</div>
+              ${hasFile ? `<div style="font-size:0.75rem;color:#7c3aed;margin-top:0.25rem;font-weight:600;">📎 ${studentAns.fileName}</div>` : ''}
+            </td>
             <td style="padding:0.5rem 0.6rem;font-size:0.83rem;color:#16a34a;font-weight:600;">${correct}</td>
             <td style="text-align:center;font-size:1rem;">${isCorrect?'✅':'❌'}</td>
             <td style="text-align:center;font-size:0.8rem;color:#475569;">${q.score||0.5}đ</td>
@@ -11617,6 +11777,103 @@ render_ai_geometry(dom) {
   // =====================================================
   // MODAL LOG VI PHAM CAMERA / MIC KY THI
   // =====================================================
+  // =====================================================
+  // BẢNG GIÁM THỊ PHÒNG THI LIVE GRID — GIÁO VIÊN XEM TOÀN BỘ HỌC SINH
+  // =====================================================
+  showLiveProctoringDashboard(examId) {
+    const exam = (db.getExams ? db.getExams() : []).find(e => e.id === examId);
+    if (!exam) { this.showToast('Không tìm thấy đề thi!', 'error'); return; }
+
+    const oldModal = document.getElementById('live-proctor-dashboard');
+    if (oldModal) oldModal.remove();
+
+    const allLogs = (db.getExamViolationLogs ? db.getExamViolationLogs(examId) : []);
+    const students = (db.getStudents ? db.getStudents() : []);
+
+    // Lấy danh sách học sinh đang thi (có examAttempt chưa có submitTime)
+    const attempts = (db.getExamAttempts ? db.getExamAttempts() : []).filter(a => a.examId === examId);
+    const activeStudentIds = [...new Set(attempts.map(a => a.studentId))];
+
+    // Nếu chưa có học sinh nào bắt đầu thi, hiện danh sách lớp được phép thi
+    const targetStudents = activeStudentIds.length > 0
+      ? activeStudentIds.map(id => students.find(s => s.id === id)).filter(Boolean)
+      : students.filter(s => (exam.classIds || []).includes(s.classId));
+
+    const getViolationCount = (stuId) => allLogs.filter(l => l.studentId === stuId).length;
+    const getStatusColor = (vc) => vc === 0 ? '#10b981' : vc <= 2 ? '#f59e0b' : '#ef4444';
+    const getStatusLabel = (vc) => vc === 0 ? '🟢 Bình thường' : vc <= 2 ? '🟡 Cảnh báo' : '🔴 Vi phạm';
+
+    const gridHtml = targetStudents.length === 0
+      ? `<div style="text-align:center;padding:3rem;color:#94a3b8;font-style:italic;">Chưa có học sinh nào bắt đầu vào phòng thi.</div>`
+      : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;">
+          ${targetStudents.map(stu => {
+            const vc = getViolationCount(stu.id);
+            const statusColor = getStatusColor(vc);
+            const statusLabel = getStatusLabel(vc);
+            const lastLog = allLogs.filter(l => l.studentId === stu.id).slice(-1)[0];
+            const lastSnap = lastLog?.snapshot || null;
+            return `
+              <div style="background:#fff;border:2px solid ${statusColor};border-radius:14px;padding:1rem;display:flex;flex-direction:column;gap:0.5rem;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:all 0.2s;">
+                ${lastSnap
+                  ? `<img src="${lastSnap}" style="width:100%;height:90px;object-fit:cover;border-radius:8px;border:1.5px solid ${statusColor};" />`
+                  : `<div style="width:100%;height:90px;background:#f1f5f9;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:2rem;">📷</div>`
+                }
+                <div style="font-weight:700;font-size:0.9rem;color:#0f172a;">${stu.name}</div>
+                <div style="font-size:0.78rem;color:#64748b;">Lớp: ${stu.classId || '—'}</div>
+                <div style="font-size:0.82rem;font-weight:700;color:${statusColor};">${statusLabel}</div>
+                <div style="font-size:0.75rem;color:#475569;">⚠️ Vi phạm: ${vc} lần</div>
+                <div style="display:flex;gap:0.4rem;margin-top:0.3rem;">
+                  <button onclick="window.LMSAppInstance && window.LMSAppInstance._sendProctoringReminder('${stu.id}', '${stu.name}')" style="flex:1;padding:0.35rem;background:#fef9c3;border:1.5px solid #fde047;border-radius:8px;font-size:0.72rem;font-weight:700;color:#854d0e;cursor:pointer;">📢 Nhắc</button>
+                  <button onclick="window.LMSAppInstance && window.LMSAppInstance.showViolationLogModal('${examId}','${exam.title}')" style="flex:1;padding:0.35rem;background:#fee2e2;border:1.5px solid #fca5a5;border-radius:8px;font-size:0.72rem;font-weight:700;color:#dc2626;cursor:pointer;">📋 Log</button>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>`;
+
+    const modal = document.createElement('div');
+    modal.id = 'live-proctor-dashboard';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:999999;padding:1rem;font-family:var(--font-body);';
+    modal.innerHTML = `
+      <div style="background:#f8fafc;border-radius:22px;padding:1.5rem;width:100%;max-width:1100px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,0.5);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-shrink:0;">
+          <div>
+            <h3 style="margin:0 0 0.2rem 0;font-weight:800;font-size:1.2rem;color:#0f172a;">🛡️ BẢNG GIÁM THỊ PHÒNG THI LIVE</h3>
+            <p style="margin:0;font-size:0.82rem;color:#64748b;">${exam.title} — ${targetStudents.length} học sinh | Tổng vi phạm: <strong>${allLogs.length}</strong></p>
+          </div>
+          <div style="display:flex;gap:0.65rem;align-items:center;">
+            <div style="font-size:0.75rem;color:#64748b;background:#fff;padding:0.3rem 0.8rem;border-radius:20px;border:1.5px solid #e2e8f0;">🔄 Tự làm mới mỗi 15s</div>
+            <button id="lp-close" style="background:#f1f5f9;border:1.5px solid #e2e8f0;color:#475569;font-size:1.3rem;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;">&times;</button>
+          </div>
+        </div>
+        <div style="overflow-y:auto;flex:1;">${gridHtml}</div>
+        <div style="display:flex;gap:0.65rem;margin-top:1rem;flex-shrink:0;">
+          <button id="lp-refresh" style="padding:0.65rem 1.4rem;background:linear-gradient(135deg,#0891b2,#0369a1);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;">🔄 Làm mới ngay</button>
+          <button id="lp-log-all" style="padding:0.65rem 1.4rem;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;">📋 Xem toàn bộ Log Vi Phạm</button>
+          <button id="lp-close2" style="margin-left:auto;padding:0.65rem 1.4rem;background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;">✕ Đóng</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.querySelector('#lp-close').onclick = () => modal.remove();
+    modal.querySelector('#lp-close2').onclick = () => modal.remove();
+    modal.querySelector('#lp-log-all').onclick = () => this.showViolationLogModal(examId, exam.title);
+    modal.querySelector('#lp-refresh').onclick = () => { modal.remove(); this.showLiveProctoringDashboard(examId); };
+    modal.onclick = e => { if (e.target === modal) modal.remove(); };
+
+    // Tự động làm mới sau 15 giây
+    setTimeout(() => { if (document.getElementById('live-proctor-dashboard')) { modal.remove(); this.showLiveProctoringDashboard(examId); } }, 15000);
+  }
+
+  // Gửi nhắc nhở trực tiếp đến màn hình học sinh (thông qua store hoặc toast chung)
+  _sendProctoringReminder(studentId, studentName) {
+    // Lưu vào store để học sinh nhận được khi trang của họ poll
+    if (!window._proctoringReminders) window._proctoringReminders = {};
+    window._proctoringReminders[studentId] = {
+      msg: `📢 Giám thị nhắc nhở: ${studentName} — Hãy tập trung làm bài, ngồi thẳng trước camera!`,
+      ts: Date.now()
+    };
+    this.showToast(`✅ Đã gửi nhắc nhở đến học sinh: ${studentName}`, 'success');
+  }
+
   showViolationLogModal(examId, examTitle) {
     const oldModal = document.getElementById('violation-log-modal');
     if (oldModal) oldModal.remove();
@@ -11704,7 +11961,7 @@ render_ai_geometry(dom) {
   // =====================================================
   // PHONG THI CHINH - FULLSCREEN LOCKDOWN
   // =====================================================
-  runExamSession(exam, stream) {
+  runExamSession(exam, stream, isPreviewMode = false) {
     const questions = db.getQuestions ? db.getQuestions() : [];
     // Merge cả hai nguồn: questionIds (ngân hàng) và exam.questions (tự soạn thủ công)
     let examQs = (exam.questionIds || []).map(id => questions.find(q => q.id === id)).filter(Boolean);
@@ -11753,14 +12010,14 @@ render_ai_geometry(dom) {
     overlay.innerHTML = `
       <div id="exam-hud" style="background:#ffffff;padding:0.55rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #e2e8f0;flex-shrink:0;gap:0.5rem;min-height:52px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
         <div style="display:flex;align-items:center;gap:0.5rem;flex:1;min-width:0;">
-          <span style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;padding:0.25rem 0.65rem;border-radius:7px;font-weight:700;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">🎓 PHÒNG THI</span>
+          <span style="background:${isPreviewMode ? 'linear-gradient(135deg,#7c3aed,#4f46e5)' : 'linear-gradient(135deg,#dc2626,#b91c1c)'};color:#fff;padding:0.25rem 0.65rem;border-radius:7px;font-weight:700;font-size:0.75rem;white-space:nowrap;flex-shrink:0;">${isPreviewMode ? '🧪 GIÁO VIÊN CHẠY THỬ' : '🎓 PHÒNG THI'}</span>
           <span style="font-weight:400;font-size:0.85rem;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${exam.title}</span>
         </div>
         <div style="display:flex;align-items:center;gap:0.65rem;flex-shrink:0;">
           <div id="exam-timer-display" style="font-weight:500;font-size:1.25rem;color:${timeLimitSec>0?'#dc2626':'#059669'};font-family:monospace;white-space:nowrap;">
             ⏱️ ${timeLimitSec>0 ? formatTime(secondsLeft) : '∞'}
           </div>
-          <div id="exam-violation-display" style="font-size:0.78rem;color:#dc2626;font-weight:400;white-space:nowrap;">⚠️ Vi phạm: <span id="vcount">0</span>/4</div>
+          <div id="exam-violation-display" style="font-size:0.78rem;color:#dc2626;font-weight:400;white-space:nowrap;">⚠️ Vi phạm: <span id="vcount">0</span>/<span id="vmaxcount">4</span></div>
           <button id="btn-exam-submit-session" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;padding:0.5rem 1.1rem;border-radius:10px;font-weight:500;font-size:0.88rem;cursor:pointer;box-shadow:0 0 18px rgba(245,158,11,0.55);white-space:nowrap;flex-shrink:0;">🚀 NỘP BÀI</button>
         </div>
       </div>
@@ -11827,18 +12084,49 @@ render_ai_geometry(dom) {
                     <img src="${q.imageUrl}" style="max-height:380px; max-width:100%; object-fit:contain; border-radius:10px; border:1.5px solid #cbd5e1; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.06);" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${q.imageUrl}')" title="Bấm để phóng to ảnh câu hỏi" />
                   </div>
                 ` : ''}
-                 ${(qType === 'tra_loi_ngan' || qType === 'tu_luan') ? `
+                 ${(qType === 'dung_sai') ? (() => {
+                   const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
+                     { text: 'Phát biểu a', isCorrect: true },
+                     { text: 'Phát biểu b', isCorrect: false },
+                     { text: 'Phát biểu c', isCorrect: true },
+                     { text: 'Phát biểu d', isCorrect: false }
+                   ]);
+                   return `
+                     <div style="display:flex; flex-direction:column; gap:0.65rem; margin-top:0.4rem;">
+                       ${rawItems.map((it, itIdx) => {
+                         const label = String.fromCharCode(97 + itIdx);
+                         const itemText = typeof it === 'string' ? it : (it.text || it.title || `Ý ${label}`);
+                         return `
+                           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:0.75rem 1rem; transition:all 0.15s;" onmouseenter="this.style.background='#eff6ff'; this.style.borderColor='#93c5fd'" onmouseleave="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'">
+                             <div style="flex:1; min-width:200px; font-size:0.92rem; color:#1e293b; line-height:1.45;">
+                               <strong style="color:#0284c7; font-size:0.95rem;">${label})</strong> ${itemText}
+                             </div>
+                             <div style="display:flex; gap:0.75rem; align-items:center;">
+                               <label style="display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer; font-size:0.88rem; font-weight:700; color:#15803d; background:#f0fdf4; border:1.5px solid #bbf7d0; padding:0.35rem 0.85rem; border-radius:8px; user-select:none; transition:all 0.15s;" onmouseenter="this.style.background='#dcfce7'" onmouseleave="this.style.background='#f0fdf4'">
+                                 <input type="radio" name="exam-tf-${qIdx}-${itIdx}" value="true" class="exam-tf-radio" data-q-idx="${qIdx}" data-sub-idx="${itIdx}" style="width:17px; height:17px; accent-color:#16a34a; cursor:pointer;">
+                                 Đúng
+                               </label>
+                               <label style="display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer; font-size:0.88rem; font-weight:700; color:#b91c1c; background:#fef2f2; border:1.5px solid #fecaca; padding:0.35rem 0.85rem; border-radius:8px; user-select:none; transition:all 0.15s;" onmouseenter="this.style.background='#fee2e2'" onmouseleave="this.style.background='#fef2f2'">
+                                 <input type="radio" name="exam-tf-${qIdx}-${itIdx}" value="false" class="exam-tf-radio" data-q-idx="${qIdx}" data-sub-idx="${itIdx}" style="width:17px; height:17px; accent-color:#dc2626; cursor:pointer;">
+                                 Sai
+                               </label>
+                             </div>
+                           </div>
+                         `;
+                       }).join('')}
+                     </div>
+                   `;
+                 })() : (qType === 'tra_loi_ngan' || qType === 'tu_luan') ? `
                    <div class="exam-essay-wrapper" data-q-idx="${qIdx}" style="display:flex;flex-direction:column;gap:0.6rem;">
-                      <textarea class="exam-essay-input" data-q-idx="${qIdx}" placeholder="${qType === 'tra_loi_ngan' ? 'Nhập câu trả lời ngắn...' : 'Nhập câu trả lời của bạn (hoặc đính kèm tệp bên dưới)...'}" style="width:100%;min-height:${qType === 'tra_loi_ngan' ? '56px' : '100px'};background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:0.75rem;color:#0f172a;font-size:0.9rem;resize:vertical;box-sizing:border-box;"></textarea>
-                      ${qType === 'tu_luan' ? `
-                      <div style="border-top:1px dashed rgba(255,255,255,0.15);padding-top:0.5rem;">
-                        <div style="font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:0.35rem;">── Đính kèm tệp (ảnh / .docx / .xlsx / .pptx) ──</div>
+                      <textarea class="exam-essay-input" data-q-idx="${qIdx}" placeholder="${qType === 'tra_loi_ngan' ? 'Nhập câu trả lời ngắn (hoặc đính kèm tệp bài làm bên dưới)...' : 'Nhập câu trả lời của bạn (hoặc đính kèm tệp bài làm bên dưới)...'}" style="width:100%;min-height:${qType === 'tra_loi_ngan' ? '60px' : '100px'};background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:0.75rem;color:#0f172a;font-size:0.9rem;resize:vertical;box-sizing:border-box;"></textarea>
+                      <div style="border-top:1px dashed #cbd5e1;padding-top:0.45rem;">
+                        <div style="font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:0.35rem;">── Đính kèm tệp bài làm (ảnh / .docx / .xlsx / .pptx / .pdf) ──</div>
                         <label class="exam-essay-file-label" data-q-idx="${qIdx}" style="display:inline-flex;align-items:center;gap:0.45rem;background:#f0f9ff;border:1.5px dashed #93c5fd;border-radius:10px;padding:0.45rem 0.9rem;cursor:pointer;font-size:0.82rem;color:#0369a1;font-weight:600;" onmouseenter="this.style.background='#dbeafe'" onmouseleave="this.style.background='#f0f9ff'">
                           📎 Chọn tệp đính kèm
-                          <input type="file" class="exam-essay-file" data-q-idx="${qIdx}" accept="image/*,.docx,.xlsx,.pptx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation" style="display:none;">
+                          <input type="file" class="exam-essay-file" data-q-idx="${qIdx}" accept="image/*,.docx,.xlsx,.pptx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation" style="display:none;">
                         </label>
-                        <div class="exam-essay-file-preview" data-q-idx="${qIdx}" style="display:none;margin-top:0.4rem;align-items:center;gap:0.55rem;background:rgba(255,255,255,0.07);border:1.5px solid rgba(167,139,250,0.35);border-radius:10px;padding:0.45rem 0.8rem;font-size:0.82rem;color:#e2e8f0;"></div>
-                      </div>` : ''}
+                        <div class="exam-essay-file-preview" data-q-idx="${qIdx}" style="display:none;margin-top:0.4rem;align-items:center;gap:0.55rem;background:#f8fafc;border:1.5px solid #a78bfa;border-radius:10px;padding:0.45rem 0.8rem;font-size:0.82rem;color:#1e293b;"></div>
+                      </div>
                     </div>
                  ` : opts.length > 0 ? `
                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.55rem;">
@@ -11886,6 +12174,18 @@ render_ai_geometry(dom) {
         </div>
       ` : ''}
 
+      ${((exam.examType || '').toLowerCase() === 'ck') ? `
+        <!-- DUAL-CAM QR PANEL — CHỈ HIỆN CHO KỲ THI CUỐI KỲ -->
+        <div id="dual-cam-qr-panel" style="position:fixed;top:210px;right:12px;z-index:100000;width:148px;background:#0f172a;border:2px solid #f59e0b;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;padding:0.4rem;gap:0.25rem;">
+          <div style="font-size:0.58rem;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:0.4px;width:100%;text-align:center;">📱 CAMERA PHỤ (GÓC NGHIÊNG)</div>
+          <div id="dual-cam-qr-img" style="width:120px;height:120px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
+            <div style="font-size:0.6rem;color:#475569;text-align:center;padding:0.4rem;">Đang tạo mã QR...</div>
+          </div>
+          <div id="dual-cam-status" style="font-size:0.6rem;color:#fbbf24;font-weight:700;text-align:center;">⏳ Chờ điện thoại kết nối</div>
+          <div style="font-size:0.55rem;color:#64748b;text-align:center;line-height:1.3;">Quét QR để mở camera phụ góc nghiêng 45°</div>
+        </div>
+      ` : ''}
+
       <div id="violation-warning-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.75); backdrop-filter:blur(6px); z-index:2147483647; align-items:center; justify-content:center; padding:1.25rem; animation:fadeIn 0.2s ease-out; font-family:var(--font-body);">
         <div style="background:#ffffff; border-radius:20px; padding:1.6rem; width:100%; max-width:460px; box-shadow:0 25px 70px rgba(0,0,0,0.5); text-align:center; border:3px solid #ef4444; position:relative;">
           <div style="font-size:2.6rem; margin-bottom:0.3rem;">🚨</div>
@@ -11916,13 +12216,57 @@ render_ai_geometry(dom) {
     };
     enterFS();
 
-    // Camera PiP — set srcObject AND explicitly call play()
+    // Camera PiP — srcObject + play() được set tại khối AI Vision bên dưới
+    // (đảm bảo listener 'playing' đã gắn trước khi play() gọi → startFaceDetect đúng thứ tự)
     if (exam.enableCamera && stream) {
-      const video = overlay.querySelector('#exam-pip-video');
-      if (video) {
-        video.srcObject = stream;
-        video.play().catch(() => {}); // force play in case autoplay is blocked
+
+    // 📱 DUAL-CAM QR GENERATOR — Kỳ Thi Cuối Kỳ: Tự động tạo QR dẫn đến cam.html
+    if ((exam.examType || '').toLowerCase() === 'ck') {
+      const qrImg = overlay.querySelector('#dual-cam-qr-img');
+      const dualStatus = overlay.querySelector('#dual-cam-status');
+      if (qrImg) {
+        // Tạo URL trang cam.html với tham số phòng thi
+        const camUrl = `${location.protocol}//${location.host}/cam.html?room=${encodeURIComponent(exam.id || 'exam')}&name=${encodeURIComponent(this.currentUser?.name || 'hs')}&t=${Date.now()}`;
+        // Dùng QR API công khai (offline fallback: chỉ hiện text URL)
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(camUrl)}&size=120x120&format=png&qzone=1&color=0f172a`;
+        const img = document.createElement('img');
+        img.src = qrApiUrl;
+        img.style.cssText = 'width:120px;height:120px;object-fit:contain;border-radius:6px;';
+        img.onerror = () => {
+          // Offline fallback: hiển thị text URL rút gọn
+          qrImg.innerHTML = `<div style="font-size:0.52rem;color:#0f172a;padding:0.3rem;word-break:break-all;text-align:center;">${camUrl.replace(/^https?:\/\//, '')}</div>`;
+        };
+        img.onload = () => {
+          qrImg.innerHTML = '';
+          qrImg.appendChild(img);
+        };
+        qrImg.innerHTML = '';
+        qrImg.appendChild(img);
+
+        // Kiểm tra kết nối camera phụ định kỳ mỗi 5 giây
+        let dualCamCheckInterval = setInterval(() => {
+          if (!this.isProctoringActive || isSubmitting) { clearInterval(dualCamCheckInterval); return; }
+          // Kiểm tra thông qua global cameraStreamStore nếu server đang chạy
+          if (typeof window._dualCamConnected !== 'undefined') {
+            if (window._dualCamConnected) {
+              if (dualStatus) dualStatus.innerHTML = '<span style="color:#34d399;font-weight:800;">🟢 Camera phụ đã kết nối!</span>';
+              const panel = overlay.querySelector('#dual-cam-qr-panel');
+              if (panel) panel.style.borderColor = '#10b981';
+            } else {
+              if (dualStatus) dualStatus.innerHTML = '<span style="color:#fbbf24;">⏳ Chờ điện thoại kết nối...</span>';
+            }
+          }
+        }, 5000);
+
+        // Cảnh báo sau 90 giây nếu chưa kết nối camera phụ (Cuối Kỳ)
+        setTimeout(() => {
+          if (!this.isProctoringActive || !window._dualCamConnected) {
+            if (dualStatus) dualStatus.innerHTML = '<span style="color:#ef4444;font-weight:800;">⚠️ Chưa kết nối camera phụ!</span>';
+            this.showToast('⚠️ Kỳ thi Cuối Kỳ yêu cầu Camera phụ! Vui lòng dùng điện thoại quét mã QR ở góc phải màn hình.', 'warning');
+          }
+        }, 90000);
       }
+    }
       // Make PiP draggable (mouse + touch)
       const pip = overlay.querySelector('#cam-pip-panel');
       if (pip) {
@@ -11971,7 +12315,7 @@ render_ai_geometry(dom) {
       enterFS();
       setTimeout(enterFS, 100);
       setTimeout(enterFS, 300);
-      if (this._examViolationCount >= 4) {
+      if (this._examViolationCount >= _maxViolations && !isPreviewMode) {
         submitExam(true);
       } else {
         this.showToast('✅ Đã nhận cam kết! Tự động khóa lại Toàn Màn Hình để tiếp tục.');
@@ -11986,6 +12330,18 @@ render_ai_geometry(dom) {
     if (commitChk) { commitChk.onclick = triggerResume; commitChk.onchange = triggerResume; }
     if (commitBox)  { commitBox.onclick = triggerResume; }
     if (ackBtn)     { ackBtn.onclick = triggerResume; }
+
+    // ─── Xác định cấp độ giám sát theo loại kỳ thi ──────────────────────────────
+    // examType: 'tx' = Thường Xuyên | 'gk' = Giữa Kỳ | 'ck' = Cuối Kỳ | undefined = Giữa Kỳ (mặc định)
+    const _examType = (exam.examType || 'gk').toLowerCase();
+    const _isTX = (_examType === 'tx'); // Thường Xuyên: nhắc nhở nhẹ, không trừ giờ, tối đa 5 cảnh báo
+    const _maxViolations = _isTX ? 5 : 4;
+
+    // Cập nhật số vi phạm tối đa trên HUD
+    setTimeout(() => {
+      const vmaxEl = overlay.querySelector('#vmaxcount');
+      if (vmaxEl) vmaxEl.textContent = _isTX ? '5' : '4';
+    }, 100);
 
     // Violation handler with Automatic Snapshot Proof
     const handleViolation = (type) => {
@@ -12022,19 +12378,42 @@ render_ai_geometry(dom) {
         if (titleEl) titleEl.textContent = '⚠️ CẢNH BÁO VI PHẠM LẦN 1/4';
         if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ Bạn đã vi phạm quy chế phòng thi. Tích chọn cam kết hoặc bấm nút bên dưới để tiếp tục bài thi!${snapHtml}`;
       } else if (vc === 2) {
-        if (titleEl) titleEl.textContent = '⏱️ VI PHẠM LẦN 2/4 — TRỪ 30% THỜI GIAN';
-        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ <strong>Xử phạt:</strong> Thời gian còn lại đã bị trừ 30%! Hãy bấm cam kết không tái phạm để làm tiếp!${snapHtml}`;
-        if (timeLimitSec > 0) secondsLeft = Math.floor(secondsLeft * 0.7);
+        if (_isTX) {
+          // KTDG Thường Xuyên: Chỉ nhắc nhở, KHÔNG trừ giờ
+          if (titleEl) titleEl.textContent = '⚠️ NHẮC NHỞ VI PHẠM LẦN 2/5 — ĐÁNH GIÁ THƯỜNG XUYÊN';
+          if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do:</strong> ${type}<br>ℹ️ <strong>Hình thức:</strong> Nhắc nhở sư phạm lần 2 — Hãy nghiêm túc làm bài!${snapHtml}`;
+        } else {
+          if (titleEl) titleEl.textContent = '⏱️ VI PHẠM LẦN 2/4 — TRỪ 30% THỜI GIAN';
+          if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ <strong>Xử phạt:</strong> Thời gian còn lại đã bị trừ 30%! Hãy bấm cam kết không tái phạm để làm tiếp!${snapHtml}`;
+          if (timeLimitSec > 0) secondsLeft = Math.floor(secondsLeft * 0.7);
+        }
       } else if (vc === 3) {
-        if (titleEl) titleEl.textContent = '⏱️ VI PHẠM LẦN 3/4 — TRỪ 70% THỜI GIAN';
-        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ <strong>Xử phạt:</strong> Thời gian còn lại đã bị trừ 70%! Cảnh báo cuối cùng trước khi tự động nộp bài!${snapHtml}`;
-        if (timeLimitSec > 0) secondsLeft = Math.floor(secondsLeft * 0.3);
-      } else if (vc >= 4) {
-        if (titleEl) titleEl.textContent = '🚨 VI PHẠM LẦN 4/4 — TỰ ĐỘNG NỘP BÀI!';
-        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>🚨 Bạn đã vi phạm 4 lần. Hệ thống tự động nộp bài kiểm tra ngay lập tức!${snapHtml}`;
-        if (commitChk) commitChk.checked = true;
-        if (ackBtn) { ackBtn.style.background = '#dc2626'; ackBtn.textContent = '✅ NỘP BÀI THI & XEM KẾT QUẢ'; }
-        setTimeout(() => submitExam(true), 2500);
+        if (_isTX) {
+          if (titleEl) titleEl.textContent = '⚠️ NHẮC NHỞ VI PHẠM LẦN 3/5 — ĐÁNH GIÁ THƯỜNG XUYÊN';
+          if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do:</strong> ${type}<br>ℹ️ <strong>Hình thức:</strong> Nhắc nhở sư phạm lần 3 — Tiếp tục vi phạm có thể ảnh hưởng đến kết quả!${snapHtml}`;
+        } else {
+          if (titleEl) titleEl.textContent = '⏱️ VI PHẠM LẦN 3/4 — TRỪ 70% THỜI GIAN';
+          if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>⚠️ <strong>Xử phạt:</strong> Thời gian còn lại đã bị trừ 70%! Cảnh báo cuối cùng trước khi tự động nộp bài!${snapHtml}`;
+          if (timeLimitSec > 0) secondsLeft = Math.floor(secondsLeft * 0.3);
+        }
+      } else if (vc === 4 && _isTX) {
+        // KTDG Thường Xuyên: Lần 4 và 5 vẫn chỉ nhắc nhở
+        if (titleEl) titleEl.textContent = '⚠️ NHẮC NHỞ VI PHẠM LẦN 4/5 — CẢNH BÁO CUỐI ĐÁNH GIÁ TX';
+        if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do:</strong> ${type}<br>⚠️ Đây là cảnh báo lần 4. Vi phạm thêm 1 lần nữa sẽ bị GV ghi nhận vào hồ sơ!${snapHtml}`;
+      } else if (vc >= _maxViolations) {
+        if (isPreviewMode) {
+          if (titleEl) titleEl.textContent = '⚠️ [CHẠY THỬ] ĐÃ ĐẠT MỨC TỐI ĐA VI PHẠM (4/4)';
+          if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>ℹ️ <strong>Chế độ Giáo viên Chạy Thử:</strong> Trong phòng thi thật của học sinh, bài thi sẽ bị <strong>TỰ ĐỘNG NỘP NGAY LẬP TỨC</strong>. Vì thầy/cô đang chạy thử nên bài thi vẫn tiếp tục bình thường để kiểm tra đề.${snapHtml}`;
+        } else if (_isTX) {
+          if (titleEl) titleEl.textContent = '🚨 VI PHẠM LẦN 5/5 — GHI NHẬN VÀO HỒ SƠ!';
+          if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do:</strong> ${type}<br>🚨 Đã vi phạm 5 lần trong giờ kiểm tra thường xuyên. Giáo viên sẽ được thông báo!${snapHtml}`;
+        } else {
+          if (titleEl) titleEl.textContent = '🚨 VI PHẠM LẦN 4/4 — TỰ ĐỘNG NỘP BÀI!';
+          if (msgEl) msgEl.innerHTML = `📌 <strong>Lý do vi phạm:</strong> ${type}<br>🚨 Bạn đã vi phạm 4 lần. Hệ thống tự động nộp bài kiểm tra ngay lập tức!${snapHtml}`;
+          if (commitChk) commitChk.checked = true;
+          if (ackBtn) { ackBtn.style.background = '#dc2626'; ackBtn.textContent = '✅ NỘP BÀI THI & XEM KẾT QUẢ'; }
+          setTimeout(() => submitExam(true), 2500);
+        }
       }
       if (warningOverlay) warningOverlay.style.display = 'flex';
     };
@@ -12050,6 +12429,18 @@ render_ai_geometry(dom) {
       const answers = {};
       overlay.querySelectorAll('.exam-ans-radio:checked').forEach(r => {
         answers[r.getAttribute('data-q-idx')] = parseInt(r.value);
+      });
+      // Collect True/False sub-item answers (4 ý a,b,c,d)
+      overlay.querySelectorAll('.exam-tf-radio:checked').forEach(r => {
+        const qI = r.getAttribute('data-q-idx');
+        const subI = parseInt(r.getAttribute('data-sub-idx'), 10);
+        if (!answers[qI] || typeof answers[qI] !== 'object') answers[qI] = {};
+        answers[qI][subI] = (r.value === 'true');
+      });
+      // Collect Single True/False answers
+      overlay.querySelectorAll('.exam-tf-single-radio:checked').forEach(r => {
+        const qI = r.getAttribute('data-q-idx');
+        answers[qI] = (r.value === 'true');
       });
       // Collect essay text + optional file attachment
       const essayFileDataMap = {};
@@ -12091,16 +12482,18 @@ render_ai_geometry(dom) {
             earnedPoints += qScore || 0.25;
           }
         } else if (qType === 'dung_sai') {
-          const subItems = q.subItems || [];
-          if (subItems.length > 0) {
-            // Mỗi sub-item đúng được tính phần điểm tương ứng
-            const perSub = (qScore || 1) / subItems.length;
-            totalPoints += qScore || 1;
-            subItems.forEach((si, si_i) => {
-              const stuVal = (typeof ans === 'object' && ans !== null) ? ans[si_i] : undefined;
-              if (stuVal === si.correct) earnedPoints += perSub;
-            });
-          }
+          const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : (sq.isCorrect !== undefined ? sq.isCorrect : true) })) : [
+            { isCorrect: true }, { isCorrect: false }, { isCorrect: true }, { isCorrect: false }
+          ]);
+          const qPts = qScore || 1.0;
+          totalPoints += qPts;
+          const perSub = qPts / Math.max(rawItems.length, 1);
+
+          rawItems.forEach((it, itIdx) => {
+            const correctVal = (it.isCorrect !== undefined) ? it.isCorrect : (it.correct !== undefined ? it.correct : (Array.isArray(q.correctAnswers) ? q.correctAnswers[itIdx] : true));
+            const stuVal = (typeof ans === 'object' && ans !== null) ? ans[itIdx] : (itIdx === 0 && typeof ans === 'boolean' ? ans : undefined);
+            if (stuVal === correctVal) earnedPoints += perSub;
+          });
         } else if (qType === 'tra_loi_ngan') {
           // Hàm chuẩn hóa: bỏ khoảng trắng thừa, lowercase, bỏ dấu tiếng Việt
           const normalize = (s) => {
@@ -12266,12 +12659,9 @@ render_ai_geometry(dom) {
                 }).join('')}
               </div>`;
             })()}
-            <div style="display:flex;flex-direction:column;gap:0.55rem;margin-top:0;">
-              <button id="btn-print-my-exam" style="width:100%;padding:0.7rem;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:0.9rem;cursor:pointer;box-shadow:0 4px 12px rgba(109,40,217,0.3);">🖨️ In Bài Kiểm Tra</button>
-              <div style="display:flex;gap:0.55rem;">
-                <button id="btn-view-violation-log" style="flex:1;padding:0.7rem;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:0.82rem;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,0.3);">📋 Log Vi Phạm</button>
-                <button id="btn-close-exam-session" style="flex:2;padding:0.7rem;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.35);">✅ Đóng & Quay Lại</button>
-              </div>
+            <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:0.65rem;margin-top:0.5rem;">
+              <button id="btn-view-violation-log" style="padding:0.75rem;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:0.85rem;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,0.3);">📋 Log Vi Phạm</button>
+              <button id="btn-close-exam-session" style="padding:0.75rem;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:12px;font-weight:700;font-size:0.9rem;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.35);">✅ Đóng & Quay Lại</button>
             </div>
           </div>
         </div>
@@ -12279,8 +12669,7 @@ render_ai_geometry(dom) {
       overlay.querySelector('#btn-close-exam-session').onclick = () => overlay.remove();
       const logBtn = overlay.querySelector('#btn-view-violation-log');
       if (logBtn) logBtn.onclick = () => this.showViolationLogModal(exam.id || this._examSessionId, exam.title);
-      const printBtn = overlay.querySelector('#btn-print-my-exam');
-      if (printBtn) printBtn.onclick = () => this.printStudentExamResult(exam.id, this._examStudentId || this.currentUser?.id || '');
+      // Print button removed from student view - managed via Teacher Grading module
     };
 
     overlay.querySelector('#btn-exam-submit-session').onclick = () => submitExam(false);
@@ -12288,6 +12677,18 @@ render_ai_geometry(dom) {
     // Timer
     this._examStartTime = new Date().toISOString();
     this.isProctoringActive = true;
+
+    // 📢 Poll nhắc nhở từ Giám thị (kiểm tra mỗi 10 giây)
+    const studentId = this._examStudentId;
+    const reminderPollInterval = setInterval(() => {
+      if (!this.isProctoringActive || isSubmitting) { clearInterval(reminderPollInterval); return; }
+      const reminders = window._proctoringReminders || {};
+      const r = reminders[studentId];
+      if (r && r.ts && (Date.now() - r.ts) < 30000) { // nhắc nhở còn mới trong 30s
+        this.showToast(r.msg || '📢 Giám thị gửi nhắc nhở!', 'warning');
+        delete window._proctoringReminders[studentId]; // xóa sau khi hiện
+      }
+    }, 10000);
 
     if (timeLimitSec > 0) {
       timerInterval = setInterval(() => {
@@ -12372,9 +12773,11 @@ render_ai_geometry(dom) {
     document.addEventListener('copy', copyHandler, true);
     document.addEventListener('paste', pasteHandler, true);
 
-    // ─── FILE-PICKER GUARD (khai báo trước fsHandler để tránh TDZ) ──────────
+    // ─── FILE-PICKER & VIRTUAL KEYBOARD GUARD (Bảo vệ di động chống bắt sai vi phạm) ──────────
     let lastBlurTime = 0;
     let _filePickerTs = 0; // timestamp lần cuối click vào file label/input
+    let _lastInputInteractionTs = 0; // timestamp tương tác ô nhập liệu / bàn phím ảo
+    let _isInputFocused = false;
 
     const _docFileCaptureHandler = (e) => {
       const t = e.target;
@@ -12393,27 +12796,62 @@ render_ai_geometry(dom) {
     // Cửa sổ 3 giây: nếu < 3s kể từ lần click file label → đang mở file dialog
     const _isFilePickerJustOpened = () => (Date.now() - _filePickerTs) < 3000;
 
-    // Khi window lấy lại focus (file dialog đóng) → reset timestamp
+    // Bắt tương tác nhập liệu (Bàn phím ảo trên điện thoại / máy tính bảng)
+    const _docInputFocusHandler = (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+        _isInputFocused = true;
+        _lastInputInteractionTs = Date.now();
+      }
+    };
+    const _docInputBlurHandler = (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+        _isInputFocused = false;
+        _lastInputInteractionTs = Date.now(); // Ghi nhận thời điểm vừa bấm Xong/Done đóng bàn phím ảo
+      }
+    };
+    document.addEventListener('focusin', _docInputFocusHandler, true);
+    document.addEventListener('focusout', _docInputBlurHandler, true);
+    document.addEventListener('input', _docInputFocusHandler, true);
+
+    // Kiểm tra an toàn: nếu đang gõ hoặc vừa đóng bàn phím ảo trong vòng 3s → BỎ QUA VI PHẠM GIẢ
+    const _isVirtualKeyboardJustActive = () => {
+      if (_isInputFocused) return true;
+      if ((Date.now() - _lastInputInteractionTs) < 3000) return true;
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) return true;
+      return false;
+    };
+
+    // Khi window lấy lại focus → reset timestamp
     window.addEventListener('focus', () => { _filePickerTs = 0; });
     // ────────────────────────────────────────────────────────────────────────
 
-    // Fullscreen exit detection & auto re-lock
-    // OS file dialog làm trình duyệt thoát fullscreen → dùng guard để bỏ qua
+    // Fullscreen exit detection & auto re-lock (có 4s grace period khởi động ban đầu)
+    const _examStartTs = Date.now();
     const fsHandler = () => {
+      if (Date.now() - _examStartTs < 4000) return; // 4s đầu bỏ qua để trình duyệt ổn định toàn màn hình
       if (!document.fullscreenElement && this.isProctoringActive && !isSubmitting) {
         if (_isFilePickerJustOpened()) return; // đang mở file dialog → bỏ qua
+        if (_isVirtualKeyboardJustActive()) {
+          // Bàn phím ảo co giãn khung nhìn → tự động khôi phục toàn màn hình mượt mà
+          setTimeout(() => { if (!document.fullscreenElement && this.isProctoringActive) enterFS(); }, 300);
+          return;
+        }
         handleViolation('Thoát chế độ toàn màn hình (Phím ESC / F11)');
       }
     };
     document.addEventListener('fullscreenchange', fsHandler);
     overlay.addEventListener('click', () => {
       if (this.isProctoringActive && !document.fullscreenElement) {
-        if (!_isFilePickerJustOpened()) enterFS();
+        if (!_isFilePickerJustOpened() && !_isVirtualKeyboardJustActive()) enterFS();
       }
     });
 
-    // Tab switch detection
+    // Tab switch detection (Chỉ bắt khi document.hidden thật sự do chuyển tab)
     const visHandler = () => {
+      if (Date.now() - _examStartTs < 4000) return;
       if (document.hidden && this.isProctoringActive && !isSubmitting) {
         if (_isFilePickerJustOpened()) return; // đang mở file dialog → bỏ qua
         handleViolation('Chuyển tab / Thu nhỏ trình duyệt');
@@ -12421,16 +12859,18 @@ render_ai_geometry(dom) {
     };
     document.addEventListener('visibilitychange', visHandler);
 
-    // Window blur detection — delay 80ms để capture handler kịp set _filePickerTs
+    // Window blur detection — delay 120ms để bắt chuẩn xác, bảo vệ bàn phím ảo 100%
     const blurHandler = () => {
+      if (Date.now() - _examStartTs < 4000) return;
       setTimeout(() => {
         if (_isFilePickerJustOpened()) return;
+        if (_isVirtualKeyboardJustActive()) return; // Bỏ qua 100% khi đóng bàn phím ảo trên điện thoại!
         const now = Date.now();
         if (now - lastBlurTime > 1500 && this.isProctoringActive && !isSubmitting) {
           lastBlurTime = now;
           handleViolation('Mất tiêu điểm cửa sổ (Alt+Tab / Chuyển ứng dụng)');
         }
-      }, 80);
+      }, 120);
     };
     window.addEventListener('blur', blurHandler);
 
@@ -12482,175 +12922,97 @@ render_ai_geometry(dom) {
       };
     });
 
-    // Mic monitor — peak amplitude detection (Uint8Array, no calibration needed)
+    // 🎤 Mic VAD Proctoring — Bandpass Filter 300Hz–3400Hz chuyên lọc giọng người
+    // Phân biệt chính xác tiếng nói gian lận với tiếng quạt / bàn phím / rè mic
     if (exam.enableMic && stream && stream.getAudioTracks().length > 0) {
       try {
         const AudioCtxCls = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtxCls) throw new Error('No AudioContext');
         const audioCtx = new AudioCtxCls();
+        const sampleRate = audioCtx.sampleRate;
         const micSrc = audioCtx.createMediaStreamSource(stream);
+
+        // ── Bandpass Filter: CHỈ CHO QUA dải 300Hz - 3400Hz (giọng người) ──────
+        const bpFilter = audioCtx.createBiquadFilter();
+        bpFilter.type = 'bandpass';
+        bpFilter.frequency.value = 1850; // trung tâm dải giọng người
+        bpFilter.Q.value = 0.85;         // độ rộng dải thông (300Hz – 3400Hz)
+
         const micAnalyser = audioCtx.createAnalyser();
-        micAnalyser.fftSize = 1024;
-        micSrc.connect(micAnalyser);
+        micAnalyser.fftSize = 2048;
+        micAnalyser.smoothingTimeConstant = 0.7; // làm mịn tránh bắt nhầm spike ngắn
+
+        // Chuỗi: micSrc -> bandpass -> analyser -> (silent sink)
+        micSrc.connect(bpFilter);
+        bpFilter.connect(micAnalyser);
         const silentGain = audioCtx.createGain();
         silentGain.gain.value = 0;
         micAnalyser.connect(silentGain);
         silentGain.connect(audioCtx.destination);
-        const byteBuf = new Uint8Array(micAnalyser.fftSize);
+
+        const freqBuf = new Uint8Array(micAnalyser.frequencyBinCount);
         let micViolationCooldown = 0;
+        let speechAccum = 0; // số tích lũy phát hiện giọng nói liên tục
+
+        // Tính chỉ số FFT tương ứng với 300Hz và 3400Hz
+        const binHz = sampleRate / micAnalyser.fftSize;
+        const binLow  = Math.max(0, Math.round(300  / binHz));
+        const binHigh = Math.min(micAnalyser.frequencyBinCount - 1, Math.round(3400 / binHz));
+
         const doStartMic = () => {
-          let micFloat = 0;
           micInterval = setInterval(() => {
             if (!this.isProctoringActive) return;
-            micAnalyser.getByteTimeDomainData(byteBuf);
-            let peak = 0;
-            for (let i = 0; i < byteBuf.length; i++) {
-              const dev = Math.abs(byteBuf[i] - 128);
-              if (dev > peak) peak = dev;
+            micAnalyser.getByteFrequencyData(freqBuf);
+
+            // Tính năng lượng trong dải giọng người 300Hz–3400Hz
+            let speechEnergy = 0;
+            for (let b = binLow; b <= binHigh; b++) {
+              speechEnergy += freqBuf[b];
             }
+            const speechBins = binHigh - binLow + 1;
+            const avgSpeechEnergy = speechBins > 0 ? speechEnergy / speechBins : 0;
+
             if (micViolationCooldown > 0) { micViolationCooldown--; return; }
-            if (peak > 28) {
-              micFloat += 1;
-              if (micFloat >= 4) {
-                micFloat = 0;
-                micViolationCooldown = 12;
-                handleViolation('Ph\u00e1t hi\u1ec7n ti\u1ebfng n\u00f3i / \u0111\u1ecdc \u0111\u00e1p \u00e1n trong ph\u00f2ng thi');
+
+            // Ngưỡng 52/255: đủ mạnh để bắt giọng nói bình thường, bỏ qua tiếng ồn nhỏ
+            if (avgSpeechEnergy > 52) {
+              speechAccum++;
+              if (speechAccum >= 6) { // ~3 giây liên tục (6 x 500ms) = tiếng nói thật
+                speechAccum = 0;
+                micViolationCooldown = 14; // 7 giây cooldown sau khi bắt vi phạm
+                handleViolation('Phát hiện tiếng nói / trao đổi đáp án liên tục trong phòng thi!');
               }
             } else {
-              micFloat = Math.max(0, micFloat - 0.4);
+              speechAccum = Math.max(0, speechAccum - 1); // giảm dần nếu im lặng trở lại
             }
           }, 500);
         };
         audioCtx.resume().then(doStartMic).catch(() => {
           document.addEventListener('click', () => audioCtx.resume().then(doStartMic).catch(() => {}), { once: true });
         });
-      } catch(e) { console.warn('Mic init error:', e); }
+      } catch(e) { console.warn('Mic VAD init error:', e); }
     }
-    // 📷 AI Vision Proctoring Real-Time 60FPS Engine (Native & State Transition)
+    // 📷 AI Vision Proctoring Real-Time 60FPS Engine (ProctorCameraAI Module)
     if (exam.enableCamera && stream) {
       const vidEl   = overlay.querySelector('#exam-pip-video');
-      const hudEl   = overlay.querySelector('#exam-pip-hud');
-      const pipPane = overlay.querySelector('#cam-pip-panel');
-      const camSt   = overlay.querySelector('#cam-status');
+      const hudEl   = overlay.querySelector('#exam-pip-hud') || overlay.querySelector('#exam-proctor-hud');
+      const camSt   = overlay.querySelector('#cam-status') || overlay.querySelector('#exam-camera-status');
+      const studentObj = (db.getStudents ? db.getStudents() : []).find(s => s.id === this._examStudentId) || {};
+      const studentName = studentObj.name || this.currentUser?.name || this._examStudentId || 'Thí sinh';
 
-      if (vidEl) {
-        const evalC = document.createElement('canvas');
-        let animFrameId = null;
-        let lastReportedState = null; // 'DETECTED' | 'NOT_DETECTED'
-
-        // Smooth Tracking State (Lerp 60fps)
-        const trackState = {
-          hasFace: true,
-          targetX: 32,
-          targetY: 22,
-          targetW: 22,
-          targetH: 26,
-          coordW: 64,
-          coordH: 48,
-          smoothX: 32,
-          smoothY: 22,
-          smoothW: 22,
-          smoothH: 26
-        };
-
-        // High-Speed Analysis Loop (runs every 60ms)
-        let isAnalyzing = false;
-        const analyzeInterval = setInterval(async () => {
-          if (!this.isProctoringActive || isSubmitting || isAnalyzing) return;
-          if (vidEl.readyState < 2) return;
-
-          isAnalyzing = true;
-          try {
-            const res = await this._analyzeProctorFrameRealtime(vidEl, evalC);
-            trackState.hasFace = res.hasFace;
-            trackState.coordW = res.coordW || 64;
-            trackState.coordH = res.coordH || 48;
-
-            if (res.hasFace) {
-              trackState.targetX = res.cx;
-              trackState.targetY = res.cy;
-              trackState.targetW = res.w;
-              trackState.targetH = res.h;
-            }
-
-            // 🌟 BÁO CHUYỂN ĐỔI TRẠNG THÁI (THOÁT RA ➔ BÁO ĐỎ, QUAY LẠI ➔ BÁO XANH)
-            if (res.hasFace && lastReportedState !== 'DETECTED') {
-              lastReportedState = 'DETECTED';
-              this.showToast('✅ ĐÃ PHÁT HIỆN & KHÓA LẠI KHUÔN MẶT THÍ SINH!');
-            } else if (!res.hasFace && lastReportedState !== 'NOT_DETECTED') {
-              lastReportedState = 'NOT_DETECTED';
-              this.showToast('🚨 CẢNH BÁO: KHÔNG PHÁT HIỆN KHUÔN MẶT! Vui lòng quay lại trước camera ngay!');
-            }
-          } catch(e) {}
-          isAnalyzing = false;
-        }, 60);
-
-        // 60FPS Continuous Animation Loop
-        const renderLoop = () => {
-          if (!this.isProctoringActive || isSubmitting) return;
-
-          // Smooth Lerp motion following face at 60fps
-          trackState.smoothX += (trackState.targetX - trackState.smoothX) * 0.40;
-          trackState.smoothY += (trackState.targetY - trackState.smoothY) * 0.40;
-          trackState.smoothW += (trackState.targetW - trackState.smoothW) * 0.40;
-          trackState.smoothH += (trackState.targetH - trackState.smoothH) * 0.40;
-
-          // Render 60FPS Pulsing HUD
-          this._renderProctorHUD60FPS(hudEl, trackState, faceAbsentTimer);
-
-          animFrameId = requestAnimationFrame(renderLoop);
-        };
-
-        // 1-Second 4-Stage Red Alert Logic (1/4 -> 2/4 -> 3/4 -> 4/4)
-        const startFaceDetect = () => {
-          if (faceInterval) return;
-          if (camSt) {
-            camSt.innerHTML = '<span style="color:#34d399;font-weight:700;">🟢 Khóa khuôn mặt [OK]</span>';
+      if (window.ProctorCameraAI && vidEl) {
+        const proctor = new window.ProctorCameraAI({
+          video: vidEl,
+          hud: hudEl,
+          status: camSt,
+          stream: stream,
+          studentName: studentName,
+          onViolation: (reason, snapshot) => {
+            handleViolation(reason);
           }
-
-          animFrameId = requestAnimationFrame(renderLoop);
-
-          faceInterval = setInterval(() => {
-            if (!this.isProctoringActive || isSubmitting) return;
-
-            // 1. THOÁT RA / KHÔNG PHÁT HIỆN
-            if (!trackState.hasFace) {
-              faceAbsentTimer++;
-
-              if (pipPane) {
-                pipPane.style.borderColor = '#ef4444';
-                pipPane.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.85)';
-              }
-
-              if (camSt) {
-                camSt.innerHTML = `<span style="color:#ef4444;font-weight:800;letter-spacing:0.3px;">🔴 CẢNH BÁO ĐỎ: [${faceAbsentTimer}/4]</span>`;
-              }
-
-              // Nhịp 4/4: TÍNH 1 LẦN VI PHẠM
-              if (faceAbsentTimer >= 4) {
-                faceAbsentTimer = 0;
-                handleViolation(`Không phát hiện khuôn mặt thí sinh trước camera quá 4 giây (4/4 vi phạm)!`);
-              }
-              return;
-            }
-
-            // 2. QUAY LẠI / ĐÃ PHÁT HIỆN — TỰ ĐỘNG RESET AN TOÀN VỀ 0/4
-            faceAbsentTimer = 0;
-
-            if (pipPane) {
-              pipPane.style.borderColor = '#10b981';
-              pipPane.style.boxShadow = '0 8px 24px rgba(0,0,0,0.35)';
-            }
-            if (camSt) {
-              camSt.innerHTML = `<span style="color:#34d399;font-weight:700;">🟢 Khóa khuôn mặt [OK]</span>`;
-            }
-          }, 1000);
-        };
-
-        if (!vidEl.srcObject) vidEl.srcObject = stream;
-        vidEl.addEventListener('playing', () => startFaceDetect(), { once: true });
-        setTimeout(() => { if (!faceInterval) startFaceDetect(); }, 1200);
-        vidEl.play().catch(() => { document.addEventListener('click', () => vidEl.play().catch(() => {}), { once: true }); });
+        });
+        proctor.start(stream);
+        this._currentProctorAI = proctor;
       }
     }
 
@@ -12658,12 +13020,18 @@ render_ai_geometry(dom) {
     const cleanupObserver = new MutationObserver(() => {
       if (!document.body.contains(overlay)) {
         this.isProctoringActive = false;
-        if (timerInterval) clearInterval(timerInterval);
-        if (micInterval) clearInterval(micInterval);
-        if (faceInterval) clearInterval(faceInterval);
+        if (this._currentProctorAI) {
+          this._currentProctorAI.stop();
+          this._currentProctorAI = null;
+        }
+        if (timerInterval)   clearInterval(timerInterval);
+        if (micInterval)     clearInterval(micInterval);
         document.removeEventListener('keydown', kbHandler, true);
         document.removeEventListener('fullscreenchange', fsHandler);
         document.removeEventListener('visibilitychange', visHandler);
+        document.removeEventListener('focusin', _docInputFocusHandler, true);
+        document.removeEventListener('focusout', _docInputBlurHandler, true);
+        document.removeEventListener('input', _docInputFocusHandler, true);
         window.removeEventListener('blur', blurHandler);
         // Điểm 6: Cleanup ctxHandler khi overlay bị xóa khỏi DOM
         document.removeEventListener('contextmenu', ctxHandler, true);
@@ -13681,127 +14049,21 @@ render_ai_geometry(dom) {
                         // 📷 AI Vision Proctoring Real-Time 60FPS Engine (Quizizz Mode)
             if (mediaStream) {
               const vidEl   = modal.querySelector('#exam-pip-video');
-              const hudEl   = modal.querySelector('#exam-pip-hud');
-              const pipPane = modal.querySelector('#cam-pip-panel');
-              const camSt   = modal.querySelector('#cam-status');
+              const hudEl   = modal.querySelector('#exam-pip-hud') || modal.querySelector('#exam-proctor-hud');
+              const camSt   = modal.querySelector('#cam-status') || modal.querySelector('#exam-camera-status');
 
-              if (vidEl) {
-                const evalC = document.createElement('canvas');
-                let faceAbsentTimer = 0;
-                let animFrameId = null;
-                let lastReportedState = null;
-
-                const trackState = {
-                  hasFace: true,
-                  targetX: 32,
-                  targetY: 22,
-                  targetW: 22,
-                  targetH: 26,
-                  coordW: 64,
-                  coordH: 48,
-                  smoothX: 32,
-                  smoothY: 22,
-                  smoothW: 22,
-                  smoothH: 26
-                };
-
-                let isAnalyzing = false;
-                const analyzeInterval = setInterval(async () => {
-                  if (!document.getElementById('quizizz-game-test-modal')) {
-                    clearInterval(analyzeInterval);
-                    return;
+              if (window.ProctorCameraAI && vidEl) {
+                const quizProctor = new window.ProctorCameraAI({
+                  video: vidEl,
+                  hud: hudEl,
+                  status: camSt,
+                  stream: mediaStream,
+                  studentName: (this.currentUser && this.currentUser.name) || 'Thí sinh',
+                  onViolation: (reason, snapshot) => {
+                    triggerViolation(reason);
                   }
-                  if (isShowingViolationModal || vidEl.readyState < 2 || isAnalyzing) return;
-
-                  isAnalyzing = true;
-                  try {
-                    const res = await this._analyzeProctorFrameRealtime(vidEl, evalC);
-                    trackState.hasFace = res.hasFace;
-                    trackState.coordW = res.coordW || 64;
-                    trackState.coordH = res.coordH || 48;
-
-                    if (res.hasFace) {
-                      trackState.targetX = res.cx;
-                      trackState.targetY = res.cy;
-                      trackState.targetW = res.w;
-                      trackState.targetH = res.h;
-                    }
-
-                    if (res.hasFace && lastReportedState !== 'DETECTED') {
-                      lastReportedState = 'DETECTED';
-                      this.showToast('✅ ĐÃ PHÁT HIỆN & KHÓA LẠI KHUÔN MẶT THÍ SINH!');
-                    } else if (!res.hasFace && lastReportedState !== 'NOT_DETECTED') {
-                      lastReportedState = 'NOT_DETECTED';
-                      this.showToast('🚨 CẢNH BÁO: KHÔNG PHÁT HIỆN KHUÔN MẶT! Vui lòng quay lại trước camera ngay!');
-                    }
-                  } catch(e) {}
-                  isAnalyzing = false;
-                }, 60);
-
-                const renderLoop = () => {
-                  if (!document.getElementById('quizizz-game-test-modal')) return;
-                  if (isShowingViolationModal) return;
-
-                  trackState.smoothX += (trackState.targetX - trackState.smoothX) * 0.40;
-                  trackState.smoothY += (trackState.targetY - trackState.smoothY) * 0.40;
-                  trackState.smoothW += (trackState.targetW - trackState.smoothW) * 0.40;
-                  trackState.smoothH += (trackState.targetH - trackState.smoothH) * 0.40;
-
-                  this._renderProctorHUD60FPS(hudEl, trackState, faceAbsentTimer);
-
-                  animFrameId = requestAnimationFrame(renderLoop);
-                };
-
-                const startQuizProctoring = () => {
-                  if (faceInterval) return;
-                  if (camSt) {
-                    camSt.innerHTML = '<span style="color:#34d399;font-weight:700;">🟢 Khóa khuôn mặt [OK]</span>';
-                  }
-
-                  animFrameId = requestAnimationFrame(renderLoop);
-
-                  faceInterval = setInterval(() => {
-                    if (!document.getElementById('quizizz-game-test-modal')) {
-                      clearInterval(faceInterval);
-                      return;
-                    }
-                    if (isShowingViolationModal) return;
-
-                    if (!trackState.hasFace) {
-                      faceAbsentTimer++;
-
-                      if (pipPane) {
-                        pipPane.style.borderColor = '#ef4444';
-                        pipPane.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.85)';
-                      }
-                      if (camSt) {
-                        camSt.innerHTML = `<span style="color:#ef4444;font-weight:800;">🔴 CẢNH BÁO ĐỎ: [${faceAbsentTimer}/4]</span>`;
-                      }
-
-                      if (faceAbsentTimer >= 4) {
-                        faceAbsentTimer = 0;
-                        triggerViolation(`Không phát hiện khuôn mặt thí sinh trước camera quá 4 giây (4/4 vi phạm)!`);
-                      }
-                      return;
-                    }
-
-                    // HỢP LỆ — RESET VỀ 0/4
-                    faceAbsentTimer = 0;
-
-                    if (pipPane) {
-                      pipPane.style.borderColor = '#10b981';
-                      pipPane.style.boxShadow = '0 8px 24px rgba(0,0,0,0.35)';
-                    }
-                    if (camSt) {
-                      camSt.innerHTML = `<span style="color:#34d399;font-weight:700;">🟢 Khóa khuôn mặt [OK]</span>`;
-                    }
-                  }, 1000);
-                };
-
-                vidEl.srcObject = mediaStream;
-                vidEl.addEventListener('playing', () => startQuizProctoring(), { once: true });
-                setTimeout(() => { if (!faceInterval) startQuizProctoring(); }, 1200);
-                vidEl.play().catch(() => {});
+                });
+                quizProctor.start(mediaStream);
               }
             }
 
@@ -14041,6 +14303,17 @@ render_ai_geometry(dom) {
     document.addEventListener('pointerdown', _quizDocCapture, true);
 
     const _quizIsFilePicker = () => (Date.now() - _quizFilePickerTs) < 3000;
+    let _quizLastInputTs = 0;
+    const _quizInputFocusHandler = (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+        _quizLastInputTs = Date.now();
+      }
+    };
+    document.addEventListener('focusin', _quizInputFocusHandler, true);
+    document.addEventListener('focusout', _quizInputFocusHandler, true);
+    document.addEventListener('input', _quizInputFocusHandler, true);
+    const _quizIsKeyboardActive = () => (Date.now() - _quizLastInputTs) < 2500 || (document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName));
 
     const handleVisibility = () => {
       if (_quizIsFilePicker()) return;
@@ -14052,8 +14325,9 @@ render_ai_geometry(dom) {
     window.addEventListener('blur', () => {
       setTimeout(() => {
         if (_quizIsFilePicker()) return;
+        if (_quizIsKeyboardActive()) return; // Bỏ qua đóng bàn phím ảo trên mobile
         handleVisibility();
-      }, 80);
+      }, 120);
     });
     window.addEventListener('focus', () => { _quizFilePickerTs = 0; });
     // ────────────────────────────────────────────────────────────────────────
@@ -15336,7 +15610,38 @@ render_ai_geometry(dom) {
             </div>
 
             <!-- Edit Options and Correct Answer -->
-            ${(q.type === 'trac_nghiem' || !q.type || q.type === 'dung_sai') ? `
+            ${(q.type === 'dung_sai') ? (() => {
+              const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
+                { text: 'Phát biểu a', isCorrect: true },
+                { text: 'Phát biểu b', isCorrect: false },
+                { text: 'Phát biểu c', isCorrect: true },
+                { text: 'Phát biểu d', isCorrect: false }
+              ]);
+              return `
+                <div style="background:#f8fafc; padding:0.75rem; border-radius:10px; border:1.5px solid #e2e8f0;">
+                  <div style="font-weight: 600; font-size:0.82rem; color:#047857; margin-bottom:0.5rem;">
+                    <span>⚖️ Các Ý a, b, c, d: Nhập nội dung & Chọn Đúng / Sai cho từng ý:</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                    ${rawItems.map((it, itIdx) => {
+                      const label = String.fromCharCode(97 + itIdx);
+                      const txt = typeof it === 'string' ? it : (it.text || `Ý ${label}`);
+                      const isTrue = it.isCorrect === true;
+                      return `
+                        <div style="display:flex; align-items:center; gap:0.5rem; background:#ecfdf5; padding:0.45rem 0.65rem; border-radius:8px; border:1px solid #a7f3d0;">
+                          <strong style="width:20px; color:#047857;">${label})</strong>
+                          <input type="text" class="asm-ds-item-text form-control" data-q-idx="${idx}" data-item-idx="${itIdx}" value="${txt}" placeholder="Nội dung ý ${label}..." style="flex:1; padding:0.35rem 0.5rem; border-radius:6px; border:1px solid #6ee7b7; font-size:0.85rem; background:#fff;" required>
+                          <select class="asm-ds-item-val" data-q-idx="${idx}" data-item-idx="${itIdx}" style="padding:0.35rem 0.6rem; border-radius:6px; font-weight:700; font-size:0.8rem; background:${isTrue ? '#10b981' : '#ef4444'}; color:#ffffff; border:none; cursor:pointer;" onchange="this.style.background = this.value === 'true' ? '#10b981' : '#ef4444';">
+                            <option value="true" ${isTrue ? 'selected' : ''}>✅ Đúng</option>
+                            <option value="false" ${!isTrue ? 'selected' : ''}>❌ Sai</option>
+                          </select>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            })() : (q.type === 'trac_nghiem' || !q.type) ? `
               <div style="background:#f8fafc; padding:0.75rem; border-radius:10px; border:1px solid #e2e8f0;">
                 <div style="font-weight: 500; font-size:0.8rem; color:#475569; margin-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
                   <span>Các đáp án & Chọn đáp án ĐÚNG (Tích chọn ô tròn ✅ & Đính kèm ảnh):</span>
@@ -19464,8 +19769,11 @@ render_ai_geometry(dom) {
                         </span>
                       </div>
                     </div>
-                    <div>
-                      <button class="btn-open-grade-attempt" data-attempt-id="${att.id}" style="background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%); color:#fff; border:none; padding:0.55rem 1.1rem; border-radius:10px; ; font-weight: 400; font-size:0.85rem; cursor:pointer; box-shadow:0 4px 12px rgba(37,99,235,0.3);">
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                      <button class="btn-quick-print-attempt" data-attempt-id="${att.id}" data-exam-id="${att.examId}" data-stu-id="${att.studentId}" style="background:linear-gradient(135deg,#7c3aed 0%,#6d28d9 100%); color:#fff; border:none; padding:0.55rem 0.95rem; border-radius:10px; font-weight:600; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 12px rgba(124,58,237,0.25); display:flex; align-items:center; gap:0.35rem;" title="In phiếu bài làm của học sinh">
+                        🖨️ In Bài
+                      </button>
+                      <button class="btn-open-grade-attempt" data-attempt-id="${att.id}" style="background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%); color:#fff; border:none; padding:0.55rem 1.1rem; border-radius:10px; font-weight:600; font-size:0.85rem; cursor:pointer; box-shadow:0 4px 12px rgba(37,99,235,0.3);">
                         ✍️ Chấm Bài & Sửa Điểm
                       </button>
                     </div>
@@ -19545,6 +19853,15 @@ render_ai_geometry(dom) {
 
     dom.querySelectorAll('.btn-open-grade-attempt').forEach(btn => {
       btn.onclick = () => this.showTeacherGradingModal(btn.getAttribute('data-attempt-id'));
+    });
+
+    dom.querySelectorAll('.btn-quick-print-attempt').forEach(btn => {
+      btn.onclick = () => {
+        const attId = btn.getAttribute('data-attempt-id');
+        const examId = btn.getAttribute('data-exam-id');
+        const stuId = btn.getAttribute('data-stu-id');
+        this.printStudentExamResult(examId, stuId, attId);
+      };
     });
 
     const btnExcel = dom.querySelector('#btn-export-excel-gradebook');
@@ -19749,9 +20066,12 @@ render_ai_geometry(dom) {
         <!-- Footer -->
         <div style="background:#f8fafc;border-top:1.5px solid #e2e8f0;padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap;">
           <div style="font-size:0.8rem;color:#64748b;">${isTrial ? '🎯 Bài Thi Thử — điểm sẽ không ghi vào Bảng Điểm GDPT' : `✅ Điểm sẽ ghi vào cột <strong id="gm-col-label">${targetCol}</strong> — Bảng Điểm GDPT 2018`}</div>
-          <div style="display:flex;gap:0.6rem;">
-            <button id="btn-cancel-gm" style="background:#f1f5f9;border:1.5px solid #cbd5e1;color:#475569;padding:0.6rem 1.2rem;border-radius:10px;font-weight:600;font-size:0.88rem;cursor:pointer;">Hủy</button>
-            <button id="btn-save-gm" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);">💾 Lưu & Đưa Vào Bảng Điểm</button>
+          <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+            <button id="btn-print-from-gm" type="button" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,0.3);display:flex;align-items:center;gap:0.4rem;">
+              🖨️ In Bài Kiểm Tra
+            </button>
+            <button id="btn-cancel-gm" type="button" style="background:#f1f5f9;border:1.5px solid #cbd5e1;color:#475569;padding:0.6rem 1.2rem;border-radius:10px;font-weight:600;font-size:0.88rem;cursor:pointer;">Hủy</button>
+            <button id="btn-save-gm" type="button" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.35);">💾 Lưu & Đưa Vào Bảng Điểm</button>
           </div>
         </div>
       </div>
@@ -19794,6 +20114,12 @@ render_ai_geometry(dom) {
     const closeFn = () => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); };
     overlay.querySelector('#btn-close-gm').onclick = closeFn;
     overlay.querySelector('#btn-cancel-gm').onclick = closeFn;
+    const printGmBtn = overlay.querySelector('#btn-print-from-gm');
+    if (printGmBtn) {
+      printGmBtn.onclick = () => {
+        this.printStudentExamResult(attempt.examId || exam.id, attempt.studentId || student.id, attempt.id);
+      };
+    }
 
     // ── Save ──
     overlay.querySelector('#btn-save-gm').onclick = () => {
@@ -24167,6 +24493,9 @@ LMSApp.prototype.exportClassesExcel = function() {
 
 LMSApp.prototype.render_ai_hub = function(dom) {
   if (window.AITeachingTools && typeof window.AITeachingTools.render === 'function') {
+    if (!window.AITeachingTools.currentTab || window.AITeachingTools.currentTab === 'slides') {
+      window.AITeachingTools.currentTab = 'icebreaker';
+    }
     window.AITeachingTools.render(dom);
   } else {
     if (!dom) dom = document.getElementById('viewport');

@@ -51,7 +51,7 @@ if (typeof globalThis !== 'undefined') {
   globalThis.formatDateVN = formatDateVN;
 }
 
-const DB_KEY = 'THCS_LMS_DATABASE_STATE_V2';
+const DB_KEY = 'THCS_LMS_DATABASE_STATE_PRO_2026';
 
 const DEFAULT_SUBJECTS = [
   { id: 'toan', name: 'Toán học', icon: '📐' },

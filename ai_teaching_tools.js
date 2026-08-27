@@ -28,7 +28,7 @@
  */
 
 window.AITeachingTools = {
-  currentTab: 'slides',
+  currentTab: 'icebreaker',
   _dom: null,
 
   // State
@@ -91,7 +91,10 @@ window.AITeachingTools = {
       challengewheel: 'Vòng Quay Thử Thách AI',
       spacejourney: 'Du Hành Vũ Trụ Kiến Thức',
       knowledgearena: 'Đấu Trường Kiến Thức',
-      stations7: 'Hành Trình 7 Trạm AI'
+      stations7: 'Hành Trình 7 Trạm AI',
+      starrace: 'Cuộc Đua Ngôi Sao (Cử Chỉ Tay AI)',
+      alphabet_kids: 'Xứ Sở Chữ Cái & Ghép Từ (Tiểu Học)',
+      numbers_kids: 'Vương Quốc Con Số & Tập Đếm (Toán 1)'
     };
     return TOOL_NAMES[toolKey] || 'Công Cụ Giảng Dạy';
   },
@@ -121,7 +124,10 @@ window.AITeachingTools = {
       challengewheel: '🎡',
       spacejourney: '🚀',
       knowledgearena: '⚔️',
-      stations7: '🚩'
+      stations7: '🚩',
+      starrace: '🌟',
+      alphabet_kids: '🔤',
+      numbers_kids: '🔢'
     };
     return TOOL_ICONS[toolKey] || '🎮';
   },
@@ -769,7 +775,7 @@ window.AITeachingTools = {
   </div>
 
 <!-- TABS (TRỌN BỘ 15 CÔNG CỤ & GAME GIẢNG DẠY CHUYÊN BIỆT VỚI ICON ĐỒ HỌA TO SẮC NÉT) -->
-  <div id="ait-tabs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.75rem;background:#f8fafc;padding:.85rem;border-radius:22px;border:2px solid #e2e8f0;margin-bottom:1.5rem;box-shadow:inset 0 2px 8px rgba(0,0,0,0.03);">
+  <div id="ait-tabs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.75rem;background:#f8fafc;padding:.85rem;border-radius:22px;border:2px solid #e2e8f0;margin-bottom:1.5rem;box-shadow:inset 0 2px 8px rgba(0,0,0,0.03);">
     
     <button id="ait-tab-slides" class="ait-tab-deluxe ${this.currentTab==='slides'?'ait-tab-on':''}" style="--tab-theme:#2563eb;--tab-bg:#eff6ff;">
       <div class="ait-icon-box" style="background:#dbeafe;color:#1d4ed8;">🎨</div>
@@ -779,11 +785,11 @@ window.AITeachingTools = {
       </div>
     </button>
 
-    <button id="ait-tab-icebreaker" class="ait-tab-deluxe ${this.currentTab==='icebreaker'?'ait-tab-on':''}" style="--tab-theme:#7c3aed;--tab-bg:#f5f3ff;">
-      <div class="ait-icon-box" style="background:#ede9fe;color:#6d28d9;">🎮</div>
+    <button id="ait-tab-icebreaker" class="ait-tab-deluxe ${['icebreaker','luckywheel','goldminer','headtilt','duckrace','tugofwar','minesweeper','fruitninja','matching','trainorder','luckycamera','plickers','mysterypuzzle','crossword','wordhunt','multiverse','treasure','challengewheel','spacejourney','knowledgearena','stations7','starrace'].includes(this.currentTab)?'ait-tab-on':''}" style="--tab-theme:#7c3aed;--tab-bg:#f5f3ff;border:2.5px solid #7c3aed;box-shadow:0 6px 16px rgba(124,58,237,0.25);">
+      <div class="ait-icon-box" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#ffffff;font-size:1.8rem;">🎮</div>
       <div class="ait-text-box">
-        <span class="ait-tab-num">CÔNG CỤ 2</span>
-        <span class="ait-tab-name">Kho Game Tổng Hợp</span>
+        <span class="ait-tab-num" style="color:#7c3aed;font-weight:900;">CÔNG CỤ 2 (HOT 🌟)</span>
+        <span class="ait-tab-name" style="font-weight:900;color:#1e1b4b;">Kho Game Tổng Hợp (24 Game)</span>
       </div>
     </button>
 
@@ -791,175 +797,31 @@ window.AITeachingTools = {
       <div class="ait-icon-box" style="background:#e0f2fe;color:#0369a1;">🔊</div>
       <div class="ait-text-box">
         <span class="ait-tab-num">CÔNG CỤ 3</span>
-        <span class="ait-tab-name">Phát Âm & Đọc Mẫu</span>
+        <span class="ait-tab-name">Phát Âm & Đọc Mẫu AI</span>
       </div>
     </button>
 
-    <button id="ait-tab-simulation" class="ait-tab-deluxe ${this.currentTab==='simulation'?'ait-tab-on':''}" style="--tab-theme:#7c3aed;--tab-bg:#f5f3ff;border:2px solid #c4b5fd;">
-      <div class="ait-icon-box" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#ffffff;font-size:1.9rem;">📐</div>
+    <button id="ait-tab-alphabet_kids" class="ait-tab-deluxe ${this.currentTab==='alphabet_kids'?'ait-tab-on':''}" style="--tab-theme:#ec4899;--tab-bg:#fdf2f8;border:2.5px solid #f472b6;box-shadow:0 6px 16px rgba(236,72,153,0.25);">
+      <div class="ait-icon-box" style="background:linear-gradient(135deg,#ec4899,#f43f5e);color:#ffffff;font-size:1.8rem;">🔤</div>
       <div class="ait-text-box">
-        <span class="ait-tab-num" style="color:#7c3aed;font-weight:900;">CÔNG CỤ 4 (HOT 🔥)</span>
-        <span class="ait-tab-name" style="font-weight:900;color:#1e1b4b;">Vẽ Hình 2D/3D & Thí Nghiệm</span>
+        <span class="ait-tab-num" style="color:#db2777;font-weight:900;">TIỂU HỌC (VIP ⭐)</span>
+        <span class="ait-tab-name" style="font-weight:900;color:#831843;">Xứ Sở Chữ Cái & Ghép Từ</span>
       </div>
     </button>
 
-    <button id="ait-tab-luckywheel" class="ait-tab-deluxe ${this.currentTab==='luckywheel'?'ait-tab-on':''}" style="--tab-theme:#d97706;--tab-bg:#fffbeb;">
-      <div class="ait-icon-box" style="background:#fef3c7;color:#b45309;">🎡</div>
+    <button id="ait-tab-numbers_kids" class="ait-tab-deluxe ${this.currentTab==='numbers_kids'?'ait-tab-on':''}" style="--tab-theme:#f59e0b;--tab-bg:#fffbeb;border:2.5px solid #f59e0b;box-shadow:0 6px 16px rgba(245,158,11,0.25);">
+      <div class="ait-icon-box" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#ffffff;font-size:1.8rem;">🔢</div>
       <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 5</span>
-        <span class="ait-tab-name">Vòng Quay Kỳ Diệu</span>
+        <span class="ait-tab-num" style="color:#d97706;font-weight:900;">TOÁN 1 (VIP ⭐)</span>
+        <span class="ait-tab-name" style="font-weight:900;color:#78350f;">Vương Quốc Con Số (0-10)</span>
       </div>
     </button>
 
-    <button id="ait-tab-goldminer" class="ait-tab-deluxe ${this.currentTab==='goldminer'?'ait-tab-on':''}" style="--tab-theme:#ca8a04;--tab-bg:#fefce8;">
-      <div class="ait-icon-box" style="background:#fef08a;color:#854d0e;">⛏️</div>
+    <button id="ait-tab-simulation" class="ait-tab-deluxe ${this.currentTab==='simulation'?'ait-tab-on':''}" style="--tab-theme:#0d9488;--tab-bg:#f0fdfa;border:2px solid #5eead4;">
+      <div class="ait-icon-box" style="background:linear-gradient(135deg,#0d9488,#0f766e);color:#ffffff;font-size:1.9rem;">📐</div>
       <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 6</span>
-        <span class="ait-tab-name">Game Đào Vàng</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-headtilt" class="ait-tab-deluxe ${this.currentTab==='headtilt'?'ait-tab-on':''}" style="--tab-theme:#e11d48;--tab-bg:#fff1f2;">
-      <div class="ait-icon-box" style="background:#ffe4e6;color:#be123c;">🤸‍♂️</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 7</span>
-        <span class="ait-tab-name">Nghiêng Đầu AI</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-duckrace" class="ait-tab-deluxe ${this.currentTab==='duckrace'?'ait-tab-on':''}" style="--tab-theme:#0d9488;--tab-bg:#f0fdfa;">
-      <div class="ait-icon-box" style="background:#ccfbf1;color:#0f766e;">🦆</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 8</span>
-        <span class="ait-tab-name">Game Đua Vịt</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-tugofwar" class="ait-tab-deluxe ${this.currentTab==='tugofwar'?'ait-tab-on':''}" style="--tab-theme:#dc2626;--tab-bg:#fef2f2;">
-      <div class="ait-icon-box" style="background:#fee2e2;color:#b91c1c;">🪢</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 9</span>
-        <span class="ait-tab-name">Kéo Co Kiến Thức</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-minesweeper" class="ait-tab-deluxe ${this.currentTab==='minesweeper'?'ait-tab-on':''}" style="--tab-theme:#9333ea;--tab-bg:#faf5ff;">
-      <div class="ait-icon-box" style="background:#f3e8ff;color:#7e22ce;">💣</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 10</span>
-        <span class="ait-tab-name">Dò Mìn Vượt Bãi</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-fruitninja" class="ait-tab-deluxe ${this.currentTab==='fruitninja'?'ait-tab-on':''}" style="--tab-theme:#ea580c;--tab-bg:#fff7ed;">
-      <div class="ait-icon-box" style="background:#ffedd5;color:#c2410c;">🍉</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 11</span>
-        <span class="ait-tab-name">Chém Hoa Quả</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-matching" class="ait-tab-deluxe ${this.currentTab==='matching'?'ait-tab-on':''}" style="--tab-theme:#0891b2;--tab-bg:#ecfeff;">
-      <div class="ait-icon-box" style="background:#cffafe;color:#0e7490;">🧩</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 12</span>
-        <span class="ait-tab-name">Kéo Thả Nối Ý</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-trainorder" class="ait-tab-deluxe ${this.currentTab==='trainorder'?'ait-tab-on':''}" style="--tab-theme:#0284c7;--tab-bg:#f0f9ff;">
-      <div class="ait-icon-box" style="background:#e0f2fe;color:#0369a1;">🚂</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 13</span>
-        <span class="ait-tab-name">Đoàn Tàu Tri Thức</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-luckycamera" class="ait-tab-deluxe ${this.currentTab==='luckycamera'?'ait-tab-on':''}" style="--tab-theme:#0d9488;--tab-bg:#f0fdfa;">
-      <div class="ait-icon-box" style="background:#ccfbf1;color:#0f766e;">📷</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 14</span>
-        <span class="ait-tab-name">Ống Kính May Mắn</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-plickers" class="ait-tab-deluxe ${this.currentTab==='plickers'?'ait-tab-on':''}" style="--tab-theme:#4f46e5;--tab-bg:#eef2ff;">
-      <div class="ait-icon-box" style="background:#e0e7ff;color:#4338ca;">📇</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 15</span>
-        <span class="ait-tab-name">Quét Thẻ Plickers AI</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-mysterypuzzle" class="ait-tab-deluxe ${this.currentTab==='mysterypuzzle'?'ait-tab-on':''}" style="--tab-theme:#ea580c;--tab-bg:#fff7ed;">
-      <div class="ait-icon-box" style="background:#ffedd5;color:#c2410c;">🧩</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 16</span>
-        <span class="ait-tab-name">Lật Mảnh Ghép Bí Ẩn</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-crossword" class="ait-tab-deluxe ${this.currentTab==='crossword'?'ait-tab-on':''}" style="--tab-theme:#0284c7;--tab-bg:#f0f9ff;">
-      <div class="ait-icon-box" style="background:#e0f2fe;color:#0369a1;">🔤</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 17</span>
-        <span class="ait-tab-name">Ô Chữ Khóa Bí Mật</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-wordhunt" class="ait-tab-deluxe ${this.currentTab==='wordhunt'?'ait-tab-on':''}" style="--tab-theme:#16a34a;--tab-bg:#f0fdf4;">
-      <div class="ait-icon-box" style="background:#dcfce7;color:#15803d;">🖼️</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 18</span>
-        <span class="ait-tab-name">Đuổi Hình Bắt Chữ</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-multiverse" class="ait-tab-deluxe ${this.currentTab==='multiverse'?'ait-tab-on':''}" style="--tab-theme:#8b5cf6;--tab-bg:#f5f3ff;">
-      <div class="ait-icon-box" style="background:#ede9fe;color:#7c3aed;">🌌</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 19</span>
-        <span class="ait-tab-name">Đấu Trường Đa Vũ Trụ</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-treasure" class="ait-tab-deluxe ${this.currentTab==='treasure'?'ait-tab-on':''}" style="--tab-theme:#d97706;--tab-bg:#fffbeb;">
-      <div class="ait-icon-box" style="background:#fef3c7;color:#b45309;">🕵️‍♂️</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 20 (HOT 🌟)</span>
-        <span class="ait-tab-name">Thám Tử Tìm Kho Báu</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-challengewheel" class="ait-tab-deluxe ${this.currentTab==='challengewheel'?'ait-tab-on':''}" style="--tab-theme:#0284c7;--tab-bg:#f0f9ff;">
-      <div class="ait-icon-box" style="background:#e0f2fe;color:#0369a1;">🎡</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 21</span>
-        <span class="ait-tab-name">Vòng Quay Thử Thách AI</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-spacejourney" class="ait-tab-deluxe ${this.currentTab==='spacejourney'?'ait-tab-on':''}" style="--tab-theme:#6366f1;--tab-bg:#eef2ff;">
-      <div class="ait-icon-box" style="background:#e0e7ff;color:#4338ca;">🚀</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 22</span>
-        <span class="ait-tab-name">Du Hành Vũ Trụ</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-knowledgearena" class="ait-tab-deluxe ${this.currentTab==='knowledgearena'?'ait-tab-on':''}" style="--tab-theme:#dc2626;--tab-bg:#fef2f2;">
-      <div class="ait-icon-box" style="background:#fee2e2;color:#b91c1c;">⚔️</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 23 (2 ĐỘI VS)</span>
-        <span class="ait-tab-name">Đấu Trường Kiến Thức</span>
-      </div>
-    </button>
-
-    <button id="ait-tab-stations7" class="ait-tab-deluxe ${this.currentTab==='stations7'?'ait-tab-on':''}" style="--tab-theme:#059669;--tab-bg:#ecfdf5;">
-      <div class="ait-icon-box" style="background:#d1fae5;color:#047857;">🚩</div>
-      <div class="ait-text-box">
-        <span class="ait-tab-num">GAME 24 (GDPT 2018)</span>
-        <span class="ait-tab-name">Hành Trình 7 Trạm AI</span>
+        <span class="ait-tab-num" style="color:#0f766e;font-weight:900;">CÔNG CỤ 4 (HOT 🔥)</span>
+        <span class="ait-tab-name" style="font-weight:900;color:#134e4a;">Vẽ Hình 2D/3D & Thí Nghiệm</span>
       </div>
     </button>
 
@@ -970,7 +832,29 @@ window.AITeachingTools = {
 </div>`;
 
     this._injectStyles();
+    this._initAudioUnlocker();
+
+    // Preload SpeechSynthesis Voices for zero-latency audio
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      try {
+        window.speechSynthesis.getVoices();
+        window.speechSynthesis.onvoiceschanged = () => {
+          try { window.speechSynthesis.getVoices(); } catch(e) {}
+        };
+      } catch(e) {}
+    }
+
     this._bindTabs();
+
+    const btnSchoolLib = dom.querySelector('#btn-open-school-shared-lib');
+    if (btnSchoolLib) {
+      btnSchoolLib.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.showSharedToolsLibraryModal();
+      };
+    }
+
     this._renderTab();
   },
 
@@ -8901,48 +8785,64 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const grade = this.icebreaker.grade || '6';
     const subKey = this.icebreaker.subjectId || 'toan';
 
+    const ALL_GAMES_LIST = [
+      { key: 'luckywheel', title: '1. Vòng Quay Kỳ Diệu', icon: '🎡', desc: 'Quay ngẫu nhiên gọi học sinh lên bảng trả lời câu hỏi và nhận điểm thưởng', tag: 'GAME 1', color: '#d97706' },
+      { key: 'goldminer', title: '2. Game AI Đào Vàng', icon: '⛏️', desc: 'Thả móc gắp vàng trúng học sinh và thử thách câu hỏi kiến thức sinh động', tag: 'GAME 2', color: '#ca8a04' },
+      { key: 'headtilt', title: '3. Nghiêng Đầu AI', icon: '🤸‍♂️', desc: 'Nhận diện camera AI góc nghiêng 60fps chọn đáp án Trái / Phải cực nhạy', tag: 'GAME 3', color: '#e11d48' },
+      { key: 'duckrace', title: '4. Game Đua Vịt', icon: '🦆', desc: 'Cuộc đua tốc độ về đích sôi động với các câu hỏi tương tác hào hứng', tag: 'GAME 4', color: '#0d9488' },
+      { key: 'tugofwar', title: '5. Kéo Co Kiến Thức', icon: '🪢', desc: 'Thi đấu đồng đội 2 đội kéo co kịch tính theo từng câu trả lời đúng', tag: 'GAME 5', color: '#dc2626' },
+      { key: 'minesweeper', title: '6. Dò Mìn Vượt Bãi', icon: '💣', desc: 'Khám phá ô an toàn, tránh bẫy mìn và giải mã câu hỏi để giải phóng bản đồ', tag: 'GAME 6', color: '#9333ea' },
+      { key: 'fruitninja', title: '7. Chém Hoa Quả', icon: '🍉', desc: 'Chém hoa quả chứa đáp án đúng, né bom độc và ghi điểm combo đỉnh cao', tag: 'GAME 7', color: '#ea580c' },
+      { key: 'matching', title: '8. Kéo Thả Nối Ý', icon: '🧩', desc: 'Nối khái niệm, định nghĩa và hình ảnh tương ứng theo chủ đề bài học', tag: 'GAME 8', color: '#0891b2' },
+      { key: 'trainorder', title: '9. Đoàn Tàu Tri Thức', icon: '🚂', desc: 'Sắp xếp các toa tàu theo thứ tự diễn biến, quy trình khoa học chuẩn xác', tag: 'GAME 9', color: '#0284c7' },
+      { key: 'luckycamera', title: '10. Ống Kính May Mắn', icon: '📷', desc: 'Bật camera lớp học quay số chọn học sinh ngẫu nhiên trả lời câu hỏi', tag: 'GAME 10', color: '#0d9488' },
+      { key: 'plickers', title: '11. Quét Thẻ Plickers AI', icon: '📇', desc: 'Quét thẻ quang học A, B, C, D của toàn bộ lớp học đồng thời trong 3 giây', tag: 'GAME 11', color: '#4f46e5' },
+      { key: 'mysterypuzzle', title: '12. Lật Mảnh Ghép Bí Ẩn', icon: '🧩', desc: 'Lật mở 3D từng ô câu hỏi để hé lộ bức tranh từ khóa bài học', tag: 'GAME 12', color: '#ea580c' },
+      { key: 'crossword', title: '13. Ô Chữ Khóa Bí Mật', icon: '🔤', desc: 'Giải ô chữ hàng ngang mở từ khóa hàng dọc bí ẩn theo chủ đề', tag: 'GAME 13', color: '#0284c7' },
+      { key: 'wordhunt', title: '14. Đuổi Hình Bắt Chữ', icon: '🖼️', desc: 'Nhìn tranh ẩn dụ suy luận từ ngữ, định lý hoặc sự kiện lịch sử', tag: 'GAME 14', color: '#16a34a' },
+      { key: 'multiverse', title: '15. Đấu Trường Đa Vũ Trụ', icon: '🌌', desc: 'Ghép nhiều game thành chuỗi ải thử thách liên hoàn với Cổng dịch chuyển Portal 3D', tag: 'GAME 15 (MEGA 🌟)', color: '#8b5cf6' },
+      { key: 'treasure', title: '16. Thám Tử Tìm Kho Báu', icon: '🕵️‍♂️', desc: 'Lần theo manh mối bản đồ kho báu, giải mật thư mở rương vàng', tag: 'GAME 16 (HOT 🌟)', color: '#d97706' },
+      { key: 'challengewheel', title: '17. Vòng Quay Thử Thách AI', icon: '🎡', desc: 'Vòng quay may mắn tương tác đa năng với ngân hàng câu hỏi tùy biến', tag: 'GAME 17', color: '#0284c7' },
+      { key: 'spacejourney', title: '18. Du Hành Vũ Trụ', icon: '🚀', desc: 'Khám phá các hành tinh trong Hệ Mặt Trời và chinh phục thử thách thiên văn', tag: 'GAME 18', color: '#6366f1' },
+      { key: 'knowledgearena', title: '19. Đấu Trường Kiến Thức', icon: '⚔️', desc: 'Thi đấu đối kháng 2 đội trực diện, thanh máu HP đối kháng kịch tính', tag: 'GAME 19 (2 ĐỘI VS)', color: '#dc2626' },
+      { key: 'stations7', title: '20. Hành Trình 7 Trạm AI', icon: '🚩', desc: 'Dạy học theo phương pháp góc/trạm chuẩn GDPT 2018 với 7 trạm thử thách', tag: 'GAME 20 (GDPT 2018)', color: '#059669' },
+      { key: 'starrace', title: '21. Cuộc Đua Ngôi Sao', icon: '🌟', desc: 'Đối kháng AI Webcam 2 người giơ ngón tay (1-4 ngón) cướp Sao Vàng từ Balo', tag: 'GAME 21 (AI GESTURE ✌️)', color: '#f59e0b' }
+    ];
+
     area.innerHTML = `
       <div class="ait-card" style="background:#ffffff;border:2.5px solid #6366f1;border-radius:24px;padding:1.75rem;box-shadow:0 10px 35px rgba(99,102,241,0.12);">
         
         <!-- HEADER -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;border-bottom:2px solid #e0e7ff;padding-bottom:1rem;">
           <div style="display:flex;align-items:center;gap:.75rem;">
-            <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:2rem;box-shadow:0 6px 18px rgba(99,102,241,0.3);">
+            <div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:2.2rem;box-shadow:0 6px 18px rgba(99,102,241,0.35);">
               🎮
             </div>
             <div>
-              <h2 style="font-size:1.35rem;font-weight:900;color:#312e81;margin:0;">KHO TRÒ CHƠI HỌC TẬP TỔNG HỢP (14+ GAME SHOW)</h2>
-              <p style="font-size:.85rem;color:#6366f1;margin:.2rem 0 0;font-weight:700;">Hệ thống 14 trò chơi game show tương tác trực tiếp trên máy chiếu lớp học</p>
+              <h2 style="font-size:1.45rem;font-weight:900;color:#312e81;margin:0;">KHO TRÒ CHƠI GAME SHOW GIẢNG DẠY (TRỌN BỘ 20 GAME SHOW TỪ 1 - 20)</h2>
+              <p style="font-size:.9rem;color:#6366f1;margin:.25rem 0 0;font-weight:700;">Hệ thống 20 trò chơi game show tương tác trực tiếp trên máy chiếu lớp học (Đánh số chuẩn từ Game 1 đến Game 20)</p>
             </div>
           </div>
-          <button id="btn-open-global-lib" class="btn" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:900;font-size:.95rem;padding:.75rem 1.6rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(99,102,241,0.35);display:flex;align-items:center;gap:.5rem;">
+          <button id="btn-open-global-lib" class="btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:.95rem;padding:.75rem 1.6rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(16,185,129,0.35);display:flex;align-items:center;gap:.5rem;">
             <span>🏫</span> MỞ KHO DÙNG CHUNG TOÀN TRƯỜNG
           </button>
         </div>
 
-        <!-- 14 GAME CARDS GRID -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;">
-          ${[
-            { key: 'luckywheel', title: '5. Vòng Quay Kỳ Diệu', icon: '🎡', desc: 'Quay ngẫu nhiên gọi học sinh lên bảng' },
-            { key: 'goldminer', title: '6. Game AI Đào Vàng', icon: '⛏️', desc: 'Thả móc gắp vàng trúng học sinh' },
-            { key: 'headtilt', title: '7. Nghiêng Đầu AI', icon: '🤸‍♂️', desc: 'Nhận diện camera AI góc nghiêng 60fps' },
-            { key: 'duckrace', title: '8. Game Đua Vịt', icon: '🦆', desc: 'Đua tốc độ về đích sôi động' },
-            { key: 'tugofwar', title: '9. Kéo Co Kiến Thức', icon: '🪢', desc: 'Thi đấu đồng đội kịch tính' },
-            { key: 'minesweeper', title: '10. Dò Mìn Vượt Bãi', icon: '💣', desc: 'Khám phá ô an toàn và trả lời câu hỏi' },
-            { key: 'fruitninja', title: '11. Chém Hoa Quả', icon: '🍉', desc: 'Chém đúng đáp án chính xác' },
-            { key: 'matching', title: '12. Kéo Thả Nối Ý', icon: '🧩', desc: 'Nối khái niệm và định nghĩa tương ứng' },
-            { key: 'trainorder', title: '13. Đoàn Tàu Tri Thức', icon: '🚂', desc: 'Sắp xếp toa tàu theo thứ tự đúng' },
-            { key: 'luckycamera', title: '14. Ống Kính May Mắn', icon: '📸', desc: 'Chụp ngẫu nhiên ảnh học sinh' },
-            { key: 'plickers', title: '15. Quét Thẻ Plickers', icon: '📷', desc: 'Quét thẻ quang học đồng thời cả lớp' },
-            { key: 'mysterypuzzle', title: '16. Lật Mảnh Ghép Bí Ẩn', icon: '🧩', desc: 'Lật mở 3D đoán từ khóa bài học' },
-            { key: 'crossword', title: '17. Ô Chữ Khóa Bí Mật', icon: '🔤', desc: 'Giải ô chữ hàng ngang mở cột dọc' },
-            { key: 'wordhunt', title: '18. Đuổi Hình Bắt Chữ', icon: '🖼️', desc: 'Nhìn tranh ẩn dụ đoán từ khóa' }
-          ].map(g => `
-            <div class="ice-game-card-btn" data-game="${g.key}" style="background:#ffffff;border:2px solid #e0e7ff;border-radius:18px;padding:1.25rem;cursor:pointer;transition:all .2s;box-shadow:0 4px 15px rgba(0,0,0,0.03);display:flex;flex-direction:column;gap:.5rem;">
-              <div style="font-size:2.2rem;">${g.icon}</div>
-              <div style="font-weight:900;font-size:1.05rem;color:#1e1b4b;">${g.title}</div>
-              <div style="font-size:.82rem;color:#64748b;font-weight:600;">${g.desc}</div>
-              <button style="margin-top:.5rem;background:#f0fdf4;color:#16a34a;border:1.5px solid #86efac;padding:.45rem;border-radius:10px;font-weight:800;font-size:.85rem;cursor:pointer;">
+        <!-- 20 GAME SHOW CARDS GRID -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.15rem;">
+          ${ALL_GAMES_LIST.map(g => `
+            <div class="ice-game-card-btn" data-game="${g.key}" style="background:#ffffff;border:2.5px solid ${g.color};border-radius:20px;padding:1.35rem;cursor:pointer;transition:all .2s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:0 4px 15px rgba(0,0,0,0.03);display:flex;flex-direction:column;justify-content:space-between;gap:.6rem;" onmouseover="this.style.transform='translateY(-5px) scale(1.02)';this.style.boxShadow='0 12px 25px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.03)';">
+              
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+                  <span style="font-size:2.4rem;">${g.icon}</span>
+                  <span style="background:${g.color}15;color:${g.color};font-weight:900;font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:8px;border:1px solid ${g.color}33;">${g.tag}</span>
+                </div>
+                <div style="font-weight:900;font-size:1.1rem;color:#0f172a;line-height:1.3;">${g.title}</div>
+                <div style="font-size:.82rem;color:#475569;font-weight:600;margin-top:0.35rem;line-height:1.4;">${g.desc}</div>
+              </div>
+
+              <button style="margin-top:.6rem;background:${g.color};color:#ffffff;border:none;padding:.55rem;border-radius:12px;font-weight:900;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;box-shadow:0 4px 12px ${g.color}44;">
                 🚀 MỞ GAME NÀY
               </button>
             </div>
@@ -8966,8 +8866,6 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       btnGlobalLib.onclick = () => this.showSharedToolsLibraryModal();
     }
   },
-
-
 
   // ═══════════════════════════════════════════════════════════════
   // QUESTIONS RETRIEVAL HELPERS FOR ALL GAMES & GRADES
@@ -9230,6 +9128,26 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
 
 
+
+  // Auto Audio Unlocker for Web Audio API & SpeechSynthesis
+  _initAudioUnlocker() {
+    if (typeof window === 'undefined') return;
+    if (window._audioUnlocked) return;
+    const unlock = () => {
+      window._audioUnlocked = true;
+      try {
+        if (window.speechSynthesis) {
+          if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+          window.speechSynthesis.getVoices();
+        }
+      } catch(e) {}
+      document.removeEventListener('click', unlock);
+      document.removeEventListener('touchstart', unlock);
+    };
+    document.addEventListener('click', unlock, { once: true });
+    document.addEventListener('touchstart', unlock, { once: true });
+  },
+
   _injectStyles() {
     if (document.getElementById('ait-css')) return;
     const s = document.createElement('style');
@@ -9349,7 +9267,18 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
         padding:.5rem .85rem;font-size:.8rem;font-weight:700;cursor:pointer;transition:.15s;
         color:#334155;text-align:left;}
       .ait-preset-btn:hover{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;}
-      .ait-fact-btn{flex:1;padding:1rem;font-size:1.05rem;font-weight:800;border:none;
+      
+        @keyframes pulseGlow {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255,255,255,0.6)); }
+          50% { transform: scale(1.06); filter: drop-shadow(0 0 35px rgba(255,255,255,0.95)); }
+        }
+        @keyframes morphBounce {
+          0% { transform: scale(0.2) rotate(-15deg); opacity: 0; }
+          60% { transform: scale(1.2) rotate(6deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .ait-fact-btn{flex:1;padding:1rem;font-size:1.05rem;font-weight:800;border:none;
         border-radius:14px;cursor:pointer;transition:.15s;}
     `;
     document.head.appendChild(s);
@@ -9396,6 +9325,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     else if (t === 'spacejourney')  this._renderSpaceJourneyDashboard();
     else if (t === 'knowledgearena') this._renderKnowledgeArenaDashboard();
     else if (t === 'stations7')     this._renderStations7Dashboard();
+    else if (t === 'starrace')      this._renderStarRaceDashboard();
+    else if (t === 'alphabet_kids') this._renderAlphabetKidsDashboard();
+    else if (t === 'numbers_kids') this._renderNumbersKidsDashboard();
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -9486,6 +9418,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     let aiGeneratedPool = [];
     let isGeneratingAI = false;
     let notificationMsg = '';
+    let isFullscreen = true;
+    let currentCorrectIndex = 0;
 
     const synth = this._getAudioSynth();
 
@@ -9502,45 +9436,87 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     };
 
     const modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.95);backdrop-filter:blur(12px);z-index:999999;display:flex;flex-direction:column;font-family:var(--font-body);color:#fff;animation:fadeIn .2s;';
+    modal.id = 'ql-modal-container';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.7);backdrop-filter:blur(8px);z-index:999999;display:flex;align-items:center;justify-content:center;font-family:var(--font-body, system-ui, sans-serif);color:#0f172a;animation:fadeIn .2s;padding:0.4rem;box-sizing:border-box;';
 
     const render = () => {
+      // Xác định đúng đáp án khi đang ở chế độ chỉnh sửa (Edit)
+      if (editingIndex >= 0 && currentQuestions[editingIndex]) {
+        const curQ = currentQuestions[editingIndex];
+        if (typeof curQ.correctAnswer === 'number') {
+          currentCorrectIndex = curQ.correctAnswer;
+        } else if (typeof curQ.correctAnswer === 'string' && !isNaN(parseInt(curQ.correctAnswer))) {
+          currentCorrectIndex = parseInt(curQ.correctAnswer);
+        } else if (curQ.a && Array.isArray(curQ.options)) {
+          const foundIdx = curQ.options.findIndex(opt => opt === curQ.a);
+          if (foundIdx >= 0) currentCorrectIndex = foundIdx;
+          else if (!isNaN(parseInt(curQ.a))) currentCorrectIndex = parseInt(curQ.a);
+        } else if (curQ.correct === 'right' || curQ.ans === false) {
+          currentCorrectIndex = 1;
+        } else {
+          currentCorrectIndex = 0;
+        }
+      }
+
+      const containerStyle = isFullscreen 
+        ? 'width:99vw;height:98vh;max-width:1600px;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden;'
+        : 'width:92vw;max-width:1150px;max-height:92vh;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden;'
+
       modal.innerHTML = `
-<div style="background:#1e293b;padding:.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155;">
-  <div style="display:flex;align-items:center;gap:.75rem;">
-    <span style="font-size:1.6rem;background:#312e81;padding:.3rem .6rem;border-radius:12px;border:1px solid #6366f1;">🤖</span>
-    <div>
-      <h3 style="margin:0;font-family:var(--font-title);color:#818cf8;font-size:1.2rem;font-weight:900;">TRUNG TÂM NẠP & QUẢN LÝ CÂU HỎI: ${gameTitle.toUpperCase()}</h3>
-      <div style="font-size:.78rem;color:#94a3b8;">Đang có <b>${currentQuestions.length} câu hỏi</b> sẵn sàng trong trò chơi</div>
+<div style="${containerStyle}">
+
+  <!-- MODAL TOP HEADER (CĂN CHỈNH CHUẨN 1 DÒNG DUY NHẤT, NÉT THƯỜNG TRANG NHÃ) -->
+  <div style="background:#ffffff;padding:0.85rem 1.75rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1.5px solid #e2e8f0;gap:1rem;flex-wrap:nowrap;">
+    
+    <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;flex:1;">
+      <span style="font-size:1.6rem;background:#e0e7ff;padding:0.35rem 0.65rem;border-radius:12px;border:1px solid #818cf8;flex-shrink:0;">🤖</span>
+      <div style="min-width:0;">
+        <h3 style="margin:0;font-family:var(--font-title, sans-serif);color:#1e1b4b;font-size:1.2rem;font-weight:700;letter-spacing:0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          TRUNG TÂM NẠP & QUẢN LÝ CÂU HỎI: ${gameTitle.toUpperCase()}
+        </h3>
+        <div style="font-size:0.85rem;color:#64748b;font-weight:400;margin-top:2px;">
+          Đang có <b style="color:#4f46e5;font-weight:600;">${currentQuestions.length} câu hỏi</b> sẵn sàng trong trò chơi · Giao diện phóng to toàn cảnh
+        </div>
+      </div>
     </div>
+
+    <div style="display:flex;align-items:center;gap:0.6rem;flex-shrink:0;">
+      <button id="btn-toggle-fullscreen" style="background:#f8fafc;color:#334155;border:1px solid #cbd5e1;padding:0.5rem 1rem;border-radius:10px;font-weight:600;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;">
+        <span>${isFullscreen ? '🗗 Thu Gọn' : '🗖 Phóng To'}</span>
+      </button>
+      <button id="ql-close" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;padding:0.5rem 1.25rem;border-radius:10px;font-weight:600;font-size:0.88rem;cursor:pointer;box-shadow:0 2px 8px rgba(239,68,68,0.25);display:flex;align-items:center;gap:0.35rem;">
+        ✕ Đóng Cửa Sổ
+      </button>
+    </div>
+
   </div>
-  <button id="ql-close" style="background:#ef4444;color:#fff;border:none;padding:.4rem 1rem;border-radius:10px;font-weight:800;cursor:pointer;">✕ Đóng</button>
-</div>
 
-<!-- 3 Modal Header Tabs -->
-<div style="background:#0f172a;padding:.65rem 1.5rem;display:flex;gap:.75rem;border-bottom:1px solid #1e293b;flex-wrap:wrap;">
-  <button id="tab-btn-ai" style="padding:.55rem 1.35rem;border-radius:12px;font-weight:900;font-size:.88rem;border:none;cursor:pointer;background:${activeTab==='ai'?'linear-gradient(135deg,#6366f1,#4f46e5)':'#1e293b'};color:#fff;box-shadow:${activeTab==='ai'?'0 4px 14px rgba(99,102,241,0.4)':'none'};display:flex;align-items:center;gap:.45rem;">
-    <span>✨</span> Tab 1: Sinh Câu Hỏi Bằng AI (Bài Học & Tài Liệu)
-  </button>
-  <button id="tab-btn-bank" style="padding:.55rem 1.35rem;border-radius:12px;font-weight:900;font-size:.88rem;border:none;cursor:pointer;background:${activeTab==='bank'?'linear-gradient(135deg,#0284c7,#0369a1)':'#1e293b'};color:#fff;box-shadow:${activeTab==='bank'?'0 4px 14px rgba(2,132,199,0.4)':'none'};display:flex;align-items:center;gap:.45rem;">
-    <span>📥</span> Tab 2: Rút Từ Ngân Hàng Đề Trường
-  </button>
-  <button id="tab-btn-crud" style="padding:.55rem 1.35rem;border-radius:12px;font-weight:900;font-size:.88rem;border:none;cursor:pointer;background:${activeTab==='crud'?'linear-gradient(135deg,#059669,#047857)':'#1e293b'};color:#fff;box-shadow:${activeTab==='crud'?'0 4px 14px rgba(5,150,105,0.4)':'none'};display:flex;align-items:center;gap:.45rem;">
-    <span>📝</span> Tab 3: Tự Soạn, Sửa, Xóa & Quản Lý (${currentQuestions.length})
-  </button>
-</div>
-
-<!-- Notification Toast -->
-${notificationMsg ? `
-  <div style="background:#10b981;color:#fff;padding:.75rem 1.5rem;font-weight:900;font-size:.95rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 15px rgba(16,185,129,0.3);animation:fadeIn .2s;">
-    <div>${notificationMsg}</div>
-    <button id="btn-close-toast" style="background:transparent;border:none;color:#fff;font-size:1.2rem;font-weight:900;cursor:pointer;">✕</button>
+  <!-- 3 MODAL HEADER TABS (CĂN TRÊN 1 DÒNG, NÉT THƯỜNG DỄ NHÌN) -->
+  <div style="background:#f8fafc;padding:0.65rem 1.75rem;display:flex;gap:0.75rem;border-bottom:1.5px solid #e2e8f0;flex-wrap:nowrap;overflow-x:auto;">
+    <button id="tab-btn-ai" style="padding:0.6rem 1.35rem;border-radius:12px;font-weight:600;font-size:0.9rem;cursor:pointer;white-space:nowrap;background:${activeTab==='ai'?'linear-gradient(135deg,#6366f1,#4f46e5)':'#ffffff'};color:${activeTab==='ai'?'#ffffff':'#475569'};border:${activeTab==='ai'?'none':'1.5px solid #cbd5e1'};box-shadow:${activeTab==='ai'?'0 4px 14px rgba(99,102,241,0.3)':'none'};display:flex;align-items:center;gap:0.45rem;transition:all .15s;">
+      <span style="font-size:1.05rem;">✨</span> Tab 1: Sinh Câu Hỏi Bằng AI (Bài Học & Tài Liệu)
+    </button>
+    <button id="tab-btn-bank" style="padding:0.6rem 1.35rem;border-radius:12px;font-weight:600;font-size:0.9rem;cursor:pointer;white-space:nowrap;background:${activeTab==='bank'?'linear-gradient(135deg,#0284c7,#0369a1)':'#ffffff'};color:${activeTab==='bank'?'#ffffff':'#475569'};border:${activeTab==='bank'?'none':'1.5px solid #cbd5e1'};box-shadow:${activeTab==='bank'?'0 4px 14px rgba(2,132,199,0.3)':'none'};display:flex;align-items:center;gap:0.45rem;transition:all .15s;">
+      <span style="font-size:1.05rem;">📥</span> Tab 2: Rút Từ Ngân Hàng Đề Trường
+    </button>
+    <button id="tab-btn-crud" style="padding:0.6rem 1.35rem;border-radius:12px;font-weight:600;font-size:0.9rem;cursor:pointer;white-space:nowrap;background:${activeTab==='crud'?'linear-gradient(135deg,#059669,#047857)':'#ffffff'};color:${activeTab==='crud'?'#ffffff':'#475569'};border:${activeTab==='crud'?'none':'1.5px solid #cbd5e1'};box-shadow:${activeTab==='crud'?'0 4px 14px rgba(5,150,105,0.3)':'none'};display:flex;align-items:center;gap:0.45rem;transition:all .15s;">
+      <span style="font-size:1.05rem;">📝</span> Tab 3: Tự Soạn, Sửa, Xóa & Quản Lý (${currentQuestions.length})
+    </button>
   </div>
-` : ''}
 
-<!-- Modal Body -->
-<div style="flex:1;overflow-y:auto;padding:1.5rem;">
-  ${activeTab === 'ai' ? renderAITab() : (activeTab === 'bank' ? renderBankTab() : renderCrudTab())}
+  <!-- Notification Toast -->
+  ${notificationMsg ? `
+    <div style="background:#10b981;color:#fff;padding:0.75rem 1.75rem;font-weight:600;font-size:0.92rem;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 12px rgba(16,185,129,0.25);animation:fadeIn .2s;">
+      <div>${notificationMsg}</div>
+      <button id="btn-close-toast" style="background:transparent;border:none;color:#fff;font-size:1.2rem;font-weight:600;cursor:pointer;">✕</button>
+    </div>
+  ` : ''}
+
+  <!-- MODAL BODY -->
+  <div style="flex:1;overflow-y:auto;padding:1.5rem 1.75rem;background:#f1f5f9;">
+    ${activeTab === 'ai' ? renderAITab() : (activeTab === 'bank' ? renderBankTab() : renderCrudTab())}
+  </div>
+
 </div>
 `;
 
@@ -9548,6 +9524,14 @@ ${notificationMsg ? `
         modal.remove();
         this._renderTab();
       };
+
+      const btnFullscreen = modal.querySelector('#btn-toggle-fullscreen');
+      if (btnFullscreen) {
+        btnFullscreen.onclick = () => {
+          isFullscreen = !isFullscreen;
+          render();
+        };
+      }
 
       const btnCloseToast = modal.querySelector('#btn-close-toast');
       if (btnCloseToast) {
@@ -9580,31 +9564,31 @@ ${notificationMsg ? `
       ];
 
       return `
-<div style="max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:1.25rem;">
+<div style="max-width:1450px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:1.35rem;">
   
-  <div style="background:#1e293b;border:2px solid #6366f1;border-radius:20px;padding:1.5rem;box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+  <div style="background:#ffffff;border:1.5px solid #818cf8;border-radius:20px;padding:1.6rem 2rem;box-shadow:0 4px 20px rgba(99,102,241,0.06);">
     
-    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem;">
-      <span style="font-size:2rem;">✨</span>
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.35rem;">
+      <span style="font-size:2rem;background:#e0e7ff;padding:0.4rem 0.75rem;border-radius:14px;border:1px solid #818cf8;">✨</span>
       <div>
-        <h4 style="margin:0;font-family:var(--font-title);color:#a5b4fc;font-size:1.25rem;font-weight:900;">
+        <h4 style="margin:0;font-family:var(--font-title, sans-serif);color:#312e81;font-size:1.25rem;font-weight:700;">
           TRỢ LÝ AI TỰ ĐỘNG TẠO CÂU HỎI CHUẨN GDPT 2018
         </h4>
-        <div style="font-size:.82rem;color:#cbd5e1;">Chọn môn, bài học hoặc tải tệp tài liệu giáo án ➔ AI tự động biên soạn câu hỏi phù hợp cho ${gameTitle}!</div>
+        <div style="font-size:0.88rem;color:#64748b;font-weight:400;margin-top:2px;">Chọn môn, bài học hoặc tải tệp tài liệu giáo án ➔ AI tự động biên soạn câu hỏi phù hợp cho ${gameTitle}!</div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.25rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.15rem;margin-bottom:1.25rem;">
       <div>
-        <label style="display:block;font-size:.82rem;font-weight:800;color:#c7d2fe;margin-bottom:.35rem;">📚 1. Môn Học:</label>
-        <select id="ai-form-sub" class="ait-select" style="width:100%;background:#0f172a;border-color:#6366f1;color:#fff;font-weight:700;">
+        <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">📚 1. Môn Học:</label>
+        <select id="ai-form-sub" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
           ${subs.map(s => `<option value="${s.id}" ${aiState.subject===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('')}
         </select>
       </div>
 
       <div>
-        <label style="display:block;font-size:.82rem;font-weight:800;color:#c7d2fe;margin-bottom:.35rem;">🏫 2. Khối Lớp:</label>
-        <select id="ai-form-grade" class="ait-select" style="width:100%;background:#0f172a;border-color:#6366f1;color:#fff;font-weight:700;">
+        <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">🏫 2. Khối Lớp:</label>
+        <select id="ai-form-grade" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
           <option value="6" ${aiState.grade==='6'?'selected':''}>Khối 6 (Lớp 6)</option>
           <option value="7" ${aiState.grade==='7'?'selected':''}>Khối 7 (Lớp 7)</option>
           <option value="8" ${aiState.grade==='8'?'selected':''}>Khối 8 (Lớp 8)</option>
@@ -9613,8 +9597,8 @@ ${notificationMsg ? `
       </div>
 
       <div>
-        <label style="display:block;font-size:.82rem;font-weight:800;color:#c7d2fe;margin-bottom:.35rem;">🔢 3. Số Lượng Câu Hỏi:</label>
-        <select id="ai-form-count" class="ait-select" style="width:100%;background:#0f172a;border-color:#6366f1;color:#fff;font-weight:700;">
+        <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">🔢 3. Số Lượng Câu Hỏi:</label>
+        <select id="ai-form-count" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
           <option value="4" ${aiState.qCount===4?'selected':''}>4 Câu hỏi (Khởi động nhanh)</option>
           <option value="6" ${aiState.qCount===6?'selected':''}>6 Câu hỏi (Tiêu chuẩn)</option>
           <option value="8" ${aiState.qCount===8?'selected':''}>8 Câu hỏi</option>
@@ -9625,8 +9609,8 @@ ${notificationMsg ? `
       </div>
 
       <div>
-        <label style="display:block;font-size:.82rem;font-weight:800;color:#c7d2fe;margin-bottom:.35rem;">🎯 4. Mức Độ Nhận Thức:</label>
-        <select id="ai-form-level" class="ait-select" style="width:100%;background:#0f172a;border-color:#6366f1;color:#fff;font-weight:700;">
+        <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">🎯 4. Mức Độ Nhận Thức:</label>
+        <select id="ai-form-level" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
           <option value="all" ${aiState.level==='all'?'selected':''}>🌟 Trộn đều các mức độ (Khuyên dùng)</option>
           <option value="nhan_biet" ${aiState.level==='nhan_biet'?'selected':''}>🟢 Mức 1: Nhận biết (Cơ bản)</option>
           <option value="thong_hieu" ${aiState.level==='thong_hieu'?'selected':''}>🔵 Mức 2: Thông hiểu</option>
@@ -9637,68 +9621,68 @@ ${notificationMsg ? `
     </div>
 
     <div style="margin-bottom:1.25rem;">
-      <label style="display:block;font-size:.82rem;font-weight:800;color:#c7d2fe;margin-bottom:.35rem;">📖 5. Tên Bài Học / Chủ Đề Giảng Dạy:</label>
-      <input id="ai-form-lesson" type="text" class="ait-input" value="${aiState.lesson}" style="width:100%;background:#0f172a;border-color:#6366f1;color:#fff;font-weight:800;font-size:1rem;box-sizing:border-box;" placeholder="Nhập tên bài học (VD: Hình có trục đối xứng, Phép nhân phân số...)" />
+      <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">📖 5. Tên Bài Học / Chủ Đề Giảng Dạy:</label>
+      <input id="ai-form-lesson" type="text" class="ait-input" value="${aiState.lesson}" style="width:100%;background:#f8fafc;border:1.5px solid #818cf8;color:#0f172a;font-weight:500;font-size:0.95rem;box-sizing:border-box;border-radius:10px;padding:0.65rem 0.95rem;" placeholder="Nhập tên bài học (VD: Hình có trục đối xứng, Phép nhân phân số...)" />
     </div>
 
     <div style="margin-bottom:1.25rem;">
-      <label style="display:block;font-size:.82rem;font-weight:800;color:#c7d2fe;margin-bottom:.35rem;">📝 6. Yêu Cầu Riêng Của Giáo Viên (Prompt Tùy Biến):</label>
-      <input id="ai-form-prompt" type="text" class="ait-input" value="${aiState.teacherPrompt}" style="width:100%;background:#0f172a;border-color:#475569;color:#e2e8f0;font-size:.9rem;box-sizing:border-box;" placeholder="VD: Tập trung vào tính toán nhanh, đố vui mẹo liên hệ thực tế, câu hỏi tình huống..." />
+      <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">📝 6. Yêu Cầu Riêng Của Giáo Viên (Prompt Tùy Biến):</label>
+      <input id="ai-form-prompt" type="text" class="ait-input" value="${aiState.teacherPrompt}" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-size:0.92rem;font-weight:400;box-sizing:border-box;border-radius:10px;padding:0.65rem 0.95rem;" placeholder="VD: Tập trung vào tính toán nhanh, đố vui mẹo liên hệ thực tế, câu hỏi tình huống..." />
     </div>
 
-    <div style="background:#0f172a;border:1.5px dashed #6366f1;border-radius:14px;padding:1rem;margin-bottom:1.25rem;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.5rem;">
-        <div style="font-weight:800;font-size:.84rem;color:#a5b4fc;display:flex;align-items:center;gap:.4rem;">
+    <div style="background:#f0fdf4;border:1.5px dashed #10b981;border-radius:14px;padding:1.15rem;margin-bottom:1.35rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.65rem;flex-wrap:nowrap;gap:0.5rem;">
+        <div style="font-weight:600;font-size:0.88rem;color:#065f46;display:flex;align-items:center;gap:0.4rem;">
           <span>📎</span> 7. Bổ Sung Tài Liệu / Giáo Án / Đề Cương (Tùy Chọn):
         </div>
-        <label for="ai-doc-upload-file" style="background:#4f46e5;color:#fff;font-weight:800;font-size:.8rem;padding:.35rem .85rem;border-radius:8px;cursor:pointer;">
+        <label for="ai-doc-upload-file" style="background:#10b981;color:#fff;font-weight:600;font-size:0.84rem;padding:0.45rem 1.1rem;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(16,185,129,0.25);">
           📁 Tải Tệp (.DOCX, .TXT, .PDF)
         </label>
         <input type="file" id="ai-doc-upload-file" accept=".docx,.txt,.doc,.pdf" style="display:none;" />
       </div>
-      <div id="ai-file-badge" style="font-size:.8rem;color:#34d399;font-weight:800;margin-bottom:.4rem;display:${aiState.docFileName?'block':'none'};">
+      <div id="ai-file-badge" style="font-size:0.84rem;color:#059669;font-weight:600;margin-bottom:0.45rem;display:${aiState.docFileName?'block':'none'};">
         ✅ Đã đính kèm: <b>${aiState.docFileName}</b>
       </div>
-      <textarea id="ai-form-doc-text" class="ait-input" rows="3" style="width:100%;background:#1e293b;border-color:#334155;color:#cbd5e1;font-size:.82rem;resize:vertical;box-sizing:border-box;" placeholder="Dán trực tiếp văn bản nội dung bài học, đề cương hoặc đoạn trích SGK vào đây nếu muốn AI trích xuất sát tài liệu...">${aiState.docContent}</textarea>
+      <textarea id="ai-form-doc-text" class="ait-input" rows="3" style="width:100%;background:#ffffff;border:1.5px solid #a7f3d0;color:#0f172a;font-size:0.9rem;font-weight:400;resize:vertical;box-sizing:border-box;border-radius:10px;padding:0.65rem 0.95rem;" placeholder="Dán trực tiếp văn bản nội dung bài học, đề cương hoặc đoạn trích SGK vào đây nếu muốn AI trích xuất sát tài liệu...">${aiState.docContent}</textarea>
     </div>
 
-    <button id="btn-do-ai-generate" style="width:100%;background:linear-gradient(135deg,#6366f1 0%,#4f46e5 100%);color:#fff;font-weight:900;font-size:1.15rem;padding:1rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(99,102,241,0.4);display:flex;align-items:center;justify-content:center;gap:.6rem;transition:transform .15s;">
-      <span>✨</span> ${isGeneratingAI ? '⏳ AI ĐANG BIÊN SOẠN CÂU HỎI...' : 'BẮT ĐẦU SINH BỘ CÂU HỎI BẰNG AI NGAY'}
+    <button id="btn-do-ai-generate" style="width:100%;background:linear-gradient(135deg,#6366f1 0%,#4f46e5 100%);color:#fff;font-weight:700;font-size:1.1rem;padding:0.95rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(99,102,241,0.3);display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:transform .15s;">
+      <span style="font-size:1.25rem;">✨</span> ${isGeneratingAI ? '⏳ AI ĐANG BIÊN SOẠN CÂU HỎI...' : 'BẮT ĐẦU SINH BỘ CÂU HỎI BẰNG AI NGAY'}
     </button>
 
   </div>
 
   <!-- AI GENERATED RESULTS PREVIEW -->
   ${aiGeneratedPool.length > 0 ? `
-    <div style="background:#1e293b;border:2px solid #10b981;border-radius:20px;padding:1.5rem;box-shadow:0 8px 30px rgba(16,185,129,0.15);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+    <div style="background:#ffffff;border:1.5px solid #10b981;border-radius:20px;padding:1.6rem 2rem;box-shadow:0 4px 20px rgba(16,185,129,0.08);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:nowrap;gap:0.75rem;">
         <div>
-          <h4 style="margin:0;color:#34d399;font-family:var(--font-title);font-size:1.15rem;font-weight:900;">
+          <h4 style="margin:0;color:#065f46;font-family:var(--font-title, sans-serif);font-size:1.2rem;font-weight:700;">
             🎉 ĐÃ SINH THÀNH CÔNG ${aiGeneratedPool.length} CÂU HỎI BẰNG AI!
           </h4>
-          <div style="font-size:.8rem;color:#94a3b8;">Xem trước và duyệt câu hỏi trước khi nạp vào ${gameTitle}</div>
+          <div style="font-size:0.85rem;color:#64748b;font-weight:400;">Xem trước và duyệt câu hỏi trước khi nạp vào ${gameTitle}</div>
         </div>
-        <button id="btn-inject-ai-questions" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:1rem;padding:.75rem 2rem;border-radius:12px;border:none;cursor:pointer;box-shadow:0 6px 20px rgba(16,185,129,0.35);display:flex;align-items:center;gap:.5rem;">
+        <button id="btn-inject-ai-questions" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:600;font-size:0.95rem;padding:0.7rem 1.8rem;border-radius:12px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(16,185,129,0.3);display:flex;align-items:center;gap:0.45rem;">
           <span>📥</span> NẠP VÀO GAME NGAY
         </button>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:.65rem;max-height:360px;overflow-y:auto;padding-right:.3rem;">
+      <div style="display:flex;flex-direction:column;gap:0.75rem;max-height:420px;overflow-y:auto;padding-right:0.3rem;">
         ${aiGeneratedPool.map((q, i) => `
-          <div style="background:#0f172a;border:1px solid #334155;border-radius:12px;padding:.85rem 1rem;display:flex;justify-content:space-between;align-items:start;gap:1rem;">
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:start;gap:1rem;">
             <div style="flex:1;">
-              <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;">
-                <span style="background:#1e1b4b;color:#a5b4fc;font-weight:900;font-size:.75rem;padding:.15rem .5rem;border-radius:6px;border:1px solid #6366f1;">Câu ${i+1}</span>
-                <span style="background:#064e3b;color:#34d399;font-weight:800;font-size:.75rem;padding:.15rem .5rem;border-radius:6px;">🎯 +${q.points || 10}đ</span>
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;">
+                <span style="background:#e0e7ff;color:#4338ca;font-weight:600;font-size:0.78rem;padding:0.2rem 0.55rem;border-radius:6px;border:1px solid #c7d2fe;">Câu ${i+1}</span>
+                <span style="background:#dcfce7;color:#15803d;font-weight:600;font-size:0.78rem;padding:0.2rem 0.55rem;border-radius:6px;">🎯 +${q.points || 10}đ</span>
               </div>
-              <div style="font-weight:800;color:#f8fafc;font-size:.95rem;margin-bottom:.4rem;">${q.q || q.questionText}</div>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-size:.82rem;color:#cbd5e1;">
+              <div style="font-weight:600;color:#0f172a;font-size:0.98rem;margin-bottom:0.45rem;line-height:1.4;">${q.q || q.questionText}</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.45rem;font-size:0.88rem;color:#334155;font-weight:400;">
                 <div>🅰️ ${q.options ? q.options[0] : q.left}</div>
                 <div>🅱️ ${q.options ? q.options[1] : q.right}</div>
                 ${q.options && q.options[2] ? `<div>🅲 ${q.options[2]}</div>` : ''}
                 ${q.options && q.options[3] ? `<div>🅳 ${q.options[3]}</div>` : ''}
               </div>
-              <div style="font-size:.78rem;color:#34d399;font-weight:700;margin-top:.4rem;">
+              <div style="font-size:0.85rem;color:#059669;font-weight:600;margin-top:0.45rem;background:#ecfdf5;padding:0.3rem 0.65rem;border-radius:8px;display:inline-block;">
                 ✅ Đáp án đúng: <b>${Array.isArray(q.options) ? q.options[q.correctAnswer||0] : q.left}</b>
               </div>
             </div>
@@ -9879,7 +9863,7 @@ ${notificationMsg ? `
             notificationMsg = `🎉 ĐÃ SINH THÀNH CÔNG ${generated.length} CÂU HỎI CHUẨN KIẾN THỨC BÀI "${lessonName}"!`;
             render();
             try { if (synth && synth.correctChime) synth.correctChime(); } catch(e) {}
-          }, 500);
+          }, 400);
         };
       }
 
@@ -9898,7 +9882,7 @@ ${notificationMsg ? `
     };
 
     // =======================================================================
-    // TAB 2: RÚT TỪ NGÂN HÀNG ĐỀ TRƯỜNG (6 BỘ LỌC CHUẨN)
+    // TAB 2: RÚT TỪ NGÂN HÀNG ĐỀ TRƯỜNG
     // =======================================================================
     const renderBankTab = () => {
       const subs = window.DB && window.DB.SUBJECTS ? window.DB.SUBJECTS : [
@@ -9908,15 +9892,16 @@ ${notificationMsg ? `
       ];
 
       return `
-<div style="max-width:850px;margin:0 auto;background:#1e293b;border:1.5px solid #0284c7;border-radius:18px;padding:1.5rem;box-shadow:0 6px 25px rgba(0,0,0,0.3);">
-  <h4 style="margin:0 0 1.25rem;color:#38bdf8;font-family:var(--font-title);font-size:1.15rem;font-weight:900;display:flex;align-items:center;gap:.5rem;">
-    <span>📥 Rút Trực Tiếp Từ Ngân Hàng Câu Hỏi Theo Bộ Lọc Đầy Đủ</span>
+<div style="max-width:1450px;width:100%;margin:0 auto;background:#ffffff;border:1.5px solid #38bdf8;border-radius:20px;padding:1.6rem 2rem;box-shadow:0 4px 20px rgba(2,132,199,0.06);">
+  <h4 style="margin:0 0 1.35rem;color:#0369a1;font-family:var(--font-title, sans-serif);font-size:1.25rem;font-weight:700;display:flex;align-items:center;gap:0.6rem;">
+    <span style="font-size:1.8rem;background:#e0f2fe;padding:0.35rem 0.7rem;border-radius:12px;border:1px solid #38bdf8;">📥</span>
+    <span>Rút Trực Tiếp Từ Ngân Hàng Câu Hỏi Theo Bộ Lọc Đầy Đủ</span>
   </h4>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-bottom:1.25rem;">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem;margin-bottom:1.35rem;">
     <div>
-      <label style="display:block;font-size:.82rem;font-weight:700;color:#cbd5e1;margin-bottom:.4rem;">1. Khối Lớp:</label>
-      <select id="bank-grade" class="ait-select" style="width:100%;">
+      <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">1. Khối Lớp:</label>
+      <select id="bank-grade" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
         <option value="all">Tất cả các Khối (6, 7, 8, 9)</option>
         <option value="6">Khối 6</option>
         <option value="7">Khối 7</option>
@@ -9925,44 +9910,44 @@ ${notificationMsg ? `
       </select>
     </div>
     <div>
-      <label style="display:block;font-size:.82rem;font-weight:700;color:#cbd5e1;margin-bottom:.4rem;">2. Môn Học:</label>
-      <select id="bank-sub" class="ait-select" style="width:100%;">
+      <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">2. Môn Học:</label>
+      <select id="bank-sub" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
         <option value="all">Tất cả Môn Học</option>
         ${subs.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
       </select>
     </div>
     <div>
-      <label style="display:block;font-size:.82rem;font-weight:700;color:#fbbf24;margin-bottom:.4rem;">3. Chủ Đề / Chương:</label>
-      <select id="bank-topic" class="ait-select" style="width:100%;border-color:#f59e0b;">
+      <label style="display:block;font-size:0.88rem;font-weight:600;color:#b45309;margin-bottom:0.4rem;">3. Chủ Đề / Chương:</label>
+      <select id="bank-topic" class="ait-select" style="width:100%;background:#fffbeb;border:1.5px solid #f59e0b;color:#78350f;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
         <option value="all">Tất cả Chủ Đề / Chương</option>
       </select>
     </div>
     <div>
-      <label style="display:block;font-size:.82rem;font-weight:700;color:#fbbf24;margin-bottom:.4rem;">4. Bài Học:</label>
-      <select id="bank-lesson" class="ait-select" style="width:100%;border-color:#f59e0b;">
+      <label style="display:block;font-size:0.88rem;font-weight:600;color:#b45309;margin-bottom:0.4rem;">4. Bài Học:</label>
+      <select id="bank-lesson" class="ait-select" style="width:100%;background:#fffbeb;border:1.5px solid #f59e0b;color:#78350f;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
         <option value="all">Tất cả Bài Học</option>
       </select>
     </div>
     <div>
-      <label style="display:block;font-size:.82rem;font-weight:700;color:#cbd5e1;margin-bottom:.4rem;">5. Dạng Câu Hỏi:</label>
-      <select id="bank-type" class="ait-select" style="width:100%;">
+      <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">5. Dạng Câu Hỏi:</label>
+      <select id="bank-type" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
         <option value="all">Tất cả Dạng Câu Hỏi</option>
         <option value="multiple_choice">📌 Trắc nghiệm 4 đáp án (A, B, C, D)</option>
         <option value="true_false">❓ Trắc nghiệm Đúng / Sai (True / False)</option>
       </select>
     </div>
     <div>
-      <label style="display:block;font-size:.82rem;font-weight:700;color:#cbd5e1;margin-bottom:.4rem;">6. Số Lượng Câu Hỏi Cần Rút:</label>
-      <input id="bank-count" type="number" min="1" max="20" value="6" class="ait-input" style="width:100%;font-weight:800;">
+      <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">6. Số Lượng Câu Hỏi Cần Rút:</label>
+      <input id="bank-count" type="number" min="1" max="20" value="6" class="ait-input" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:600;font-size:0.95rem;border-radius:10px;padding:0.6rem 0.85rem;">
     </div>
   </div>
 
-  <div style="background:#0f172a;border:1px solid #334155;border-radius:12px;padding:1rem;margin-bottom:1.5rem;font-size:.82rem;color:#94a3b8;line-height:1.6;">
+  <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:14px;padding:1.15rem;margin-bottom:1.5rem;font-size:0.9rem;color:#0369a1;line-height:1.6;font-weight:500;">
     💡 <b>Hướng dẫn rút câu hỏi:</b> Hệ thống sẽ tự động quét ngân hàng câu hỏi của trường, bốc ngẫu nhiên đúng số lượng câu hỏi phù hợp với Khối/Môn/Chủ đề/Bài học thầy cô chọn và nạp trực tiếp vào game <b>${gameTitle}</b>!
   </div>
 
-  <button id="btn-pull-from-bank" class="ait-btn ait-btn-blue" style="width:100%;justify-content:center;padding:.85rem;font-size:1.05rem;font-weight:900;">
-    📥 RÚT CÂU HỎI VÀO GAME NGAY
+  <button id="btn-pull-from-bank" style="width:100%;background:linear-gradient(135deg,#0284c7 0%,#0369a1 100%);color:#fff;font-weight:700;font-size:1.1rem;padding:0.95rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(2,132,199,0.3);display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+    <span>📥</span> RÚT CÂU HỎI VÀO GAME NGAY
   </button>
 </div>
 `;
@@ -10029,163 +10014,182 @@ ${notificationMsg ? `
     };
 
     // =======================================================================
-    // TAB 3: TỰ SOẠN, SỬA, XÓA & QUẢN LÝ CÂU HỎI (FULL CRUD)
+    // TAB 3: TỰ SOẠN, SỬA, XÓA & QUẢN LÝ CÂU HỎI (NÉT THƯỜNG TRANG NHÃ & CĂN 1 DÒNG)
     // =======================================================================
     const renderCrudTab = () => {
+      const isTF = (editingIndex >= 0 && currentQuestions[editingIndex] && currentQuestions[editingIndex].type === 'true_false');
+
       return `
-<div style="max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:1.25rem;">
+<div style="max-width:1450px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:1.35rem;">
   
   <!-- Add / Edit Form Card -->
-  <div style="background:#1e293b;border:2px solid #059669;border-radius:18px;padding:1.35rem;box-shadow:0 6px 25px rgba(0,0,0,0.3);">
-    <h4 style="margin:0 0 1rem;color:#34d399;font-family:var(--font-title);display:flex;justify-content:space-between;align-items:center;font-size:1.15rem;font-weight:900;">
+  <div style="background:#ffffff;border:1.5px solid #10b981;border-radius:20px;padding:1.6rem 2rem;box-shadow:0 4px 20px rgba(16,185,129,0.06);">
+    <h4 style="margin:0 0 1.25rem;color:#065f46;font-family:var(--font-title, sans-serif);display:flex;justify-content:space-between;align-items:center;font-size:1.25rem;font-weight:700;">
       <span>${editingIndex >= 0 ? '✏️ Đang Chỉnh Sửa Câu Hỏi #' + (editingIndex + 1) : '➕ Thêm Câu Hỏi Mới Thủ Công'}</span>
-      ${editingIndex >= 0 ? '<button id="btn-cancel-edit" style="background:#64748b;color:#fff;border:none;padding:.3rem .8rem;border-radius:8px;font-size:.8rem;font-weight:800;cursor:pointer;">✕ Hủy chỉnh sửa</button>' : ''}
+      ${editingIndex >= 0 ? '<button id="btn-cancel-edit" style="background:#64748b;color:#fff;border:none;padding:0.4rem 1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;">✕ Hủy chỉnh sửa</button>' : ''}
     </h4>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.85rem;margin-bottom:1rem;">
+    <!-- CĂN 1 DÒNG DUY NHẤT CHO 2 TRƯỜNG DẠNG CÂU HỎI & ĐIỂM SỐ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.25rem;">
       <div>
-        <label style="display:block;font-size:.8rem;font-weight:700;color:#cbd5e1;margin-bottom:.35rem;">Dạng câu hỏi:</label>
-        <select id="form-q-type" class="ait-select" style="width:100%;">
-          <option value="multiple_choice" ${(editingIndex>=0 && currentQuestions[editingIndex].type==='multiple_choice')?'selected':''}>📌 Trắc nghiệm 4 đáp án (A, B, C, D)</option>
-          <option value="true_false" ${(editingIndex>=0 && currentQuestions[editingIndex].type==='true_false')?'selected':''}>❓ Trắc nghiệm Đúng / Sai (True / False)</option>
+        <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">Dạng câu hỏi:</label>
+        <select id="form-q-type" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
+          <option value="multiple_choice" ${!isTF?'selected':''}>📌 Trắc nghiệm 4 đáp án (A, B, C, D)</option>
+          <option value="true_false" ${isTF?'selected':''}>❓ Trắc nghiệm Đúng / Sai (True / False)</option>
         </select>
       </div>
       <div>
-        <label style="display:block;font-size:.8rem;font-weight:700;color:#cbd5e1;margin-bottom:.35rem;">Đáp án đúng:</label>
-        <select id="form-q-correct" class="ait-select" style="width:100%;font-weight:800;color:#10b981;">
-          <option value="0">🅰️ Đáp án A / Đúng (True)</option>
-          <option value="1">🅱️ Đáp án B / Sai (False)</option>
-          <option value="2">🅲 Đáp án C</option>
-          <option value="3">🅳 Đáp án D</option>
-        </select>
-      </div>
-      <div>
-        <label style="display:block;font-size:.8rem;font-weight:700;color:#fbbf24;margin-bottom:.35rem;">🎯 Điểm số câu này:</label>
-        <input type="number" id="form-q-points" class="ait-input" min="1" step="1" value="10" placeholder="VD: 10..." style="font-weight:800;color:#fbbf24;width:100%;">
+        <label style="display:block;font-size:0.88rem;font-weight:600;color:#b45309;margin-bottom:0.4rem;">🎯 Điểm số câu này:</label>
+        <input type="number" id="form-q-points" class="ait-input" min="1" step="1" value="10" placeholder="VD: 10..." style="font-weight:600;color:#b45309;background:#fffbeb;border:1.5px solid #f59e0b;width:100%;border-radius:10px;padding:0.6rem 0.85rem;font-size:0.95rem;">
       </div>
     </div>
 
-    <!-- SUPER VISIBLE IMAGE UPLOAD BOX FOR QUESTION BODY -->
-    <div style="background:#0f172a;border:2px solid #0284c7;border-radius:14px;padding:1rem;margin-bottom:1rem;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.5rem;">
-        <label style="font-size:.88rem;font-weight:900;color:#38bdf8;display:flex;align-items:center;gap:.4rem;">
+    <!-- 1. THÂN CÂU HỎI & HÌNH ẢNH (CĂN 1 DÒNG HEADER) -->
+    <div style="background:#f0f9ff;border:1.5px solid #38bdf8;border-radius:16px;padding:1.25rem;margin-bottom:1.25rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.65rem;flex-wrap:nowrap;gap:0.5rem;">
+        <label style="font-size:0.95rem;font-weight:700;color:#0284c7;display:flex;align-items:center;gap:0.4rem;white-space:nowrap;">
           <span>📸</span> 1. THÂN CÂU HỎI & HÌNH ẢNH MINH HỌA ĐỀ BÀI:
         </label>
-        <label for="form-q-img-file" style="background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;font-weight:900;font-size:.85rem;padding:.4rem 1.1rem;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:.4rem;box-shadow:0 4px 12px rgba(2,132,199,0.35);">
+        <label for="form-q-img-file" style="background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;font-weight:600;font-size:0.85rem;padding:0.45rem 1.15rem;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:0 2px 8px rgba(2,132,199,0.25);white-space:nowrap;">
           <span>🖼️</span> ĐÍNH KÈM / CHỌN ẢNH ĐỀ BÀI
         </label>
         <input type="file" id="form-q-img-file" accept="image/*" style="display:none;" />
       </div>
 
-      <div id="form-q-img-preview" style="display:none;margin-bottom:.75rem;align-items:center;gap:1rem;background:#1e293b;padding:.75rem;border-radius:12px;border:1.5px dashed #38bdf8;">
-        <img id="form-q-img-tag" style="max-height:280px;max-width:100%;object-fit:contain;border-radius:10px;border:2px solid #38bdf8;box-shadow:0 4px 12px rgba(0,0,0,0.3);cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage(this.src)" title="Bấm để xem ảnh to" />
+      <div id="form-q-img-preview" style="display:none;margin-bottom:0.85rem;align-items:center;gap:1.15rem;background:#ffffff;padding:0.85rem;border-radius:12px;border:1.5px dashed #38bdf8;">
+        <img id="form-q-img-tag" style="max-height:280px;max-width:100%;object-fit:contain;border-radius:10px;border:1.5px solid #38bdf8;box-shadow:0 2px 10px rgba(0,0,0,0.08);cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage(this.src)" title="Bấm để xem ảnh to" />
         <div>
-          <div style="font-size:.85rem;color:#34d399;font-weight:800;margin-bottom:.4rem;">✅ Đã tải ảnh minh họa câu hỏi thành công! (Bấm vào ảnh để phóng to)</div>
-          <button id="btn-remove-q-img" style="background:#ef4444;color:#fff;border:none;padding:.4rem .85rem;border-radius:8px;font-size:.8rem;font-weight:800;cursor:pointer;">✕ Xóa ảnh này</button>
+          <div style="font-size:0.88rem;color:#059669;font-weight:600;margin-bottom:0.35rem;">✅ Đã tải ảnh minh họa câu hỏi thành công! (Bấm vào ảnh để phóng to)</div>
+          <button id="btn-remove-q-img" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:0.4rem 0.95rem;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;">✕ Xóa ảnh này</button>
         </div>
       </div>
 
-      <textarea id="form-q-text" class="ait-input" rows="2" style="width:100%;resize:vertical;font-weight:800;box-sizing:border-box;font-size:.95rem;" placeholder="Nhập nội dung văn bản câu hỏi tại đây..."></textarea>
+      <textarea id="form-q-text" class="ait-input" rows="3" style="width:100%;background:#ffffff;border:1.5px solid #7dd3fc;color:#0f172a;resize:vertical;font-weight:400;box-sizing:border-box;font-size:0.98rem;border-radius:10px;padding:0.75rem 1rem;line-height:1.5;" placeholder="Nhập nội dung văn bản câu hỏi tại đây..."></textarea>
     </div>
 
-    <!-- SUPER VISIBLE IMAGE UPLOAD GRID FOR OPTIONS A, B, C, D -->
-    <div id="options-box-container" style="background:#0f172a;border:2px solid #7c3aed;border-radius:14px;padding:1rem;margin-bottom:1rem;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
-        <label style="font-size:.88rem;font-weight:900;color:#c4b5fd;display:flex;align-items:center;gap:.4rem;">
-          <span>🎨</span> 2. PHƯƠNG ÁN ĐÁP ÁN (HỖ TRỢ ĐÍNH KÈM ẢNH A, B, C, D):
+    <!-- 2. PHƯƠNG ÁN ĐÁP ÁN (CĂN 1 DÒNG HEADER) -->
+    <div id="options-box-container" style="background:#f5f3ff;border:1.5px solid #a855f7;border-radius:16px;padding:1.25rem;margin-bottom:1.25rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:nowrap;gap:0.75rem;">
+        <label style="font-size:0.95rem;font-weight:700;color:#6b21a8;display:flex;align-items:center;gap:0.4rem;white-space:nowrap;">
+          <span>🎨</span> 2. PHƯƠNG ÁN ĐÁP ÁN (CHỈ CẦN TÍCH CHỌN ĐÁP ÁN ĐÚNG TRỰC TIẾP):
         </label>
-        <span style="font-size:.78rem;color:#a78bfa;font-weight:800;background:#1e1b4b;padding:.2rem .6rem;border-radius:6px;border:1px solid #7c3aed;">
-          🖼️ Thầy/cô bấm nút "Tải Ảnh" để đính kèm hình ảnh cho từng đáp án
+        <span style="font-size:0.84rem;color:#065f46;font-weight:500;background:#d1fae5;padding:0.35rem 0.85rem;border-radius:10px;border:1px solid #a7f3d0;display:flex;align-items:center;gap:0.35rem;white-space:nowrap;">
+          <span>👉</span> Thầy/cô chỉ cần tích chọn nút tròn hoặc click vào ô để đặt làm <b>Đáp án Đúng</b>
         </span>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;">
-        ${[0,1,2,3].map(i => `
-          <div style="background:#1e293b;border:1.5px solid #4c1d95;padding:.75rem;border-radius:12px;display:flex;flex-direction:column;gap:.5rem;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:.84rem;font-weight:900;color:#fde047;">Phương án ${['🅰️ A','🅱️ B','🅲 C','🅳 D'][i]}</span>
-              <label for="form-opt-img-${i}" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:.76rem;font-weight:900;padding:.3rem .7rem;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:.3rem;box-shadow:0 2px 8px rgba(124,58,237,0.3);">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.15rem;">
+        ${[0,1,2,3].map(i => {
+          const isSelected = (currentCorrectIndex === i);
+          return `
+          <div class="crud-opt-card" data-opt-idx="${i}" style="background:${isSelected?'#ecfdf5':'#ffffff'};border:2px solid ${isSelected?'#10b981':'#d8b4fe'};padding:1rem;border-radius:14px;display:flex;flex-direction:column;gap:0.65rem;box-shadow:${isSelected?'0 4px 16px rgba(16,185,129,0.18)':'0 2px 8px rgba(168,85,247,0.04)'};cursor:pointer;transition:all .15s;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:nowrap;gap:0.4rem;">
+              
+              <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;user-select:none;min-width:0;">
+                <input type="radio" name="crud-correct-answer-radio" value="${i}" ${isSelected?'checked':''} class="crud-correct-radio" style="width:20px;height:20px;accent-color:#10b981;cursor:pointer;flex-shrink:0;" />
+                <span style="font-size:0.98rem;font-weight:700;color:${isSelected?'#047857':'#6b21a8'};white-space:nowrap;">
+                  Phương án ${['🅰️ A','🅱️ B','🅲 C','🅳 D'][i]}
+                </span>
+                <span class="badge-correct-indicator" style="font-size:0.78rem;font-weight:${isSelected?'600':'400'};padding:0.2rem 0.55rem;border-radius:6px;background:${isSelected?'#d1fae5':'#f3e8ff'};color:${isSelected?'#065f46':'#7e22ce'};border:1px solid ${isSelected?'#6ee7b7':'#d8b4fe'};white-space:nowrap;">
+                  ${isSelected ? '✅ ĐÁP ÁN ĐÚNG' : '⚪ Chọn làm Đúng'}
+                </span>
+              </label>
+
+              <label for="form-opt-img-${i}" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:0.78rem;font-weight:600;padding:0.35rem 0.8rem;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:0.35rem;box-shadow:0 2px 6px rgba(124,58,237,0.2);white-space:nowrap;flex-shrink:0;">
                 🖼️ Tải Ảnh ${['A','B','C','D'][i]}
               </label>
               <input type="file" id="form-opt-img-${i}" accept="image/*" style="display:none;" />
             </div>
 
-            <div id="form-opt-preview-${i}" style="display:none;align-items:center;gap:.75rem;background:#0f172a;padding:.5rem;border-radius:8px;">
-              <img id="form-opt-img-tag-${i}" style="max-height:140px;max-width:180px;object-fit:contain;border-radius:6px;border:2px solid #a78bfa;cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage(this.src)" title="Bấm để xem ảnh to" />
+            <div id="form-opt-preview-${i}" style="display:none;align-items:center;gap:0.85rem;background:#f5f3ff;padding:0.65rem;border-radius:10px;border:1px dashed #a855f7;">
+              <img id="form-opt-img-tag-${i}" style="max-height:140px;max-width:180px;object-fit:contain;border-radius:8px;border:1.5px solid #a855f7;cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage(this.src)" title="Bấm để xem ảnh to" />
               <div style="flex:1;">
-                <div style="font-size:.75rem;color:#34d399;font-weight:800;margin-bottom:.3rem;">Đã đính kèm ảnh</div>
-                <button class="btn-del-opt-img" data-idx="${i}" style="background:#ef4444;color:#fff;border:none;padding:.2rem .5rem;border-radius:4px;font-size:.72rem;font-weight:800;cursor:pointer;">✕ Xóa ảnh</button>
+                <div style="font-size:0.8rem;color:#059669;font-weight:600;margin-bottom:0.25rem;">Đã đính kèm ảnh</div>
+                <button class="btn-del-opt-img" data-idx="${i}" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:0.25rem 0.6rem;border-radius:6px;font-size:0.74rem;font-weight:600;cursor:pointer;">✕ Xóa ảnh</button>
               </div>
             </div>
 
-            <input id="form-opt-${i}" class="ait-input" placeholder="Nhập tên/văn bản phương án ${['A','B','C','D'][i]}..." style="box-sizing:border-box;font-size:.88rem;background:#0f172a;">
+            <input id="form-opt-${i}" class="ait-input crud-opt-input" placeholder="Nhập tên/văn bản phương án ${['A','B','C','D'][i]}..." style="box-sizing:border-box;font-size:0.95rem;font-weight:400;background:#ffffff;border:1.5px solid ${isSelected?'#10b981':'#cbd5e1'};color:#0f172a;border-radius:10px;padding:0.65rem 0.9rem;">
           </div>
-        `).join('')}
+        `}).join('')}
       </div>
     </div>
 
-    <div style="margin-bottom:1rem;">
-      <label style="display:block;font-size:.8rem;font-weight:700;color:#cbd5e1;margin-bottom:.35rem;">Giải thích chi tiết (nếu có):</label>
-      <input id="form-q-exp" class="ait-input" style="width:100%;box-sizing:border-box;" placeholder="Giải thích đáp án đúng...">
+    <div style="margin-bottom:1.25rem;">
+      <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">Giải thích chi tiết (nếu có):</label>
+      <input id="form-q-exp" class="ait-input" style="width:100%;box-sizing:border-box;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:400;font-size:0.92rem;border-radius:10px;padding:0.65rem 0.95rem;" placeholder="Giải thích đáp án đúng...">
     </div>
 
-    <div style="display:flex;justify-content:flex-end;gap:.5rem;">
-      <button id="btn-save-item" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;font-weight:900;padding:.75rem 2rem;border-radius:12px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(5,150,105,0.3);">
+    <div style="display:flex;justify-content:flex-end;gap:0.65rem;">
+      <button id="btn-save-item" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;font-weight:700;padding:0.85rem 2.4rem;border-radius:12px;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(5,150,105,0.3);font-size:1rem;">
         ${editingIndex >= 0 ? '💾 CẬP NHẬT CÂU HỎI' : '➕ THÊM VÀO DANH SÁCH'}
       </button>
     </div>
   </div>
 
-  <!-- Question List Table -->
-  <div style="background:#1e293b;border:1.5px solid #334155;border-radius:18px;padding:1.35rem;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+  <!-- Question List Table Card -->
+  <div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:20px;padding:1.6rem 2rem;box-shadow:0 4px 20px rgba(0,0,0,0.04);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:nowrap;gap:0.75rem;">
       <div>
-        <h4 style="margin:0;color:#38bdf8;font-family:var(--font-title);font-size:1.1rem;font-weight:900;">
+        <h4 style="margin:0;color:#0f172a;font-family:var(--font-title, sans-serif);font-size:1.2rem;font-weight:700;">
           📋 Danh Sách Câu Hỏi Trong Game (${currentQuestions.length} câu)
         </h4>
-        <div style="font-size:.78rem;color:#94a3b8;">Có thể chỉnh sửa hoặc xóa từng câu bất kỳ</div>
+        <div style="font-size:0.85rem;color:#64748b;font-weight:400;margin-top:2px;">Có thể chỉnh sửa hoặc xóa từng câu bất kỳ</div>
       </div>
-      <div style="display:flex;gap:.6rem;">
-        <button id="btn-clear-all" style="background:#dc2626;color:#fff;border:none;padding:.5rem 1rem;border-radius:10px;font-weight:800;font-size:.82rem;cursor:pointer;">
+      <div style="display:flex;gap:0.75rem;flex-shrink:0;">
+        <button id="btn-clear-all" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:0.55rem 1.15rem;border-radius:10px;font-weight:600;font-size:0.85rem;cursor:pointer;">
           🗑️ Xóa Tất Cả
         </button>
-        <button id="btn-save-all" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:.5rem 1.35rem;border-radius:10px;font-weight:900;font-size:.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.3);">
+        <button id="btn-save-all" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:0.6rem 1.5rem;border-radius:10px;font-weight:600;font-size:0.92rem;cursor:pointer;box-shadow:0 4px 14px rgba(16,185,129,0.3);">
           💾 LƯU BỘ CÂU HỎI GAME
         </button>
       </div>
     </div>
 
     ${currentQuestions.length === 0 ? `
-      <div style="text-align:center;padding:2.5rem;color:#94a3b8;background:#0f172a;border-radius:12px;border:1px dashed #334155;">
+      <div style="text-align:center;padding:2.5rem;color:#64748b;background:#f8fafc;border-radius:14px;border:1.5px dashed #cbd5e1;font-weight:500;font-size:0.95rem;">
         ⚠️ Chưa có câu hỏi nào. Thầy/cô hãy dùng Form phía trên để thêm hoặc sang Tab 1/Tab 2 để nạp câu hỏi!
       </div>
     ` : `
-      <div style="display:flex;flex-direction:column;gap:.65rem;max-height:360px;overflow-y:auto;padding-right:.3rem;">
-        ${currentQuestions.map((q, idx) => `
-          <div style="background:#0f172a;border:1.5px solid #334155;border-radius:12px;padding:.85rem 1.15rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+      <div style="display:flex;flex-direction:column;gap:0.75rem;max-height:420px;overflow-y:auto;padding-right:0.3rem;">
+        ${currentQuestions.map((q, idx) => {
+          let qCorr = 0;
+          if (typeof q.correctAnswer === 'number') qCorr = q.correctAnswer;
+          else if (typeof q.correctAnswer === 'string' && !isNaN(parseInt(q.correctAnswer))) qCorr = parseInt(q.correctAnswer);
+          else if (q.a && Array.isArray(q.options)) {
+            const fIdx = q.options.indexOf(q.a);
+            if (fIdx >= 0) qCorr = fIdx;
+          } else if (q.correct === 'right' || q.ans === false) qCorr = 1;
+
+          const letterIcons = ['🅰️ Đáp án A: ', '🅱️ Đáp án B: ', '🅲 Đáp án C: ', '🅳 Đáp án D: '];
+          const letterLabel = letterIcons[qCorr >= 0 && qCorr < 4 ? qCorr : 0];
+          const correctText = (Array.isArray(q.options) && q.options[qCorr]) ? q.options[qCorr] : (q.a || q.left || 'Đúng');
+
+          return `
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;box-shadow:0 1px 4px rgba(0,0,0,0.02);">
             <div style="flex:1;">
-              <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;">
-                <span style="background:#334155;color:#fbbf24;font-weight:900;font-size:.75rem;padding:.15rem .5rem;border-radius:6px;">Câu ${idx+1}</span>
-                <span style="background:rgba(251,191,36,0.18);color:#fbbf24;font-weight:900;font-size:.75rem;padding:.15rem .55rem;border-radius:6px;">
+              <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.35rem;flex-wrap:wrap;">
+                <span style="background:#e0e7ff;color:#3730a3;font-weight:600;font-size:0.78rem;padding:0.2rem 0.55rem;border-radius:6px;border:1px solid #c7d2fe;">Câu ${idx+1}</span>
+                <span style="background:#fef3c7;color:#b45309;font-weight:600;font-size:0.78rem;padding:0.2rem 0.55rem;border-radius:6px;border:1px solid #fde68a;">
                   🎯 +${q.points || 10}đ
                 </span>
-                <span style="background:#047857;color:#34d399;font-weight:700;font-size:.72rem;padding:.15rem .5rem;border-radius:6px;">
-                  ✅ ${q.left || (Array.isArray(q.options) ? q.options[q.correctAnswer||0] : 'Đúng')}
+                <span style="background:#dcfce7;color:#15803d;font-weight:600;font-size:0.82rem;padding:0.2rem 0.65rem;border-radius:6px;border:1px solid #86efac;display:flex;align-items:center;gap:0.3rem;">
+                  ✅ <b>${letterLabel}</b> ${correctText}
                 </span>
               </div>
-              <div style="font-weight:800;color:#f8fafc;font-size:.92rem;line-height:1.4;">${q.questionText || q.q || q.stmt || ''}</div>
+              <div style="font-weight:500;color:#0f172a;font-size:0.95rem;line-height:1.45;">${q.questionText || q.q || q.stmt || ''}</div>
             </div>
 
-            <div style="display:flex;gap:.5rem;">
-              <button class="btn-crud-edit" data-idx="${idx}" style="background:#0284c7;color:#fff;border:none;padding:.4rem .85rem;border-radius:8px;font-weight:800;font-size:.8rem;cursor:pointer;">
+            <div style="display:flex;gap:0.55rem;flex-shrink:0;">
+              <button class="btn-crud-edit" data-idx="${idx}" style="background:#e0f2fe;color:#0284c7;border:1px solid #bae6fd;padding:0.45rem 0.95rem;border-radius:8px;font-weight:600;font-size:0.82rem;cursor:pointer;">
                 ✏️ Sửa
               </button>
-              <button class="btn-crud-del" data-idx="${idx}" style="background:#ef4444;color:#fff;border:none;padding:.4rem .85rem;border-radius:8px;font-weight:800;font-size:.8rem;cursor:pointer;">
+              <button class="btn-crud-del" data-idx="${idx}" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;padding:0.45rem 0.95rem;border-radius:8px;font-weight:600;font-size:0.82rem;cursor:pointer;">
                 🗑️ Xóa
               </button>
             </div>
           </div>
-        `).join('')}
+        `}).join('')}
       </div>
     `}
   </div>
@@ -10201,6 +10205,53 @@ ${notificationMsg ? `
       const typeSelect = modal.querySelector('#form-q-type');
       const opt2 = modal.querySelector('#form-opt-2');
       const opt3 = modal.querySelector('#form-opt-3');
+
+      // Sync function for selecting correct option
+      const setCorrectOption = (idx) => {
+        currentCorrectIndex = idx;
+
+        modal.querySelectorAll('.crud-opt-card').forEach((card, cIdx) => {
+          const isSelected = (cIdx === idx);
+          card.style.background = isSelected ? '#ecfdf5' : '#ffffff';
+          card.style.borderColor = isSelected ? '#10b981' : '#d8b4fe';
+          card.style.boxShadow = isSelected ? '0 4px 16px rgba(16,185,129,0.18)' : '0 2px 8px rgba(168,85,247,0.04)';
+          
+          const radio = card.querySelector('.crud-correct-radio');
+          if (radio) radio.checked = isSelected;
+          
+          const badge = card.querySelector('.badge-correct-indicator');
+          if (badge) {
+            badge.innerHTML = isSelected ? '✅ ĐÁP ÁN ĐÚNG' : '⚪ Chọn làm Đúng';
+            badge.style.background = isSelected ? '#d1fae5' : '#f3e8ff';
+            badge.style.color = isSelected ? '#065f46' : '#7e22ce';
+            badge.style.borderColor = isSelected ? '#6ee7b7' : '#d8b4fe';
+            badge.style.fontWeight = isSelected ? '600' : '400';
+          }
+          
+          const input = card.querySelector('.crud-opt-input');
+          if (input) {
+            input.style.borderColor = isSelected ? '#10b981' : '#cbd5e1';
+          }
+        });
+      };
+
+      // Radio & Card click listeners
+      modal.querySelectorAll('.crud-correct-radio').forEach(radio => {
+        radio.onchange = (e) => {
+          setCorrectOption(parseInt(e.target.value));
+        };
+      });
+
+      modal.querySelectorAll('.crud-opt-card').forEach(card => {
+        card.onclick = (e) => {
+          if (e.target.tagName === 'INPUT' && e.target.type === 'file') return;
+          if (e.target.tagName === 'LABEL' && e.target.htmlFor && e.target.htmlFor.startsWith('form-opt-img-')) return;
+          if (e.target.classList.contains('btn-del-opt-img')) return;
+          if (e.target.classList.contains('crud-opt-input')) return;
+          const idx = parseInt(card.dataset.optIdx);
+          setCorrectOption(idx);
+        };
+      });
 
       // Image file readers for Question Body
       const qImgFileInput = modal.querySelector('#form-q-img-file');
@@ -10275,15 +10326,14 @@ ${notificationMsg ? `
         };
       }
 
+      // Populate edit fields
       if (editingIndex >= 0 && currentQuestions[editingIndex]) {
         const q = currentQuestions[editingIndex];
         const txtEl = modal.querySelector('#form-q-text');
         const expEl = modal.querySelector('#form-q-exp');
-        const corrEl = modal.querySelector('#form-q-correct');
         const ptsEl = modal.querySelector('#form-q-points');
         if (txtEl) txtEl.value = q.questionText || q.q || q.stmt || '';
         if (expEl) expEl.value = q.explanation || q.exp || '';
-        if (corrEl) corrEl.value = q.correctAnswer || 0;
         if (ptsEl) ptsEl.value = q.points || 10;
 
         if (q.qImage) {
@@ -10317,7 +10367,7 @@ ${notificationMsg ? `
           const type = modal.querySelector('#form-q-type').value;
           const text = modal.querySelector('#form-q-text').value.trim();
           const exp = modal.querySelector('#form-q-exp').value.trim();
-          const corr = parseInt(modal.querySelector('#form-q-correct').value) || 0;
+          const corr = currentCorrectIndex;
           const pts = parseFloat(modal.querySelector('#form-q-points').value) || 10;
 
           if (!text) { alert('Vui lòng nhập nội dung câu hỏi!'); return; }
@@ -10335,7 +10385,7 @@ ${notificationMsg ? `
           }
 
           const newItem = {
-            id: 'custom_' + Date.now(),
+            id: (editingIndex >= 0 && currentQuestions[editingIndex] && currentQuestions[editingIndex].id) ? currentQuestions[editingIndex].id : ('custom_' + Date.now()),
             type: type,
             questionText: text,
             q: text,
@@ -10348,6 +10398,7 @@ ${notificationMsg ? `
             right: opts[1] || 'Phương án B',
             correct: corr === 1 ? 'right' : 'left',
             a: opts[corr] || opts[0],
+            ans: corr === 0,
             explanation: exp,
             exp: exp,
             points: pts
@@ -10358,7 +10409,7 @@ ${notificationMsg ? `
           if (editingIndex >= 0) {
             currentQuestions[editingIndex] = newItem;
             editingIndex = -1;
-            notificationMsg = '✅ Đã cập nhật câu hỏi thành công!';
+            notificationMsg = '✅ Đã cập nhật câu hỏi & đáp án đúng thành công!';
           } else {
             currentQuestions.push(newItem);
             notificationMsg = '✅ Đã thêm câu hỏi mới vào danh sách!';
@@ -10371,7 +10422,13 @@ ${notificationMsg ? `
       }
 
       const cancelBtn = modal.querySelector('#btn-cancel-edit');
-      if (cancelBtn) cancelBtn.onclick = () => { editingIndex = -1; render(); };
+      if (cancelBtn) {
+        cancelBtn.onclick = () => { 
+          editingIndex = -1; 
+          currentCorrectIndex = 0;
+          render(); 
+        };
+      }
 
       modal.querySelectorAll('.btn-crud-edit').forEach(btn => {
         btn.onclick = () => {
@@ -10416,12 +10473,11 @@ ${notificationMsg ? `
       }
     };
 
-    document.body.appendChild(modal);
     render();
+    document.body.appendChild(modal);
   },
 
-
-  _convertDefaultDataToQuestions(gameKey, defaultData) {
+    _convertDefaultDataToQuestions(gameKey, defaultData) {
     if (!defaultData) return [];
     if (gameKey === 'puzzle' && defaultData.tiles) {
       return defaultData.tiles.map((t, idx) => ({
@@ -15313,6 +15369,9 @@ ${notificationMsg ? `
     let isGameRunning = false;
     let isLockedRound = false;
     let scannedAnswers = {};
+    let plickersEvtSource = null;
+    let isPhoneConnected = false;
+    let chosenCameraMode = null; // 'laptop' | 'mobile'
 
     const modal = document.createElement('div');
     modal.id = 'plickers-arena-modal';
@@ -15499,9 +15558,159 @@ ${notificationMsg ? `
       } catch(e) {}
     }
 
+    const broadcastRoundState = () => {
+      fetch('/api/plickers/state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          classId: currentClassId,
+          questionIdx: currentQIdx,
+          totalQuestions: loadedQs.length,
+          totalStudents: activeClassList.length,
+          resetScans: true
+        })
+      }).catch(()=>{});
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 📡 1. REAL-TIME SERVER-SENT EVENTS (SSE) LISTENER
+    // ─────────────────────────────────────────────────────────────
+    let camStreamEvtSource = null;
+    let highSpeedStreamInterval = null;
+
+    const initSSEListener = () => {
+      try {
+        if (plickersEvtSource) plickersEvtSource.close();
+        if (camStreamEvtSource) camStreamEvtSource.close();
+        if (highSpeedStreamInterval) clearInterval(highSpeedStreamInterval);
+
+        // High-Speed Unbuffered Video Sync Loop (Guarantees 20 FPS live video display)
+        let lastFrameTs = 0;
+        highSpeedStreamInterval = setInterval(async () => {
+          if (!modal || !document.getElementById('plickers-arena-modal')) {
+            clearInterval(highSpeedStreamInterval);
+            return;
+          }
+          try {
+            const res = await fetch('/api/cam-stream/latest?t=' + Date.now());
+            const d = await res.json();
+            if (d && d.image && d.ts !== lastFrameTs) {
+              lastFrameTs = d.ts;
+              const streamImg = modal.querySelector('#plickers-mobile-stream-img') || document.getElementById('plickers-mobile-stream-img');
+              const digitalBg = modal.querySelector('#plk-digital-bg') || document.getElementById('plk-digital-bg');
+              if (streamImg) {
+                streamImg.src = d.image;
+                streamImg.style.display = 'block';
+              }
+              if (digitalBg) digitalBg.style.display = 'none';
+            }
+          } catch(e) {}
+        }, 60);
+
+        // Listen for live mobile camera video frames via SSE
+        camStreamEvtSource = new EventSource('/api/cam-stream/live');
+        camStreamEvtSource.onmessage = (e) => {
+          try {
+            const d = JSON.parse(e.data);
+            if (d && d.image) {
+              const streamImg = modal.querySelector('#plickers-mobile-stream-img') || document.getElementById('plickers-mobile-stream-img');
+              const digitalBg = modal.querySelector('#plk-digital-bg') || document.getElementById('plk-digital-bg');
+              if (streamImg) {
+                streamImg.src = d.image;
+                streamImg.style.display = 'block';
+              }
+              if (digitalBg) digitalBg.style.display = 'none';
+            }
+          } catch(err) {}
+        };
+        plickersEvtSource = new EventSource('/api/plickers/events');
+
+        plickersEvtSource.onmessage = (e) => {
+          try {
+            const data = JSON.parse(e.data);
+
+            // A. Handle Phone Connected Handshake
+            if (data.type === 'phone_connected') {
+              isPhoneConnected = true;
+              soundFX.magicChime();
+
+              const waitBanner = modal.querySelector('#plk-mobile-wait-box');
+              const waitText = modal.querySelector('#plk-phone-conn-text');
+              const btnStartNow = modal.querySelector('#plk-btn-mobile-start-now');
+
+              if (waitBanner) {
+                waitBanner.style.background = '#ecfdf5';
+                waitBanner.style.borderColor = '#10b981';
+              }
+              if (waitText) {
+                waitText.innerHTML = '<span style="color:#059669;font-weight:900;">🟢 ĐIỆN THOẠI ĐÃ KẾT NỐI THÀNH CÔNG!</span><br><span style="font-size:0.85rem;color:#047857;">Chuẩn bị khởi động đấu trường...</span>';
+              }
+              if (btnStartNow) {
+                btnStartNow.style.display = 'inline-flex';
+                btnStartNow.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+              }
+
+              // Auto advance after 1.4s if chosen mobile mode
+              if (chosenCameraMode === 'mobile' && !isGameRunning) {
+                setTimeout(() => {
+                  if (!isGameRunning) startCountdownSequence();
+                }, 1400);
+              }
+            }
+
+            // B. Handle Student Card Scanned from Mobile Phone
+            if (data.type === 'scan_result') {
+              const idx = data.studentIndex;
+              const chosen = data.answer || 'A';
+              const name = data.studentName || (activeClassList[idx] || `Học sinh #${idx+1}`);
+
+              if (idx !== undefined && idx >= 0 && idx < activeClassList.length) {
+                scannedAnswers[idx] = chosen;
+
+                const pill = modal.querySelector(`.plickers-stu-pill[data-idx="${idx}"]`);
+                if (pill) {
+                  pill.style.background = '#ecfdf5';
+                  pill.style.borderColor = '#10b981';
+                  pill.style.color = '#065f46';
+                  pill.style.transform = 'scale(1.08)';
+                  pill.style.boxShadow = '0 0 20px rgba(16,185,129,0.5)';
+                  pill.innerHTML = `✅ #${idx + 1} ${name.split(' ').pop()} (${chosen})`;
+                  setTimeout(() => { pill.style.transform = 'scale(1)'; }, 300);
+                }
+
+                const totalScanned = Object.keys(scannedAnswers).length;
+                const countNumEl = modal.querySelector('#count-num');
+                const pctEl = modal.querySelector('#plickers-percent');
+                if (countNumEl) countNumEl.innerText = totalScanned;
+                if (pctEl) pctEl.innerText = `${Math.round((totalScanned / activeClassList.length) * 100)}% ĐÃ NỘP`;
+
+                soundFX.magicChime();
+              }
+            }
+
+            // C. Handle Remote Control from Mobile Phone
+            if (data.type === 'control_action') {
+              if (data.action === 'reveal') {
+                const revBtn = modal.querySelector('#btn-reveal-plickers-answer');
+                if (revBtn && !isLockedRound) revBtn.click();
+              } else if (data.action === 'next') {
+                const nextBtn = modal.querySelector('#plk-btn-next-question');
+                if (nextBtn) nextBtn.click();
+              }
+            }
+
+          } catch(err) {}
+        };
+      } catch(err) {}
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 🎨 2. RENDER ARENA & PRE-GAME SETUP OVERLAY
+    // ─────────────────────────────────────────────────────────────
     const renderRound = () => {
       isLockedRound = false;
       scannedAnswers = {};
+      broadcastRoundState();
 
       const q = loadedQs[currentQIdx % loadedQs.length];
       const optA = q.options ? q.options[0] : (q.left || 'Phương án A');
@@ -15520,12 +15729,12 @@ ${notificationMsg ? `
                 <h3 style="margin:0;font-size:1.35rem;font-weight:900;background:linear-gradient(90deg, #4f46e5, #0284c7, #10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.5px;">QUÉT THẺ PLICKERS AI · LỚP ${currentClassId}</h3>
                 <span id="plk-cam-badge" style="background:linear-gradient(135deg, #10b981, #059669);color:#fff;font-size:.7rem;padding:4px 12px;border-radius:999px;font-weight:800;letter-spacing:1px;box-shadow:0 2px 8px rgba(16,185,129,0.3);">🟢 QUÉT AR 60 FPS</span>
               </div>
-              <div style="font-size:.82rem;color:#64748b;font-weight:600;">Học sinh giơ thẻ hướng đáp án lên trên · Camera AI tự động quét và chấm điểm tức thì!</div>
+              <div style="font-size:.82rem;color:#64748b;font-weight:600;">Học sinh giơ thẻ hướng đáp án lên trên · Quét trực tiếp bằng Camera Laptop hoặc Điện thoại di động!</div>
             </div>
           </div>
 
           <!-- STATUS HUD -->
-          <div style="display:flex;align-items:center;gap:1.6rem;background:rgba(255,255,255,0.95);border:2px solid rgba(79,70,229,0.3);padding:.45rem 1.8rem;border-radius:30px;box-shadow:0 4px 15px rgba(0,0,0,0.06);">
+          <div style="display:flex;align-items:center;gap:1.4rem;background:rgba(255,255,255,0.95);border:2px solid rgba(79,70,229,0.3);padding:.45rem 1.6rem;border-radius:30px;box-shadow:0 4px 15px rgba(0,0,0,0.06);">
             <div style="display:flex;align-items:center;gap:.45rem;color:#4f46e5;font-weight:800;font-size:1.05rem;">
               <span>Câu:</span> <span style="color:#ea580c;font-size:1.25rem;font-weight:900;">${currentQIdx + 1} / ${loadedQs.length}</span>
             </div>
@@ -15535,6 +15744,7 @@ ${notificationMsg ? `
             </div>
           </div>
 
+          <!-- ACTIONS: AUDIO, EXIT -->
           <div style="display:flex;align-items:center;gap:.75rem;">
             <button id="plk-btn-sound" title="Bật/Tắt âm thanh & Nhạc nền" style="background:#f1f5f9;color:#0f172a;border:1px solid #cbd5e1;padding:.5rem 1rem;border-radius:12px;font-size:.9rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:all .2s;">
               <span id="plk-sound-icon">🔊</span> Âm thanh & Nhạc
@@ -15550,10 +15760,17 @@ ${notificationMsg ? `
           
           <!-- LEFT COLUMN: LIVE AR CAMERA VIEWFINDER -->
           <div style="position:relative;background:#ffffff;border-radius:32px;overflow:hidden;border:4px solid #818cf8;box-shadow:0 20px 60px rgba(0,0,0,0.12), 0 0 35px rgba(99,102,241,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;">
-            <video id="plickers-live-video" autoplay playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
+            <video id="plickers-live-video" autoplay playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:none;"></video>
+            <img id="plickers-mobile-stream-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#0f172a;display:none;z-index:10;" alt="Live Phone Stream">
 
-            <div id="plk-digital-bg" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle, #e0e7ff 0%, #f5f3ff 100%);">
-              <div style="font-size:7rem;opacity:0.85;animation:pulse 1.5s infinite;">📇✨</div>
+            <div id="plk-digital-bg" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle, #e0e7ff 0%, #f5f3ff 100%);padding:2rem;text-align:center;z-index:1;">
+              <div style="font-size:6rem;margin-bottom:0.4rem;animation:bounce 1.5s infinite;">📱📡✨</div>
+              <div id="plk-stream-status-text" style="font-size:1.35rem;font-weight:900;color:#4f46e5;margin-bottom:0.5rem;">
+                ĐIỆN THOẠI ĐÃ KẾT NỐI THÀNH CÔNG!
+              </div>
+              <div style="background:#ecfdf5;border:2px solid #10b981;color:#065f46;padding:0.6rem 1.4rem;border-radius:20px;font-size:0.95rem;font-weight:800;max-width:380px;box-shadow:0 4px 15px rgba(16,185,129,0.2);">
+                👉 Hãy bấm nút <strong>[📷 BẬT CAMERA QUÉT THẺ]</strong> trên điện thoại để chụp và truyền ảnh sang máy chiếu!
+              </div>
             </div>
 
             <!-- SCANLINE LASER SWEEP -->
@@ -15607,14 +15824,14 @@ ${notificationMsg ? `
               </div>
             </div>
 
-            <!-- LIVE CLASS MATRIX (SPACIOUS & TIGHT TO HEADER) -->
+            <!-- LIVE CLASS MATRIX -->
             <div id="plickers-student-matrix-card" style="background:#ffffff;border:3px solid #cbd5e1;border-radius:26px;padding:1.2rem 1.6rem;flex:1;min-height:220px;box-shadow:0 8px 25px rgba(0,0,0,0.06);display:flex;flex-direction:column;justify-content:flex-start;gap:.5rem;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.2rem;">
                 <span style="font-size:.95rem;font-weight:900;color:#475569;text-transform:uppercase;letter-spacing:1px;">👥 MA TRẬN HỌC SINH GIƠ THẺ:</span>
                 <span id="plickers-percent" style="font-size:.95rem;font-weight:900;color:#10b981;background:#ecfdf5;padding:4px 14px;border-radius:20px;border:1.5px solid #a7f3d0;">0% ĐÃ NỘP</span>
               </div>
               
-              <!-- GRID PILLS (MIN-HEIGHT 46PX, SHIFTED UPWARDS) -->
+              <!-- GRID PILLS -->
               <div id="plickers-student-grid" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:.65rem;max-height:250px;overflow-y:auto;padding:4px 4px 4px 0;">
                 ${activeClassList.map((name, i) => `
                   <div class="plickers-stu-pill" data-idx="${i}" style="min-height:46px;background:#f8fafc;border:2px solid #cbd5e1;border-radius:14px;padding:4px 8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:800;color:#334155;line-height:1.25;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,0.04);transition:all .25s;">
@@ -15665,45 +15882,131 @@ ${notificationMsg ? `
           </div>
         </div>
 
-        <!-- PRE-GAME START OVERLAY (3-2-1 START SEQUENCE) -->
-        <div id="plk-start-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.78);backdrop-filter:blur(12px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:45;transition:opacity .3s ease;">
-          <div style="text-align:center;max-width:640px;padding:2.8rem;background:linear-gradient(145deg, #ffffff, #f8fafc);border:4px solid #4f46e5;border-radius:32px;box-shadow:0 20px 50px rgba(0,0,0,0.15), 0 0 40px rgba(79,70,229,0.25);animation:floatUp .4s ease;">
-            <div style="font-size:4.8rem;margin-bottom:.5rem;filter:drop-shadow(0 6px 15px rgba(79,70,229,0.4));">📇✨📊</div>
-            <h2 style="font-size:2.2rem;font-weight:900;margin:0 0 .5rem;background:linear-gradient(90deg,#4f46e5,#0284c7,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ĐẤU TRƯỜNG QUÉT THẺ PLICKERS AI</h2>
-            <p style="color:#475569;font-size:1.1rem;line-height:1.6;margin:0 0 2rem;font-weight:600;">
-              Học sinh giơ thẻ Plickers theo hướng đáp án A, B, C, D!<br>
-              Camera AI tự động quét lia toàn bộ lớp và chấm điểm biểu đồ 3D tức thì.
+        <!-- ───────────────────────────────────────────────────────────── -->
+        <!-- 🚀 PRE-GAME CAMERA SOURCE SELECTION & PAIRING OVERLAY -->
+        <!-- ───────────────────────────────────────────────────────────── -->
+        <div id="plk-start-overlay" style="position:absolute;inset:0;background:rgba(15,23,42,0.85);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:90;transition:opacity .3s ease;">
+          <div style="text-align:center;max-width:760px;width:92%;padding:2.8rem 2.4rem;background:linear-gradient(145deg, #ffffff, #f8fafc);border:4px solid #4f46e5;border-radius:36px;box-shadow:0 25px 70px rgba(0,0,0,0.3), 0 0 50px rgba(79,70,229,0.25);animation:floatUp .4s ease;">
+            
+            <div style="font-size:4.2rem;margin-bottom:.2rem;">📇✨</div>
+            <h2 style="font-size:2.1rem;font-weight:900;margin:0 0 .4rem;background:linear-gradient(90deg,#4f46e5,#0284c7,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">CHỌN THIẾT BỊ QUÉT THẺ PLICKERS AI</h2>
+            <p style="color:#475569;font-size:1rem;line-height:1.5;margin:0 0 1.8rem;font-weight:600;">
+              Vui lòng chọn thiết bị quét thẻ trước khi bắt đầu bài kiểm tra:
             </p>
 
-            <button id="plk-btn-launch" style="background:linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);color:#ffffff;border:3px solid #a5b4fc;padding:1.1rem 3.4rem;border-radius:50px;font-size:1.45rem;font-weight:900;cursor:pointer;letter-spacing:1px;box-shadow:0 10px 30px rgba(79,70,229,0.45);transition:all .2s cubic-bezier(0.175,0.885,0.32,1.275);display:inline-flex;align-items:center;gap:.9rem;">
-              <span>🚀</span> BẮT ĐẦU QUÉT THẺ!
-            </button>
+            <!-- VIEW 1: SELECTION OPTIONS (LAPTOP VS PHONE) -->
+            <div id="plk-view-choose-device" style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-bottom:1.5rem;">
+              
+              <!-- OPTION 1: LAPTOP WEBCAM -->
+              <div id="card-opt-laptop" style="background:#f8fafc;border:3px solid #cbd5e1;border-radius:24px;padding:1.6rem 1.2rem;display:flex;flex-direction:column;align-items:center;justify-content:space-between;cursor:pointer;transition:all .2s;box-shadow:0 6px 18px rgba(0,0,0,0.05);" onmouseover="this.style.borderColor='#4f46e5';this.style.transform='scale(1.03)';" onmouseout="this.style.borderColor='#cbd5e1';this.style.transform='scale(1)';">
+                <div style="font-size:3.5rem;margin-bottom:.5rem;">💻</div>
+                <div style="font-size:1.25rem;font-weight:900;color:#0f172a;margin-bottom:.4rem;">Webcam Máy Tính</div>
+                <div style="font-size:.85rem;color:#64748b;line-height:1.4;margin-bottom:1.2rem;font-weight:600;">Quét trực tiếp qua Camera gắn liền trên máy tính giáo viên.</div>
+                <button style="width:100%;background:#4f46e5;color:#fff;border:none;padding:.75rem;border-radius:14px;font-weight:900;font-size:.95rem;cursor:pointer;pointer-events:none;">
+                  👉 DÙNG WEBCAM MÁY TÍNH
+                </button>
+              </div>
+
+              <!-- OPTION 2: MOBILE PHONE SCANNER (RECOMMENDED) -->
+              <div id="card-opt-mobile" style="background:#ecfdf5;border:3.5px solid #10b981;border-radius:24px;padding:1.6rem 1.2rem;display:flex;flex-direction:column;align-items:center;justify-content:space-between;cursor:pointer;transition:all .2s;position:relative;box-shadow:0 10px 25px rgba(16,185,129,0.25);" onmouseover="this.style.transform='scale(1.03)';" onmouseout="this.style.transform='scale(1)';">
+                <div style="position:absolute;top:-12px;background:#10b981;color:#fff;padding:3px 12px;border-radius:20px;font-size:.72rem;font-weight:900;letter-spacing:.5px;">⭐ KHUYÊN DÙNG</div>
+                <div style="font-size:3.5rem;margin-bottom:.5rem;">📱</div>
+                <div style="font-size:1.25rem;font-weight:900;color:#065f46;margin-bottom:.4rem;">Camera Điện Thoại</div>
+                <div style="font-size:.85rem;color:#047857;line-height:1.4;margin-bottom:1.2rem;font-weight:600;">Cầm điện thoại di chuyển quanh lớp quét bao quát 100% học sinh.</div>
+                <button style="width:100%;background:#059669;color:#fff;border:none;padding:.75rem;border-radius:14px;font-weight:900;font-size:.95rem;cursor:pointer;pointer-events:none;">
+                  👉 KẾT NỐI ĐIỆN THOẠI QUÉT
+                </button>
+              </div>
+
+
+
+            </div>
+
+            <!-- VIEW 2: PHONE PAIRING WAITING SCREEN -->
+            <div id="plk-view-phone-pairing" style="display:none;flex-direction:column;align-items:center;">
+              <div id="plk-qr-container" style="background:#f8fafc;border:3px dashed #10b981;border-radius:24px;padding:1rem;display:inline-block;margin-bottom:1rem;box-shadow:0 8px 25px rgba(0,0,0,0.06);">
+                <img id="plk-qr-img" src="" style="width:200px;height:200px;border-radius:12px;display:block;" alt="QR Code Phone Pairing">
+              </div>
+
+              <div id="plk-mobile-wait-box" style="background:#fffbeb;border:2px solid #fde047;padding:.65rem 1.6rem;border-radius:20px;margin-bottom:0.8rem;transition:all .3s;">
+                <div id="plk-phone-conn-text" style="font-size:.95rem;font-weight:800;color:#b45309;">
+                  🟡 Mở Camera điện thoại quét mã QR ở trên để kết nối...
+                </div>
+              </div>
+
+
+
+              <div style="display:flex;gap:1rem;">
+                <button id="plk-btn-mobile-start-now" style="display:none;background:linear-gradient(135deg, #10b981, #059669);color:#fff;border:none;padding:.85rem 2.2rem;border-radius:20px;font-size:1.15rem;font-weight:900;cursor:pointer;box-shadow:0 8px 25px rgba(16,185,129,0.4);">
+                  🚀 BẮT ĐẦU VÀO ĐẤU TRƯỜNG!
+                </button>
+                <button id="plk-btn-back-choose" style="background:#f1f5f9;color:#64748b;border:1.5px solid #cbd5e1;padding:.75rem 1.6rem;border-radius:16px;font-size:.9rem;font-weight:800;cursor:pointer;">
+                  ⬅️ Chọn Lại Thiết Bị
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
 
         <!-- 3-2-1 COUNTDOWN POPUP OVERLAY -->
-        <div id="plk-countdown-overlay" style="position:absolute;inset:0;pointer-events:none;display:none;align-items:center;justify-content:center;z-index:46;">
+        <div id="plk-countdown-overlay" style="position:absolute;inset:0;pointer-events:none;display:none;align-items:center;justify-content:center;z-index:95;">
           <div id="plk-count-number" style="font-size:10rem;font-weight:900;color:#4f46e5;text-shadow:0 0 45px rgba(79,70,229,0.7), 0 10px 25px rgba(0,0,0,0.2);transform:scale(0.5);opacity:0;transition:transform .25s cubic-bezier(0.175,0.885,0.32,1.275), opacity .25s ease;">
             3
           </div>
         </div>
       `;
 
-      // Live Camera Init
-      const video = modal.querySelector('#plickers-live-video');
-      const digitalBg = modal.querySelector('#plk-digital-bg');
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720, facingMode: 'user' } })
-          .then(stream => {
-            cameraStream = stream;
-            video.srcObject = stream;
-            video.play();
-            if (digitalBg) digitalBg.style.display = 'none';
-          })
-          .catch(err => {
-            console.warn('Plickers webcam fallback to digital AR scanner:', err);
-          });
-      }
+      // ─────────────────────────────────────────────────────────────
+      // 🚀 WIRE SELECTION BUTTON ACTIONS
+      // ─────────────────────────────────────────────────────────────
+      const viewChoose = modal.querySelector('#plk-view-choose-device');
+      const viewPhone = modal.querySelector('#plk-view-phone-pairing');
+      const qrImg = modal.querySelector('#plk-qr-img');
+
+      // OPTION 1: CHOOSE LAPTOP WEBCAM
+      modal.querySelector('#card-opt-laptop').onclick = () => {
+        chosenCameraMode = 'laptop';
+        const video = modal.querySelector('#plickers-live-video');
+        const digitalBg = modal.querySelector('#plk-digital-bg');
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720, facingMode: 'user' } })
+            .then(stream => {
+              cameraStream = stream;
+              if (video) video.srcObject = stream;
+              if (digitalBg) digitalBg.style.display = 'none';
+            }).catch(()=>{});
+        }
+        startCountdownSequence();
+      };
+
+      // OPTION 2: CHOOSE MOBILE PHONE
+      modal.querySelector('#card-opt-mobile').onclick = async () => {
+        chosenCameraMode = 'mobile';
+        viewChoose.style.display = 'none';
+        viewPhone.style.display = 'flex';
+
+        let qrUrl = 'http://' + window.location.hostname + ':' + (window.location.port || '3000') + '/plickers-mobile.html';
+        try {
+          const res = await fetch('/api/server-ip');
+          const d = await res.json();
+          if (d && d.plickersUrl) qrUrl = d.plickersUrl;
+        } catch(e) {}
+
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&color=0f172a&bgcolor=ffffff&data=${encodeURIComponent(qrUrl)}`;
+      };
+
+      // Back to Device Choice
+      modal.querySelector('#plk-btn-back-choose').onclick = () => {
+        viewPhone.style.display = 'none';
+        viewChoose.style.display = 'grid';
+        chosenCameraMode = null;
+      };
+
+      modal.querySelector('#plk-btn-mobile-start-now').onclick = () => {
+        startCountdownSequence();
+      };
 
       // Audio buttons
       const soundBtn = modal.querySelector('#plk-btn-sound');
@@ -15755,7 +16058,6 @@ ${notificationMsg ? `
         plickersBgm.stop();
         soundFX.victoryFanfare();
 
-        // Highlight correct card
         modal.querySelectorAll('.plickers-choice-box').forEach(box => {
           if (box.dataset.opt === correctOpt) {
             box.style.background = '#ecfdf5';
@@ -15765,7 +16067,6 @@ ${notificationMsg ? `
           }
         });
 
-        // Tally A, B, C, D
         const counts = { A: 0, B: 0, C: 0, D: 0 };
         let correctCount = 0;
         activeClassList.forEach((name, i) => {
@@ -15793,7 +16094,6 @@ ${notificationMsg ? `
         const totalStudents = activeClassList.length;
         const accuracyPct = Math.round((correctCount / totalStudents) * 100);
 
-        // Render Bars in Stats Modal
         const statsOverlay = modal.querySelector('#plk-stats-overlay');
         const statsPct = modal.querySelector('#plk-stats-pct');
         const barsChart = modal.querySelector('#plk-bars-chart');
@@ -15844,9 +16144,11 @@ ${notificationMsg ? `
         const countOverlay = modal.querySelector('#plk-countdown-overlay');
         const countNum = modal.querySelector('#plk-count-number');
 
-        startOverlay.style.opacity = '0';
-        startOverlay.style.pointerEvents = 'none';
-        setTimeout(() => { startOverlay.style.display = 'none'; }, 300);
+        if (startOverlay) {
+          startOverlay.style.opacity = '0';
+          startOverlay.style.pointerEvents = 'none';
+          setTimeout(() => { startOverlay.style.display = 'none'; }, 300);
+        }
 
         countOverlay.style.display = 'flex';
 
@@ -15884,13 +16186,23 @@ ${notificationMsg ? `
           }, st.delay);
         });
       }
-
-      modal.querySelector('#plk-btn-launch').onclick = () => startCountdownSequence();
     };
 
     function cleanupAndClose() {
       isGameRunning = false;
       plickersBgm.stop();
+      if (plickersEvtSource) {
+        plickersEvtSource.close();
+        plickersEvtSource = null;
+      }
+      if (camStreamEvtSource) {
+        camStreamEvtSource.close();
+        camStreamEvtSource = null;
+      }
+      if (highSpeedStreamInterval) {
+        clearInterval(highSpeedStreamInterval);
+        highSpeedStreamInterval = null;
+      }
       if (cameraStream) {
         cameraStream.getTracks().forEach(t => t.stop());
         cameraStream = null;
@@ -15902,9 +16214,9 @@ ${notificationMsg ? `
     }
 
     document.body.appendChild(modal);
+    initSSEListener();
     renderRound();
   },
-
   // =========================================================================
   // TAB 16: LẬT MẢNH GHÉP BÍ ẨN (MYSTERY PICTURE PUZZLE REVEAL ARENA)
   // =========================================================================
@@ -18247,7 +18559,7 @@ ${notificationMsg ? `
 
 
   // ═══════════════════════════════════════════════════════════════
-  // GAME 19: ĐẤU TRƯỜNG ĐA VŨ TRỤ (MULTIVERSE ADVENTURE ARENA)
+  // GAME 15: ĐẤU TRƯỜNG ĐA VŨ TRỤ (MULTIVERSE ADVENTURE ARENA)
   // KIẾN TRÚC NHÓM ẢI GAME ĐA DẠNG (MULTI-QUESTION STAGE GROUPS)
   // ═══════════════════════════════════════════════════════════════
   _getDefaultMultiverseStages() {
@@ -18358,21 +18670,28 @@ ${notificationMsg ? `
     const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'multiverse').length : 0;
 
     const GAME_META = {
-      goldminer:   { name: 'Đào Vàng', icon: '⛏️', color: '#f59e0b', bg: '#fef3c7' },
-      fruitninja:  { name: 'Chém Hoa Quả', icon: '🍉', color: '#ea580c', bg: '#ffedd5' },
-      headtilt:    { name: 'Nghiêng Đầu AI', icon: '🤸', color: '#0284c7', bg: '#e0f2fe' },
-      tugofwar:    { name: 'Kéo Co Đồng Đội', icon: '🪢', color: '#dc2626', bg: '#fee2e2' },
-      minesweeper: { name: 'Dò Mìn Vượt Bãi', icon: '💣', color: '#7c3aed', bg: '#f5f3ff' },
-      matching:    { name: 'Kéo Thả Nối Ý', icon: '🧩', color: '#0891b2', bg: '#ecfeff' },
-      duckrace:    { name: 'Game Đua Vịt', icon: '🦆', color: '#0d9488', bg: '#f0fdfa' },
-      trainorder:  { name: 'Đoàn Tàu Tri Thức', icon: '🚂', color: '#2563eb', bg: '#eff6ff' }
+      goldminer:      { name: 'Đào Vàng', icon: '⛏️', color: '#f59e0b', bg: '#fef3c7' },
+      fruitninja:     { name: 'Chém Hoa Quả', icon: '🍉', color: '#ea580c', bg: '#ffedd5' },
+      headtilt:       { name: 'Nghiêng Đầu AI', icon: '🤸', color: '#0284c7', bg: '#e0f2fe' },
+      tugofwar:       { name: 'Kéo Co Đồng Đội', icon: '🪢', color: '#dc2626', bg: '#fee2e2' },
+      minesweeper:    { name: 'Dò Mìn Vượt Bãi', icon: '💣', color: '#7c3aed', bg: '#f5f3ff' },
+      matching:       { name: 'Kéo Thả Nối Ý', icon: '🧩', color: '#0891b2', bg: '#ecfeff' },
+      duckrace:       { name: 'Game Đua Vịt', icon: '🦆', color: '#0d9488', bg: '#f0fdfa' },
+      trainorder:     { name: 'Đoàn Tàu Tri Thức', icon: '🚂', color: '#2563eb', bg: '#eff6ff' },
+      luckycamera:    { name: 'Ống Kính May Mắn (Game 14)', icon: '📷', color: '#0d9488', bg: '#f0fdfa' },
+      plickers:       { name: 'Quét Thẻ Plickers (Game 15)', icon: '📇', color: '#4f46e5', bg: '#eef2ff' },
+      treasure:       { name: 'Thám Tử Kho Báu (Game 20)', icon: '🕵️‍♂️', color: '#d97706', bg: '#fffbeb' },
+      challengewheel: { name: 'Vòng Quay Thử Thách (Game 21)', icon: '🎡', color: '#0284c7', bg: '#f0f9ff' },
+      spacejourney:   { name: 'Du Hành Vũ Trụ (Game 22)', icon: '🚀', color: '#6366f1', bg: '#eef2ff' },
+      knowledgearena: { name: 'Đấu Trường 2 Đội VS (Game 23)', icon: '⚔️', color: '#dc2626', bg: '#fef2f2' },
+      stations7:      { name: 'Hành Trình 7 Trạm AI (Game 24)', icon: '🚩', color: '#059669', bg: '#ecfdf5' },
+      starrace:       { name: 'Cuộc Đua Ngôi Sao AI (Game 25)', icon: '🌟', color: '#f59e0b', bg: '#fef3c7' }
     };
 
     const totalQuestionsCount = stages.reduce((acc, s) => acc + ((s.questions && s.questions.length) || (s.pairs && s.pairs.length) || 0), 0);
 
     area.innerHTML = `
       <div style="display:flex; flex-direction:column; gap:1.5rem; animation:fadeIn 0.25s ease-out;">
-        
         <!-- HEADER BANNER -->
         <div style="background:linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); border-radius:22px; padding:1.8rem; color:#fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem; box-shadow:0 12px 35px rgba(49,46,129,0.25); border:2px solid rgba(199,210,254,0.3);">
           <div style="display:flex; align-items:center; gap:1.2rem;">
@@ -18382,7 +18701,7 @@ ${notificationMsg ? `
             <div>
               <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
                 <h2 style="margin:0; font-size:1.6rem; font-weight:900; background:linear-gradient(90deg, #c084fc, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
-                  GAME 19: ĐẤU TRƯỜNG ĐA VŨ TRỤ (MULTIVERSE ARENA)
+                  GAME 15: ĐẤU TRƯỜNG ĐA VŨ TRỤ (MULTIVERSE ARENA)
                 </h2>
                 <span style="background:#7c3aed; color:#fff; font-size:0.75rem; padding:3px 10px; border-radius:999px; font-weight:800; border:1px solid #c084fc;">ĐA ẢI LIÊN HOÀN</span>
               </div>
@@ -20243,15 +20562,46 @@ ${notificationMsg ? `
     const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
-    let items = this._getChallengeWheelItems();
-    const savedList = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'challengewheel') : [];
-    const curSubName = (typeof currentSubject !== 'undefined' && currentSubject && currentSubject.name) ? currentSubject.name : 'Tin học';
+    const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
+    const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
+    const subName = (subKey === 'toan' ? 'Toán học' : (subKey === 'van' ? 'Ngữ văn' : (subKey === 'tin' ? 'Tin học' : 'Môn học')));
+    const defaultLessonTitle = `Bài 1: Vòng quay thử thách môn ${subName} Khối ${gradeKey}`;
+    const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'challengewheel').length : 0;
+    const loadedQs = this._getLoadedQuestions('challengewheel') || this._getChallengeWheelItems();
 
     area.innerHTML = `
-      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease;">
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease; display:flex; flex-direction:column; gap:1.25rem;">
         
+        <!-- BẢNG ĐIỀU KHIỂN: TIÊU ĐỀ BÀI HỌC, KHỐI LỚP & KHO DÙNG CHUNG TOÀN TRƯỜNG -->
+        <div style="background:#ffffff;border:2.5px solid #38bdf8;border-radius:20px;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.25rem;box-shadow:0 6px 20px rgba(0,0,0,0.04);">
+          <div style="display:flex;align-items:center;gap:.85rem;flex:1;min-width:300px;">
+            <span style="font-size:1.8rem;background:#e0f2fe;padding:.4rem .7rem;border-radius:12px;border:1.5px solid #38bdf8;">🏷️</span>
+            <div style="flex:1;">
+              <label style="font-size:.82rem;font-weight:900;color:#0284c7;display:block;text-transform:uppercase;margin-bottom:.25rem;letter-spacing:0.3px;">Tên Tiêu Đề Bài Học / Chủ Đề Giảng Dạy:</label>
+              <input id="dash-lesson-title" type="text" class="ait-input" value="${defaultLessonTitle}" style="font-weight:900;color:#1e293b;font-size:1.05rem;border:2.5px solid #38bdf8;padding:.6rem 1rem;border-radius:12px;width:100%;box-sizing:border-box;outline:none;" placeholder="Ví dụ: Bài 1: Vòng quay thử thách..." />
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.92rem;font-weight:900;color:#0284c7;">🎓 Khối Lớp:</span>
+              <select id="dash-grade" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #0284c7;color:#0369a1;outline:none;cursor:pointer;">
+                ${['6','7','8','9'].map(g => `<option value="${g}" ${String(gradeKey)===g?'selected':''}>Khối ${g}</option>`).join('')}
+              </select>
+            </div>
+
+            <button id="btn-dash-save-lib" class="btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(16,185,129,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>💾</span> LƯU BÀI HỌC VÀO KHO DÙNG CHUNG
+            </button>
+
+            <button id="btn-dash-open-lib" class="btn" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(99,102,241,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>🏫</span> KHO BÀI GIẢNG DÙNG CHUNG (${savedCount} bài)
+            </button>
+          </div>
+        </div>
+
         <!-- HEADER BANNER GAMESHOW -->
-        <div style="background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; margin-bottom:1.5rem; border:2.5px solid #f59e0b; box-shadow:0 12px 35px rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+        <div style="background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; border:2.5px solid #f59e0b; box-shadow:0 12px 35px rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
           <div style="display:flex; align-items:center; gap:1.4rem;">
             <div style="width:70px; height:70px; border-radius:20px; background:radial-gradient(circle, #fde047 0%, #f59e0b 60%, #b45309 100%); display:flex; align-items:center; justify-content:center; font-size:2.8rem; border:3px solid #fff; box-shadow:0 0 25px rgba(245,158,11,0.7); animation:bounce 2s infinite;">
               🎡
@@ -20262,36 +20612,27 @@ ${notificationMsg ? `
                 <span style="background:rgba(255,255,255,0.15); color:#bae6fd; font-weight:800; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">12 Ô ĐÈN LED 60 FPS</span>
               </div>
               <h1 style="margin:0; font-size:2rem; font-weight:900; background:linear-gradient(90deg, #fde047, #38bdf8, #f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
-                21. VÒNG QUAY THỬ THÁCH AI (CHALLENGE WHEEL)
+                17. VÒNG QUAY THỬ THÁCH AI (CHALLENGE WHEEL)
               </h1>
               <p style="margin:0.3rem 0 0 0; color:#e2e8f0; font-size:0.98rem;">
                 Vòng quay may mắn đa năng tích hợp Trắc nghiệm kiến thức, Thử thách hoạt náo, Nhân đôi điểm x2 & Hộp quà bí mật
               </p>
             </div>
           </div>
-        </div>
 
-        <!-- 4 ACTION BUTTONS STANDARD -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
-          <button id="btn-save-cw-library" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:2px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(16,185,129,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            💾 LƯU VÀO THƯ VIỆN TRƯỜNG
-          </button>
-
-          <button id="btn-open-cw-library" style="background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color:#fff; border:2px solid #c4b5fd; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(139,92,246,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            📁 KHO BÀI ĐÃ LƯU (${savedList.length})
-          </button>
-
-          <button id="btn-ai-generate-cw-sectors" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:2px solid #7dd3fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(2,132,199,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            🤖 AI TỰ ĐỘNG TẠO 12 Ô THEO BÀI
-          </button>
-
-          <button id="btn-start-cw-gameshow-now" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:#fff; border:2.5px solid #fde047; padding:0.95rem 1.1rem; border-radius:16px; font-size:1.08rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(245,158,11,0.45); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03) translateY(-2px)';" onmouseout="this.style.transform='scale(1) translateY(0)';">
-            🚀 BẮT ĐẦU QUAY GAMESHOW
-          </button>
+          <!-- ACTION BUTTONS -->
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <button id="btn-cw-manage-qs-top" class="ait-btn" style="background:#0284c7; color:#fff; font-weight:900; font-size:1rem; padding:0.85rem 1.6rem; border-radius:14px; border:none; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:0 6px 18px rgba(2,132,199,0.4);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
+            <button id="btn-start-cw-gameshow-now" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:#fff; border:2.5px solid #fde047; padding:0.85rem 1.8rem; border-radius:14px; font-size:1.05rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(245,158,11,0.45); transition:transform 0.15s;">
+              <span>🚀</span> BẮT ĐẦU QUAY GAMESHOW
+            </button>
+          </div>
         </div>
 
         <!-- SETTINGS PANEL & STUDENT CALL SELECTOR -->
-        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.2rem 1.6rem; margin-bottom:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.2rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
           <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:0.5rem;">
               <span style="font-weight:800; color:#334155; font-size:0.92rem;">🎯 Chế độ chơi:</span>
@@ -20312,52 +20653,29 @@ ${notificationMsg ? `
               </select>
             </div>
           </div>
-
-          <div style="display:flex; gap:0.8rem;">
-            <button id="btn-add-new-cw-sector" style="background:#f1f5f9; color:#0f172a; border:2px dashed #94a3b8; padding:0.5rem 1rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem; display:flex; align-items:center; gap:0.4rem;">
-              ➕ Thêm Ô Thử Thách Mới
-            </button>
-            <button id="btn-reset-default-cw-sectors" style="background:#fff; color:#ef4444; border:1.5px solid #fca5a5; padding:0.5rem 0.9rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem;">
-              🔄 Khôi phục mặc định
-            </button>
-          </div>
         </div>
 
-        <!-- 12 SECTORS VISUAL GRID -->
-        <div style="margin-bottom:1.5rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
-            <h3 style="margin:0; font-size:1.25rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:0.5rem;">
-              <span>📋</span> DANH SÁCH 12 Ô THỬ THÁCH TRÊN VÒNG QUAY (${items.length} Ô)
-            </h3>
-            <span style="font-size:0.85rem; color:#64748b; font-weight:700;">Nhấn vào từng ô để chỉnh sửa câu hỏi & phần thưởng</span>
+        <!-- QUESTION MANAGER & PREVIEW TABLE -->
+        <div style="background:#ffffff;border:1.5px solid #38bdf8;border-radius:18px;padding:1.25rem;box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+            <div style="font-weight:900;font-size:1.05rem;color:#0284c7;display:flex;align-items:center;gap:.5rem;">
+              <span>📋</span> Danh Sách 12 Ô Thử Thách & Câu Hỏi Trên Vòng Quay (${loadedQs.length} ô)
+            </div>
+            <button id="btn-cw-manage-qs" class="ait-btn" style="background:#0284c7;color:#fff;font-weight:800;font-size:.92rem;padding:.6rem 1.4rem;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;gap:.4rem;box-shadow:0 4px 12px rgba(2,132,199,0.3);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:1rem;" id="cw-sectors-list-container">
-            ${items.map((item, idx) => `
-              <div style="background:#ffffff; border:2.5px solid ${item.color || '#38bdf8'}; border-radius:18px; padding:1.1rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.15s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
-                
-                <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:${item.color || '#38bdf8'};"></div>
-
-                <div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                    <span style="background:${item.color || '#38bdf8'}; color:#fff; font-weight:900; font-size:0.75rem; padding:0.18rem 0.55rem; border-radius:6px;">Ô SỐ ${idx + 1}</span>
-                    <span style="font-weight:900; color:#d97706; font-size:1rem;">+${item.pts}đ</span>
-                  </div>
-
-                  <h4 style="margin:0 0 0.4rem; font-size:1.1rem; font-weight:900; color:#0f172a;">${item.text}</h4>
-                  <p style="margin:0 0 0.7rem; font-size:0.88rem; color:#475569; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
-                    ${item.q || item.text}
-                  </p>
+          <div style="display:flex;flex-direction:column;gap:.6rem;max-height:300px;overflow-y:auto;padding-right:.3rem;">
+            ${loadedQs.map((q, i) => `
+              <div style="background:#f0f9ff;border:1.5px solid #e0f2fe;border-radius:12px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+                <div style="flex:1;font-weight:800;color:#1e293b;display:flex;align-items:center;gap:.6rem;">
+                  <span style="background:${q.color || '#0284c7'};color:#fff;font-size:.75rem;padding:.2rem .55rem;border-radius:6px;font-weight:900;">Ô ${i+1}</span>
+                  <span><b>${q.text || ('Ô ' + (i+1))}:</b> ${q.q || q.questionText || q.stmt || q.text}</span>
                 </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed #e2e8f0; padding-top:0.6rem; margin-top:0.4rem;">
-                  <span style="font-size:0.78rem; font-weight:800; color:#64748b;">Loại: ${item.type === 'quiz' ? '🎯 Trắc nghiệm' : (item.type === 'bonus' ? '⭐ Nhân đôi' : (item.type === 'action' ? '🤸 Vận động' : '🎁 May mắn'))}</span>
-                  <div style="display:flex; gap:0.4rem;">
-                    <button class="btn-edit-cw-item" data-idx="${idx}" style="background:#e0f2fe; color:#0369a1; border:none; padding:0.3rem 0.7rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">✏️ Sửa</button>
-                    <button class="btn-del-cw-item" data-idx="${idx}" style="background:#fee2e2; color:#dc2626; border:none; padding:0.3rem 0.55rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">🗑️</button>
-                  </div>
-                </div>
-
+                <span style="font-size:.84rem;color:#0369a1;font-weight:900;background:#e0f2fe;padding:.2rem .65rem;border-radius:8px;white-space:nowrap;">
+                  +${q.pts || 100}đ · ${q.opts ? q.opts[q.a || 0] : (q.left || 'Hoàn thành')}
+                </span>
               </div>
             `).join('')}
           </div>
@@ -20366,71 +20684,47 @@ ${notificationMsg ? `
       </div>
     `;
 
-    // Save Library
-    const saveLibBtn = area.querySelector('#btn-save-cw-library');
-    if (saveLibBtn) {
-      saveLibBtn.onclick = () => {
-        if (typeof showSaveToolModal === 'function') {
-          showSaveToolModal('challengewheel', '21. Vòng Quay Thử Thách AI', items);
-        } else {
-          this._saveGameToCustomStorage('challengewheel', items);
-          if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã lưu bộ Vòng Quay vào thư viện thành công!', 'success');
+    // Handlers
+    const openLoader = () => {
+      this._openQuestionLoaderModal('challengewheel', 'Vòng Quay Thử Thách AI', loadedQs);
+    };
+
+    const btnManageTop = area.querySelector('#btn-cw-manage-qs-top');
+    if (btnManageTop) btnManageTop.onclick = openLoader;
+
+    const btnManage = area.querySelector('#btn-cw-manage-qs');
+    if (btnManage) btnManage.onclick = openLoader;
+
+    const btnSaveLib = area.querySelector('#btn-dash-save-lib');
+    if (btnSaveLib) {
+      btnSaveLib.onclick = () => {
+        const customTitle = area.querySelector('#dash-lesson-title')?.value.trim() || defaultLessonTitle;
+        const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+        this.showSaveToolModal('challengewheel', customTitle, { questions: loadedQs, grade: selectedGrade, subjectId: subKey }, () => {
           this._renderChallengeWheelDashboard();
-        }
+        });
       };
     }
 
-    // Open Library
-    const openLibBtn = area.querySelector('#btn-open-cw-library');
-    if (openLibBtn) {
-      openLibBtn.onclick = () => {
-        if (typeof showSharedToolsLibraryModal === 'function') {
-          showSharedToolsLibraryModal('challengewheel', (loaded) => {
-            if (loaded && Array.isArray(loaded)) {
-              this._setLoadedQuestions('challengewheel', loaded);
-              this._renderChallengeWheelDashboard();
-            }
-          });
-        } else {
-          this._openQuestionLoaderModal('challengewheel', (loaded) => {
-            this._setLoadedQuestions('challengewheel', loaded);
-            this._renderChallengeWheelDashboard();
-          });
+    const btnOpenLib = area.querySelector('#btn-dash-open-lib');
+    if (btnOpenLib) {
+      btnOpenLib.onclick = () => this.showSharedToolsLibraryModal('challengewheel');
+    }
+
+    const selGrade = area.querySelector('#dash-grade');
+    if (selGrade) {
+      selGrade.onchange = (e) => {
+        this.icebreaker.grade = e.target.value;
+        const newQs = this._getQuestionsForSubjectAndGrade('challengewheel', subKey, e.target.value);
+        if (newQs && newQs.length > 0) {
+          if (!this._activeQuestionsByGame) this._activeQuestionsByGame = {};
+          this._activeQuestionsByGame['challengewheel'] = newQs;
+          window._activeGameQuestions = newQs;
         }
+        this._renderChallengeWheelDashboard();
       };
     }
 
-    // AI Generate 12 Sectors
-    const aiGenBtn = area.querySelector('#btn-ai-generate-cw-sectors');
-    if (aiGenBtn) {
-      aiGenBtn.onclick = () => {
-        const topic = prompt('Nhập chủ đề bài học để AI sinh 12 ô thử thách:', curSubName + ' - Ôn tập kiến thức');
-        if (topic) {
-          if (typeof app !== 'undefined' && app.showToast) app.showToast('🤖 AI đang thiết kế 12 ô thử thách Gameshow...', 'info');
-          setTimeout(() => {
-            const aiGenerated = [
-              { id: 1, text: "🎯 Câu Hỏi 1", type: "quiz", q: "Kiến thức trọng tâm số 1 về " + topic + " là gì?", opts: ["Đáp án đúng chính xác", "Khái niệm chưa chuẩn", "Ý kiến sai", "Không liên quan"], a: 0, hint: "Xem lại SGK bài học", pts: 100, color: "#ef4444" },
-              { id: 2, text: "⭐ x2 ĐIỂM THƯỞNG", type: "bonus", q: "NHÂN ĐÔI ĐIỂM SỐ: Định lý / nguyên lý cốt lõi trong " + topic + "?", opts: ["Đúng chuẩn kiến thức", "Phương án 2", "Phương án 3", "Phương án 4"], a: 0, hint: "Ô nhân đôi điểm x2", pts: 200, color: "#f59e0b" },
-              { id: 3, text: "🤸 Thử Thách Vui", type: "action", q: "Thử thách vận động: Kể tên 3 bạn trong lớp và bắt tay làm quen!", opts: ["Đã hoàn thành xuất sắc (+100đ)", "Bỏ qua"], a: 0, hint: "Tạo không khí hòa đồng", pts: 100, color: "#10b981" },
-              { id: 4, text: "🎁 Quà AI", type: "gift", q: "Món quà AI: Trả lời nhanh để nhận trọn 150 điểm thưởng!", opts: ["Phương án đúng", "Phương án sai 1", "Phương án sai 2", "Phương án sai 3"], a: 0, hint: "Tự tin trả lời", pts: 150, color: "#06b6d4" },
-              { id: 5, text: "🎤 Đọc Thơ / Hát", type: "action", q: "Thử thách văn nghệ: Đọc 1 câu thơ hoặc hát 1 bài về tình thầy trò!", opts: ["Đã thể hiện (+100đ)", "Bỏ qua"], a: 0, hint: "Tự tin biểu diễn", pts: 100, color: "#3b82f6" },
-              { id: 6, text: "💔 MẤT LƯỢT", type: "bad", q: "Ô Mất Lượt rồi, nhường quyền cho bạn bên cạnh nhé!", opts: ["Nhường lượt (+0đ)"], a: 0, hint: "Chúc may mắn lần sau", pts: 0, color: "#64748b" },
-              { id: 7, text: "💰 Thưởng 100đ", type: "free", q: "CHÚC MỪNG: Nhận nóng 100 điểm thưởng từ Vòng Quay AI!", opts: ["Nhận 100đ ngay"], a: 0, hint: "May mắn tuyệt vời", pts: 100, color: "#8b5cf6" },
-              { id: 8, text: "🔄 Đổi Bạn Quay", type: "swap", q: "Hãy chỉ định 1 bạn bất kỳ trong lớp lên quay tiếp theo!", opts: ["Đã chỉ định bạn (+50đ)"], a: 0, hint: "Chỉ định bạn", pts: 50, color: "#ec4899" },
-              { id: 9, text: "🧠 Đố Mẹo Nhanh", type: "quiz", q: "Câu đố rèn luyện tư duy phản xạ nhanh cho chủ đề " + topic + "?", opts: ["Đáp án thông minh", "Đáp án chưa đúng", "Đáp án sai", "Không chắc"], a: 0, hint: "Tư duy logic", pts: 100, color: "#14b8a6" },
-              { id: 10, text: "👑 Ngôi Sao Lớp", type: "star", q: "VINH DANH NGÔI SAO: Ứng dụng thực tế của " + topic + " trong đời sống?", opts: ["Ứng dụng hữu ích", "Không có ứng dụng", "Chưa rõ", "Sai"], a: 0, hint: "Liên hệ thực tế", pts: 200, color: "#eab308" },
-              { id: 11, text: "⏱️ Trả Lời 10s", type: "speed", q: "Thử thách 10 giây: Nêu 2 từ khóa quan trọng nhất của bài học?", opts: ["Đã hoàn thành trong 10s (+100đ)", "Chưa kịp"], a: 0, hint: "Phản xạ nhanh", pts: 100, color: "#6366f1" },
-              { id: 12, text: "🌟 Jackpot 300đ", type: "jackpot", q: "Ô JACKPOT 300Đ: Tổng kết toàn diện kiến thức bài học " + topic + "?", opts: ["Câu trả lời xuất sắc tuyệt đối", "Chưa chuẩn", "Sai", "Thiếu ý"], a: 0, hint: "Điểm thưởng vô địch", pts: 300, color: "#f97316" }
-            ];
-            this._setLoadedQuestions('challengewheel', aiGenerated);
-            if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã tạo thành công 12 ô thử thách mới!', 'success');
-            this._renderChallengeWheelDashboard();
-          }, 600);
-        }
-      };
-    }
-
-    // Start Gameshow Arena
     const startBtn = area.querySelector('#btn-start-cw-gameshow-now');
     if (startBtn) {
       startBtn.onclick = () => {
@@ -20440,76 +20734,9 @@ ${notificationMsg ? `
           mode: modeEl ? modeEl.value : 'single',
           timeLimit: timerEl ? parseInt(timerEl.value) : 30
         };
-        this._launchChallengeWheelArena(curSubName, items, opts);
+        this._launchChallengeWheelArena(subName, loadedQs, opts);
       };
     }
-
-    // Reset default
-    const resetBtn = area.querySelector('#btn-reset-default-cw-sectors');
-    if (resetBtn) {
-      resetBtn.onclick = () => {
-        if (confirm('Khôi phục 12 ô thử thách về mặc định?')) {
-          this._setLoadedQuestions('challengewheel', null);
-          this._renderChallengeWheelDashboard();
-        }
-      };
-    }
-
-    // Add new sector
-    const addBtn = area.querySelector('#btn-add-new-cw-sector');
-    if (addBtn) {
-      addBtn.onclick = () => {
-        const newTitle = prompt('Nhập tên ô thử thách mới:', '🎯 Ô Thử Thách Mới');
-        if (newTitle) {
-          items.push({
-            id: items.length + 1,
-            text: newTitle,
-            type: "quiz",
-            q: "Nội dung câu hỏi hoặc thử thách cho " + newTitle,
-            opts: ["Đáp án đúng", "Đáp án sai 1", "Đáp án sai 2", "Đáp án sai 3"],
-            a: 0,
-            hint: "Gợi ý",
-            pts: 100,
-            color: "#3b82f6"
-          });
-          this._setLoadedQuestions('challengewheel', items);
-          this._renderChallengeWheelDashboard();
-        }
-      };
-    }
-
-    // Edit and Delete buttons
-    area.querySelectorAll('.btn-edit-cw-item').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx);
-        const cur = items[idx];
-        const newText = prompt('Tên hiển thị trên vòng quay:', cur.text);
-        if (newText !== null) {
-          const newQ = prompt('Nội dung chi tiết câu hỏi / thử thách:', cur.q);
-          const newPts = prompt('Điểm thưởng khi hoàn thành:', cur.pts);
-          cur.text = newText;
-          if (newQ) cur.q = newQ;
-          if (newPts) cur.pts = parseInt(newPts) || 100;
-          this._setLoadedQuestions('challengewheel', items);
-          this._renderChallengeWheelDashboard();
-        }
-      };
-    });
-
-    area.querySelectorAll('.btn-del-cw-item').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx);
-        if (items.length <= 4) {
-          alert('Vòng quay cần tối thiểu 4 ô để hoạt động!');
-          return;
-        }
-        if (confirm('Xóa ô này khỏi vòng quay?')) {
-          items.splice(idx, 1);
-          this._setLoadedQuestions('challengewheel', items);
-          this._renderChallengeWheelDashboard();
-        }
-      };
-    });
   },
 
   _launchChallengeWheelArena(subName, questions, opts = {}) {
@@ -21139,15 +21366,46 @@ ${notificationMsg ? `
     const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
-    let stations = this._getSpaceJourneyStations();
-    const savedList = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'spacejourney') : [];
-    const curSubName = (typeof currentSubject !== 'undefined' && currentSubject && currentSubject.name) ? currentSubject.name : 'Tin học';
+    const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
+    const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
+    const subName = (subKey === 'toan' ? 'Toán học' : (subKey === 'van' ? 'Ngữ văn' : (subKey === 'khtn' ? 'KHTN' : 'Môn học')));
+    const defaultLessonTitle = `Bài 1: Du hành vũ trụ môn ${subName} Khối ${gradeKey}`;
+    const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'spacejourney').length : 0;
+    const loadedQs = this._getLoadedQuestions('spacejourney') || this._getSpaceJourneyStations();
 
     area.innerHTML = `
-      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease;">
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease; display:flex; flex-direction:column; gap:1.25rem;">
         
+        <!-- BẢNG ĐIỀU KHIỂN: TIÊU ĐỀ BÀI HỌC, KHỐI LỚP & KHO DÙNG CHUNG TOÀN TRƯỜNG -->
+        <div style="background:#ffffff;border:2.5px solid #818cf8;border-radius:20px;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.25rem;box-shadow:0 6px 20px rgba(0,0,0,0.04);">
+          <div style="display:flex;align-items:center;gap:.85rem;flex:1;min-width:300px;">
+            <span style="font-size:1.8rem;background:#e0e7ff;padding:.4rem .7rem;border-radius:12px;border:1.5px solid #818cf8;">🏷️</span>
+            <div style="flex:1;">
+              <label style="font-size:.82rem;font-weight:900;color:#4338ca;display:block;text-transform:uppercase;margin-bottom:.25rem;letter-spacing:0.3px;">Tên Tiêu Đề Bài Học / Chủ Đề Giảng Dạy:</label>
+              <input id="dash-lesson-title" type="text" class="ait-input" value="${defaultLessonTitle}" style="font-weight:900;color:#1e293b;font-size:1.05rem;border:2.5px solid #818cf8;padding:.6rem 1rem;border-radius:12px;width:100%;box-sizing:border-box;outline:none;" placeholder="Ví dụ: Bài 1: Du hành vũ trụ..." />
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.92rem;font-weight:900;color:#4338ca;">🎓 Khối Lớp:</span>
+              <select id="dash-grade" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #6366f1;color:#4338ca;outline:none;cursor:pointer;">
+                ${['6','7','8','9'].map(g => `<option value="${g}" ${String(gradeKey)===g?'selected':''}>Khối ${g}</option>`).join('')}
+              </select>
+            </div>
+
+            <button id="btn-dash-save-lib" class="btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(16,185,129,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>💾</span> LƯU BÀI HỌC VÀO KHO DÙNG CHUNG
+            </button>
+
+            <button id="btn-dash-open-lib" class="btn" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(99,102,241,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>🏫</span> KHO BÀI GIẢNG DÙNG CHUNG (${savedCount} bài)
+            </button>
+          </div>
+        </div>
+
         <!-- HEADER BANNER SPACE SCI-FI -->
-        <div style="background:linear-gradient(135deg, #090d16 0%, #1e1b4b 50%, #312e81 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; margin-bottom:1.5rem; border:2.5px solid #6366f1; box-shadow:0 12px 35px rgba(0,0,0,0.4); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+        <div style="background:linear-gradient(135deg, #090d16 0%, #1e1b4b 50%, #312e81 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; border:2.5px solid #6366f1; box-shadow:0 12px 35px rgba(0,0,0,0.4); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
           <div style="display:flex; align-items:center; gap:1.4rem;">
             <div style="width:72px; height:72px; border-radius:20px; background:radial-gradient(circle, #818cf8 0%, #4338ca 60%, #1e1b4b 100%); display:flex; align-items:center; justify-content:center; font-size:3rem; border:3px solid #c7d2fe; box-shadow:0 0 30px rgba(99,102,241,0.7); animation:pulse 2s infinite;">
               🚀
@@ -21158,36 +21416,27 @@ ${notificationMsg ? `
                 <span style="background:rgba(255,255,255,0.15); color:#c7d2fe; font-weight:800; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">5 TRẠM HÀNH TINH HYPERDRIVE</span>
               </div>
               <h1 style="margin:0; font-size:2rem; font-weight:900; background:linear-gradient(90deg, #c7d2fe, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
-                22. DU HÀNH VŨ TRỤ KIẾN THỨC (SPACE JOURNEY AI)
+                18. DU HÀNH VŨ TRỤ KIẾN THỨC (SPACE JOURNEY AI)
               </h1>
               <p style="margin:0.3rem 0 0 0; color:#e2e8f0; font-size:0.98rem;">
                 Điều khiển phi thuyền không gian vượt qua 5 trạm hành tinh dải Ngân Hà bằng việc giải mã tín hiệu tri thức
               </p>
             </div>
           </div>
-        </div>
 
-        <!-- 4 ACTION BUTTONS STANDARD -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
-          <button id="btn-save-space-library" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:2px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(16,185,129,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            💾 LƯU VÀO THƯ VIỆN TRƯỜNG
-          </button>
-
-          <button id="btn-open-space-library" style="background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color:#fff; border:2px solid #c4b5fd; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(139,92,246,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            📁 KHO BÀI ĐÃ LƯU (${savedList.length})
-          </button>
-
-          <button id="btn-ai-generate-space-stations" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:2px solid #7dd3fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(2,132,199,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            🤖 AI TẠO 5 TRẠM VŨ TRỤ THEO BÀI
-          </button>
-
-          <button id="btn-start-space-journey-now" style="background:linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color:#fff; border:2.5px solid #a5b4fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1.08rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(99,102,241,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03) translateY(-2px)';" onmouseout="this.style.transform='scale(1) translateY(0)';">
-            🚀 BẮT ĐẦU DU HÀNH VŨ TRỤ
-          </button>
+          <!-- ACTION BUTTONS -->
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <button id="btn-space-manage-qs-top" class="ait-btn" style="background:#0284c7; color:#fff; font-weight:900; font-size:1rem; padding:0.85rem 1.6rem; border-radius:14px; border:none; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:0 6px 18px rgba(2,132,199,0.4);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
+            <button id="btn-start-space-journey-now" style="background:linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color:#fff; border:2.5px solid #a5b4fc; padding:0.85rem 1.8rem; border-radius:14px; font-size:1.05rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(99,102,241,0.5); transition:transform 0.15s;">
+              <span>🚀</span> BẮT ĐẦU DU HÀNH VŨ TRỤ
+            </button>
+          </div>
         </div>
 
         <!-- SETTINGS PANEL & CONTROLS -->
-        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.2rem 1.6rem; margin-bottom:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.2rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
           <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:0.5rem;">
               <span style="font-weight:800; color:#334155; font-size:0.92rem;">⏱️ Thời gian Oxy mỗi trạm:</span>
@@ -21199,52 +21448,29 @@ ${notificationMsg ? `
               </select>
             </div>
           </div>
-
-          <div style="display:flex; gap:0.8rem;">
-            <button id="btn-add-space-station" style="background:#f1f5f9; color:#0f172a; border:2px dashed #94a3b8; padding:0.5rem 1rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem; display:flex; align-items:center; gap:0.4rem;">
-              ➕ Thêm Trạm Hành Tinh Mới
-            </button>
-            <button id="btn-reset-default-space-stations" style="background:#fff; color:#ef4444; border:1.5px solid #fca5a5; padding:0.5rem 0.9rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem;">
-              🔄 Khôi phục 5 trạm gốc
-            </button>
-          </div>
         </div>
 
-        <!-- 5 PLANETARY STATIONS GRID -->
-        <div style="margin-bottom:1.5rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
-            <h3 style="margin:0; font-size:1.25rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:0.5rem;">
-              <span>🪐</span> HẢI TRÌNH 5 TRẠM HÀNH TINH DU HÀNH (${stations.length} Trạm)
-            </h3>
-            <span style="font-size:0.85rem; color:#64748b; font-weight:700;">Nhấn vào từng trạm để chỉnh sửa câu hỏi & manh mối</span>
+        <!-- QUESTION MANAGER & PREVIEW TABLE -->
+        <div style="background:#ffffff;border:1.5px solid #818cf8;border-radius:18px;padding:1.25rem;box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+            <div style="font-weight:900;font-size:1.05rem;color:#4338ca;display:flex;align-items:center;gap:.5rem;">
+              <span>🪐</span> Hải Trình Các Trạm Hành Tinh Du Hành (${loadedQs.length} trạm)
+            </div>
+            <button id="btn-space-manage-qs" class="ait-btn" style="background:#0284c7;color:#fff;font-weight:800;font-size:.92rem;padding:.6rem 1.4rem;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;gap:.4rem;box-shadow:0 4px 12px rgba(2,132,199,0.3);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
-            ${stations.map((st, idx) => `
-              <div style="background:#ffffff; border:2.5px solid #6366f1; border-radius:18px; padding:1.1rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.15s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
-                
-                <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:#6366f1;"></div>
-
-                <div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                    <span style="background:#e0e7ff; color:#4338ca; font-weight:900; font-size:0.78rem; padding:0.2rem 0.6rem; border-radius:6px;">TRẠM ${idx + 1}: ${st.planet}</span>
-                    <span style="font-weight:900; color:#6366f1; font-size:1.25rem;">${st.icon || '🪐'}</span>
-                  </div>
-
-                  <h4 style="margin:0 0 0.4rem; font-size:1.05rem; font-weight:900; color:#0f172a; line-height:1.4;">${st.q}</h4>
-                  <p style="margin:0 0 0.7rem; font-size:0.85rem; color:#64748b;">
-                    💡 <em>Gợi ý: ${st.hint || 'Không có gợi ý'}</em>
-                  </p>
+          <div style="display:flex;flex-direction:column;gap:.6rem;max-height:300px;overflow-y:auto;padding-right:.3rem;">
+            ${loadedQs.map((st, i) => `
+              <div style="background:#f5f3ff;border:1.5px solid #ede9fe;border-radius:12px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+                <div style="flex:1;font-weight:800;color:#1e293b;display:flex;align-items:center;gap:.6rem;">
+                  <span style="background:#6366f1;color:#fff;font-size:.75rem;padding:.2rem .55rem;border-radius:6px;font-weight:900;">Trạm ${i+1}: ${st.planet || ('Hành tinh ' + (i+1))}</span>
+                  <span>${st.q || st.questionText || st.stmt}</span>
                 </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed #e2e8f0; padding-top:0.6rem; margin-top:0.4rem;">
-                  <span style="font-size:0.8rem; font-weight:800; color:#10b981;">+${st.pts || 100} Điểm</span>
-                  <div style="display:flex; gap:0.4rem;">
-                    <button class="btn-edit-space-st" data-idx="${idx}" style="background:#e0e7ff; color:#4338ca; border:none; padding:0.3rem 0.7rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">✏️ Sửa</button>
-                    <button class="btn-del-space-st" data-idx="${idx}" style="background:#fee2e2; color:#dc2626; border:none; padding:0.3rem 0.55rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">🗑️</button>
-                  </div>
-                </div>
-
+                <span style="font-size:.84rem;color:#6366f1;font-weight:900;background:#ede9fe;padding:.2rem .65rem;border-radius:8px;white-space:nowrap;">
+                  +${st.pts || 100}đ · ${st.opts ? st.opts[st.a || 0] : (st.left || 'Đúng')}
+                </span>
               </div>
             `).join('')}
           </div>
@@ -21253,58 +21479,44 @@ ${notificationMsg ? `
       </div>
     `;
 
-    // Events
-    const saveLibBtn = area.querySelector('#btn-save-space-library');
-    if (saveLibBtn) {
-      saveLibBtn.onclick = () => {
-        if (typeof showSaveToolModal === 'function') {
-          showSaveToolModal('spacejourney', '22. Du Hành Vũ Trụ Kiến Thức', stations);
-        } else {
-          this._saveGameToCustomStorage('spacejourney', stations);
-          if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã lưu hải trình vũ trụ vào thư viện thành công!', 'success');
+    // Handlers
+    const openLoader = () => {
+      this._openQuestionLoaderModal('spacejourney', 'Du Hành Vũ Trụ Kiến Thức', loadedQs);
+    };
+
+    const btnManageTop = area.querySelector('#btn-space-manage-qs-top');
+    if (btnManageTop) btnManageTop.onclick = openLoader;
+
+    const btnManage = area.querySelector('#btn-space-manage-qs');
+    if (btnManage) btnManage.onclick = openLoader;
+
+    const btnSaveLib = area.querySelector('#btn-dash-save-lib');
+    if (btnSaveLib) {
+      btnSaveLib.onclick = () => {
+        const customTitle = area.querySelector('#dash-lesson-title')?.value.trim() || defaultLessonTitle;
+        const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+        this.showSaveToolModal('spacejourney', customTitle, { questions: loadedQs, grade: selectedGrade, subjectId: subKey }, () => {
           this._renderSpaceJourneyDashboard();
-        }
+        });
       };
     }
 
-    const openLibBtn = area.querySelector('#btn-open-space-library');
-    if (openLibBtn) {
-      openLibBtn.onclick = () => {
-        if (typeof showSharedToolsLibraryModal === 'function') {
-          showSharedToolsLibraryModal('spacejourney', (loaded) => {
-            if (loaded && Array.isArray(loaded)) {
-              this._setLoadedQuestions('spacejourney', loaded);
-              this._renderSpaceJourneyDashboard();
-            }
-          });
-        } else {
-          this._openQuestionLoaderModal('spacejourney', (loaded) => {
-            this._setLoadedQuestions('spacejourney', loaded);
-            this._renderSpaceJourneyDashboard();
-          });
-        }
-      };
+    const btnOpenLib = area.querySelector('#btn-dash-open-lib');
+    if (btnOpenLib) {
+      btnOpenLib.onclick = () => this.showSharedToolsLibraryModal('spacejourney');
     }
 
-    const aiGenBtn = area.querySelector('#btn-ai-generate-space-stations');
-    if (aiGenBtn) {
-      aiGenBtn.onclick = () => {
-        const topic = prompt('Nhập chủ đề bài học để AI thiết kế 5 Trạm Vũ Trụ:', curSubName + ' - Ôn tập kiến thức');
-        if (topic) {
-          if (typeof app !== 'undefined' && app.showToast) app.showToast('🤖 AI đang thiết kế hải trình 5 Trạm Hành Tinh...', 'info');
-          setTimeout(() => {
-            const aiStations = [
-              { id: 1, planet: "Bệ Phóng Trái Đất", icon: "🚀", q: "Khái niệm mở đầu quan trọng nhất về " + topic + " là gì?", opts: ["Đáp án đúng chuẩn xác", "Khái niệm sai", "Chưa đầy đủ", "Không liên quan"], a: 0, hint: "Xem lại phần mở đầu bài học", pts: 100 },
-              { id: 2, planet: "Trạm Vệ Tinh Mặt Trăng", icon: "🌕", q: "Nguyên lý / công thức trọng tâm trong " + topic + " là gì?", opts: ["Công thức đúng", "Công thức sai 1", "Công thức sai 2", "Công thức sai 3"], a: 0, hint: "Công thức cơ bản SGK", pts: 100 },
-              { id: 3, planet: "Sao Hỏa Đỏ Bí Ẩn", icon: "🔴", q: "Ý nghĩa thực tiễn nổi bật nhất của " + topic + " là gì?", opts: ["Ứng dụng thực tiễn chuẩn xác", "Không có ứng dụng", "Chưa rõ", "Sai"], a: 0, hint: "Liên hệ đời sống", pts: 100 },
-              { id: 4, planet: "Vành Đai Sao Thổ", icon: "🪐", q: "Khi giải bài tập về " + topic + ", bước quan trọng nhất cần nhớ là gì?", opts: ["Phân tích đề bài và áp dụng đúng phương pháp", "Đoán mò đáp án", "Bỏ qua bước kiểm tra", "Làm ngược quy trình"], a: 0, hint: "Phương pháp tư duy logic", pts: 100 },
-              { id: 5, planet: "Tinh Vân Thiên Hà Tri Thức", icon: "🌌", q: "Tổng kết toàn diện kiến thức bài học " + topic + "?", opts: ["Nắm vững toàn bộ lý thuyết và bài tập", "Chỉ học thuộc lòng", "Bỏ qua bài khó", "Không ôn tập"], a: 0, hint: "Chìa khóa chinh phục đỉnh cao", pts: 100 }
-            ];
-            this._setLoadedQuestions('spacejourney', aiStations);
-            if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã tạo thành công 5 Trạm Hành Tinh mới!', 'success');
-            this._renderSpaceJourneyDashboard();
-          }, 600);
+    const selGrade = area.querySelector('#dash-grade');
+    if (selGrade) {
+      selGrade.onchange = (e) => {
+        this.icebreaker.grade = e.target.value;
+        const newQs = this._getQuestionsForSubjectAndGrade('spacejourney', subKey, e.target.value);
+        if (newQs && newQs.length > 0) {
+          if (!this._activeQuestionsByGame) this._activeQuestionsByGame = {};
+          this._activeQuestionsByGame['spacejourney'] = newQs;
+          window._activeGameQuestions = newQs;
         }
+        this._renderSpaceJourneyDashboard();
       };
     }
 
@@ -21315,72 +21527,9 @@ ${notificationMsg ? `
         const opts = {
           timeLimit: timerEl ? parseInt(timerEl.value) : 30
         };
-        this._launchSpaceJourneyArena(curSubName, stations, opts);
+        this._launchSpaceJourneyArena(subName, loadedQs, opts);
       };
     }
-
-    const resetBtn = area.querySelector('#btn-reset-default-space-stations');
-    if (resetBtn) {
-      resetBtn.onclick = () => {
-        if (confirm('Khôi phục 5 trạm hành tinh về mặc định?')) {
-          this._setLoadedQuestions('spacejourney', null);
-          this._renderSpaceJourneyDashboard();
-        }
-      };
-    }
-
-    const addBtn = area.querySelector('#btn-add-space-station');
-    if (addBtn) {
-      addBtn.onclick = () => {
-        const newTitle = prompt('Tên Trạm Hành Tinh mới:', '🪐 Trạm Không Gian Mới');
-        if (newTitle) {
-          stations.push({
-            id: stations.length + 1,
-            planet: newTitle,
-            icon: "🪐",
-            q: "Nội dung câu hỏi mã hóa tín hiệu vũ trụ cho " + newTitle,
-            opts: ["Đáp án đúng", "Đáp án sai 1", "Đáp án sai 2", "Đáp án sai 3"],
-            a: 0,
-            hint: "Gợi ý",
-            pts: 100
-          });
-          this._setLoadedQuestions('spacejourney', stations);
-          this._renderSpaceJourneyDashboard();
-        }
-      };
-    }
-
-    area.querySelectorAll('.btn-edit-space-st').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx);
-        const cur = stations[idx];
-        const newPlanet = prompt('Tên Trạm Hành Tinh:', cur.planet);
-        if (newPlanet !== null) {
-          const newQ = prompt('Nội dung câu hỏi mã hóa:', cur.q);
-          const newHint = prompt('Gợi ý manh mối:', cur.hint);
-          cur.planet = newPlanet;
-          if (newQ) cur.q = newQ;
-          if (newHint) cur.hint = newHint;
-          this._setLoadedQuestions('spacejourney', stations);
-          this._renderSpaceJourneyDashboard();
-        }
-      };
-    });
-
-    area.querySelectorAll('.btn-del-space-st').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx);
-        if (stations.length <= 2) {
-          alert('Hải trình vũ trụ cần tối thiểu 2 trạm!');
-          return;
-        }
-        if (confirm('Xóa trạm hành tinh này?')) {
-          stations.splice(idx, 1);
-          this._setLoadedQuestions('spacejourney', stations);
-          this._renderSpaceJourneyDashboard();
-        }
-      };
-    });
   },
 
   _launchSpaceJourneyArena(subName, questions, opts = {}) {
@@ -21841,15 +21990,46 @@ ${notificationMsg ? `
     const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
-    let questions = this._getKnowledgeArenaQuestions();
-    const savedList = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'knowledgearena') : [];
-    const curSubName = (typeof currentSubject !== 'undefined' && currentSubject && currentSubject.name) ? currentSubject.name : 'Tin học';
+    const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
+    const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
+    const subName = (subKey === 'toan' ? 'Toán học' : (subKey === 'van' ? 'Ngữ văn' : (subKey === 'lsdl' ? 'Lịch sử & Địa lý' : 'Môn học')));
+    const defaultLessonTitle = `Bài 1: Đấu trường đối kháng 2 đội môn ${subName} Khối ${gradeKey}`;
+    const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'knowledgearena').length : 0;
+    const loadedQs = this._getLoadedQuestions('knowledgearena') || this._getKnowledgeArenaQuestions();
 
     area.innerHTML = `
-      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease;">
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease; display:flex; flex-direction:column; gap:1.25rem;">
         
+        <!-- BẢNG ĐIỀU KHIỂN: TIÊU ĐỀ BÀI HỌC, KHỐI LỚP & KHO DÙNG CHUNG TOÀN TRƯỜNG -->
+        <div style="background:#ffffff;border:2.5px solid #fca5a5;border-radius:20px;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.25rem;box-shadow:0 6px 20px rgba(0,0,0,0.04);">
+          <div style="display:flex;align-items:center;gap:.85rem;flex:1;min-width:300px;">
+            <span style="font-size:1.8rem;background:#fee2e2;padding:.4rem .7rem;border-radius:12px;border:1.5px solid #fca5a5;">🏷️</span>
+            <div style="flex:1;">
+              <label style="font-size:.82rem;font-weight:900;color:#dc2626;display:block;text-transform:uppercase;margin-bottom:.25rem;letter-spacing:0.3px;">Tên Tiêu Đề Bài Học / Chủ Đề Giảng Dạy:</label>
+              <input id="dash-lesson-title" type="text" class="ait-input" value="${defaultLessonTitle}" style="font-weight:900;color:#1e293b;font-size:1.05rem;border:2.5px solid #fca5a5;padding:.6rem 1rem;border-radius:12px;width:100%;box-sizing:border-box;outline:none;" placeholder="Ví dụ: Bài 1: Đấu trường đối kháng..." />
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.92rem;font-weight:900;color:#dc2626;">🎓 Khối Lớp:</span>
+              <select id="dash-grade" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #dc2626;color:#b91c1c;outline:none;cursor:pointer;">
+                ${['6','7','8','9'].map(g => `<option value="${g}" ${String(gradeKey)===g?'selected':''}>Khối ${g}</option>`).join('')}
+              </select>
+            </div>
+
+            <button id="btn-dash-save-lib" class="btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(16,185,129,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>💾</span> LƯU BÀI HỌC VÀO KHO DÙNG CHUNG
+            </button>
+
+            <button id="btn-dash-open-lib" class="btn" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(99,102,241,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>🏫</span> KHO BÀI GIẢNG DÙNG CHUNG (${savedCount} bài)
+            </button>
+          </div>
+        </div>
+
         <!-- HEADER BANNER ARENA VS -->
-        <div style="background:linear-gradient(135deg, #450a0a 0%, #1e1b4b 50%, #082f49 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; margin-bottom:1.5rem; border:2.5px solid #ef4444; box-shadow:0 12px 35px rgba(0,0,0,0.4); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+        <div style="background:linear-gradient(135deg, #450a0a 0%, #1e1b4b 50%, #082f49 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; border:2.5px solid #ef4444; box-shadow:0 12px 35px rgba(0,0,0,0.4); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
           <div style="display:flex; align-items:center; gap:1.4rem;">
             <div style="width:72px; height:72px; border-radius:20px; background:radial-gradient(circle, #f87171 0%, #dc2626 60%, #450a0a 100%); display:flex; align-items:center; justify-content:center; font-size:3rem; border:3px solid #fecaca; box-shadow:0 0 30px rgba(239,68,68,0.7); animation:pulse 2s infinite;">
               ⚔️
@@ -21860,41 +22040,28 @@ ${notificationMsg ? `
                 <span style="background:rgba(255,255,255,0.15); color:#bae6fd; font-weight:800; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">CƯỚP QUYỀN TRẢ LỜI KHI SAI</span>
               </div>
               <h1 style="margin:0; font-size:2rem; font-weight:900; background:linear-gradient(90deg, #f87171, #fde047, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
-                23. ĐẤU TRƯỜNG KIẾN THỨC (2 ĐỘI ĐỐI KHÁNG VS)
+                19. ĐẤU TRƯỜNG KIẾN THỨC (2 ĐỘI ĐỐI KHÁNG VS)
               </h1>
               <p style="margin:0.3rem 0 0 0; color:#e2e8f0; font-size:0.98rem;">
                 Thi đấu đối kháng đồng đội sôi nổi - Đội nào trả lời sai sẽ bị đối thủ giành quyền cướp điểm câu hỏi đó!
               </p>
             </div>
           </div>
-        </div>
 
-        <!-- 4 ACTION BUTTONS STANDARD -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
-          <button id="btn-save-arena-library" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:2px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(16,185,129,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            💾 LƯU VÀO THƯ VIỆN TRƯỜNG
-          </button>
-
-          <button id="btn-open-arena-library" style="background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color:#fff; border:2px solid #c4b5fd; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(139,92,246,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            📁 KHO BÀI ĐÃ LƯU (${savedList.length})
-          </button>
-
-          <button id="btn-ai-generate-arena-questions" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:2px solid #7dd3fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(2,132,199,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            🤖 AI TẠO 10 CÂU ĐỐI KHÁNG THEO BÀI
-          </button>
-
-          <button id="btn-start-arena-battle-now" style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%); color:#fff; border:2.5px solid #fecaca; padding:0.95rem 1.1rem; border-radius:16px; font-size:1.08rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(239,68,68,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03) translateY(-2px)';" onmouseout="this.style.transform='scale(1) translateY(0)';">
-            🚀 BẮT ĐẦU ĐẤU TRƯỜNG 2 ĐỘI
-          </button>
+          <!-- ACTION BUTTONS -->
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <button id="btn-arena-manage-qs-top" class="ait-btn" style="background:#0284c7; color:#fff; font-weight:900; font-size:1rem; padding:0.85rem 1.6rem; border-radius:14px; border:none; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:0 6px 18px rgba(2,132,199,0.4);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
+            <button id="btn-start-arena-battle-now" style="background:linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%); color:#fff; border:2.5px solid #fecaca; padding:0.85rem 1.8rem; border-radius:14px; font-size:1.05rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(239,68,68,0.5); transition:transform 0.15s;">
+              <span>🚀</span> BẮT ĐẦU ĐẤU TRƯỜNG 2 ĐỘI
+            </button>
+          </div>
         </div>
 
         <!-- TEAM NAMES CUSTOMIZATION & SETTINGS PANEL -->
-        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.4rem 1.8rem; margin-bottom:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; flex-direction:column; gap:1.2rem;">
-          
-          <!-- CUSTOM TEAM NAMES ROW -->
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.4rem 1.8rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; flex-direction:column; gap:1.2rem;">
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
-            
-            <!-- RED TEAM NAME INPUT -->
             <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:16px; padding:0.9rem 1.2rem; display:flex; align-items:center; gap:0.8rem;">
               <span style="font-size:1.8rem;">🔴</span>
               <div style="flex:1;">
@@ -21903,82 +22070,37 @@ ${notificationMsg ? `
               </div>
             </div>
 
-            <!-- BLUE TEAM NAME INPUT -->
             <div style="background:#f0f9ff; border:2px solid #7dd3fc; border-radius:16px; padding:0.9rem 1.2rem; display:flex; align-items:center; gap:0.8rem;">
               <span style="font-size:1.8rem;">🔵</span>
               <div style="flex:1;">
                 <label style="display:block; font-size:0.82rem; font-weight:900; color:#0369a1; margin-bottom:0.2rem;">TÊN ĐỘI XANH (TÙY CHỈNH):</label>
-                <input type="text" id="arena-blue-team-name-input" value="🔵 ĐỘI SẤM SÉT" style="width:100%; padding:0.4rem 0.7rem; border-radius:10px; border:1.5px solid #0284c7; font-weight:900; font-size:1.05rem; color:#0369a1; outline:none; background:#fff;" placeholder="Nhập tên Đội Xanh...">
+                <input type="text" id="arena-blue-team-name-input" value="🔵 ĐỘI ĐẠI DƯƠNG" style="width:100%; padding:0.4rem 0.7rem; border-radius:10px; border:1.5px solid #0284c7; font-weight:900; font-size:1.05rem; color:#0369a1; outline:none; background:#fff;" placeholder="Nhập tên Đội Xanh...">
               </div>
-            </div>
-
-          </div>
-
-          <!-- TIME CONTROLS -->
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem; border-top:1.5px dashed #e2e8f0; padding-top:1rem;">
-            <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <span style="font-weight:800; color:#334155; font-size:0.92rem;">⏱️ Thời gian suy nghĩ:</span>
-                <select id="arena-timer-limit-sel" style="padding:0.45rem 0.85rem; border-radius:12px; border:2px solid #cbd5e1; font-weight:800; color:#0f172a; outline:none; background:#f8fafc;">
-                  <option value="15">15 Giây</option>
-                  <option value="20">20 Giây</option>
-                  <option value="30" selected>30 Giây</option>
-                  <option value="45">45 Giây</option>
-                </select>
-              </div>
-
-              <div style="background:#fef3c7; color:#92400e; padding:0.4rem 0.9rem; border-radius:10px; font-weight:800; font-size:0.85rem; border:1px solid #fde68a;">
-                ⚖️ Luật đấu: Đội sai mất quyền ➔ Đội kia cướp điểm & giữ lượt câu tiếp theo
-              </div>
-            </div>
-
-            <div style="display:flex; gap:0.8rem;">
-              <button id="btn-add-arena-q" style="background:#f1f5f9; color:#0f172a; border:2px dashed #94a3b8; padding:0.5rem 1rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem; display:flex; align-items:center; gap:0.4rem;">
-                ➕ Thêm Câu Hỏi Mới
-              </button>
-              <button id="btn-reset-default-arena-qs" style="background:#fff; color:#ef4444; border:1.5px solid #fca5a5; padding:0.5rem 0.9rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem;">
-                🔄 Khôi phục 10 câu gốc
-              </button>
             </div>
           </div>
-
         </div>
 
-        <!-- 10 QUESTIONS GRID -->
-        <div style="margin-bottom:1.5rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
-            <h3 style="margin:0; font-size:1.25rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:0.5rem;">
-              <span>📋</span> DANH SÁCH CÂU HỎI THI ĐẤU ĐỐI KHÁNG (${questions.length} Câu)
-            </h3>
-            <span style="font-size:0.85rem; color:#64748b; font-weight:700;">Nhấn vào từng câu để chỉnh sửa nội dung & đáp án</span>
+        <!-- QUESTION MANAGER & PREVIEW TABLE -->
+        <div style="background:#ffffff;border:1.5px solid #fca5a5;border-radius:18px;padding:1.25rem;box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+            <div style="font-weight:900;font-size:1.05rem;color:#b91c1c;display:flex;align-items:center;gap:.5rem;">
+              <span>⚔️</span> Danh Sách Câu Hỏi Đấu Trường 2 Đội Đối Kháng (${loadedQs.length} câu)
+            </div>
+            <button id="btn-arena-manage-qs" class="ait-btn" style="background:#0284c7;color:#fff;font-weight:800;font-size:.92rem;padding:.6rem 1.4rem;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;gap:.4rem;box-shadow:0 4px 12px rgba(2,132,199,0.3);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
-            ${questions.map((q, idx) => `
-              <div style="background:#ffffff; border:2.5px solid #cbd5e1; border-radius:18px; padding:1.1rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.15s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
-                
-                <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:${idx % 2 === 0 ? '#ef4444' : '#0284c7'};"></div>
-
-                <div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                    <span style="background:${idx % 2 === 0 ? '#fee2e2' : '#e0f2fe'}; color:${idx % 2 === 0 ? '#b91c1c' : '#0369a1'}; font-weight:900; font-size:0.78rem; padding:0.2rem 0.6rem; border-radius:6px;">CÂU HỎI ${idx + 1}</span>
-                    <span style="font-weight:900; color:#d97706; font-size:0.95rem;">+${q.pts || 100} Điểm</span>
-                  </div>
-
-                  <h4 style="margin:0 0 0.4rem; font-size:1.05rem; font-weight:900; color:#0f172a; line-height:1.4;">${q.q}</h4>
-                  <p style="margin:0 0 0.7rem; font-size:0.85rem; color:#64748b;">
-                    💡 <em>Gợi ý: ${q.hint || 'Không có gợi ý'}</em>
-                  </p>
+          <div style="display:flex;flex-direction:column;gap:.6rem;max-height:300px;overflow-y:auto;padding-right:.3rem;">
+            ${loadedQs.map((q, i) => `
+              <div style="background:#fff1f2;border:1.5px solid #ffe4e6;border-radius:12px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+                <div style="flex:1;font-weight:800;color:#1e293b;display:flex;align-items:center;gap:.6rem;">
+                  <span style="background:#dc2626;color:#fff;font-size:.75rem;padding:.2rem .55rem;border-radius:6px;font-weight:900;">Câu ${i+1}</span>
+                  <span>${q.q || q.questionText || q.stmt}</span>
                 </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed #e2e8f0; padding-top:0.6rem; margin-top:0.4rem;">
-                  <span style="font-size:0.8rem; font-weight:800; color:#475569;">Đáp án đúng: A</span>
-                  <div style="display:flex; gap:0.4rem;">
-                    <button class="btn-edit-arena-q" data-idx="${idx}" style="background:#e0f2fe; color:#0369a1; border:none; padding:0.3rem 0.7rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">✏️ Sửa</button>
-                    <button class="btn-del-arena-q" data-idx="${idx}" style="background:#fee2e2; color:#dc2626; border:none; padding:0.3rem 0.55rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">🗑️</button>
-                  </div>
-                </div>
-
+                <span style="font-size:.84rem;color:#b91c1c;font-weight:900;background:#ffe4e6;padding:.2rem .65rem;border-radius:8px;white-space:nowrap;">
+                  +${q.pts || 100}đ · ${q.opts ? q.opts[q.a || 0] : (q.left || 'Đúng')}
+                </span>
               </div>
             `).join('')}
           </div>
@@ -21987,63 +22109,44 @@ ${notificationMsg ? `
       </div>
     `;
 
-    // Events
-    const saveLibBtn = area.querySelector('#btn-save-arena-library');
-    if (saveLibBtn) {
-      saveLibBtn.onclick = () => {
-        if (typeof showSaveToolModal === 'function') {
-          showSaveToolModal('knowledgearena', '23. Đấu Trường Kiến Thức (2 Đội VS)', questions);
-        } else {
-          this._saveGameToCustomStorage('knowledgearena', questions);
-          if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã lưu bộ câu hỏi đấu trường vào thư viện thành công!', 'success');
+    // Handlers
+    const openLoader = () => {
+      this._openQuestionLoaderModal('knowledgearena', 'Đấu Trường Kiến Thức 2 Đội', loadedQs);
+    };
+
+    const btnManageTop = area.querySelector('#btn-arena-manage-qs-top');
+    if (btnManageTop) btnManageTop.onclick = openLoader;
+
+    const btnManage = area.querySelector('#btn-arena-manage-qs');
+    if (btnManage) btnManage.onclick = openLoader;
+
+    const btnSaveLib = area.querySelector('#btn-dash-save-lib');
+    if (btnSaveLib) {
+      btnSaveLib.onclick = () => {
+        const customTitle = area.querySelector('#dash-lesson-title')?.value.trim() || defaultLessonTitle;
+        const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+        this.showSaveToolModal('knowledgearena', customTitle, { questions: loadedQs, grade: selectedGrade, subjectId: subKey }, () => {
           this._renderKnowledgeArenaDashboard();
-        }
+        });
       };
     }
 
-    const openLibBtn = area.querySelector('#btn-open-arena-library');
-    if (openLibBtn) {
-      openLibBtn.onclick = () => {
-        if (typeof showSharedToolsLibraryModal === 'function') {
-          showSharedToolsLibraryModal('knowledgearena', (loaded) => {
-            if (loaded && Array.isArray(loaded)) {
-              this._setLoadedQuestions('knowledgearena', loaded);
-              this._renderKnowledgeArenaDashboard();
-            }
-          });
-        } else {
-          this._openQuestionLoaderModal('knowledgearena', (loaded) => {
-            this._setLoadedQuestions('knowledgearena', loaded);
-            this._renderKnowledgeArenaDashboard();
-          });
-        }
-      };
+    const btnOpenLib = area.querySelector('#btn-dash-open-lib');
+    if (btnOpenLib) {
+      btnOpenLib.onclick = () => this.showSharedToolsLibraryModal('knowledgearena');
     }
 
-    const aiGenBtn = area.querySelector('#btn-ai-generate-arena-questions');
-    if (aiGenBtn) {
-      aiGenBtn.onclick = () => {
-        const topic = prompt('Nhập chủ đề bài học để AI tạo 10 câu đối kháng:', curSubName + ' - Đấu trường kiến thức');
-        if (topic) {
-          if (typeof app !== 'undefined' && app.showToast) app.showToast('🤖 AI đang thiết kế 10 câu hỏi đối kháng...', 'info');
-          setTimeout(() => {
-            const aiQs = [
-              { id: 1, q: "Câu hỏi 1: Kiến thức cơ bản trọng tâm về " + topic + " là gì?", opts: ["Đáp án đúng chính xác", "Phương án sai 1", "Phương án sai 2", "Phương án sai 3"], a: 0, hint: "Xem lại SGK bài học", pts: 100 },
-              { id: 2, q: "Câu hỏi 2: Ý nghĩa cốt lõi trong " + topic + " là gì?", opts: ["Đúng chuẩn kiến thức", "Phương án 2", "Phương án 3", "Phương án 4"], a: 0, hint: "Khái niệm trọng tâm", pts: 100 },
-              { id: 3, q: "Câu hỏi 3: Ứng dụng thực tiễn của " + topic + " trong đời sống?", opts: ["Ứng dụng hữu ích chuẩn xác", "Không có ứng dụng", "Chưa rõ", "Sai"], a: 0, hint: "Liên hệ thực tiễn", pts: 100 },
-              { id: 4, q: "Câu hỏi 4: Đâu là phát biểu đúng nhất về " + topic + "?", opts: ["Phát biểu chuẩn xác", "Phát biểu sai", "Phát biểu thiếu ý", "Chưa rõ"], a: 0, hint: "Phân tích kỹ đề bài", pts: 100 },
-              { id: 5, q: "Câu hỏi 5: Khi thực hành bài tập về " + topic + ", cần lưu ý gì?", opts: ["Thực hiện đúng quy trình chuẩn", "Làm tắt các bước", "Bỏ qua kiểm tra", "Làm ngược lại"], a: 0, hint: "Quy trình thực hành", pts: 100 },
-              { id: 6, q: "Câu hỏi 6: Điểm khác biệt quan trọng trong " + topic + " là gì?", opts: ["Đáp án phân biệt chính xác", "Không có khác biệt", "Chưa rõ", "Sai"], a: 0, hint: "So sánh đối chiếu", pts: 100 },
-              { id: 7, q: "Câu hỏi 7: Tác dụng nổi bật nhất của " + topic + "?", opts: ["Tác dụng tích cực chuẩn", "Không có tác dụng", "Gây hại", "Chưa rõ"], a: 0, hint: "Tác dụng thực tế", pts: 100 },
-              { id: 8, q: "Câu hỏi 8: Cách giải quyết tình huống thường gặp trong " + topic + "?", opts: ["Giải pháp tối ưu và an toàn", "Bỏ qua tình huống", "Làm liều", "Sai"], a: 0, hint: "Kỹ năng xử lý tình huống", pts: 100 },
-              { id: 9, q: "Câu hỏi 9: Nhận định nào sau đây là sai về " + topic + "?", opts: ["Nhận định sai chuẩn xác", "Nhận định đúng 1", "Nhận định đúng 2", "Nhận định đúng 3"], a: 0, hint: "Tìm câu sai", pts: 100 },
-              { id: 10, q: "Câu hỏi 10: Tổng kết toàn diện kiến thức bài học " + topic + "?", opts: ["Nắm vững toàn bộ kiến thức và kỹ năng", "Chỉ học vẹt", "Bỏ qua bài khó", "Không chú ý"], a: 0, hint: "Chìa khóa chiến thắng", pts: 100 }
-            ];
-            this._setLoadedQuestions('knowledgearena', aiQs);
-            if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã tạo thành công 10 câu hỏi đối kháng mới!', 'success');
-            this._renderKnowledgeArenaDashboard();
-          }, 600);
+    const selGrade = area.querySelector('#dash-grade');
+    if (selGrade) {
+      selGrade.onchange = (e) => {
+        this.icebreaker.grade = e.target.value;
+        const newQs = this._getQuestionsForSubjectAndGrade('knowledgearena', subKey, e.target.value);
+        if (newQs && newQs.length > 0) {
+          if (!this._activeQuestionsByGame) this._activeQuestionsByGame = {};
+          this._activeQuestionsByGame['knowledgearena'] = newQs;
+          window._activeGameQuestions = newQs;
         }
+        this._renderKnowledgeArenaDashboard();
       };
     }
 
@@ -22052,75 +22155,14 @@ ${notificationMsg ? `
       startBtn.onclick = () => {
         const redInput = area.querySelector('#arena-red-team-name-input');
         const blueInput = area.querySelector('#arena-blue-team-name-input');
-        const timerEl = area.querySelector('#arena-timer-limit-sel');
-        
         const opts = {
-          redTeamName: redInput ? (redInput.value.trim() || '🔴 ĐỘI ĐỎ') : '🔴 ĐỘI ĐỎ',
-          blueTeamName: blueInput ? (blueInput.value.trim() || '🔵 ĐỘI XANH') : '🔵 ĐỘI XANH',
-          timeLimit: timerEl ? parseInt(timerEl.value) : 30
+          redTeamName: redInput ? (redInput.value.trim() || '🔴 ĐỘI RỒNG LỬA') : '🔴 ĐỘI RỒNG LỬA',
+          blueTeamName: blueInput ? (blueInput.value.trim() || '🔵 ĐỘI ĐẠI DƯƠNG') : '🔵 ĐỘI ĐẠI DƯƠNG',
+          timeLimit: 30
         };
-        this._launchKnowledgeArenaModal(curSubName, questions, opts);
+        this._launchKnowledgeArenaModal(subName, loadedQs, opts);
       };
     }
-
-    const resetBtn = area.querySelector('#btn-reset-default-arena-qs');
-    if (resetBtn) {
-      resetBtn.onclick = () => {
-        if (confirm('Khôi phục 10 câu hỏi đối kháng về mặc định?')) {
-          this._setLoadedQuestions('knowledgearena', null);
-          this._renderKnowledgeArenaDashboard();
-        }
-      };
-    }
-
-    const addBtn = area.querySelector('#btn-add-arena-q');
-    if (addBtn) {
-      addBtn.onclick = () => {
-        const newQ = prompt('Nhập nội dung câu hỏi đối kháng mới:', 'Câu hỏi đối kháng mới?');
-        if (newQ) {
-          questions.push({
-            id: questions.length + 1,
-            q: newQ,
-            opts: ["Đáp án đúng", "Đáp án sai 1", "Đáp án sai 2", "Đáp án sai 3"],
-            a: 0,
-            hint: "Gợi ý",
-            pts: 100
-          });
-          this._setLoadedQuestions('knowledgearena', questions);
-          this._renderKnowledgeArenaDashboard();
-        }
-      };
-    }
-
-    area.querySelectorAll('.btn-edit-arena-q').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx);
-        const cur = questions[idx];
-        const newQ = prompt('Nội dung câu hỏi:', cur.q);
-        if (newQ !== null) {
-          const newHint = prompt('Gợi ý:', cur.hint);
-          cur.q = newQ;
-          if (newHint) cur.hint = newHint;
-          this._setLoadedQuestions('knowledgearena', questions);
-          this._renderKnowledgeArenaDashboard();
-        }
-      };
-    });
-
-    area.querySelectorAll('.btn-del-arena-q').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx);
-        if (questions.length <= 2) {
-          alert('Đấu trường cần tối thiểu 2 câu hỏi!');
-          return;
-        }
-        if (confirm('Xóa câu hỏi này?')) {
-          questions.splice(idx, 1);
-          this._setLoadedQuestions('knowledgearena', questions);
-          this._renderKnowledgeArenaDashboard();
-        }
-      };
-    });
   },
 
   _launchKnowledgeArenaModal(subName, questions, opts = {}) {
@@ -22620,15 +22662,46 @@ ${notificationMsg ? `
     const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
-    let stations = this._getStations7Questions();
-    const savedList = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'stations7') : [];
-    const curSubName = (typeof currentSubject !== 'undefined' && currentSubject && currentSubject.name) ? currentSubject.name : 'Tin học';
+    const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
+    const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
+    const subName = (subKey === 'toan' ? 'Toán học' : (subKey === 'van' ? 'Ngữ văn' : (subKey === 'khtn' ? 'KHTN' : 'Môn học')));
+    const defaultLessonTitle = `Bài 1: Hành trình 7 trạm môn ${subName} Khối ${gradeKey}`;
+    const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'stations7').length : 0;
+    const loadedQs = this._getLoadedQuestions('stations7') || this._getStations7Questions();
 
     area.innerHTML = `
-      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease;">
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease; display:flex; flex-direction:column; gap:1.25rem;">
         
+        <!-- BẢNG ĐIỀU KHIỂN: TIÊU ĐỀ BÀI HỌC, KHỐI LỚP & KHO DÙNG CHUNG TOÀN TRƯỜNG -->
+        <div style="background:#ffffff;border:2.5px solid #34d399;border-radius:20px;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.25rem;box-shadow:0 6px 20px rgba(0,0,0,0.04);">
+          <div style="display:flex;align-items:center;gap:.85rem;flex:1;min-width:300px;">
+            <span style="font-size:1.8rem;background:#dcfce7;padding:.4rem .7rem;border-radius:12px;border:1.5px solid #34d399;">🏷️</span>
+            <div style="flex:1;">
+              <label style="font-size:.82rem;font-weight:900;color:#059669;display:block;text-transform:uppercase;margin-bottom:.25rem;letter-spacing:0.3px;">Tên Tiêu Đề Bài Học / Chủ Đề Giảng Dạy:</label>
+              <input id="dash-lesson-title" type="text" class="ait-input" value="${defaultLessonTitle}" style="font-weight:900;color:#1e293b;font-size:1.05rem;border:2.5px solid #34d399;padding:.6rem 1rem;border-radius:12px;width:100%;box-sizing:border-box;outline:none;" placeholder="Ví dụ: Bài 1: Hành trình 7 trạm..." />
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.92rem;font-weight:900;color:#059669;">🎓 Khối Lớp:</span>
+              <select id="dash-grade" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #059669;color:#047857;outline:none;cursor:pointer;">
+                ${['6','7','8','9'].map(g => `<option value="${g}" ${String(gradeKey)===g?'selected':''}>Khối ${g}</option>`).join('')}
+              </select>
+            </div>
+
+            <button id="btn-dash-save-lib" class="btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(16,185,129,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>💾</span> LƯU BÀI HỌC VÀO KHO DÙNG CHUNG
+            </button>
+
+            <button id="btn-dash-open-lib" class="btn" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(99,102,241,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>🏫</span> KHO BÀI GIẢNG DÙNG CHUNG (${savedCount} bài)
+            </button>
+          </div>
+        </div>
+
         <!-- HEADER BANNER ISLAND MAP -->
-        <div style="background:linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; margin-bottom:1.5rem; border:2.5px solid #34d399; box-shadow:0 12px 35px rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+        <div style="background:linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; border:2.5px solid #34d399; box-shadow:0 12px 35px rgba(0,0,0,0.3); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
           <div style="display:flex; align-items:center; gap:1.4rem;">
             <div style="width:72px; height:72px; border-radius:20px; background:radial-gradient(circle, #6ee7b7 0%, #10b981 60%, #047857 100%); display:flex; align-items:center; justify-content:center; font-size:3rem; border:3px solid #a7f3d0; box-shadow:0 0 30px rgba(16,185,129,0.7); animation:bounce 2s infinite;">
               🗺️
@@ -22639,36 +22712,27 @@ ${notificationMsg ? `
                 <span style="background:rgba(255,255,255,0.15); color:#a7f3d0; font-weight:800; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">HÒN ĐẢO 7 TRẠM TRI THỨC</span>
               </div>
               <h1 style="margin:0; font-size:2rem; font-weight:900; background:linear-gradient(90deg, #a7f3d0, #fde047, #34d399); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
-                24. BẢN ĐỒ HÒN ĐẢO 7 TRẠM & HỘ CHIẾU NĂNG LỰC
+                20. BẢN ĐỒ HÒN ĐẢO 7 TRẠM & HỘ CHIẾU NĂNG LỰC
               </h1>
               <p style="margin:0.3rem 0 0 0; color:#e2e8f0; font-size:0.98rem;">
                 Bản đồ học tập tương tác trực quan - Khám phá 7 vùng đất tri thức, giải mã nhiệm vụ và đóng dấu Hộ chiếu
               </p>
             </div>
           </div>
-        </div>
 
-        <!-- 4 ACTION BUTTONS STANDARD -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
-          <button id="btn-save-st7-library" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:2px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(16,185,129,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            💾 LƯU VÀO THƯ VIỆN TRƯỜNG
-          </button>
-
-          <button id="btn-open-st7-library" style="background:linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color:#fff; border:2px solid #c4b5fd; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(139,92,246,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            📁 KHO BÀI ĐÃ LƯU (${savedList.length})
-          </button>
-
-          <button id="btn-ai-generate-st7-stations" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:2px solid #7dd3fc; padding:0.95rem 1.1rem; border-radius:16px; font-size:1rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 6px 20px rgba(2,132,199,0.35); transition:transform 0.15s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
-            🤖 AI TẠO 7 TRẠM THEO BÀI (GDPT 2018)
-          </button>
-
-          <button id="btn-start-st7-journey-now" style="background:linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%); color:#fff; border:2.5px solid #6ee7b7; padding:0.95rem 1.1rem; border-radius:16px; font-size:1.08rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(5,150,105,0.5); transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.03) translateY(-2px)';" onmouseout="this.style.transform='scale(1) translateY(0)';">
-            🚀 MỞ BẢN ĐỒ 7 TRẠM HỌC TẬP
-          </button>
+          <!-- ACTION BUTTONS -->
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <button id="btn-st7-manage-qs-top" class="ait-btn" style="background:#0284c7; color:#fff; font-weight:900; font-size:1rem; padding:0.85rem 1.6rem; border-radius:14px; border:none; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:0 6px 18px rgba(2,132,199,0.4);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
+            <button id="btn-start-st7-journey-now" style="background:linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%); color:#fff; border:2.5px solid #6ee7b7; padding:0.85rem 1.8rem; border-radius:14px; font-size:1.05rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(5,150,105,0.5); transition:transform 0.15s;">
+              <span>🚀</span> MỞ BẢN ĐỒ 7 TRẠM HỌC TẬP
+            </button>
+          </div>
         </div>
 
         <!-- SETTINGS PANEL & CONTROLS -->
-        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.2rem 1.6rem; margin-bottom:1.5rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.2rem 1.6rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
           <div style="display:flex; align-items:center; gap:1.2rem; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:0.5rem;">
               <span style="font-weight:800; color:#334155; font-size:0.92rem;">⏱️ Thời gian mỗi trạm:</span>
@@ -22684,53 +22748,29 @@ ${notificationMsg ? `
               🗺️ Bản đồ hòn đảo trực quan: 7 Vùng đất tri thức kết nối bằng con đường học tập sinh động
             </div>
           </div>
-
-          <div style="display:flex; gap:0.8rem;">
-            <button id="btn-add-st7-station" style="background:#f1f5f9; color:#0f172a; border:2px dashed #94a3b8; padding:0.5rem 1rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem; display:flex; align-items:center; gap:0.4rem;">
-              ➕ Thêm Trạm Mới
-            </button>
-            <button id="btn-reset-default-st7-stations" style="background:#fff; color:#ef4444; border:1.5px solid #fca5a5; padding:0.5rem 0.9rem; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.88rem;">
-              🔄 Khôi phục 7 trạm chuẩn
-            </button>
-          </div>
         </div>
 
-        <!-- 7 STATIONS VISUAL GRID -->
-        <div style="margin-bottom:1.5rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
-            <h3 style="margin:0; font-size:1.25rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:0.5rem;">
-              <span>🚩</span> DANH SÁCH 7 TRẠM TRÊN BẢN ĐỒ (${stations.length} Trạm)
-            </h3>
-            <span style="font-size:0.85rem; color:#64748b; font-weight:700;">Nhấn vào từng trạm để chỉnh sửa câu hỏi & gợi ý sư phạm</span>
+        <!-- QUESTION MANAGER & PREVIEW TABLE -->
+        <div style="background:#ffffff;border:1.5px solid #34d399;border-radius:18px;padding:1.25rem;box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+            <div style="font-weight:900;font-size:1.05rem;color:#047857;display:flex;align-items:center;gap:.5rem;">
+              <span>🚩</span> Danh Sách 7 Trạm Nhiệm Vụ Trên Bản Đồ (${loadedQs.length} trạm)
+            </div>
+            <button id="btn-st7-manage-qs" class="ait-btn" style="background:#0284c7;color:#fff;font-weight:800;font-size:.92rem;padding:.6rem 1.4rem;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;gap:.4rem;box-shadow:0 4px 12px rgba(2,132,199,0.3);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
-            ${stations.map((st, idx) => `
-              <div style="background:#ffffff; border:2.5px solid ${st.color || '#059669'}; border-radius:18px; padding:1.1rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.15s; position:relative; overflow:hidden;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
-                
-                <div style="position:absolute; top:0; left:0; width:6px; height:100%; background:${st.color || '#059669'};"></div>
-
-                <div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                    <span style="background:${st.color || '#059669'}22; color:${st.color || '#059669'}; font-weight:900; font-size:0.78rem; padding:0.2rem 0.6rem; border-radius:6px;">${st.name || ('TRẠM ' + (idx + 1))}</span>
-                    <span style="font-weight:900; color:${st.color || '#059669'}; font-size:1.25rem;">${st.icon || '🚩'}</span>
-                  </div>
-
-                  <div style="font-size:0.82rem; font-weight:800; color:#64748b; margin-bottom:0.3rem;">Khu vực: ${st.label || st.name}</div>
-                  <h4 style="margin:0 0 0.4rem; font-size:1.02rem; font-weight:900; color:#0f172a; line-height:1.4;">${st.q}</h4>
-                  <p style="margin:0 0 0.7rem; font-size:0.85rem; color:#64748b;">
-                    💡 <em>Gợi ý: ${st.hint || 'Không có gợi ý'}</em>
-                  </p>
+          <div style="display:flex;flex-direction:column;gap:.6rem;max-height:300px;overflow-y:auto;padding-right:.3rem;">
+            ${loadedQs.map((st, i) => `
+              <div style="background:#f0fdf4;border:1.5px solid #dcfce7;border-radius:12px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+                <div style="flex:1;font-weight:800;color:#1e293b;display:flex;align-items:center;gap:.6rem;">
+                  <span style="background:${st.color || '#059669'};color:#fff;font-size:.75rem;padding:.2rem .55rem;border-radius:6px;font-weight:900;">${st.name || ('Trạm ' + (i+1))}</span>
+                  <span>${st.q || st.questionText || st.stmt}</span>
                 </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed #e2e8f0; padding-top:0.6rem; margin-top:0.4rem;">
-                  <span style="font-size:0.8rem; font-weight:800; color:#059669;">+${st.pts || 100} Điểm</span>
-                  <div style="display:flex; gap:0.4rem;">
-                    <button class="btn-edit-st7-item" data-idx="${idx}" style="background:#d1fae5; color:#047857; border:none; padding:0.3rem 0.7rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">✏️ Sửa</button>
-                    <button class="btn-del-st7-item" data-idx="${idx}" style="background:#fee2e2; color:#dc2626; border:none; padding:0.3rem 0.55rem; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">🗑️</button>
-                  </div>
-                </div>
-
+                <span style="font-size:.84rem;color:#047857;font-weight:900;background:#dcfce7;padding:.2rem .65rem;border-radius:8px;white-space:nowrap;">
+                  +${st.pts || 100}đ · ${st.opts ? st.opts[st.a || 0] : (st.left || 'Đúng')}
+                </span>
               </div>
             `).join('')}
           </div>
@@ -22739,60 +22779,44 @@ ${notificationMsg ? `
       </div>
     `;
 
-    // Events
-    const saveLibBtn = area.querySelector('#btn-save-st7-library');
-    if (saveLibBtn) {
-      saveLibBtn.onclick = () => {
-        if (typeof showSaveToolModal === 'function') {
-          showSaveToolModal('stations7', '24. Bản Đồ Hòn Đảo 7 Trạm & Hộ Chiếu Năng Lực', stations);
-        } else {
-          this._saveGameToCustomStorage('stations7', stations);
-          if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã lưu bản đồ 7 trạm vào thư viện thành công!', 'success');
+    // Handlers
+    const openLoader = () => {
+      this._openQuestionLoaderModal('stations7', 'Hành Trình 7 Trạm AI', loadedQs);
+    };
+
+    const btnManageTop = area.querySelector('#btn-st7-manage-qs-top');
+    if (btnManageTop) btnManageTop.onclick = openLoader;
+
+    const btnManage = area.querySelector('#btn-st7-manage-qs');
+    if (btnManage) btnManage.onclick = openLoader;
+
+    const btnSaveLib = area.querySelector('#btn-dash-save-lib');
+    if (btnSaveLib) {
+      btnSaveLib.onclick = () => {
+        const customTitle = area.querySelector('#dash-lesson-title')?.value.trim() || defaultLessonTitle;
+        const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+        this.showSaveToolModal('stations7', customTitle, { questions: loadedQs, grade: selectedGrade, subjectId: subKey }, () => {
           this._renderStations7Dashboard();
-        }
+        });
       };
     }
 
-    const openLibBtn = area.querySelector('#btn-open-st7-library');
-    if (openLibBtn) {
-      openLibBtn.onclick = () => {
-        if (typeof showSharedToolsLibraryModal === 'function') {
-          showSharedToolsLibraryModal('stations7', (loaded) => {
-            if (loaded && Array.isArray(loaded)) {
-              this._setLoadedQuestions('stations7', loaded);
-              this._renderStations7Dashboard();
-            }
-          });
-        } else {
-          this._openQuestionLoaderModal('stations7', (loaded) => {
-            this._setLoadedQuestions('stations7', loaded);
-            this._renderStations7Dashboard();
-          });
-        }
-      };
+    const btnOpenLib = area.querySelector('#btn-dash-open-lib');
+    if (btnOpenLib) {
+      btnOpenLib.onclick = () => this.showSharedToolsLibraryModal('stations7');
     }
 
-    const aiGenBtn = area.querySelector('#btn-ai-generate-st7-stations');
-    if (aiGenBtn) {
-      aiGenBtn.onclick = () => {
-        const topic = prompt('Nhập chủ đề bài học để AI thiết kế Bản Đồ 7 Trạm:', curSubName + ' - Bài học trọng tâm');
-        if (topic) {
-          if (typeof app !== 'undefined' && app.showToast) app.showToast('🤖 AI đang thiết kế Bản đồ 7 Vùng Đất Tri Thức...', 'info');
-          setTimeout(() => {
-            const aiStations = [
-              { id: 1, name: "Trạm 1: Khởi Động", type: "Khởi động & Kích hoạt", icon: "🏁", color: "#10b981", label: "Bến Tàu Khởi Động", desc: "Kích hoạt kiến thức nền tảng mở đầu", q: "Khởi động & kết nối: Khái niệm mở đầu nền tảng về " + topic + " là gì?", opts: ["Đáp án đúng chính xác", "Khái niệm sai 1", "Khái niệm sai 2", "Chưa rõ"], a: 0, hint: "Xem phần khởi động bài học", pts: 100 },
-              { id: 2, name: "Trạm 2: Khám Phá", type: "Khám phá tri thức", icon: "🔍", color: "#06b6d4", label: "Rừng Khám Phá", desc: "Tìm hiểu định nghĩa và cấu trúc cốt lõi", q: "Khám phá tri thức: Định nghĩa / nguyên lý cốt lõi trong " + topic + " là gì?", opts: ["Đúng chuẩn định nghĩa", "Phương án sai 1", "Phương án sai 2", "Phương án sai 3"], a: 0, hint: "Khám phá kiến thức mới", pts: 100 },
-              { id: 3, name: "Trạm 3: Thực Nghiệm", type: "Thực hành & Đo đạc", icon: "🧪", color: "#8b5cf6", label: "Hồ Thực Nghiệm", desc: "Thực hành áp dụng công thức và thí nghiệm", q: "Thực nghiệm & phân tích: Khi thực hiện thí nghiệm / bài tập " + topic + ", bước cần làm là gì?", opts: ["Thực hiện đúng quy trình an toàn", "Bỏ qua các bước", "Làm ngược lại", "Không cần quan sát"], a: 0, hint: "Thực hành thí nghiệm", pts: 100 },
-              { id: 4, name: "Trạm 4: Tư Duy Logic", type: "Giải mã & Phản biện", icon: "🧠", color: "#f59e0b", label: "Đền Thờ Tư Duy", desc: "Suy luận logic và giải quyết vấn đề", q: "Tư duy phản biện: Giải quyết bài toán tình huống thực tế liên quan đến " + topic + "?", opts: ["Phương án tối ưu logic", "Phương án chưa chuẩn", "Phương án sai", "Không chắc chắn"], a: 0, hint: "Tư duy suy luận logic", pts: 100 },
-              { id: 5, name: "Trạm 5: Hợp Tác Nhóm", type: "Thảo luận & Phản biện", icon: "🤝", color: "#ec4899", label: "Làng Hợp Tác", desc: "Cùng làm việc nhóm và bảo vệ quan điểm", q: "Thảo luận nhóm: Phân tích và so sánh các khía cạnh trong bài học " + topic + "?", opts: ["Nhận định toàn diện chính xác", "Nhận định phiến diện", "Nhận định sai", "Chưa đầy đủ"], a: 0, hint: "Ý kiến tổng hợp nhóm", pts: 100 },
-              { id: 6, name: "Trạm 6: Vận Dụng Sáng Tạo", type: "Ứng dụng thực tế", icon: "🚀", color: "#3b82f6", label: "Xưởng Sáng Chế", desc: "Liên hệ đời sống và công nghệ số", q: "Vận dụng sáng tạo: Ứng dụng thực tiễn của " + topic + " trong đời sống và kỹ thuật số?", opts: ["Ứng dụng hữu ích chuẩn xác", "Không có ứng dụng", "Chưa rõ", "Sai"], a: 0, hint: "Liên hệ thực tiễn", pts: 100 },
-              { id: 7, name: "Trạm 7: Về Đích Năng Lực", type: "Tổng kết & Đánh giá", icon: "🏆", color: "#eab308", label: "Đỉnh Núi Vinh Quang", desc: "Đánh giá chuẩn đầu ra phẩm chất và năng lực", q: "Tổng kết năng lực: Nắm vững toàn diện phẩm chất và năng lực bài học " + topic + "?", opts: ["Nắm vững lý thuyết và thực hành xuất sắc", "Chỉ học thuộc lòng", "Bỏ qua phần khó", "Không ôn tập"], a: 0, hint: "Chinh phục đỉnh cao tri thức", pts: 100 }
-            ];
-            this._setLoadedQuestions('stations7', aiStations);
-            if (typeof app !== 'undefined' && app.showToast) app.showToast('✅ Đã tạo thành công Bản đồ 7 Trạm mới!', 'success');
-            this._renderStations7Dashboard();
-          }, 600);
+    const selGrade = area.querySelector('#dash-grade');
+    if (selGrade) {
+      selGrade.onchange = (e) => {
+        this.icebreaker.grade = e.target.value;
+        const newQs = this._getQuestionsForSubjectAndGrade('stations7', subKey, e.target.value);
+        if (newQs && newQs.length > 0) {
+          if (!this._activeQuestionsByGame) this._activeQuestionsByGame = {};
+          this._activeQuestionsByGame['stations7'] = newQs;
+          window._activeGameQuestions = newQs;
         }
+        this._renderStations7Dashboard();
       };
     }
 
@@ -22803,76 +22827,9 @@ ${notificationMsg ? `
         const opts = {
           timeLimit: timerEl ? parseInt(timerEl.value) : 30
         };
-        this._launchStations7Arena(curSubName, stations, opts);
+        this._launchStations7Arena(subName, loadedQs, opts);
       };
     }
-
-    const resetBtn = area.querySelector('#btn-reset-default-st7-stations');
-    if (resetBtn) {
-      resetBtn.onclick = () => {
-        if (confirm('Khôi phục 7 trạm học tập về mặc định?')) {
-          this._setLoadedQuestions('stations7', null);
-          this._renderStations7Dashboard();
-        }
-      };
-    }
-
-    const addBtn = area.querySelector('#btn-add-st7-station');
-    if (addBtn) {
-      addBtn.onclick = () => {
-        const newTitle = prompt('Nhập tên Trạm Mới:', '🚩 Trạm Mới: Thử Thách');
-        if (newTitle) {
-          stations.push({
-            id: stations.length + 1,
-            name: newTitle,
-            type: "Phát triển năng lực",
-            icon: "🚩",
-            color: "#10b981",
-            label: newTitle,
-            desc: "Nhiệm vụ học tập bổ sung",
-            q: "Nội dung câu hỏi / nhiệm vụ cho " + newTitle,
-            opts: ["Đáp án đúng", "Đáp án sai 1", "Đáp án sai 2", "Đáp án sai 3"],
-            a: 0,
-            hint: "Gợi ý",
-            pts: 100
-          });
-          this._setLoadedQuestions('stations7', stations);
-          this._renderStations7Dashboard();
-        }
-      };
-    }
-
-    area.querySelectorAll('.btn-edit-st7-item').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx);
-        const cur = stations[idx];
-        const newName = prompt('Tên Trạm:', cur.name);
-        if (newName !== null) {
-          const newQ = prompt('Nội dung câu hỏi nhiệm vụ:', cur.q);
-          const newHint = prompt('Gợi ý manh mối:', cur.hint);
-          cur.name = newName;
-          if (newQ) cur.q = newQ;
-          if (newHint) cur.hint = newHint;
-          this._setLoadedQuestions('stations7', stations);
-          this._renderStations7Dashboard();
-        }
-      };
-    });
-
-    area.querySelectorAll('.btn-del-st7-item').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.idx);
-        if (stations.length <= 2) {
-          alert('Hành trình cần tối thiểu 2 trạm!');
-          return;
-        }
-        if (confirm('Xóa trạm học tập này?')) {
-          stations.splice(idx, 1);
-          this._setLoadedQuestions('stations7', stations);
-          this._renderStations7Dashboard();
-        }
-      };
-    });
   },
 
   _launchStations7Arena(subName, questions, opts = {}) {
@@ -23430,5 +23387,5596 @@ ${notificationMsg ? `
     };
 
     renderStage();
+  },
+
+
+  // =========================================================================
+  // 🌟 GAME 25: CUỘC ĐUA NGÔI SAO (ĐỐI KHÁNG AI WEBCAM CỬ CHỈ TAY 2 NGƯỜI)
+  // =========================================================================
+  _getStarRaceQuestions() {
+    return this._getLoadedQuestions('starrace') || [
+      { id: 1, q: "Núi nào cao nhất Việt Nam?", opts: ["Fansipan", "Ngọc Linh", "Langbiang", "Bạch Mã"], a: 0, hint: "Nóc nhà Đông Dương cao 3.143m tại Sa Pa" },
+      { id: 2, q: "Sông nào dài nhất chảy qua lãnh thổ Việt Nam?", opts: ["Sông Mê Kông", "Sông Hồng", "Sông Đồng Nai", "Sông Mã"], a: 0, hint: "Bắt nguồn từ Tây Tạng đổ ra Biển Đông" },
+      { id: 3, q: "Tác giả của bài hát Tiến Quân Ca (Quốc ca Việt Nam) là ai?", opts: ["Nhạc sĩ Văn Cao", "Nhạc sĩ Phạm Tuyên", "Nhạc sĩ Trịnh Công Sơn", "Nhạc sĩ Hoàng Vân"], a: 0, hint: "Sáng tác năm 1944" },
+      { id: 4, q: "Hành tinh nào gần Mặt Trời nhất trong Hệ Mặt Trời?", opts: ["Sao Thủy (Mercury)", "Sao Kim (Venus)", "Trái Đất (Earth)", "Sao Hỏa (Mars)"], a: 0, hint: "Hành tinh nhỏ nhất và nằm trong cùng" },
+      { id: 5, q: "Tổng ba góc trong một tam giác bằng bao nhiêu độ?", opts: ["180 độ", "360 độ", "90 độ", "270 độ"], a: 0, hint: "Định lý cơ bản trong hình học Euclid" },
+      { id: 6, q: "Thành phố nào là Thủ đô của nước Cộng hòa Xã hội Chủ nghĩa Việt Nam?", opts: ["Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng", "Cần Thơ"], a: 0, hint: "Thủ đô ngàn năm văn hiến" },
+      { id: 7, q: "Khí nào chiếm tỉ lệ lớn nhất trong bầu khí quyển Trái Đất?", opts: ["Khí Nitơ (~78%)", "Khí Oxy (~21%)", "Khí Cacbonic (~0.04%)", "Khí Argon"], a: 0, hint: "Khí N2 không duy trì sự cháy" },
+      { id: 8, q: "Tập hợp các số nguyên bao gồm các loại số nào?", opts: ["Số nguyên âm, số 0 và số nguyên dương", "Chỉ số nguyên dương", "Số tự nhiên và phân số", "Số thập phân"], a: 0, hint: "Ký hiệu tập hợp là Z" },
+      { id: 9, q: "Văn bản Hịch tướng sĩ do ai sáng tác?", opts: ["Trần Hưng Đạo", "Nguyễn Trãi", "Quang Trung", "Lý Thường Kiệt"], a: 0, hint: "Vị tướng đánh thắng 3 lần quân Nguyên Mông" },
+      { id: 10, q: "Trong máy tính, phím tắt nào dùng để Hoàn tác thao tác vừa thực hiện?", opts: ["Ctrl + Z", "Ctrl + C", "Ctrl + V", "Ctrl + Y"], a: 0, hint: "Undo action" }
+    ];
+  },
+
+  _renderStarRaceDashboard() {
+    const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
+    if (!area) return;
+
+    const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
+    const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
+    const subName = (subKey === 'toan' ? 'Toán học' : (subKey === 'van' ? 'Ngữ văn' : (subKey === 'lsdl' ? 'Lịch sử & Địa lý' : 'Môn học')));
+    const defaultLessonTitle = `Bài 1: Cuộc đua ngôi sao cử chỉ tay AI môn ${subName} Khối ${gradeKey}`;
+    const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'starrace').length : 0;
+    const loadedQs = this._getLoadedQuestions('starrace') || this._getStarRaceQuestions();
+
+    area.innerHTML = `
+      <div style="max-width:1250px; margin:0 auto; padding:0.5rem; animation:fadeIn 0.3s ease; display:flex; flex-direction:column; gap:1.25rem;">
+        
+        <!-- BẢNG ĐIỀU KHIỂN: TIÊU ĐỀ BÀI HỌC, KHỐI LỚP & KHO DÙNG CHUNG TOÀN TRƯỜNG -->
+        <div style="background:#ffffff;border:2.5px solid #f59e0b;border-radius:20px;padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.25rem;box-shadow:0 6px 20px rgba(0,0,0,0.04);">
+          <div style="display:flex;align-items:center;gap:.85rem;flex:1;min-width:300px;">
+            <span style="font-size:1.8rem;background:#fef3c7;padding:.4rem .7rem;border-radius:12px;border:1.5px solid #f59e0b;">🏷️</span>
+            <div style="flex:1;">
+              <label style="font-size:.82rem;font-weight:900;color:#b45309;display:block;text-transform:uppercase;margin-bottom:.25rem;letter-spacing:0.3px;">Tên Tiêu Đề Bài Học / Chủ Đề Giảng Dạy:</label>
+              <input id="dash-lesson-title" type="text" class="ait-input" value="${defaultLessonTitle}" style="font-weight:900;color:#1e293b;font-size:1.05rem;border:2.5px solid #f59e0b;padding:.6rem 1rem;border-radius:12px;width:100%;box-sizing:border-box;outline:none;" placeholder="Ví dụ: Bài 1: Cuộc đua ngôi sao..." />
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:.85rem;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.92rem;font-weight:900;color:#b45309;">🎓 Khối Lớp:</span>
+              <select id="dash-grade" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #f59e0b;color:#b45309;outline:none;cursor:pointer;">
+                ${['6','7','8','9'].map(g => `<option value="${g}" ${String(gradeKey)===g?'selected':''}>Khối ${g}</option>`).join('')}
+              </select>
+            </div>
+
+            <button id="btn-dash-save-lib" class="btn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(16,185,129,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>💾</span> LƯU BÀI HỌC VÀO KHO DÙNG CHUNG
+            </button>
+
+            <button id="btn-dash-open-lib" class="btn" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:900;font-size:.95rem;padding:.7rem 1.4rem;border-radius:14px;border:none;cursor:pointer;box-shadow:0 4px 15px rgba(99,102,241,0.35);display:flex;align-items:center;gap:.45rem;">
+              <span>🏫</span> KHO BÀI GIẢNG DÙNG CHUNG (${savedCount} bài)
+            </button>
+          </div>
+        </div>
+
+        <!-- HEADER BANNER -->
+        <div style="background:linear-gradient(135deg, #78350f 0%, #b45309 40%, #064e3b 100%); color:#fff; border-radius:24px; padding:1.8rem 2.2rem; border:2.5px solid #f59e0b; box-shadow:0 12px 35px rgba(0,0,0,0.4); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.2rem;">
+          <div style="display:flex; align-items:center; gap:1.4rem;">
+            <div style="width:72px; height:72px; border-radius:20px; background:radial-gradient(circle, #fde047 0%, #f59e0b 60%, #b45309 100%); display:flex; align-items:center; justify-content:center; font-size:3.2rem; border:3px solid #fef08a; box-shadow:0 0 30px rgba(245,158,11,0.7); animation:pulse 2s infinite;">
+              🌟
+            </div>
+            <div>
+              <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.25rem;">
+                <span style="background:#f59e0b; color:#000; font-weight:900; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">AI WEBCAM CỬ CHỈ TAY ✌️</span>
+                <span style="background:rgba(255,255,255,0.15); color:#fef08a; font-weight:800; font-size:0.8rem; padding:0.2rem 0.65rem; border-radius:8px;">2 NGƯỜI ĐỐI KHÁNG THỜI GIAN THỰC</span>
+              </div>
+              <h1 style="margin:0; font-size:2rem; font-weight:900; background:linear-gradient(90deg, #fde047, #fed7aa, #86efac); -webkit-background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:0.5px;">
+                21. CUỘC ĐUA NGÔI SAO (ĐỐI KHÁNG AI WEBCAM CỬ CHỈ TAY)
+              </h1>
+              <p style="margin:0.3rem 0 0 0; color:#fef3c7; font-size:0.98rem;">
+                Dùng 1 Camera chia đôi nhận diện cử chỉ 2 học sinh giơ ngón tay (1, 2, 3, 4 ngón) để cướp Sao Vàng từ Balo may mắn!
+              </p>
+            </div>
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+            <button id="btn-starrace-manage-qs-top" class="ait-btn" style="background:#0284c7; color:#fff; font-weight:900; font-size:1rem; padding:0.85rem 1.6rem; border-radius:14px; border:none; cursor:pointer; display:flex; align-items:center; gap:0.45rem; box-shadow:0 6px 18px rgba(2,132,199,0.4);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
+            <button id="btn-start-starrace-arena-now" style="background:linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); color:#000; border:2.5px solid #fef08a; padding:0.85rem 1.8rem; border-radius:14px; font-size:1.05rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow:0 8px 25px rgba(245,158,11,0.5); transition:transform 0.15s;">
+              <span>🚀</span> BẮT ĐẦU CUỘC ĐUA NGÔI SAO
+            </button>
+          </div>
+        </div>
+
+        <!-- SETTINGS PANEL & PLAYER NAMES -->
+        <div style="background:#ffffff; border:2px solid #e2e8f0; border-radius:20px; padding:1.4rem 1.8rem; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; flex-direction:column; gap:1.2rem;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem;">
+            <div style="background:#eff6ff; border:2px solid #93c5fd; border-radius:16px; padding:0.9rem 1.2rem; display:flex; align-items:center; gap:0.8rem;">
+              <span style="font-size:2rem;">🔵</span>
+              <div style="flex:1;">
+                <label style="display:block; font-size:0.82rem; font-weight:900; color:#1d4ed8; margin-bottom:0.2rem;">NGƯỜI CHƠI BÊN TRÁI (ĐỘI XANH):</label>
+                <input type="text" id="starrace-left-name-input" value="Người chơi bên trái" style="width:100%; padding:0.4rem 0.7rem; border-radius:10px; border:1.5px solid #3b82f6; font-weight:900; font-size:1.05rem; color:#1e40af; outline:none; background:#fff;" placeholder="Nhập tên người chơi trái...">
+              </div>
+            </div>
+
+            <div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:16px; padding:0.9rem 1.2rem; display:flex; align-items:center; gap:0.8rem;">
+              <span style="font-size:2rem;">🔴</span>
+              <div style="flex:1;">
+                <label style="display:block; font-size:0.82rem; font-weight:900; color:#b91c1c; margin-bottom:0.2rem;">NGƯỜI CHƠI BÊN PHẢI (ĐỘI ĐỎ):</label>
+                <input type="text" id="starrace-right-name-input" value="Người chơi bên phải" style="width:100%; padding:0.4rem 0.7rem; border-radius:10px; border:1.5px solid #ef4444; font-weight:900; font-size:1.05rem; color:#b91c1c; outline:none; background:#fff;" placeholder="Nhập tên người chơi phải...">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUESTION MANAGER & PREVIEW TABLE -->
+        <div style="background:#ffffff;border:1.5px solid #f59e0b;border-radius:18px;padding:1.25rem;box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+            <div style="font-weight:900;font-size:1.05rem;color:#b45309;display:flex;align-items:center;gap:.5rem;">
+              <span>🌟</span> Danh Sách Câu Hỏi Cuộc Đua Ngôi Sao (${loadedQs.length} câu)
+            </div>
+            <button id="btn-starrace-manage-qs" class="ait-btn" style="background:#0284c7;color:#fff;font-weight:800;font-size:.92rem;padding:.6rem 1.4rem;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;gap:.4rem;box-shadow:0 4px 12px rgba(2,132,199,0.3);">
+              <span>➕</span> Thêm / Rút Thêm Câu Hỏi
+            </button>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:.6rem;max-height:300px;overflow-y:auto;padding-right:.3rem;">
+            ${loadedQs.map((q, i) => `
+              <div style="background:#fffbeb;border:1.5px solid #fef3c7;border-radius:12px;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+                <div style="flex:1;font-weight:800;color:#1e293b;display:flex;align-items:center;gap:.6rem;">
+                  <span style="background:#f59e0b;color:#000;font-size:.75rem;padding:.2rem .55rem;border-radius:6px;font-weight:900;">Câu ${i+1}</span>
+                  <span>${q.q || q.questionText || q.stmt}</span>
+                </div>
+                <span style="font-size:.84rem;color:#b45309;font-weight:900;background:#fef3c7;padding:.2rem .65rem;border-radius:8px;white-space:nowrap;">
+                  ⭐ +1 Sao · ${q.opts ? q.opts[q.a || 0] : (q.left || 'Đúng')}
+                </span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    // Handlers
+    const openLoader = () => {
+      this._openQuestionLoaderModal('starrace', 'Cuộc Đua Ngôi Sao (AI Gesture)', loadedQs);
+    };
+
+    const btnManageTop = area.querySelector('#btn-starrace-manage-qs-top');
+    if (btnManageTop) btnManageTop.onclick = openLoader;
+
+    const btnManage = area.querySelector('#btn-starrace-manage-qs');
+    if (btnManage) btnManage.onclick = openLoader;
+
+    const btnSaveLib = area.querySelector('#btn-dash-save-lib');
+    if (btnSaveLib) {
+      btnSaveLib.onclick = () => {
+        const customTitle = area.querySelector('#dash-lesson-title')?.value.trim() || defaultLessonTitle;
+        const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+        this.showSaveToolModal('starrace', customTitle, { questions: loadedQs, grade: selectedGrade, subjectId: subKey }, () => {
+          this._renderStarRaceDashboard();
+        });
+      };
+    }
+
+    const btnOpenLib = area.querySelector('#btn-dash-open-lib');
+    if (btnOpenLib) {
+      btnOpenLib.onclick = () => this.showSharedToolsLibraryModal('starrace');
+    }
+
+    const selGrade = area.querySelector('#dash-grade');
+    if (selGrade) {
+      selGrade.onchange = (e) => {
+        this.icebreaker.grade = e.target.value;
+        const newQs = this._getQuestionsForSubjectAndGrade('starrace', subKey, e.target.value);
+        if (newQs && newQs.length > 0) {
+          if (!this._activeQuestionsByGame) this._activeQuestionsByGame = {};
+          this._activeQuestionsByGame['starrace'] = newQs;
+          window._activeGameQuestions = newQs;
+        }
+        this._renderStarRaceDashboard();
+      };
+    }
+
+    const startBtn = area.querySelector('#btn-start-starrace-arena-now');
+    if (startBtn) {
+      startBtn.onclick = () => {
+        const leftName = area.querySelector('#starrace-left-name-input')?.value.trim() || 'Người chơi bên trái';
+        const rightName = area.querySelector('#starrace-right-name-input')?.value.trim() || 'Người chơi bên phải';
+        const opts = {
+          leftPlayerName: leftName,
+          rightPlayerName: rightName,
+          totalStars: 6,
+          timeLimit: 110
+        };
+        this._launchStarRaceArena(subName, loadedQs, opts);
+      };
+    }
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 🎮 MÀN HÌNH THI ĐẤU TOÀN CẢNH: CUỘC ĐUA NGÔI SAO AI WEBCAM CỬ CHỈ TAY
+  // ─────────────────────────────────────────────────────────────────────────────
+  _launchStarRaceArena(subName, questions, opts = {}) {
+    const old = document.getElementById('starrace-arena-modal');
+    if (old) old.remove();
+
+    let qList = questions;
+    if (!qList || !Array.isArray(qList) || qList.length === 0) {
+      qList = this._getStarRaceQuestions();
+    }
+
+    const leftName = opts.leftName || 'Người chơi bên trái';
+    const rightName = opts.rightName || 'Người chơi bên phải';
+    let vaultStars = opts.totalStars || 6;
+    let leftScore = 0;
+    let rightScore = 0;
+    let timeLimit = opts.timeLimit || 110;
+    let remainingSec = timeLimit;
+
+    let curQIdx = 0;
+    let isGameOver = false;
+    let timerInterval = null;
+    let cameraStream = null;
+    let audioMuted = false;
+    let isProcessingAnswer = false;
+
+    // AI Vision Detection Mode: 'mediapipe' | 'hotspot' | 'contour'
+    let visionMode = 'smart'; // Auto-switches
+    let leftHoldCount = 0;
+    let leftDetectedNum = 0;
+    let rightHoldCount = 0;
+    let rightDetectedNum = 0;
+    let visionAnimId = null;
+    let mpHandsInstance = null;
+
+    const synth = this._getAudioSynth();
+
+    // ─────────────────────────────────────────────────────────────
+    // 🎵 1. BGM GAME SHOW SOUNDTRACK (SYNTHESIZED MULTI-CHANNEL WEB AUDIO)
+    // ─────────────────────────────────────────────────────────────
+    let audioCtx = null;
+    try {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass) audioCtx = new AudioCtxClass();
+    } catch(e) {}
+
+    let bgmTimer = null;
+    let bgmStep = 0;
+
+    const playBgmNote = (freq, duration, type = 'triangle', vol = 0.05) => {
+      if (audioMuted || isGameOver || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const now = audioCtx.currentTime;
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(vol, now + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + duration);
+      } catch(e) {}
+    };
+
+    const bgmNotes = [
+      { f: 523.25, d: 0.22, b: 130.81 },
+      { f: 659.25, d: 0.22, b: 164.81 },
+      { f: 783.99, d: 0.22, b: 196.00 },
+      { f: 1046.50, d: 0.35, b: 261.63 },
+      { f: 880.00, d: 0.22, b: 220.00 },
+      { f: 783.99, d: 0.22, b: 196.00 },
+      { f: 659.25, d: 0.22, b: 164.81 },
+      { f: 587.33, d: 0.35, b: 146.83 },
+      { f: 523.25, d: 0.22, b: 130.81 },
+      { f: 659.25, d: 0.22, b: 164.81 },
+      { f: 783.99, d: 0.22, b: 196.00 },
+      { f: 880.00, d: 0.35, b: 220.00 },
+      { f: 987.77, d: 0.22, b: 246.94 },
+      { f: 1046.50, d: 0.45, b: 261.63 }
+    ];
+
+    const runBgmLoop = () => {
+      if (isGameOver || audioMuted) return;
+      const n = bgmNotes[bgmStep % bgmNotes.length];
+      playBgmNote(n.f, n.d, 'triangle', 0.045);
+      playBgmNote(n.b, n.d + 0.08, 'sawtooth', 0.025);
+      bgmStep++;
+    };
+
+    const startBgm = () => {
+      if (bgmTimer) clearInterval(bgmTimer);
+      bgmTimer = setInterval(runBgmLoop, 280);
+    };
+
+    const modal = document.createElement('div');
+    modal.id = 'starrace-arena-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:#042f2e; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, "Montserrat", "Segoe UI", sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.25s ease;';
+    document.body.appendChild(modal);
+
+    const unlockAudio = () => {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      startBgm();
+    };
+    modal.addEventListener('click', unlockAudio, { once: true });
+    startBgm();
+
+    const cleanup = () => {
+      isGameOver = true;
+      if (timerInterval) clearInterval(timerInterval);
+      if (bgmTimer) clearInterval(bgmTimer);
+      if (visionAnimId) cancelAnimationFrame(visionAnimId);
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+      }
+      if (mpHandsInstance) {
+        try { mpHandsInstance.close(); } catch(e) {}
+        mpHandsInstance = null;
+      }
+      modal.remove();
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 📷 2. WEBCAM & DUAL MEDIAPIPE / AR GESTURE RECOGNITION
+    // ─────────────────────────────────────────────────────────────
+    const loadScript = (src) => {
+      return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+          resolve();
+          return;
+        }
+        const s = document.createElement('script');
+        s.src = src;
+        s.crossOrigin = 'anonymous';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    };
+
+    // Initialize MediaPipe Hands or Robust Fallback
+    const initMediaPipeHands = async () => {
+      try {
+        if (typeof window.Hands === 'undefined') {
+          await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js').catch(()=>{});
+          await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js').catch(()=>{});
+        }
+
+        if (typeof window.Hands !== 'undefined') {
+          const hands = new window.Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+          });
+          hands.setOptions({
+            maxNumHands: 2,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.55,
+            minTrackingConfidence: 0.5
+          });
+
+          hands.onResults(onMediaPipeResults);
+          mpHandsInstance = hands;
+          console.log('🌟 MediaPipe Hands 21-Landmark AI initialized successfully!');
+        }
+      } catch(e) {
+        console.warn('MediaPipe Hands CDN load failed, using Smart AR Vision fallback:', e);
+      }
+    };
+
+    // Count fingers from 21 MediaPipe Landmarks
+    const countExtendedFingers = (landmarks) => {
+      if (!landmarks || landmarks.length < 21) return 0;
+      let count = 0;
+
+      // Thumb (Landmarks 4 vs 2 & 3)
+      const isRightHand = landmarks[4].x < landmarks[20].x;
+      const thumbExtended = isRightHand ? (landmarks[4].x < landmarks[3].x - 0.03) : (landmarks[4].x > landmarks[3].x + 0.03);
+
+      // Index (Landmark 8 vs 6)
+      const indexExtended = landmarks[8].y < landmarks[6].y - 0.03;
+      // Middle (Landmark 12 vs 10)
+      const middleExtended = landmarks[12].y < landmarks[10].y - 0.03;
+      // Ring (Landmark 16 vs 14)
+      const ringExtended = landmarks[16].y < landmarks[14].y - 0.03;
+      // Pinky (Landmark 20 vs 18)
+      const pinkyExtended = landmarks[20].y < landmarks[18].y - 0.03;
+
+      if (indexExtended) count++;
+      if (middleExtended) count++;
+      if (ringExtended) count++;
+      if (pinkyExtended) count++;
+      if (thumbExtended && count < 4 && count > 0) count++; // Thumb auxiliary count
+
+      return Math.min(4, Math.max(0, count));
+    };
+
+    // Draw Skeleton on Video Canvas Overlay
+    const drawHandSkeleton = (ctx, landmarks, color, w, h) => {
+      if (!landmarks || landmarks.length < 21) return;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 3;
+      ctx.fillStyle = '#fde047';
+
+      // Landmark connections
+      const connections = [
+        [0,1],[1,2],[2,3],[3,4],
+        [0,5],[5,6],[6,7],[7,8],
+        [5,9],[9,10],[10,11],[11,12],
+        [9,13],[13,14],[14,15],[15,16],
+        [13,17],[17,18],[18,19],[19,20],
+        [0,17]
+      ];
+
+      connections.forEach(([i, j]) => {
+        const p1 = landmarks[i];
+        const p2 = landmarks[j];
+        ctx.beginPath();
+        ctx.moveTo(p1.x * w, p1.y * h);
+        ctx.lineTo(p2.x * w, p2.y * h);
+        ctx.stroke();
+      });
+
+      // Joint dots
+      landmarks.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x * w, p.y * h, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.restore();
+    };
+
+    const onMediaPipeResults = (results) => {
+      if (isGameOver) return;
+
+      const canvasL = modal.querySelector('#starrace-canvas-left');
+      const canvasR = modal.querySelector('#starrace-canvas-right');
+      let ctxL = canvasL ? canvasL.getContext('2d') : null;
+      let ctxR = canvasR ? canvasR.getContext('2d') : null;
+
+      if (ctxL && canvasL) ctxL.clearRect(0, 0, canvasL.width, canvasL.height);
+      if (ctxR && canvasR) ctxR.clearRect(0, 0, canvasR.width, canvasR.height);
+
+      let foundLeft = 0;
+      let foundRight = 0;
+
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        results.multiHandLandmarks.forEach((lm, hIdx) => {
+          // Wrist position determines Left team vs Right team
+          const wrist = lm[0];
+          const isLeftTeam = wrist.x < 0.5; // Mirrored / split
+
+          const fCount = countExtendedFingers(lm);
+
+          if (isLeftTeam) {
+            foundLeft = fCount;
+            if (ctxL && canvasL) drawHandSkeleton(ctxL, lm, '#38bdf8', canvasL.width, canvasL.height);
+          } else {
+            foundRight = fCount;
+            if (ctxR && canvasR) drawHandSkeleton(ctxR, lm, '#f87171', canvasR.width, canvasR.height);
+          }
+        });
+      }
+
+      handleVisionUpdate(foundLeft, foundRight);
+    };
+
+    // Update Hold Counter and Trigger
+    const handleVisionUpdate = (fingersL, fingersR) => {
+      // Left Player
+      const badgeL = modal.querySelector('#starrace-ai-badge-left');
+      const gaugeL = modal.querySelector('#starrace-gauge-left');
+
+      if (fingersL >= 1 && fingersL <= 4) {
+        if (leftDetectedNum === fingersL) {
+          leftHoldCount++;
+        } else {
+          leftDetectedNum = fingersL;
+          leftHoldCount = 1;
+        }
+
+        const pct = Math.min(100, (leftHoldCount / 6) * 100); // 6 frames (~0.6s)
+        if (gaugeL) gaugeL.style.width = pct + '%';
+
+        if (badgeL) {
+          badgeL.innerHTML = `🤖 AI Khớp: <b>${['☝️ 1','✌️ 2','🤟 3','🖖 4'][fingersL - 1]} ngón</b> (${Math.round(pct)}%)`;
+          badgeL.style.background = '#10b981';
+          badgeL.style.color = '#fff';
+        }
+
+        // Highlight candidate button
+        modal.querySelectorAll('.btn-sr-left').forEach((b, idx) => {
+          if (idx === fingersL - 1) {
+            b.style.borderColor = '#fde047';
+            b.style.boxShadow = '0 0 25px #fde047';
+            b.style.transform = 'scale(1.06)';
+          } else {
+            b.style.borderColor = '#60a5fa';
+            b.style.boxShadow = 'none';
+            b.style.transform = 'scale(1)';
+          }
+        });
+
+        // Trigger Answer on 100% Hold
+        if (leftHoldCount >= 6 && !isProcessingAnswer) {
+          leftHoldCount = 0;
+          const targetBtn = modal.querySelectorAll('.btn-sr-left')[fingersL - 1];
+          if (targetBtn) targetBtn.click();
+        }
+      } else {
+        leftHoldCount = Math.max(0, leftHoldCount - 1);
+        if (gaugeL) gaugeL.style.width = '0%';
+        if (badgeL) {
+          badgeL.innerHTML = `🖐️ Giơ 1, 2, 3, 4 ngón tay`;
+          badgeL.style.background = 'rgba(0,0,0,0.65)';
+          badgeL.style.color = '#93c5fd';
+        }
+        modal.querySelectorAll('.btn-sr-left').forEach(b => {
+          b.style.borderColor = '#60a5fa';
+          b.style.boxShadow = 'none';
+          b.style.transform = 'scale(1)';
+        });
+      }
+
+      // Right Player
+      const badgeR = modal.querySelector('#starrace-ai-badge-right');
+      const gaugeR = modal.querySelector('#starrace-gauge-right');
+
+      if (fingersR >= 1 && fingersR <= 4) {
+        if (rightDetectedNum === fingersR) {
+          rightHoldCount++;
+        } else {
+          rightDetectedNum = fingersR;
+          rightHoldCount = 1;
+        }
+
+        const pct = Math.min(100, (rightHoldCount / 6) * 100);
+        if (gaugeR) gaugeR.style.width = pct + '%';
+
+        if (badgeR) {
+          badgeR.innerHTML = `🤖 AI Khớp: <b>${['☝️ 1','✌️ 2','🤟 3','🖖 4'][fingersR - 1]} ngón</b> (${Math.round(pct)}%)`;
+          badgeR.style.background = '#ef4444';
+          badgeR.style.color = '#fff';
+        }
+
+        modal.querySelectorAll('.btn-sr-right').forEach((b, idx) => {
+          if (idx === fingersR - 1) {
+            b.style.borderColor = '#fde047';
+            b.style.boxShadow = '0 0 25px #fde047';
+            b.style.transform = 'scale(1.06)';
+          } else {
+            b.style.borderColor = '#f87171';
+            b.style.boxShadow = 'none';
+            b.style.transform = 'scale(1)';
+          }
+        });
+
+        if (rightHoldCount >= 6 && !isProcessingAnswer) {
+          rightHoldCount = 0;
+          const targetBtn = modal.querySelectorAll('.btn-sr-right')[fingersR - 1];
+          if (targetBtn) targetBtn.click();
+        }
+      } else {
+        rightHoldCount = Math.max(0, rightHoldCount - 1);
+        if (gaugeR) gaugeR.style.width = '0%';
+        if (badgeR) {
+          badgeR.innerHTML = `🖐️ Giơ 1, 2, 3, 4 ngón tay`;
+          badgeR.style.background = 'rgba(0,0,0,0.65)';
+          badgeR.style.color = '#fca5a5';
+        }
+        modal.querySelectorAll('.btn-sr-right').forEach(b => {
+          b.style.borderColor = '#f87171';
+          b.style.boxShadow = 'none';
+          b.style.transform = 'scale(1)';
+        });
+      }
+    };
+
+    // Camera Video Stream Handler
+    const initWebcam = async () => {
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+            audio: false
+          });
+          const vLeft = modal.querySelector('#starrace-video-left');
+          const vRight = modal.querySelector('#starrace-video-right');
+          if (vLeft && cameraStream) {
+            vLeft.srcObject = cameraStream;
+            vLeft.play().catch(()=>{});
+          }
+          if (vRight && cameraStream) {
+            vRight.srcObject = cameraStream;
+            vRight.play().catch(()=>{});
+          }
+
+          await initMediaPipeHands();
+          startContinuousVisionLoop();
+        }
+      } catch (err) {
+        console.warn('Webcam stream error:', err);
+      }
+    };
+
+    // Continuous Frame Loop
+    const startContinuousVisionLoop = () => {
+      const vLeft = modal.querySelector('#starrace-video-left');
+      let lastSendTime = 0;
+
+      const loop = async (now) => {
+        if (isGameOver) return;
+
+        if (mpHandsInstance && vLeft && vLeft.readyState >= 2) {
+          if (now - lastSendTime > 100) { // 10 FPS MediaPipe AI
+            lastSendTime = now;
+            try {
+              await mpHandsInstance.send({ image: vLeft });
+            } catch(e) {}
+          }
+        }
+
+        visionAnimId = requestAnimationFrame(loop);
+      };
+
+      visionAnimId = requestAnimationFrame(loop);
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 🎨 3. RENDER MAIN ARENA VIEW
+    // ─────────────────────────────────────────────────────────────
+    const renderStage = () => {
+      if (isGameOver) return;
+
+      const q = qList[curQIdx % qList.length];
+      const qText = q.q || 'Núi nào cao nhất Việt Nam?';
+      const rawOpts = q.opts || ["Fansipan", "Ngọc Linh", "Langbiang", "Bạch Mã"];
+      const correctText = rawOpts[q.a || 0];
+
+      // Shuffle options for Left player
+      const leftOpts = [
+        { text: rawOpts[1] || 'Ngọc Linh', isCorrect: rawOpts[1] === correctText },
+        { text: rawOpts[2] || 'Langbiang', isCorrect: rawOpts[2] === correctText },
+        { text: rawOpts[3] || 'Bạch Mã', isCorrect: rawOpts[3] === correctText },
+        { text: rawOpts[0] || 'Fansipan', isCorrect: rawOpts[0] === correctText }
+      ];
+
+      // Shuffle differently for Right player
+      const rightOpts = [
+        { text: rawOpts[0] || 'Fansipan', isCorrect: rawOpts[0] === correctText },
+        { text: rawOpts[3] || 'Bạch Mã', isCorrect: rawOpts[3] === correctText },
+        { text: rawOpts[1] || 'Ngọc Linh', isCorrect: rawOpts[1] === correctText },
+        { text: rawOpts[2] || 'Langbiang', isCorrect: rawOpts[2] === correctText }
+      ];
+
+      const min = Math.floor(remainingSec / 60);
+      const sec = remainingSec % 60;
+      const timeStr = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+
+      modal.innerHTML = `
+        <!-- 1. TOP BAR HEADER -->
+        <div style="background:linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #ea580c 100%); border-bottom:4px solid #b45309; padding:0.6rem 2rem; display:flex; justify-content:space-between; align-items:center; box-shadow:0 6px 20px rgba(0,0,0,0.3); z-index:20;">
+          
+          <!-- LEFT PLAYER SCORE -->
+          <div style="display:flex; align-items:center; gap:0.6rem; font-size:1.35rem; font-weight:900; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,0.3);">
+            <span style="color:#fde047; font-size:1.6rem;">⭐</span>
+            <span>${leftName}</span>
+            <span id="starrace-score-left" style="background:#0f172a; color:#fde047; border:2.5px solid #fde047; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.45rem; box-shadow:0 4px 12px rgba(0,0,0,0.4);">
+              ${leftScore}
+            </span>
+          </div>
+
+          <!-- CENTER TITLE & TIMER -->
+          <div style="display:flex; flex-direction:column; align-items:center; gap:0.2rem;">
+            <div style="font-size:1.15rem; font-weight:900; color:#78350f; letter-spacing:0.5px; text-transform:uppercase;">
+              Cuộc Đua Ngôi Sao - Đối Kháng AI Cử Chỉ Tay
+            </div>
+            <div style="background:#78350f; color:#fef08a; padding:0.2rem 1.1rem; border-radius:20px; font-weight:900; font-size:1.3rem; display:flex; align-items:center; gap:0.4rem; border:2px solid #fef08a; box-shadow:0 4px 10px rgba(0,0,0,0.25);">
+              <span>⏰</span> <span id="starrace-timer-display">${timeStr}</span>
+            </div>
+          </div>
+
+          <!-- RIGHT PLAYER SCORE & CONTROLS -->
+          <div style="display:flex; align-items:center; gap:1rem;">
+            <div style="display:flex; align-items:center; gap:0.6rem; font-size:1.35rem; font-weight:900; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,0.3);">
+              <span>${rightName}</span>
+              <span style="color:#fde047; font-size:1.6rem;">⭐</span>
+              <span id="starrace-score-right" style="background:#0f172a; color:#fde047; border:2.5px solid #fde047; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.45rem; box-shadow:0 4px 12px rgba(0,0,0,0.4);">
+                ${rightScore}
+              </span>
+            </div>
+
+            <!-- CONTROLS -->
+            <div style="display:flex; align-items:center; gap:0.4rem; margin-left:0.6rem;">
+              <button id="btn-sr-mute" style="background:rgba(0,0,0,0.35); color:#fff; border:1.5px solid rgba(255,255,255,0.4); border-radius:10px; width:38px; height:38px; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                ${audioMuted ? '🔇' : '🔊'}
+              </button>
+              <button id="btn-sr-full" style="background:rgba(0,0,0,0.35); color:#fff; border:1.5px solid rgba(255,255,255,0.4); border-radius:10px; width:38px; height:38px; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                ⛶
+              </button>
+              <button id="btn-sr-close" style="background:#dc2626; color:#fff; border:1.5px solid #fca5a5; border-radius:10px; width:38px; height:38px; font-size:1.2rem; font-weight:900; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                ✕
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 2. QUESTION BAR -->
+        <div style="background:#ffffff; color:#0f172a; padding:1.1rem 2rem; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,0.15); border-bottom:3px solid #cbd5e1; z-index:15;">
+          <h2 style="margin:0; font-size:2.35rem; font-weight:900; letter-spacing:-0.5px; color:#0f172a;">
+            ${qText}
+          </h2>
+        </div>
+
+        <!-- 3. MAIN ARENA: LEFT PLAYER (BLUE) | CENTER BALO VAULT | RIGHT PLAYER (RED) -->
+        <div style="flex:1; background:#064e3b; display:grid; grid-template-columns:1fr 240px 1fr; gap:1.2rem; padding:1.2rem 1.8rem; align-items:stretch; position:relative; overflow:hidden;">
+          
+          <!-- LEFT PLAYER SECTION (BLUE TEAM) -->
+          <div style="background:#1e3a8a; border:4px solid #3b82f6; border-radius:28px; padding:1rem; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 12px 35px rgba(0,0,0,0.4), 0 0 30px rgba(59,130,246,0.3); position:relative;">
+            
+            <div style="position:absolute; top:8px; left:12px; font-size:1.6rem; z-index:5;">🎪</div>
+
+            <!-- WEBCAM FRAME WITH AR SKELETON CANVAS OVERLAY -->
+            <div style="width:100%; height:250px; border-radius:20px; overflow:hidden; background:#0f172a; position:relative; border:3px solid #60a5fa; box-shadow:inset 0 0 20px rgba(0,0,0,0.8);">
+              <video id="starrace-video-left" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover; transform:scaleX(-1);"></video>
+              <canvas id="starrace-canvas-left" width="320" height="240" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:2; transform:scaleX(-1);"></canvas>
+
+              <!-- 4 AR TOUCH HOTSPOTS (FOR DIRECT TAP / HOVER) -->
+              <div style="position:absolute; inset:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6px; padding:8px; z-index:3;">
+                ${[1,2,3,4].map(n => `
+                  <div class="sr-hotspot-left" data-num="${n}" style="border:1.5px dashed rgba(56,189,248,0.4); border-radius:12px; background:rgba(15,23,42,0.25); display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:900; font-size:1rem; color:#93c5fd; transition:all 0.15s;" onmouseover="this.style.background='rgba(56,189,248,0.4)'; this.style.borderColor='#fde047';" onmouseout="this.style.background='rgba(15,23,42,0.25)'; this.style.borderColor='rgba(56,189,248,0.4)';">
+                    <span style="background:rgba(0,0,0,0.6); padding:0.15rem 0.5rem; border-radius:8px;">${['☝️ 1','✌️ 2','🤟 3','🖖 4'][n-1]}</span>
+                  </div>
+                `).join('')}
+              </div>
+
+              <!-- AI LIVE FINGER BADGE -->
+              <div id="starrace-ai-badge-left" style="position:absolute; bottom:12px; left:10px; background:rgba(0,0,0,0.75); padding:0.25rem 0.85rem; border-radius:10px; font-size:0.85rem; font-weight:900; color:#93c5fd; border:1.5px solid #3b82f6; z-index:5;">
+                🖐️ Giơ 1, 2, 3, 4 ngón tay
+              </div>
+
+              <!-- HOLD PROGRESS BAR -->
+              <div style="position:absolute; bottom:0; left:0; right:0; height:6px; background:rgba(0,0,0,0.5); z-index:5;">
+                <div id="starrace-gauge-left" style="height:100%; width:0%; background:linear-gradient(90deg, #38bdf8, #10b981); transition:width 0.1s linear;"></div>
+              </div>
+            </div>
+
+            <!-- 4 BLUE ANSWER BUTTONS -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:0.7rem;">
+              ${leftOpts.map((opt, oIdx) => `
+                <button class="btn-sr-choice btn-sr-left" data-player="left" data-correct="${opt.isCorrect}" data-idx="${oIdx}" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); border:3px solid #60a5fa; border-radius:18px; padding:0.9rem 0.8rem; color:#ffffff; font-family:var(--font-title); font-size:1.55rem; font-weight:900; cursor:pointer; text-align:center; position:relative; box-shadow:0 6px 16px rgba(0,0,0,0.3); transition:all 0.15s; min-height:85px; display:flex; flex-direction:column; align-items:center; justify-content:center;" onmouseover="this.style.transform='scale(1.04)';" onmouseout="this.style.transform='scale(1)';">
+                  <span style="position:absolute; top:6px; left:8px; background:#1e293b; color:#93c5fd; font-size:0.72rem; font-weight:900; padding:0.15rem 0.45rem; border-radius:6px; border:1px solid #3b82f6;">
+                    ${oIdx + 1} ngón
+                  </span>
+                  <span style="margin-top:0.35rem;">${opt.text}</span>
+                </button>
+              `).join('')}
+            </div>
+
+          </div>
+
+          <!-- CENTER VAULT: BALO NGÔI SAO & SAO VÀNG CÒN LẠI -->
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; z-index:10;">
+            
+            <div id="starrace-center-backpack" style="position:relative; width:150px; height:150px; border-radius:50%; background:radial-gradient(circle, #f43f5e 0%, #e11d48 60%, #be123c 100%); border:4.5px solid #fecdd3; display:flex; align-items:center; justify-content:center; box-shadow:0 15px 40px rgba(225,29,72,0.6), inset 0 0 20px rgba(255,255,255,0.4); animation:bounce 2s infinite; cursor:pointer;">
+              <span style="font-size:5rem; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.3));">🎒</span>
+              
+              <div style="position:absolute; top:-5px; left:20px; font-size:1.8rem; animation:pulse 1.5s infinite;">⭐</div>
+              <div style="position:absolute; bottom:5px; right:15px; font-size:1.6rem; animation:pulse 2s infinite;">⭐</div>
+              <div style="position:absolute; top:25px; right:-10px; font-size:1.4rem; animation:pulse 1.8s infinite;">⭐</div>
+            </div>
+
+            <!-- REMAINING STARS BADGE -->
+            <div style="background:rgba(0,0,0,0.5); padding:0.45rem 1.4rem; border-radius:20px; border:2px solid #fde047; text-align:center; box-shadow:0 6px 18px rgba(0,0,0,0.3);">
+              <div id="starrace-vault-count" style="font-size:1.45rem; font-weight:900; color:#fde047; text-shadow:0 2px 6px rgba(0,0,0,0.6);">
+                còn ${vaultStars} sao
+              </div>
+            </div>
+
+            <!-- KEYBOARD SHORTCUTS HINT -->
+            <div style="font-size:0.75rem; color:#a7f3d0; text-align:center; line-height:1.4; background:rgba(0,0,0,0.3); padding:0.4rem 0.8rem; border-radius:12px; border:1px solid rgba(255,255,255,0.15);">
+              ✌️ <strong>Giơ 1-4 ngón</strong> trước Camera<br>
+              ⌨️ <strong>Phím Trái:</strong> 1, 2, 3, 4<br>
+              ⌨️ <strong>Phím Phải:</strong> 7, 8, 9, 0
+            </div>
+
+          </div>
+
+          <!-- RIGHT PLAYER SECTION (RED TEAM) -->
+          <div style="background:#7f1d1d; border:4px solid #ef4444; border-radius:28px; padding:1rem; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 12px 35px rgba(0,0,0,0.4), 0 0 30px rgba(239,68,68,0.3); position:relative;">
+            
+            <div style="position:absolute; top:8px; right:12px; font-size:1.6rem; z-index:5;">🎪</div>
+
+            <!-- WEBCAM FRAME WITH AR SKELETON CANVAS OVERLAY -->
+            <div style="width:100%; height:250px; border-radius:20px; overflow:hidden; background:#0f172a; position:relative; border:3px solid #f87171; box-shadow:inset 0 0 20px rgba(0,0,0,0.8);">
+              <video id="starrace-video-right" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover; transform:scaleX(-1);"></video>
+              <canvas id="starrace-canvas-right" width="320" height="240" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:2; transform:scaleX(-1);"></canvas>
+
+              <!-- 4 AR TOUCH HOTSPOTS (FOR DIRECT TAP / HOVER) -->
+              <div style="position:absolute; inset:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6px; padding:8px; z-index:3;">
+                ${[1,2,3,4].map(n => `
+                  <div class="sr-hotspot-right" data-num="${n}" style="border:1.5px dashed rgba(248,113,113,0.4); border-radius:12px; background:rgba(15,23,42,0.25); display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:900; font-size:1rem; color:#fca5a5; transition:all 0.15s;" onmouseover="this.style.background='rgba(248,113,113,0.4)'; this.style.borderColor='#fde047';" onmouseout="this.style.background='rgba(15,23,42,0.25)'; this.style.borderColor='rgba(248,113,113,0.4)';">
+                    <span style="background:rgba(0,0,0,0.6); padding:0.15rem 0.5rem; border-radius:8px;">${['☝️ 1','✌️ 2','🤟 3','🖖 4'][n-1]}</span>
+                  </div>
+                `).join('')}
+              </div>
+
+              <!-- AI LIVE FINGER BADGE -->
+              <div id="starrace-ai-badge-right" style="position:absolute; bottom:12px; right:10px; background:rgba(0,0,0,0.75); padding:0.25rem 0.85rem; border-radius:10px; font-size:0.85rem; font-weight:900; color:#fca5a5; border:1.5px solid #ef4444; z-index:5;">
+                🖐️ Giơ 1, 2, 3, 4 ngón tay
+              </div>
+
+              <!-- HOLD PROGRESS BAR -->
+              <div style="position:absolute; bottom:0; left:0; right:0; height:6px; background:rgba(0,0,0,0.5); z-index:5;">
+                <div id="starrace-gauge-right" style="height:100%; width:0%; background:linear-gradient(90deg, #f87171, #f59e0b); transition:width 0.1s linear;"></div>
+              </div>
+            </div>
+
+            <!-- 4 RED ANSWER BUTTONS -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:0.7rem;">
+              ${rightOpts.map((opt, oIdx) => `
+                <button class="btn-sr-choice btn-sr-right" data-player="right" data-correct="${opt.isCorrect}" data-idx="${oIdx}" style="background:linear-gradient(135deg, #dc2626, #b91c1c); border:3px solid #f87171; border-radius:18px; padding:0.9rem 0.8rem; color:#ffffff; font-family:var(--font-title); font-size:1.55rem; font-weight:900; cursor:pointer; text-align:center; position:relative; box-shadow:0 6px 16px rgba(0,0,0,0.3); transition:all 0.15s; min-height:85px; display:flex; flex-direction:column; align-items:center; justify-content:center;" onmouseover="this.style.transform='scale(1.04)';" onmouseout="this.style.transform='scale(1)';">
+                  <span style="position:absolute; top:6px; left:8px; background:#1e293b; color:#fca5a5; font-size:0.72rem; font-weight:900; padding:0.15rem 0.45rem; border-radius:6px; border:1px solid #ef4444;">
+                    ${oIdx + 1} ngón
+                  </span>
+                  <span style="margin-top:0.35rem;">${opt.text}</span>
+                </button>
+              `).join('')}
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+      // Wire Camera stream if available
+      if (cameraStream) {
+        const vLeft = modal.querySelector('#starrace-video-left');
+        const vRight = modal.querySelector('#starrace-video-right');
+        if (vLeft) vLeft.srcObject = cameraStream;
+        if (vRight) vRight.srcObject = cameraStream;
+      } else {
+        initWebcam();
+      }
+
+      // Top bar button actions
+      modal.querySelector('#btn-sr-close').onclick = cleanup;
+      
+      const muteBtn = modal.querySelector('#btn-sr-mute');
+      if (muteBtn) {
+        muteBtn.onclick = () => {
+          audioMuted = !audioMuted;
+          muteBtn.textContent = audioMuted ? '🔇' : '🔊';
+          if (!audioMuted) startBgm();
+        };
+      }
+
+      const fullBtn = modal.querySelector('#btn-sr-full');
+      if (fullBtn) {
+        fullBtn.onclick = () => {
+          if (!document.fullscreenElement) {
+            modal.requestFullscreen().catch(()=>{});
+          } else {
+            document.exitFullscreen().catch(()=>{});
+          }
+        };
+      }
+
+      // Handle Answer Trigger
+      const handlePlayerAnswer = (player, isCorrect, btnEl) => {
+        if (isProcessingAnswer || isGameOver) return;
+        isProcessingAnswer = true;
+
+        if (isCorrect) {
+          synth.play('win');
+          btnEl.style.background = '#10b981';
+          btnEl.style.borderColor = '#34d399';
+          btnEl.style.transform = 'scale(1.1)';
+          btnEl.style.boxShadow = '0 0 35px #10b981';
+
+          if (player === 'left') {
+            leftScore++;
+          } else {
+            rightScore++;
+          }
+          vaultStars--;
+
+          // Update HUD Displays
+          const leftDisp = modal.querySelector('#starrace-score-left');
+          const rightDisp = modal.querySelector('#starrace-score-right');
+          const vaultDisp = modal.querySelector('#starrace-vault-count');
+          if (leftDisp) leftDisp.textContent = leftScore;
+          if (rightDisp) rightDisp.textContent = rightScore;
+          if (vaultDisp) vaultDisp.textContent = `còn ${vaultStars} sao`;
+
+          // Star Flying Animation
+          const starAnim = document.createElement('div');
+          starAnim.innerHTML = '⭐';
+          starAnim.style.cssText = `position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); font-size:4.5rem; z-index:99999; pointer-events:none; transition:all 0.8s cubic-bezier(0.175,0.885,0.32,1.275); filter:drop-shadow(0 0 25px #fde047);`;
+          document.body.appendChild(starAnim);
+
+          setTimeout(() => {
+            if (player === 'left') {
+              starAnim.style.top = '40px';
+              starAnim.style.left = '120px';
+            } else {
+              starAnim.style.top = '40px';
+              starAnim.style.left = `${window.innerWidth - 120}px`;
+            }
+            starAnim.style.transform = 'scale(0.3) rotate(360deg)';
+            starAnim.style.opacity = '0';
+          }, 50);
+
+          setTimeout(() => starAnim.remove(), 900);
+
+          // Check End Game Condition
+          if (vaultStars <= 0) {
+            setTimeout(() => triggerVictoryScreen(), 1000);
+            return;
+          }
+
+          // Advance to next question
+          setTimeout(() => {
+            curQIdx++;
+            isProcessingAnswer = false;
+            leftHoldCount = 0;
+            rightHoldCount = 0;
+            renderStage();
+          }, 1200);
+
+        } else {
+          synth.play('wrong');
+          btnEl.style.background = '#000000';
+          btnEl.style.borderColor = '#ef4444';
+          btnEl.style.transform = 'translateX(-8px)';
+          setTimeout(() => { btnEl.style.transform = 'translateX(8px)'; }, 100);
+          setTimeout(() => { btnEl.style.transform = 'translateX(0)'; }, 200);
+
+          setTimeout(() => {
+            isProcessingAnswer = false;
+            leftHoldCount = 0;
+            rightHoldCount = 0;
+          }, 1000);
+        }
+      };
+
+      // Bind Answer Clicks
+      modal.querySelectorAll('.btn-sr-choice').forEach(btn => {
+        btn.onclick = () => {
+          const player = btn.dataset.player;
+          const isCorrect = btn.dataset.correct === 'true';
+          handlePlayerAnswer(player, isCorrect, btn);
+        };
+      });
+
+      // Bind AR Touch Hotspots (Click / Touch directly on Camera Frame)
+      modal.querySelectorAll('.sr-hotspot-left').forEach(hs => {
+        hs.onclick = () => {
+          const n = parseInt(hs.dataset.num);
+          const targetChoice = modal.querySelectorAll('.btn-sr-left')[n - 1];
+          if (targetChoice) targetChoice.click();
+        };
+      });
+
+      modal.querySelectorAll('.sr-hotspot-right').forEach(hs => {
+        hs.onclick = () => {
+          const n = parseInt(hs.dataset.num);
+          const targetChoice = modal.querySelectorAll('.btn-sr-right')[n - 1];
+          if (targetChoice) targetChoice.click();
+        };
+      });
+
+      // Global Keydown Handler (1-4 for Left, 7-0 for Right)
+      const onKeyDownHandler = (e) => {
+        if (isProcessingAnswer || isGameOver) return;
+        const k = e.key;
+
+        // Left Player keys (1, 2, 3, 4)
+        if (['1', '2', '3', '4'].includes(k)) {
+          const idx = parseInt(k) - 1;
+          const btn = modal.querySelectorAll('.btn-sr-left')[idx];
+          if (btn) btn.click();
+        }
+
+        // Right Player keys (7, 8, 9, 0)
+        if (['7', '8', '9', '0'].includes(k)) {
+          const mapIdx = { '7': 0, '8': 1, '9': 2, '0': 3 };
+          const idx = mapIdx[k];
+          const btn = modal.querySelectorAll('.btn-sr-right')[idx];
+          if (btn) btn.click();
+        }
+      };
+
+      window.removeEventListener('keydown', modal._keyHandler);
+      modal._keyHandler = onKeyDownHandler;
+      window.addEventListener('keydown', onKeyDownHandler);
+    };
+
+    // Countdown Timer Loop
+    timerInterval = setInterval(() => {
+      if (isGameOver) {
+        clearInterval(timerInterval);
+        return;
+      }
+      remainingSec--;
+      const tDisp = modal.querySelector('#starrace-timer-display');
+      if (tDisp) {
+        const min = Math.floor(remainingSec / 60);
+        const sec = remainingSec % 60;
+        tDisp.textContent = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        if (remainingSec <= 10) {
+          tDisp.style.color = '#ef4444';
+          synth.play('pop');
+        }
+      }
+
+      if (remainingSec <= 0) {
+        clearInterval(timerInterval);
+        triggerVictoryScreen();
+      }
+    }, 1000);
+
+    // Victory Screen
+    const triggerVictoryScreen = () => {
+      isGameOver = true;
+      if (timerInterval) clearInterval(timerInterval);
+      if (bgmTimer) clearInterval(bgmTimer);
+      if (visionAnimId) cancelAnimationFrame(visionAnimId);
+
+      let winnerText = '';
+      let winnerColor = '#f59e0b';
+      let winnerIcon = '🏆';
+
+      if (leftScore > rightScore) {
+        winnerText = `🎉 ${leftName.toUpperCase()} CHIẾN THẮNG XUẤT SẮC!`;
+        winnerColor = '#3b82f6';
+        winnerIcon = '🔵🏆';
+      } else if (rightScore > leftScore) {
+        winnerText = `🎉 ${rightName.toUpperCase()} CHIẾN THẮNG XUẤT SẮC!`;
+        winnerColor = '#ef4444';
+        winnerIcon = '🔴🏆';
+      } else {
+        winnerText = `🤝 KẾT QUẢ HÒA TUYỆT ĐẸP! (${leftScore} - ${rightScore})`;
+        winnerColor = '#f59e0b';
+        winnerIcon = '🌟🤝';
+      }
+
+      synth.play('win');
+
+      modal.innerHTML = `
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem; background:radial-gradient(circle at center, #064e3b 0%, #022c22 100%); text-align:center; animation:zoomIn 0.35s ease;">
+          
+          <div style="font-size:6.5rem; margin-bottom:0.5rem; animation:bounce 1.5s infinite;">
+            ${winnerIcon}
+          </div>
+
+          <h1 style="font-size:3rem; font-weight:900; color:${winnerColor}; text-shadow:0 0 30px ${winnerColor}; margin:0.4rem 0 1.2rem;">
+            ${winnerText}
+          </h1>
+
+          <!-- FINAL SCORE BOARD -->
+          <div style="display:flex; justify-content:center; gap:2.5rem; margin:1.5rem 0; width:100%; max-width:650px;">
+            
+            <div style="background:rgba(37,99,235,0.25); border:3px solid #3b82f6; border-radius:24px; padding:1.5rem 2.2rem; flex:1;">
+              <div style="font-size:1.1rem; font-weight:800; color:#93c5fd;">${leftName}</div>
+              <div style="font-size:3.5rem; font-weight:900; color:#ffffff; margin-top:0.3rem;">⭐ ${leftScore}</div>
+            </div>
+
+            <div style="background:rgba(220,38,38,0.25); border:3px solid #ef4444; border-radius:24px; padding:1.5rem 2.2rem; flex:1;">
+              <div style="font-size:1.1rem; font-weight:800; color:#fca5a5;">${rightName}</div>
+              <div style="font-size:3.5rem; font-weight:900; color:#ffffff; margin-top:0.3rem;">⭐ ${rightScore}</div>
+            </div>
+
+          </div>
+
+          <!-- ACTION BUTTONS -->
+          <div style="display:flex; gap:1.2rem; margin-top:1.5rem;">
+            <button id="btn-sr-replay" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#000; border:none; padding:1rem 2.5rem; border-radius:18px; font-weight:900; font-size:1.2rem; cursor:pointer; box-shadow:0 8px 25px rgba(245,158,11,0.5);">
+              🔄 ĐUA LẠI VÁN MỚI
+            </button>
+            <button id="btn-sr-exit-win" style="background:rgba(255,255,255,0.15); color:#fff; border:2px solid rgba(255,255,255,0.4); padding:1rem 2rem; border-radius:18px; font-weight:900; font-size:1.1rem; cursor:pointer;">
+              ✕ Đóng Trò Chơi
+            </button>
+          </div>
+
+        </div>
+      `;
+
+      modal.querySelector('#btn-sr-replay').onclick = () => {
+        isGameOver = false;
+        leftScore = 0;
+        rightScore = 0;
+        vaultStars = opts.totalStars || 6;
+        remainingSec = opts.timeLimit || 110;
+        curQIdx = 0;
+        renderStage();
+      };
+
+      modal.querySelector('#btn-sr-exit-win').onclick = cleanup;
+    };
+
+    renderStage();
+  },
+
+  _renderAlphabetKidsDashboard() {
+
+    // Ensure smooth scrolling in fullscreen mode
+    if (!document.getElementById('kids-fullscreen-scroll-style')) {
+      const st = document.createElement('style');
+      st.id = 'kids-fullscreen-scroll-style';
+      st.textContent = `
+        #chart100-matrix-scrollbox::-webkit-scrollbar {
+          width: 8px;
+        }
+        #chart100-matrix-scrollbox::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 8px;
+        }
+        #chart100-matrix-scrollbox::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #f59e0b, #ec4899);
+          border-radius: 8px;
+        }
+        #chart100-matrix-scrollbox::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #d97706, #db2777);
+        }
+
+        :fullscreen, :-webkit-full-screen {
+          overflow-y: auto !important;
+          max-height: 100vh !important;
+          box-sizing: border-box !important;
+          scroll-behavior: smooth;
+        }
+        :fullscreen::-webkit-scrollbar, :-webkit-full-screen::-webkit-scrollbar {
+          width: 12px;
+          height: 12px;
+        }
+        :fullscreen::-webkit-scrollbar-track, :-webkit-full-screen::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.8);
+          border-radius: 8px;
+        }
+        :fullscreen::-webkit-scrollbar-thumb, :-webkit-full-screen::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #f59e0b, #ec4899);
+          border-radius: 8px;
+          border: 2px solid rgba(15, 23, 42, 0.8);
+        }
+        :fullscreen::-webkit-scrollbar-thumb:hover, :-webkit-full-screen::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #fbbf24, #f43f5e);
+        }
+      `;
+      document.head.appendChild(st);
+    }
+
+    const area = this._area();
+    if (!area) return;
+
+    // Kho 29 Chữ Cái Chuẩn GDPT 2018 - Quy Tắc Đánh Vần Chuẩn Bộ GD&ĐT
+    const ALPHABET_DATA = [
+      { id: 'a', upper: 'A', lower: 'a', letterName: 'Chữ A', phoneme: 'a', characterName: 'Bé A Áo Đỏ', icon: '👕', animIcon: '👚', color: '#ef4444', bg: '#fee2e2', intro: 'Đây là chữ A in hoa và chữ a in thường. Âm đọc là a. Chữ A biến hình thành Bé A Mặc Áo Đỏ xinh tươi!', rhyme: 'Bé A Áo Đỏ tươi cười, chăm ngoan học giỏi mọi người đều khen!', words: [{w:'Cái Áo', icon:'👕', p:'a, sắc, áo, cái áo', displayP:'a - sắc - áo ➔ cái áo'}, {w:'Con Gà', icon:'🐔', p:'gờ, a, ga, ga, huyền, gà, con gà', displayP:'gờ - a - ga, ga - huyền - gà ➔ con gà'}, {w:'Quả Na', icon:'🍈', p:'nờ, a, na, quả na', displayP:'nờ - a - na ➔ quả na'}] },
+      { id: 'aw', upper: 'Ă', lower: 'ă', letterName: 'Chữ Á', phoneme: 'ă', characterName: 'Chú Ă Trăng Khuyết', icon: '🌙', animIcon: '✨', color: '#f97316', bg: '#ffedd5', intro: 'Đây là chữ Ă in hoa và chữ ă in thường. Âm đọc là ă. Chữ Ă có chiếc mũ trăng khuyết biến hình thành Vầng Trăng Đêm Rằm!', rhyme: 'Chữ Ă có mũ trăng ngà, soi đường chú Cuội bay qua đón chào!', words: [{w:'Mặt Trăng', icon:'🌙', p:'mờ, ăng, măng, măng, nặng, mặt, mặt trăng', displayP:'mờ - ăng - măng, măng - nặng - mặt ➔ mặt trăng'}, {w:'Con Rắn', icon:'🐍', p:'rờ, ăn, răn, răn, sắc, rắn, con rắn', displayP:'rờ - ăn - răn, răn - sắc - rắn ➔ con rắn'}, {w:'Bắp Ngô', icon:'🌽', p:'bờ, ắp, bắp, bắp ngô', displayP:'bờ - ắp - bắp ➔ bắp ngô'}] },
+      { id: 'aa', upper: 'Â', lower: 'â', letterName: 'Chữ Ớ', phoneme: 'â', characterName: 'Bạn Â Nón Lá', icon: '👒', animIcon: '🍄', color: '#eab308', bg: '#fef9c3', intro: 'Đây là chữ Â in hoa và chữ â in thường. Âm đọc là â. Chữ Â đội nón lá biến hình thành Bạn Nấm Nhỏ che mưa!', rhyme: 'Chữ Â đội nón lá xinh, che mưa che nắng giúp mình đến trường!', words: [{w:'Cây Nấm', icon:'🍄', p:'nờ, âm, nâm, nâm, sắc, nấm, cây nấm', displayP:'nờ - âm - nâm, nâm - sắc - nấm ➔ cây nấm'}, {w:'Bồ Câu', icon:'🕊️', p:'cờ, âu, câu, bồ câu', displayP:'cờ - âu - câu ➔ bồ câu'}, {w:'Cá Mập', icon:'🦈', p:'mờ, ấp, mập, cá mập', displayP:'mờ - ấp - mập ➔ cá mập'}] },
+      { id: 'b', upper: 'B', lower: 'b', letterName: 'Chữ Bê', phoneme: 'bờ', characterName: 'Chú B Bướm Xinh', icon: '🦋', animIcon: '🌸', color: '#3b82f6', bg: '#dbeafe', intro: 'Đây là chữ B in hoa và chữ b in thường. Âm đọc là bờ. Chữ B mọc ra đôi cánh biến hình thành Chú Bướm Xinh dập dờn!', rhyme: 'Chữ B như bướm lượn quanh, dập dờn cánh biếc trên cành hoa tươi!', words: [{w:'Bươm Bướm', icon:'🦋', p:'bờ, ươm, bươm, bươm, sắc, bướm, bươm bướm', displayP:'bờ - ươm - bươm, bươm - sắc - bướm ➔ bươm bướm'}, {w:'Quả Bơ', icon:'🥑', p:'bờ, ơ, bơ, quả bơ', displayP:'bờ - ơ - bơ ➔ quả bơ'}, {w:'Búp Bê', icon:'🪆', p:'bờ, úp, búp, búp bê', displayP:'bờ - úp - búp ➔ búp bê'}] },
+      { id: 'c', upper: 'C', lower: 'c', letterName: 'Chữ Xê', phoneme: 'cờ', characterName: 'Chú C Cá Vàng', icon: '🐟', animIcon: '🌊', color: '#06b6d4', bg: '#cffafe', intro: 'Đây là chữ C in hoa và chữ c in thường. Âm đọc là cờ. Nét cong chữ C uốn lượn biến hình thành Chú Cá Vàng quẫy đuôi!', rhyme: 'Chữ C cong cong chú cá vàng, quẫy đuôi bơi lội rộn ràng trong veo!', words: [{w:'Con Cá', icon:'🐟', p:'cờ, a, ca, ca, sắc, cá, con cá', displayP:'cờ - a - ca, ca - sắc - cá ➔ con cá'}, {w:'Cây Cau', icon:'🌴', p:'cờ, au, cau, cây cau', displayP:'cờ - au - cau ➔ cây cau'}, {w:'Con Cú', icon:'🦉', p:'cờ, u, cu, cu, sắc, cú, con cú', displayP:'cờ - u - cu, cu - sắc - cú ➔ con cú'}] },
+      { id: 'd', upper: 'D', lower: 'd', letterName: 'Chữ Dê', phoneme: 'dờ', characterName: 'Chú D Dê Con', icon: '🐐', animIcon: '🌿', color: '#10b981', bg: '#d1fae5', intro: 'Đây là chữ D in hoa và chữ d in thường. Âm đọc là dờ. Chữ D biến hình thành Chú Dê Con có đôi sừng xinh!', rhyme: 'Chữ D chú Dê leo đồi, be he gọi mẹ cùng ngồi ăn hoa!', words: [{w:'Con Dê', icon:'🐐', p:'dờ, ê, dê, con dê', displayP:'dờ - ê - dê ➔ con dê'}, {w:'Quả Dưa', icon:'🍈', p:'dờ, ưa, dưa, quả dưa', displayP:'dờ - ưa - dưa ➔ quả dưa'}, {w:'Dòng Sông', icon:'🏞️', p:'dờ, ong, dong, dong, huyền, dòng, dòng sông', displayP:'dờ - ong - dong, dong - huyền - dòng ➔ dòng sông'}] },
+      { id: 'dd', upper: 'Đ', lower: 'đ', letterName: 'Chữ Đê', phoneme: 'đờ', characterName: 'Bác Đ Đồng Hồ', icon: '⏰', animIcon: '🕰️', color: '#8b5cf6', bg: '#ede9fe', intro: 'Đây là chữ Đ in hoa và chữ đ in thường. Âm đọc là đờ. Chữ Đ có gạch ngang biến hình thành Bác Đồng Hồ quay tích tắc!', rhyme: 'Chữ Đ có gạch ngang vai, tích tắc báo đúng ban mai tới rồi!', words: [{w:'Đồng Hồ', icon:'⏰', p:'đờ, ông, đông, đông, huyền, đồng, đồng hồ', displayP:'đờ - ông - đông, đông - huyền - đồng ➔ đồng hồ'}, {w:'Đèn Lồng', icon:'🏮', p:'đờ, en, đen, đen, huyền, đèn, đèn lồng', displayP:'đờ - en - đen, đen - huyền - đèn ➔ đèn lồng'}, {w:'Đu Đủ', icon:'🥭', p:'đờ, u, đu, đờ, u, đu, đu, hỏi, đủ, đu đủ', displayP:'đờ - u - đu, đờ - u - đu - hỏi - đủ ➔ đu đủ'}] },
+      { id: 'e', upper: 'E', lower: 'e', letterName: 'Chữ E', phoneme: 'e', characterName: 'Bé E Em Bé', icon: '👶', animIcon: '🍼', color: '#ec4899', bg: '#fce7f3', intro: 'Đây là chữ E in hoa và chữ e in thường. Âm đọc là e. Chữ E biến hình thành Em Bé cười tươi bi bô!', rhyme: 'Chữ E em bé toe toét cười, bi bô tập nói rộn mười niềm vui!', words: [{w:'Em Bé', icon:'👶', p:'e, mờ, em, em bé', displayP:'e - mờ - em ➔ em bé'}, {w:'Quả Me', icon:'🥜', p:'mờ, e, me, quả me', displayP:'mờ - e - me ➔ quả me'}, {w:'Cái Keng', icon:'🔔', p:'kờ, eng, keng, cái keng', displayP:'kờ - eng - keng ➔ cái keng'}] },
+      { id: 'ee', upper: 'Ê', lower: 'ê', letterName: 'Chữ Ê', phoneme: 'ê', characterName: 'Cô Ê Ếch Xanh', icon: '🐸', animIcon: '🍃', color: '#14b8a6', bg: '#ccfbf1', intro: 'Đây là chữ Ê in hoa và chữ ê in thường. Âm đọc là ê. Chữ Ê có nón nhọn biến hình thành Chú Ếch Xanh ộp ộp bờ ao!', rhyme: 'Chữ Ê cô Ếch đội nón tròn, ộp ộp đón hội trăng giòn bờ ao!', words: [{w:'Chú Ếch', icon:'🐸', p:'ê, chờ, êch, êch, sắc, ếch, chú ếch', displayP:'ê - chờ - êch, êch - sắc - ếch ➔ chú ếch'}, {w:'Cái Ghế', icon:'🪑', p:'ghờ, ê, ghê, ghê, sắc, ghế, cái ghế', displayP:'ghờ - ê - ghê, ghê - sắc - ghế ➔ cái ghế'}, {w:'Búp Bê', icon:'🪆', p:'bờ, ê, bê, búp bê', displayP:'bờ - ê - bê ➔ búp bê'}] },
+      { id: 'g', upper: 'G', lower: 'g', letterName: 'Chữ Giê', phoneme: 'gờ', characterName: 'Chú G Gà Trống', icon: '🐓', animIcon: '🌅', color: '#f43f5e', bg: '#ffe4e6', intro: 'Đây là chữ G in hoa và chữ g in thường. Âm đọc là gờ. Chữ G mọc mào đỏ biến hình thành Chú Gà Trống gáy vang!', rhyme: 'Chữ G chú Gà mào tươi, ò ó o gáy rạng ngời bình minh!', words: [{w:'Con Gà', icon:'🐓', p:'gờ, a, ga, ga, huyền, gà, con gà', displayP:'gờ - a - ga, ga - huyền - gà ➔ con gà'}, {w:'Cái Gối', icon:'🛋️', p:'gờ, ôi, gôi, gôi, sắc, gối, cái gối', displayP:'gờ - ôi - gôi, gôi - sắc - gối ➔ cái gối'}, {w:'Cục Gạch', icon:'🧱', p:'gờ, ách, gạch, cục gạch', displayP:'gờ - ách - gạch ➔ cục gạch'}] },
+      { id: 'h', upper: 'H', lower: 'h', letterName: 'Chữ Hát', phoneme: 'hờ', characterName: 'Bạn H Hươu Cao', icon: '🦒', animIcon: '🌳', color: '#84cc16', bg: '#ecfccb', intro: 'Đây là chữ H in hoa và chữ h in thường. Âm đọc là hờ. Chữ H vươn cao biến hình thành Bạn Hươu Cao Cổ xinh đẹp!', rhyme: 'Chữ H bạn Hươu cổ dài, với hái lá ngọt tháng ngày bình yên!', words: [{w:'Hươu Cao Cổ', icon:'🦒', p:'hờ, ưu, hươu, hươu cao cổ', displayP:'hờ - ưu - hươu ➔ hươu cao cổ'}, {w:'Hoa Hồng', icon:'🌹', p:'hờ, oa, hoa, hờ, ông, hông, hông, huyền, hồng, hoa hồng', displayP:'hờ - oa - hoa, hờ - ông - hồng ➔ hoa hồng'}, {w:'Hộp Bút', icon:'✏️', p:'hờ, ốp, hộp, hộp bút', displayP:'hờ - ốp - hộp ➔ hộp bút'}] },
+      { id: 'i', upper: 'I', lower: 'i', letterName: 'Chữ I ngắn', phoneme: 'i', characterName: 'Bé I Que Kem', icon: '🍦', animIcon: '🍧', color: '#0ea5e9', bg: '#e0f2fe', intro: 'Đây là chữ I in hoa và chữ i in thường. Âm đọc là i. Chữ I có dấu chấm trên đầu biến hình thành Que Kem ngọt mát!', rhyme: 'Chữ I có chấm trên đầu, ngọt ngào que kem sắc màu lung linh!', words: [{w:'Viên Bi', icon:'⚪', p:'bờ, i, bi, viên bi', displayP:'bờ - i - bi ➔ viên bi'}, {w:'Con Khỉ', icon:'🐒', p:'khờ, i, khi, khi, hỏi, khỉ, con khỉ', displayP:'khờ - i - khi, khi - hỏi - khỉ ➔ con khỉ'}, {w:'Bút Chì', icon:'✏️', p:'chờ, i, chi, chi, huyền, chì, bút chì', displayP:'chờ - i - chi, chi - huyền - chì ➔ bút chì'}] },
+      { id: 'k', upper: 'K', lower: 'k', letterName: 'Chữ Ca', phoneme: 'cờ', characterName: 'Chú K Kéo Vàng', icon: '✂️', animIcon: '📑', color: '#a855f7', bg: '#f3e8ff', intro: 'Đây là chữ K in hoa và chữ k in thường. Âm đọc là cờ. Chữ K biến hình thành Cây Kéo Vàng cắt giấy hoa!', rhyme: 'Chữ K chú Kéo sắc tài, cắt hoa dán giấy đẹp hoài vườn thơ!', words: [{w:'Cái Kéo', icon:'✂️', p:'kờ, eo, keo, keo, sắc, kéo, cái kéo', displayP:'kờ - eo - keo, keo - sắc - kéo ➔ cái kéo'}, {w:'Kính Mắt', icon:'👓', p:'kờ, inh, kinh, kinh, sắc, kính, kính mắt', displayP:'kờ - inh - kinh, kinh - sắc - kính ➔ kính mắt'}, {w:'Que Kem', icon:'🍦', p:'kờ, em, kem, que kem', displayP:'kờ - em - kem ➔ que kem'}] },
+      { id: 'l', upper: 'L', lower: 'l', letterName: 'Chữ E-lờ', phoneme: 'lờ', characterName: 'Chú L Lợn Con', icon: '🐷', animIcon: '🍎', color: '#f43f5e', bg: '#ffe4e6', intro: 'Đây là chữ L in hoa và chữ l in thường. Âm đọc là lờ. Chữ L đứng thẳng biến hình thành Chú Lợn Hồng ủn ỉn!', rhyme: 'Chữ L vươn thẳng thật cao, chú Lợn ủn ỉn vẫy chào bé ngoan!', words: [{w:'Con Lợn', icon:'🐷', p:'lờ, ơn, lơn, lơn, nặng, lợn, con lợn', displayP:'lờ - ơn - lơn, lơn - nặng - lợn ➔ con lợn'}, {w:'Quả Lê', icon:'🍐', p:'lờ, ê, lê, quả lê', displayP:'lờ - ê - lê ➔ quả lê'}, {w:'Lá Cây', icon:'🍃', p:'lờ, a, la, la, sắc, lá, lá cây', displayP:'lờ - a - la, la - sắc - lá ➔ lá cây'}] },
+      { id: 'm', upper: 'M', lower: 'm', letterName: 'Chữ Em-mờ', phoneme: 'mờ', characterName: 'Bạn M Mèo Con', icon: '🐱', animIcon: '🐾', color: '#eab308', bg: '#fef9c3', intro: 'Đây là chữ M in hoa và chữ m in thường. Âm đọc là mờ. Chữ M có hai vòm cong biến hình thành Đôi Tai Mèo Con meo meo!', rhyme: 'Chữ M hai đỉnh cong cong, mèo con rửa mặt sạch bong mỗi ngày!', words: [{w:'Mèo Con', icon:'🐱', p:'mờ, eo, meo, meo, huyền, mèo, mèo con', displayP:'mờ - eo - meo, meo - huyền - mèo ➔ mèo con'}, {w:'Quả Mận', icon:'🍑', p:'mờ, ân, mân, mân, nặng, mận, quả mận', displayP:'mờ - ân - mân, mân - nặng - mận ➔ quả mận'}, {w:'Mặt Trời', icon:'☀️', p:'mờ, ắt, mặt, mặt trời', displayP:'mờ - ắt - mặt ➔ mặt trời'}] },
+      { id: 'n', upper: 'N', lower: 'n', letterName: 'Chữ En-nờ', phoneme: 'nờ', characterName: 'Chiếc N Nơ Xinh', icon: '🎀', animIcon: '🎁', color: '#ec4899', bg: '#fce7f3', intro: 'Đây là chữ N in hoa và chữ n in thường. Âm đọc là nờ. Chữ N một cổng vòm biến hình thành Chiếc Nơ Cài Áo xinh xắn!', rhyme: 'Chữ N một nhịp cổng vòm, cài chiếc Nơ thắm cài lọn tóc xinh!', words: [{w:'Cái Nơ', icon:'🎀', p:'nờ, ơ, nơ, cái nơ', displayP:'nờ - ơ - nơ ➔ cái nơ'}, {w:'Nồi Cơm', icon:'🍲', p:'nờ, ôi, nôi, nôi, huyền, nồi, nồi cơm', displayP:'nờ - ôi - nôi, nôi - huyền - nồi ➔ nồi cơm'}, {w:'Ngôi Nhà', icon:'🏠', p:'nhờ, a, nha, nha, huyền, nhà, ngôi nhà', displayP:'nhờ - a - nha, nha - huyền - nhà ➔ ngôi nhà'}] },
+      { id: 'o', upper: 'O', lower: 'o', letterName: 'Chữ O', phoneme: 'o', characterName: 'Bé O Tròn Xoe', icon: '🥚', animIcon: '🐣', color: '#ef4444', bg: '#fee2e2', intro: 'Đây là chữ O in hoa và chữ o in thường. Âm đọc là o. Chữ O tròn xoe biến hình thành Quả Trứng Gà nở ra Gà Con!', rhyme: 'O tròn như quả trứng gà, bé nhìn bé nhớ cả nhà cùng vui!', words: [{w:'Con Bò', icon:'🐂', p:'bờ, o, bo, bo, huyền, bò, con bò', displayP:'bờ - o - bo, bo - huyền - bò ➔ con bò'}, {w:'Con Ong', icon:'🐝', p:'o, ngờ, ong, con ong', displayP:'o - ngờ - ong ➔ con ong'}, {w:'Cái Còi', icon:'📢', p:'cờ, oi, coi, coi, huyền, còi, cái còi', displayP:'cờ - oi - coi, coi - huyền - còi ➔ cái còi'}] },
+      { id: 'oo', upper: 'Ô', lower: 'ô', letterName: 'Chữ Ô', phoneme: 'ô', characterName: 'Chú Ô Đội Mũ', icon: '🌂', animIcon: '🌧️', color: '#3b82f6', bg: '#dbeafe', intro: 'Đây là chữ Ô in hoa và chữ ô in thường. Âm đọc là ô. Chữ Ô đội chiếc mũ che mưa biến hình thành Chiếc Ô Bung Tỏa mát lành!', rhyme: 'Ô thì đội chiếc mũ xinh, mưa rơi che mát chúng mình cùng đi!', words: [{w:'Cái Ô', icon:'🌂', p:'ô, cái ô', displayP:'ô ➔ cái ô'}, {w:'Xe Ô Tô', icon:'🚗', p:'ô, tờ, ô, tô, xe ô tô', displayP:'ô, tờ - ô - tô ➔ xe ô tô'}, {w:'Cây Cối', icon:'🌳', p:'cờ, ôi, côi, côi, sắc, cối, cây cối', displayP:'cờ - ôi - côi, côi - sắc - cối ➔ cây cối'}] },
+      { id: 'ow', upper: 'Ơ', lower: 'ơ', letterName: 'Chữ Ơ', phoneme: 'ơ', characterName: 'Bạn Ơ Có Râu', icon: '🥑', animIcon: '🚩', color: '#10b981', bg: '#d1fae5', intro: 'Đây là chữ Ơ in hoa và chữ ơ in thường. Âm đọc là ơ. Chữ Ơ có chiếc râu xinh biến hình thành Quả Bơ Béo Ngon và Lá Cờ Đỏ!', rhyme: 'Ơ thì thêm chiếc râu dài, quả Bơ béo ngậy mượt mà thơm ngon!', words: [{w:'Quả Bơ', icon:'🥑', p:'bờ, ơ, bơ, quả bơ', displayP:'bờ - ơ - bơ ➔ quả bơ'}, {w:'Lá Cờ', icon:'🚩', p:'cờ, ơ, cơ, cơ, huyền, cờ, lá cờ', displayP:'cờ - ơ - cơ, cơ - huyền - cờ ➔ lá cờ'}, {w:'Quả Mơ', icon:'🍑', p:'mờ, ơ, mơ, quả mơ', displayP:'mờ - ơ - mơ ➔ quả mơ'}] },
+      { id: 'p', upper: 'P', lower: 'p', letterName: 'Chữ Pê', phoneme: 'pờ', characterName: 'Chú P Phi Công', icon: '✈️', animIcon: '🚀', color: '#8b5cf6', bg: '#ede9fe', intro: 'Đây là chữ P in hoa và chữ p in thường. Âm đọc là pờ. Chữ P biến hình thành Chú Phi Công lái máy bay lượn trời xanh!', rhyme: 'Chữ P chú Phi công tài, lái tàu vũ trụ bay hoài trời xanh!', words: [{w:'Đèn Pin', icon:'🔦', p:'pờ, in, pin, đèn pin', displayP:'pờ - in - pin ➔ đèn pin'}, {w:'Pháo Hoa', icon:'🎆', p:'phờ, ao, phao, phao, sắc, pháo, pháo hoa', displayP:'phờ - ao - phao, phao - sắc - pháo ➔ pháo hoa'}, {w:'Tàu Phà', icon:'⛴️', p:'phờ, a, pha, pha, huyền, phà, tàu phà', displayP:'phờ - a - pha, pha - huyền - phà ➔ tàu phà'}] },
+      { id: 'q', upper: 'Q', lower: 'q', letterName: 'Chữ Quy', phoneme: 'quờ', characterName: 'Bạn Q Quạt Mát', icon: '🪭', animIcon: '🍊', color: '#f97316', bg: '#ffedd5', intro: 'Đây là chữ Q in hoa và chữ q in thường. Khi đi với u tạo thành âm quờ. Chữ Q biến hình thành Chiếc Quạt Xòe Mát!', rhyme: 'Chữ Q như chiếc quạt xoay, mùa hè gió mát thổi bay oi nồng!', words: [{w:'Quả Quýt', icon:'🍊', p:'quờ, ít, quyt, quyt, sắc, quýt, quả quýt', displayP:'quờ - ít - quyt, quyt - sắc - quýt ➔ quả quýt'}, {w:'Cái Quạt', icon:'🪭', p:'quờ, át, quat, quat, nặng, quạt, cái quạt', displayP:'quờ - át - quat, quat - nặng - quạt ➔ cái quạt'}, {w:'Con Quạ', icon:'🐦‍⬛', p:'quờ, a, qua, qua, nặng, quạ, con quạ', displayP:'quờ - a - qua, qua - nặng - quạ ➔ con quạ'}] },
+      { id: 'r', upper: 'R', lower: 'r', letterName: 'Chữ E-rờ', phoneme: 'rờ', characterName: 'Chú R Rùa Vàng', icon: '🐢', animIcon: '🌾', color: '#059669', bg: '#d1fae5', intro: 'Đây là chữ R in hoa và chữ r in thường. Âm đọc là rờ. Chữ R biến hình thành Chú Rùa Vàng kiên nhẫn từng bước đi!', rhyme: 'Chữ R chú Rùa kiên trì, từng bước vững chắc bước đi về nguồn!', words: [{w:'Con Rùa', icon:'🐢', p:'rờ, ua, rua, rua, huyền, rùa, con rùa', displayP:'rờ - ua - rua, rua - huyền - rùa ➔ con rùa'}, {w:'Cái Rổ', icon:'🧺', p:'rờ, ô, rô, rô, hỏi, rổ, cái rổ', displayP:'rờ - ô - rô, rô - hỏi - rổ ➔ cái rổ'}, {w:'Củ Cà Rốt', icon:'🥕', p:'rờ, ốt, rốt, củ cà rốt', displayP:'rờ - ốt - rốt ➔ củ cà rốt'}] },
+      { id: 's', upper: 'S', lower: 's', letterName: 'Chữ Ét-sì (Sờ cong)', phoneme: 'sờ', characterName: 'Bạn S Sóc Nâu', icon: '🐿️', animIcon: '🌰', color: '#ca8a04', bg: '#fefce8', intro: 'Đây là chữ S in hoa và chữ s in thường. Âm đọc là sờ uốn lưỡi. Nét chữ S uốn lượn biến hình thành Bạn Sóc Nâu đuôi xòe!', rhyme: 'Chữ S cong cong mềm mại, Sóc nâu nhảy nhót hái dẻ đầy túi!', words: [{w:'Con Sóc', icon:'🐿️', p:'sờ, óc, sóc, con sóc', displayP:'sờ - óc - sóc ➔ con sóc'}, {w:'Ngôi Sao', icon:'⭐', p:'sờ, ao, sao, ngôi sao', displayP:'sờ - ao - sao ➔ ngôi sao'}, {w:'Sư Tử', icon:'🦁', p:'sờ, ư, sư, sư tử', displayP:'sờ - ư - sư ➔ sư tử'}] },
+      { id: 't', upper: 'T', lower: 't', letterName: 'Chữ Tê', phoneme: 'tờ', characterName: 'Chú T Tàu Thủy', icon: '🚢', animIcon: '🌊', color: '#0284c7', bg: '#e0f2fe', intro: 'Đây là chữ T in hoa và chữ t in thường. Âm đọc là tờ. Chữ T vươn cao biến hình thành Chú Tàu Thủy giương cờ lướt sóng!', rhyme: 'Chữ T sừng sững thân tàu, rẽ sóng vượt biển muôn màu ngát hương!', words: [{w:'Tàu Thủy', icon:'🚢', p:'tờ, au, tau, tau, huyền, tàu, tàu thủy', displayP:'tờ - au - tau, tau - huyền - tàu ➔ tàu thủy'}, {w:'Trái Tim', icon:'❤️', p:'tờ, im, tim, trái tim', displayP:'tờ - im - tim ➔ trái tim'}, {w:'Cái Tủ', icon:'🗄️', p:'tờ, u, tu, tu, hỏi, tủ, cái tủ', displayP:'tờ - u - tu, tu - hỏi - tủ ➔ cái tủ'}] },
+      { id: 'u', upper: 'U', lower: 'u', letterName: 'Chữ U', phoneme: 'u', characterName: 'Bé U Uống Nước', icon: '🥛', animIcon: '🥤', color: '#3b82f6', bg: '#dbeafe', intro: 'Đây là chữ U in hoa và chữ u in thường. Âm đọc là u. Chữ U như chiếc ly biến hình thành Ly Sữa Ngọt Ngào cho bé khỏe mạnh!', rhyme: 'Chữ U như chiếc cốc tròn, bé uống sữa ngọt lớn khôn từng ngày!', words: [{w:'Hộp Sữa', icon:'🥛', p:'sờ, ưa, sưa, sưa, ngã, sữa, hộp sữa', displayP:'sờ - ưa - sưa, sưa - ngã - sữa ➔ hộp sữa'}, {w:'Con Cú', icon:'🦉', p:'cờ, u, cu, cu, sắc, cú, con cú', displayP:'cờ - u - cu, cu - sắc - cú ➔ con cú'}, {w:'Cái Mũ', icon:'🧢', p:'mờ, u, mu, mu, ngã, mũ, cái mũ', displayP:'mờ - u - mu, mu - ngã - mũ ➔ cái mũ'}] },
+      { id: 'uw', upper: 'Ư', lower: 'ư', letterName: 'Chữ Ư', phoneme: 'ư', characterName: 'Chú Ư Móc Câu', icon: '🦌', animIcon: '🌲', color: '#0d9488', bg: '#ccfbf1', intro: 'Đây là chữ Ư in hoa và chữ ư in thường. Âm đọc là ư. Chữ Ư có móc câu biến hình thành Chú Hươu Sao nhảy nhót trong rừng!', rhyme: 'Chữ Ư có chiếc móc xinh, bạn Hươu sao nhỏ lượn quanh núi đồi!', words: [{w:'Con Hươu', icon:'🦌', p:'hờ, ưu, hươu, con hươu', displayP:'hờ - ưu - hươu ➔ con hươu'}, {w:'Lá Thư', icon:'✉️', p:'thờ, ư, thư, lá thư', displayP:'thờ - ư - thư ➔ lá thư'}, {w:'Mực Đen', icon:'🦑', p:'mờ, ức, mực, con mực', displayP:'mờ - ức - mực ➔ con mực'}] },
+      { id: 'v', upper: 'V', lower: 'v', letterName: 'Chữ Vê', phoneme: 'vờ', characterName: 'Bé V Voi Con', icon: '🐘', animIcon: '🌿', color: '#8b5cf6', bg: '#ede9fe', intro: 'Đây là chữ V in hoa và chữ v in thường. Âm đọc là vờ. Chữ V hai nét chụm đáy biến hình thành Chú Voi Con vung vẩy vòi!', rhyme: 'Chữ V chú Voi vẫy tai, vòi dài phun nước mát lành rừng xanh!', words: [{w:'Voi Con', icon:'🐘', p:'vờ, oi, voi, voi con', displayP:'vờ - oi - voi ➔ voi con'}, {w:'Con Vịt', icon:'🦆', p:'vờ, ít, vịt, con vịt', displayP:'vờ - ít - vịt ➔ con vịt'}, {w:'Quyển Vở', icon:'📖', p:'vờ, ơ, vơ, vơ, hỏi, vở, quyển vở', displayP:'vờ - ơ - vơ, vơ - hỏi - vở ➔ quyển vở'}] },
+      { id: 'x', upper: 'X', lower: 'x', letterName: 'Chữ Ích-xì (Xờ nhẹ)', phoneme: 'xờ', characterName: 'Bạn X Xe Đạp', icon: '🚲', animIcon: '🛴', color: '#ea580c', bg: '#ffedd5', intro: 'Đây là chữ X in hoa và chữ x in thường. Âm đọc là xờ xì nhẹ. Chữ X bắt chéo biến hình thành Chiếc Xe Đạp bon bon trên đường!', rhyme: 'Chữ X bắt chéo hai cành, xe đạp lăn bánh lướt nhanh đến trường!', words: [{w:'Xe Đạp', icon:'🚲', p:'xờ, e, xe, xe đạp', displayP:'xờ - e - xe ➔ xe đạp'}, {w:'Xích Đu', icon:'🎡', p:'xờ, ích, xích, xích, sắc, xích, xích đu', displayP:'xờ - ích - xích, xích - sắc - xích ➔ xích đu'}, {w:'Màu Xanh', icon:'🟢', p:'xờ, anh, xanh, màu xanh', displayP:'xờ - anh - xanh ➔ màu xanh'}] },
+      { id: 'y', upper: 'Y', lower: 'y', letterName: 'Chữ I dài', phoneme: 'i', characterName: 'Bác Y Y Tá', icon: '🩺', animIcon: '🏥', color: '#db2777', bg: '#fce7f3', intro: 'Đây là chữ Y in hoa và chữ y in thường. Âm đọc là i. Chữ Y dáng cao thẳng biến hình thành Bác Y Tá nhân ái chăm sóc bệnh nhân!', rhyme: 'Chữ Y dáng đứng thẳng thon, bác Y tá tốt chăm non nụ cười!', words: [{w:'Bác Y Tá', icon:'🩺', p:'y, tờ, a, ta, ta, sắc, tá, y tá', displayP:'y, tờ - a - ta - sắc - tá ➔ y tá'}, {w:'Chim Yến', icon:'🕊️', p:'y, ên, yên, yên, sắc, yến, chim yến', displayP:'y - ên - yên, yên - sắc - yến ➔ chim yến'}, {w:'Quả Vải', icon:'🍒', p:'vờ, ai, vai, vai, hỏi, vải, quả vải', displayP:'vờ - ai - vai, vai - hỏi - vải ➔ quả vải'}] }
+    ];
+
+    // Kho Từ Ghép GDPT 2018 (Chuẩn hóa công thức đánh vần: Âm đầu + Vần -> Tiếng -> Tiếng + Dấu -> Từ)
+    const BLEND_DICTIONARY = {
+      'ca': { text: 'Cái Ca', icon: '🥛', sound: 'cờ, a, ca, cái ca', exp: 'Vật dụng đựng nước sạch hàng ngày.' },
+      'ca/sac': { text: 'Con Cá', icon: '🐟', sound: 'cờ, a, ca, ca, sắc, cá, con cá', exp: 'Loài vật bơi dưới nước có vây và đuôi xinh xắn.' },
+      'ca/huyen': { text: 'Quả Cà', icon: '🍆', sound: 'cờ, a, ca, ca, huyền, cà, quả cà', exp: 'Loại rau quả giàu vitamin thơm ngon.' },
+      'ba': { text: 'Ba / Bố', icon: '👨', sound: 'bờ, a, ba, người ba', exp: 'Người cha kính yêu luôn chở che cho con.' },
+      'ba/huyen': { text: 'Bà Ngoại', icon: '👵', sound: 'bờ, a, ba, ba, huyền, bà, bà ngoại', exp: 'Người bà hiền hậu luôn kể chuyện cổ tích cho bé.' },
+      'ba/sac': { text: 'Bắp Cải', icon: '🥬', sound: 'bờ, a, ba, ba, sắc, bá', exp: 'Từ ghép trong tiếng Việt.' },
+      'ba/nang': { text: 'Ba Đậu', icon: '🌱', sound: 'bờ, a, ba, ba, nặng, bạ', exp: 'Thanh điệu trong tiếng Việt.' },
+      'bo': { text: 'Bơ Vơ', icon: '🌿', sound: 'bờ, o, bo', exp: 'Ghép vần cơ bản.' },
+      'bo/huyen': { text: 'Con Bò', icon: '🐂', sound: 'bờ, o, bo, bo, huyền, bò, con bò', exp: 'Chú bò ăn cỏ hiền lành trên đồng xanh.' },
+      'bo/sac': { text: 'Bó Hoa', icon: '💐', sound: 'bờ, o, bo, bo, sắc, bó, bó hoa', exp: 'Bó hoa điểm mười tươi thắm dâng tặng thầy cô.' },
+      'ga': { text: 'Nhà Ga', icon: '🚉', sound: 'gờ, a, ga, nhà ga', exp: 'Nơi đón tàu hỏa đón khách muôn phương.' },
+      'ga/huyen': { text: 'Con Gà', icon: '🐔', sound: 'gờ, a, ga, ga, huyền, gà, con gà', exp: 'Chú gà mào đỏ rực gáy vang ò ó o.' },
+      'de': { text: 'Con Dê', icon: '🐐', sound: 'dờ, ê, dê, con dê', exp: 'Chú dê nhỏ thích leo vách đá non.' },
+      'de/sac': { text: 'Cái Đế', icon: '👟', sound: 'dờ, ê, dê, dê, sắc, đế, cái đế', exp: 'Phần nâng đỡ bước chân của bé.' },
+      'do': { text: 'Thước Đo', icon: '📏', sound: 'đờ, o, đo, thước đo', exp: 'Dụng cụ học tập giúp bé kẻ đường thẳng tắp.' },
+      'do/sac': { text: 'Màu Đỏ', icon: '🔴', sound: 'đờ, o, đo, đo, sắc, đỏ, màu đỏ', exp: 'Màu của tình yêu thương và cờ Tổ quốc.' },
+      'do/huyen': { text: 'Con Đò', icon: '🚣', sound: 'đờ, o, đo, đo, huyền, đò, con đò', exp: 'Phương tiện đưa người qua dòng sông quê.' },
+      'me': { text: 'Quả Me', icon: '🥜', sound: 'mờ, e, me, quả me', exp: 'Quả me chua ngọt tuổi thơ.' },
+      'me/nang': { text: 'Người Mẹ', icon: '👩', sound: 'mờ, e, me, me, nặng, mẹ, người mẹ', exp: 'Mẹ là vầng trăng ngọt ngào của bé.' },
+      'no': { text: 'Cái Nơ', icon: '🎀', sound: 'nờ, ơ, nơ, cái nơ', exp: 'Chiếc nơ cài áo lộng lẫy ngày khai trường.' },
+      'no/sac': { text: 'Pháo Nổ', icon: '💥', sound: 'nờ, ô, nô, nô, hỏi, nổ, pháo nổ', exp: 'Âm thanh rộn ràng.' },
+      'o': { text: 'Cái Ô', icon: '🌂', sound: 'ô, cái ô', exp: 'Người bạn che chở nắng mưa cho bé tới trường.' },
+      'co': { text: 'Lá Cờ', icon: '🚩', sound: 'cờ, ơ, cơ, cơ, huyền, cờ, lá cờ', exp: 'Quốc kỳ thiêng liêng rạng rỡ non sông Việt Nam.' },
+      'co/huyen': { text: 'Con Cò', icon: '🦩', sound: 'cờ, o, co, co, huyền, cò, con cò', exp: 'Cánh cò trắng muốt chao nghiêng đồng quê.' },
+      'co/sac': { text: 'Có Bạn Bè', icon: '🤝', sound: 'cờ, o, co, co, sắc, có, có bạn bè', exp: 'Tình bạn thân thiết gắn bó.' },
+      'xe': { text: 'Xe Cộ', icon: '🚲', sound: 'xờ, e, xe, xe cộ', exp: 'Phương tiện đi lại hàng ngày.' },
+      'voi': { text: 'Chú Voi', icon: '🐘', sound: 'vờ, oi, voi, chú voi', exp: 'Chú voi Bản Đôn ngộ nghĩnh đáng yêu.' }
+    };
+
+    let activeSubTab = 'garden'; // 'garden' | 'blending' | 'games'
+    let activeMiniGame = 'wheel'; // 'wheel' | 'bubbles' | 'guess' | 'print' | 'badges'
+    let currentStars = parseInt(localStorage.getItem('kids_alphabet_stars') || '0', 10);
+
+    const soundSynth = this._getAudioSynth();
+
+    const speakVN = (text, customRate = 0.85, onEndCallback = null) => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        
+        let cleanText = String(text || '')
+          .replace(/[➔>]+/g, '. ')
+          .replace(/[-–—]+/g, ', ')
+          .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        // Đảm bảo có dấu chấm câu ở cuối để giọng đọc hạ giọng trọn vẹn
+        if (!/[.!?]$/.test(cleanText)) cleanText += '.';
+
+        const utter = new SpeechSynthesisUtterance(cleanText);
+        utter.lang = 'vi-VN';
+        utter.rate = customRate;
+        utter.pitch = 1.0;
+        utter.volume = 1.0;
+
+        // Chọn giọng đọc Tiếng Việt chuẩn tự nhiên nếu máy có hỗ trợ
+        if (window.speechSynthesis.getVoices) {
+          const voices = window.speechSynthesis.getVoices();
+          const viVoice = voices.find(v => v.lang === 'vi-VN' || v.lang.startsWith('vi') || (v.name && v.name.toLowerCase().includes('vietnam')));
+          if (viVoice) utter.voice = viVoice;
+        }
+        
+        let isDone = false;
+        const completeSpeech = () => {
+          if (!isDone) {
+            isDone = true;
+            window._activeSpeechUtterance = null;
+            if (onEndCallback && typeof onEndCallback === 'function') {
+              onEndCallback();
+            }
+          }
+        };
+
+        utter.onend = completeSpeech;
+        utter.onerror = completeSpeech;
+
+        // Bảo vệ chống lỗi bộ nhớ tự động thu dọn (Garbage Collection bug) trên Chrome/Edge
+        window._activeSpeechUtterance = utter;
+
+        // Cơ chế bảo vệ dự phòng tối đa 30s
+        setTimeout(() => {
+          if (!isDone && window.speechSynthesis && !window.speechSynthesis.speaking) {
+            completeSpeech();
+          }
+        }, 30000);
+
+        window.speechSynthesis.speak(utter);
+      } else if (onEndCallback && typeof onEndCallback === 'function') {
+        setTimeout(onEndCallback, 1500);
+      }
+    };
+
+    const addStar = (amt = 1) => {
+      currentStars += amt;
+      localStorage.setItem('kids_alphabet_stars', String(currentStars));
+      const starDisplay = area.querySelector('#kids-star-counter');
+      if (starDisplay) {
+        starDisplay.textContent = `⭐ ${currentStars} Sao Vàng`;
+        starDisplay.style.transform = 'scale(1.25)';
+        setTimeout(() => { starDisplay.style.transform = 'scale(1)'; }, 300);
+      }
+    };
+
+    // LAUNCH CONFETTI BURST
+    const fireConfetti = () => {
+      for (let i = 0; i < 35; i++) {
+        const p = document.createElement('div');
+        const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        p.style.cssText = `position:fixed;top:50%;left:50%;width:${8+Math.random()*8}px;height:${8+Math.random()*8}px;background:${c};border-radius:50%;pointer-events:none;z-index:9999999;transition:all 0.85s cubic-bezier(0.25, 1, 0.5, 1);`;
+        document.body.appendChild(p);
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 80 + Math.random() * 250;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist - 50;
+        requestAnimationFrame(() => {
+          p.style.transform = `translate(${tx}px, ${ty}px) rotate(${Math.random()*360}deg) scale(0)`;
+          p.style.opacity = '0';
+        });
+        setTimeout(() => p.remove(), 900);
+      }
+    };
+
+    // RENDER MAIN CONTAINER
+    const renderContent = () => {
+      area.innerHTML = `
+        <div style="font-family:var(--font-body);animation:fadeIn 0.25s ease-out;display:flex;flex-direction:column;gap:1.25rem;">
+          
+          <!-- BANNER HERO -->
+          <div style="background:linear-gradient(135deg,#ff758c 0%,#ff7eb3 50%,#7028e4 100%);border-radius:26px;padding:1.5rem 2rem;color:#ffffff;box-shadow:0 15px 35px rgba(255,117,140,0.35);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.2rem;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:-20px;right:-20px;font-size:8rem;opacity:0.15;user-select:none;pointer-events:none;">🔤</div>
+            
+            <div style="z-index:2;">
+              <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;">
+                <span style="font-size:2rem;animation:bounce 1.5s infinite;">🦄</span>
+                <h2 style="margin:0;font-family:var(--font-title);font-size:1.6rem;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                  XỨ SỞ CHỮ CÁI DIỆU KỲ & GHÉP TỪ (GDPT 2018)
+                </h2>
+                <span style="background:#fef08a;color:#854d0e;font-size:0.78rem;font-weight:900;padding:0.2rem 0.65rem;border-radius:12px;box-shadow:0 2px 6px rgba(0,0,0,0.15);">LỚP 1 & TIỂU HỌC</span>
+              </div>
+              <p style="margin:0;font-size:0.95rem;opacity:0.95;max-width:650px;line-height:1.5;">
+                Nhân cách hóa 29 chữ cái Tiếng Việt • Giọng đọc đánh vần mẫu • Bàn ghép vần trực quan • Trò chơi tương tác & In phiếu bài tập A4
+              </p>
+            </div>
+
+            <!-- STAR BADGE & CONTROLS -->
+            <div style="display:flex;align-items:center;gap:0.75rem;z-index:2;flex-wrap:wrap;">
+              <div id="kids-star-counter" style="background:#ffffff;color:#d97706;font-family:var(--font-title);font-weight:900;font-size:1.15rem;padding:0.6rem 1.25rem;border-radius:18px;box-shadow:0 6px 18px rgba(0,0,0,0.15);display:flex;align-items:center;gap:0.4rem;transition:transform 0.2s;">
+                ⭐ ${currentStars} Sao Vàng
+              </div>
+              
+              <button id="btn-kids-full-projector" style="background:rgba(255,255,255,0.2);backdrop-filter:blur(6px);color:#ffffff;border:1.5px solid rgba(255,255,255,0.4);padding:0.6rem 1rem;border-radius:16px;font-weight:800;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;" title="Phóng to toàn màn hình máy chiếu lớp học">
+                📺 Chiếu Lớp Học
+              </button>
+            </div>
+          </div>
+
+          <!-- SUB-NAVIGATION BAR (3 PHÂN KHU) -->
+          <div style="display:flex;gap:0.75rem;background:#f8fafc;padding:0.5rem;border-radius:20px;border:2px solid #e2e8f0;flex-wrap:wrap;">
+            
+            <button id="btn-sub-garden" style="flex:1;min-width:180px;padding:0.75rem 1.2rem;border-radius:14px;border:none;font-family:var(--font-title);font-weight:800;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all 0.2s;background:${activeSubTab==='garden'?'linear-gradient(135deg,#ec4899,#db2777)':'#ffffff'};color:${activeSubTab==='garden'?'#ffffff':'#475569'};box-shadow:${activeSubTab==='garden'?'0 4px 14px rgba(236,72,153,0.35)':'none'};">
+              <span>🏰</span> 1. VƯỜN 29 CHỮ CÁI HOẠT HÌNH
+            </button>
+
+            <button id="btn-sub-blending" style="flex:1;min-width:180px;padding:0.75rem 1.2rem;border-radius:14px;border:none;font-family:var(--font-title);font-weight:800;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all 0.2s;background:${activeSubTab==='blending'?'linear-gradient(135deg,#3b82f6,#2563eb)':'#ffffff'};color:${activeSubTab==='blending'?'#ffffff':'#475569'};box-shadow:${activeSubTab==='blending'?'0 4px 14px rgba(59,130,246,0.35)':'none'};">
+              <span>🧪</span> 2. BÀN GHÉP VẦN & GHÉP TỪ
+            </button>
+
+            <button id="btn-sub-games" style="flex:1;min-width:180px;padding:0.75rem 1.2rem;border-radius:14px;border:none;font-family:var(--font-title);font-weight:800;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all 0.2s;background:${activeSubTab==='games'?'linear-gradient(135deg,#10b981,#059669)':'#ffffff'};color:${activeSubTab==='games'?'#ffffff':'#475569'};box-shadow:${activeSubTab==='games'?'0 4px 14px rgba(16,185,129,0.35)':'none'};">
+              <span>🎈</span> 3. TRÒ CHƠI ÔN LUYỆN & IN PHIẾU A4
+            </button>
+
+          </div>
+
+          <!-- DYNAMIC TAB BODY -->
+          <div id="kids-tab-body"></div>
+
+        </div>
+      `;
+
+      // Bind Sub Tabs
+      area.querySelector('#btn-sub-garden').onclick = () => { activeSubTab = 'garden'; renderContent(); };
+      area.querySelector('#btn-sub-blending').onclick = () => { activeSubTab = 'blending'; renderContent(); };
+      area.querySelector('#btn-sub-games').onclick = () => { activeSubTab = 'games'; renderContent(); };
+
+      const btnFull = area.querySelector('#btn-kids-full-projector');
+      if (btnFull) {
+        btnFull.onclick = () => {
+          soundSynth.play('pop');
+          if (!document.fullscreenElement) {
+            area.style.overflowY = 'auto';
+            area.style.maxHeight = '100vh';
+            area.style.background = '#0f172a';
+            area.style.padding = '1.5rem 2rem';
+            area.style.boxSizing = 'border-box';
+            area.requestFullscreen().catch(() => {});
+            btnFull.innerHTML = '📴 Thoát Chiếu';
+          } else {
+            document.exitFullscreen().catch(() => {});
+            area.style.overflowY = '';
+            area.style.maxHeight = '';
+            area.style.background = '';
+            area.style.padding = '';
+            btnFull.innerHTML = '📺 Chiếu Lớp Học';
+          }
+        };
+      }
+
+      document.addEventListener('fullscreenchange', () => {
+        const bf = area.querySelector('#btn-kids-full-projector');
+        if (!document.fullscreenElement) {
+          area.style.overflowY = '';
+          area.style.maxHeight = '';
+          area.style.background = '';
+          area.style.padding = '';
+          if (bf) bf.innerHTML = '📺 Chiếu Lớp Học';
+        } else {
+          area.style.overflowY = 'auto';
+          area.style.maxHeight = '100vh';
+          area.style.background = '#0f172a';
+          area.style.padding = '1.5rem 2rem';
+          area.style.boxSizing = 'border-box';
+          if (bf) bf.innerHTML = '📴 Thoát Chiếu';
+        }
+      });
+
+      // Render Active SubTab Content
+      const bodyEl = area.querySelector('#kids-tab-body');
+      if (activeSubTab === 'garden') renderGardenTab(bodyEl);
+      else if (activeSubTab === 'blending') renderBlendingTab(bodyEl);
+      else if (activeSubTab === 'games') renderGamesTab(bodyEl);
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 🏰 TAB 1: VƯỜN 29 CHỮ CÁI HOẠT HÌNH (NHẬN BIẾT MẶT CHỮ)
+    // ─────────────────────────────────────────────────────────────
+    let gardenLetterFilter = 'all'; // 'all' | 'vowels' (12 nguyên âm) | 'consonants' (17 phụ âm)
+    let isAlphabetKaraokePlaying = false;
+    let alphabetKaraokeTimer = null;
+
+    const renderGardenTab = (container) => {
+      const VOWEL_IDS = ['a','aw','aa','e','ee','i','o','oo','ow','u','uw','y'];
+      
+      let filteredLetters = ALPHABET_DATA;
+      if (gardenLetterFilter === 'vowels') {
+        filteredLetters = ALPHABET_DATA.filter(x => VOWEL_IDS.includes(x.id));
+      } else if (gardenLetterFilter === 'consonants') {
+        filteredLetters = ALPHABET_DATA.filter(x => !VOWEL_IDS.includes(x.id));
+      }
+
+      container.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:1.2rem;">
+          
+          <!-- TOP CONTROL & FILTER BAR -->
+          <div style="background:#fff;border-radius:24px;padding:1.1rem 1.6rem;border:2px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.9rem;box-shadow:0 6px 20px rgba(0,0,0,0.03);">
+            
+            <!-- FILTER BUTTONS -->
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+              <span style="font-weight:900;color:#1e293b;font-size:0.88rem;margin-right:0.2rem;">🎯 BỘ LỌC CHỮ CÁI:</span>
+              <button class="btn-filter-garden" data-filter="all" style="padding:0.45rem 0.95rem;border-radius:12px;border:1.5px solid #cbd5e1;background:${gardenLetterFilter==='all'?'#ec4899':'#f8fafc'};color:${gardenLetterFilter==='all'?'#fff':'#334155'};font-weight:900;font-size:0.85rem;cursor:pointer;transition:all 0.15s;box-shadow:${gardenLetterFilter==='all'?'0 4px 10px rgba(236,72,153,0.3)':'none'};">
+                🌈 Tất Cả (29 Chữ)
+              </button>
+              <button class="btn-filter-garden" data-filter="vowels" style="padding:0.45rem 0.95rem;border-radius:12px;border:1.5px solid #cbd5e1;background:${gardenLetterFilter==='vowels'?'#f59e0b':'#f8fafc'};color:${gardenLetterFilter==='vowels'?'#000':'#334155'};font-weight:900;font-size:0.85rem;cursor:pointer;transition:all 0.15s;box-shadow:${gardenLetterFilter==='vowels'?'0 4px 10px rgba(245,158,11,0.3)':'none'};">
+                🅰️ 12 Nguyên Âm Đơn
+              </button>
+              <button class="btn-filter-garden" data-filter="consonants" style="padding:0.45rem 0.95rem;border-radius:12px;border:1.5px solid #cbd5e1;background:${gardenLetterFilter==='consonants'?'#3b82f6':'#f8fafc'};color:${gardenLetterFilter==='consonants'?'#fff':'#334155'};font-weight:900;font-size:0.85rem;cursor:pointer;transition:all 0.15s;box-shadow:${gardenLetterFilter==='consonants'?'0 4px 10px rgba(59,130,246,0.3)':'none'};">
+                🅱️ 17 Phụ Âm Đầu
+              </button>
+            </div>
+
+            <!-- KARAOKE AUTO PLAY BUTTON -->
+            <div style="display:flex;align-items:center;gap:0.6rem;">
+              <button id="btn-karaoke-alphabet" style="background:${isAlphabetKaraokePlaying?'#ef4444':'linear-gradient(135deg,#f59e0b,#d97706)'};color:#fff;border:none;padding:0.6rem 1.3rem;border-radius:14px;font-weight:900;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:0.45rem;box-shadow:0 4px 14px rgba(245,158,11,0.35);">
+                <span>${isAlphabetKaraokePlaying?'⏸️ TẠM DỪNG':'▶️ TỰ ĐỘNG ĐỌC 29 CHỮ CÁI'}</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- 29 LETTERS GRID -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:1rem;" id="garden-cards-grid">
+            ${filteredLetters.map(item => `
+              <div class="letter-card-item" data-letter-id="${item.id}" style="background:#ffffff;border:2.5px solid ${item.color};border-radius:22px;padding:1.1rem 0.8rem;text-align:center;cursor:pointer;transition:all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);box-shadow:0 6px 16px rgba(0,0,0,0.04);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:0.35rem;" onmouseover="this.style.transform='translateY(-6px) scale(1.04)';this.style.boxShadow='0 12px 28px rgba(0,0,0,0.12)';" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 16px rgba(0,0,0,0.04)';">
+                
+                <div style="position:absolute;top:6px;right:8px;font-size:1.1rem;">${item.icon}</div>
+                
+                <div style="font-family:var(--font-title);font-weight:900;font-size:3.8rem;color:${item.color};line-height:1;margin-top:0.15rem;text-shadow:0 3px 8px rgba(0,0,0,0.12);letter-spacing:-1px;">
+                  ${item.upper} <span style="font-size:2.6rem;color:#475569;font-weight:800;">${item.lower}</span>
+                </div>
+
+                <div style="font-size:0.82rem;font-weight:800;color:#1e293b;margin-top:0.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;">
+                  ${item.name || item.letterName}
+                </div>
+
+                <div style="background:${item.bg};color:${item.color};font-size:0.75rem;font-weight:900;padding:0.2rem 0.6rem;border-radius:10px;margin-top:0.2rem;border:1px solid ${item.color}33;">
+                  Âm /${item.phoneme || item.sound}/
+                </div>
+
+              </div>
+            `).join('')}
+          </div>
+
+        </div>
+      `;
+
+      // Filter events
+      container.querySelectorAll('.btn-filter-garden').forEach(b => {
+        b.onclick = () => {
+          gardenLetterFilter = b.dataset.filter;
+          soundSynth.play('pop');
+          if (alphabetKaraokeTimer) { clearInterval(alphabetKaraokeTimer); alphabetKaraokeTimer = null; isAlphabetKaraokePlaying = false; }
+          renderGardenTab(container);
+        };
+      });
+
+      // Karaoke Auto Reader (Đọc tự động 29 chữ cái chuẩn ngữ âm & ngắt nghỉ 1.5s)
+      const karaokeBtn = container.querySelector('#btn-karaoke-alphabet');
+      if (karaokeBtn) {
+        karaokeBtn.onclick = () => {
+          if (isAlphabetKaraokePlaying) {
+            if (alphabetKaraokeTimer) clearTimeout(alphabetKaraokeTimer);
+            alphabetKaraokeTimer = null;
+            isAlphabetKaraokePlaying = false;
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            renderGardenTab(container);
+          } else {
+            isAlphabetKaraokePlaying = true;
+            karaokeBtn.textContent = '⏸️ TẠM DỪNG';
+            karaokeBtn.style.background = '#ef4444';
+
+            const cardEls = Array.from(container.querySelectorAll('.letter-card-item'));
+            let curIdx = 0;
+
+            const playNextLetter = () => {
+              if (!isAlphabetKaraokePlaying || curIdx >= cardEls.length) {
+                if (alphabetKaraokeTimer) clearTimeout(alphabetKaraokeTimer);
+                alphabetKaraokeTimer = null;
+                isAlphabetKaraokePlaying = false;
+                renderGardenTab(container);
+                return;
+              }
+
+              // Highlight active card & smooth scroll into view for classroom projector
+              cardEls.forEach(c => { c.style.transform = ''; c.style.boxShadow = '0 6px 16px rgba(0,0,0,0.04)'; });
+              const currentCard = cardEls[curIdx];
+              currentCard.style.transform = 'scale(1.15) translateY(-8px)';
+              currentCard.style.boxShadow = '0 15px 35px rgba(245,158,11,0.5)';
+              currentCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+              const lId = currentCard.getAttribute('data-letter-id');
+              const lData = ALPHABET_DATA.find(x => x.id === lId);
+              curIdx++;
+
+              if (lData) {
+                const letterTitle = lData.name || lData.letterName || `Chữ ${lData.upper}`;
+                const phonemeSound = lData.phoneme || lData.sound || lData.lower;
+                const sampleWord = (lData.words && lData.words[0]) ? lData.words[0].w : lData.characterName;
+
+                // Cấu trúc câu phát âm mẫu chuẩn mực: "Chữ A. Âm a. Trong từ Cái Áo."
+                const spokenText = `${letterTitle}. Âm ${phonemeSound}. Trong từ ${sampleWord}.`;
+
+                speakVN(spokenText, 0.85, () => {
+                  if (isAlphabetKaraokePlaying) {
+                    alphabetKaraokeTimer = setTimeout(playNextLetter, 1500);
+                  }
+                });
+              } else {
+                if (isAlphabetKaraokePlaying) {
+                  alphabetKaraokeTimer = setTimeout(playNextLetter, 1500);
+                }
+              }
+            };
+
+            playNextLetter();
+          }
+        };
+      }
+
+      // Open Letter Theater Modal
+      container.querySelectorAll('.letter-card-item').forEach(card => {
+        card.onclick = () => {
+          const lId = card.getAttribute('data-letter-id');
+          const lData = ALPHABET_DATA.find(x => x.id === lId);
+          if (lData) {
+            soundSynth.play('pop');
+            if (alphabetKaraokeTimer) { clearInterval(alphabetKaraokeTimer); alphabetKaraokeTimer = null; isAlphabetKaraokePlaying = false; }
+            openLetterTheaterModal(lData);
+          }
+        };
+      });
+    };
+
+        // MODAL RẠP XIẾC CHỮ CÁI BIẾN HÌNH HOẠT HÌNH 2 GIAI ĐOẠN (MEGA SUPER ZOOM & GREETING)
+    const openLetterTheaterModal = (item) => {
+      const oldM = document.getElementById('letter-theater-modal');
+      if (oldM) oldM.remove();
+
+      soundSynth.play('correct');
+      addStar(1);
+      fireConfetti();
+
+      let isMorphed = false;
+      const mainWord = item.words && item.words[0] ? item.words[0].w : item.characterName;
+      const mainIcon = item.words && item.words[0] ? item.words[0].icon : item.icon;
+      const greetingText = `Xin chào! Mình là chữ ${item.upper} (âm /${item.phoneme}/) trong từ ${mainWord} ${mainIcon}!`;
+
+      const m = document.createElement('div');
+      m.id = 'letter-theater-modal';
+      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(16px);z-index:9999999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.25s ease-out;';
+
+      const renderTheaterStage = () => {
+        m.innerHTML = `
+          <div style="background:#ffffff;border-radius:36px;max-width:1280px;width:96vw;max-height:94vh;overflow-y:auto;box-shadow:0 35px 100px rgba(0,0,0,0.7);border:4px solid ${item.color};position:relative;animation:zoomIn 0.25s ease-out;display:flex;flex-direction:column;">
+            
+            <!-- Top Bar -->
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.8rem;border-bottom:1.5px solid #f1f5f9;background:#f8fafc;border-radius:32px 32px 0 0;">
+              <div style="display:flex;align-items:center;gap:0.6rem;">
+                <span style="font-size:1.8rem;animation:bounce 1.5s infinite;">🦄</span>
+                <div>
+                  <h3 style="margin:0;font-family:var(--font-title);font-size:1.25rem;font-weight:900;color:#0f172a;">
+                    RẠP XIẾC CHỮ CÁI TIẾNG VIỆT — ${item.letterName.toUpperCase()}
+                  </h3>
+                  <span style="font-size:0.8rem;color:#059669;font-weight:800;">Tiếng Việt Lớp 1 Chuẩn GDPT 2018</span>
+                </div>
+              </div>
+              <button id="btn-close-theater" style="background:#e2e8f0;border:none;color:#475569;width:42px;height:42px;border-radius:50%;font-size:1.3rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background='#cbd5e1';" onmouseout="this.style.background='#e2e8f0';">✕</button>
+            </div>
+
+            <!-- 2-COLUMN WIDE BODY -->
+            <div style="display:grid;grid-template-columns:1.05fr 1.15fr;gap:0;flex:1;min-height:0;">
+              
+              <!-- LEFT COLUMN: MEGA SUPER ZOOM STAGE & MORPHING -->
+              <div style="background:linear-gradient(145deg, ${item.color} 0%, #1e1b4b 100%);color:#fff;padding:2.2rem 1.8rem;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;position:relative;overflow:hidden;">
+                
+                <!-- Radiant Glow Effect -->
+                <div style="position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);width:360px;height:360px;background:radial-gradient(circle, ${item.color}bb 0%, transparent 70%);border-radius:50%;pointer-events:none;filter:blur(30px);"></div>
+
+                <!-- Banner Lời Chào Nổi Bật -->
+                <div style="position:relative;z-index:2;background:rgba(255,255,255,0.22);backdrop-filter:blur(8px);padding:0.65rem 1.4rem;border-radius:20px;border:1.5px solid rgba(255,255,255,0.4);font-family:var(--font-title);font-size:1.15rem;font-weight:900;color:#fef08a;box-shadow:0 6px 18px rgba(0,0,0,0.25);line-height:1.4;">
+                  👋 Xin chào! Mình là chữ <span style="color:#ffffff;font-size:1.4rem;text-decoration:underline;">${item.upper}</span> trong từ <span style="color:#67e8f9;font-size:1.3rem;">${mainWord} ${mainIcon}</span>!
+                </div>
+
+                <!-- MAIN MEGA ZOOM VISUAL: SIÊU TO KHỔNG LỒ 13.5rem -->
+                <div style="position:relative;z-index:2;min-height:250px;display:flex;align-items:center;justify-content:center;margin:1rem 0;">
+                  ${!isMorphed ? `
+                    <!-- GIAI ĐOẠN 1: MẶT CHỮ PHÓNG TO SIÊU KHỔNG LỒ (13.5rem) CHO BÉ NHẬN BIẾT MẶT CHỮ -->
+                    <div style="animation:pulseGlow 2s infinite;display:flex;align-items:baseline;justify-content:center;gap:2rem;">
+                      <span style="font-family:var(--font-title);font-size:13.5rem;font-weight:900;line-height:0.9;color:#ffffff;text-shadow:0 0 55px ${item.color}, 0 0 90px rgba(255,255,255,0.8), 0 8px 25px rgba(0,0,0,0.65);letter-spacing:-4px;">
+                        ${item.upper}
+                      </span>
+                      <span style="font-family:var(--font-title);font-size:8.5rem;font-weight:800;line-height:0.9;color:#fef08a;text-shadow:0 0 40px rgba(254,240,138,0.95), 0 6px 20px rgba(0,0,0,0.5);">
+                        ${item.lower}
+                      </span>
+                    </div>
+                  ` : `
+                    <!-- GIAI ĐOẠN 2: BIẾN HÌNH HOẠT HÌNH NGỘ NGHĨNH -->
+                    <div style="animation:morphBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+                      <div style="font-size:8.5rem;animation:bounce 1.5s infinite;filter:drop-shadow(0 15px 30px rgba(0,0,0,0.5));">
+                        ${item.icon}
+                      </div>
+                      <div style="background:#ffffff;color:${item.color};font-family:var(--font-title);font-size:2.1rem;font-weight:900;padding:0.45rem 1.8rem;border-radius:24px;box-shadow:0 12px 35px rgba(0,0,0,0.35);">
+                        ${item.characterName}
+                      </div>
+                    </div>
+                  `}
+                </div>
+
+                <!-- Phonics Badge -->
+                <div style="position:relative;z-index:2;margin-bottom:0.8rem;font-size:1.05rem;font-weight:900;color:#e2e8f0;background:rgba(0,0,0,0.25);padding:0.35rem 1.2rem;border-radius:14px;">
+                  Tên chữ: <strong style="color:#fef08a;">${item.letterName}</strong> • Âm đọc: <strong style="color:#ffffff;background:${item.color};padding:0.15rem 0.6rem;border-radius:8px;">/${item.phoneme}/</strong>
+                </div>
+
+                <!-- Transform Action Buttons -->
+                <div style="position:relative;z-index:2;display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center;width:100%;">
+                  <button id="btn-toggle-morph" style="flex:1.2;min-width:200px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#ffffff;border:none;padding:0.9rem 1.4rem;border-radius:20px;font-family:var(--font-title);font-weight:900;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;box-shadow:0 8px 24px rgba(245,158,11,0.5);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)';" onmouseout="this.style.transform='scale(1)';">
+                    <span>${!isMorphed ? '🪄 BIẾN HÌNH HOẠT HÌNH' : '🔍 XEM LẠI CHỮ SIÊU TO'}</span>
+                  </button>
+
+                  <button id="btn-speak-phonics" style="flex:1;min-width:160px;background:#ffffff;color:${item.color};border:none;padding:0.9rem 1.2rem;border-radius:20px;font-weight:900;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;box-shadow:0 6px 20px rgba(0,0,0,0.25);">
+                    🔊 Đọc Lời Chào
+                  </button>
+                </div>
+
+              </div>
+
+              <!-- RIGHT COLUMN: PEDAGOGY, RHYMES, VOCABULARY & TOOLS -->
+              <div style="padding:2rem 2.2rem;display:flex;flex-direction:column;justify-content:space-between;gap:1.4rem;overflow-y:auto;">
+                
+                <!-- Lời Cô Giáo Hướng Dẫn Nét -->
+                <div style="background:#f8fafc;border-left:6px solid ${item.color};border-radius:0 20px 20px 0;padding:1.15rem 1.4rem;box-shadow:0 3px 10px rgba(0,0,0,0.03);">
+                  <div style="font-size:0.85rem;font-weight:900;color:${item.color};text-transform:uppercase;letter-spacing:1px;margin-bottom:0.35rem;display:flex;align-items:center;gap:0.4rem;">
+                    <span>🎓</span> LỜI CÔ GIÁO HƯỚNG DẪN MẶT CHỮ (GDPT 2018):
+                  </div>
+                  <div style="font-size:1.1rem;font-weight:700;color:#1e293b;line-height:1.55;">
+                    ${item.intro}
+                  </div>
+                </div>
+
+                <!-- Bài Thơ Ghi Nhớ Nét Chữ Có Nút Nghe Đọc -->
+                <div id="box-rhyme-poem" style="background:${item.bg};border:2.5px dashed ${item.color};border-radius:22px;padding:1.15rem 1.4rem;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.03);">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;flex-wrap:wrap;gap:0.4rem;">
+                    <span style="font-size:0.85rem;font-weight:900;color:${item.color};text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:0.3rem;">
+                      <span>📜</span> CÂU VÈ GHI NHỚ MẶT CHỮ:
+                    </span>
+                    <button id="btn-read-rhyme-poem" style="background:${item.color};color:#ffffff;border:none;padding:0.4rem 0.95rem;border-radius:12px;font-weight:900;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;box-shadow:0 3px 10px rgba(0,0,0,0.15);transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                      <span>🔊</span> Nghe Đọc Câu Vè
+                    </button>
+                  </div>
+                  <div style="font-size:1.35rem;font-weight:900;color:#1e293b;line-height:1.5;margin-top:0.2rem;">
+                    "${item.rhyme}"
+                  </div>
+                </div>
+
+                <!-- 3 Thẻ Từ Vựng Minh Họa Phân Tích Âm Tiết -->
+                <div>
+                  <div style="font-size:0.95rem;font-weight:900;color:#334155;margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem;">
+                    <span>🌟</span> TỪ VỰNG MINH HỌA & PHÂN TÍCH ĐÁNH VẦN:
+                  </div>
+
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.9rem;">
+                    ${item.words.map((w) => `
+                      <div class="theater-word-card" data-word="${w.w}" data-phonics="${w.p}" style="background:#ffffff;border:2.5px solid #e2e8f0;border-radius:20px;padding:1.15rem 0.65rem;text-align:center;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(0,0,0,0.03);" onmouseover="this.style.borderColor='${item.color}';this.style.transform='scale(1.05) translateY(-4px)';this.style.boxShadow='0 12px 26px rgba(0,0,0,0.09)';" onmouseout="this.style.borderColor='#e2e8f0';this.style.transform='';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.03)';">
+                        <div style="font-size:3rem;margin-bottom:0.25rem;">${w.icon}</div>
+                        <div style="font-weight:900;font-size:1.2rem;color:#0f172a;">${w.w}</div>
+                        <div style="font-size:0.85rem;color:#64748b;font-weight:800;margin-top:0.25rem;background:#f1f5f9;padding:0.2rem 0.55rem;border-radius:8px;display:inline-block;">${w.displayP || w.p}</div>
+                        <div style="margin-top:0.5rem;font-size:0.82rem;color:${item.color};font-weight:900;display:flex;align-items:center;justify-content:center;gap:0.25rem;">
+                          <span>🔊</span> Nghe đọc
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <!-- 2 Large Action Buttons -->
+                <div style="display:flex;gap:0.9rem;border-top:1.5px solid #f1f5f9;padding-top:1.25rem;flex-wrap:wrap;">
+                  <button id="btn-open-magic-tracing" style="flex:1;min-width:210px;background:linear-gradient(135deg,#ec4899,#db2777);color:#fff;border:none;padding:0.9rem 1.4rem;border-radius:18px;font-weight:900;font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;box-shadow:0 6px 20px rgba(236,72,153,0.35);">
+                    <span>✍️</span> TẬP TÔ NÉT CHỮ PHÁT SÁNG
+                  </button>
+
+                                    <button id="btn-theater-open-tree" style="flex:1;min-width:210px;background:linear-gradient(135deg,#0284c7,#0369a1);color:#ffffff;border:none;padding:0.9rem 1.4rem;border-radius:20px;font-family:var(--font-title);font-weight:900;font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;box-shadow:0 8px 24px rgba(2,132,199,0.35);transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.04)';" onmouseout="this.style.transform='scale(1)';">
+                    <span>🌳</span> XEM SƠ ĐỒ CÂY GHÉP ÂM (${item.upper})
+                  </button>
+                  <button id="btn-print-letter-worksheet" style="flex:1;min-width:210px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:0.9rem 1.4rem;border-radius:18px;font-weight:900;font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem;box-shadow:0 6px 20px rgba(16,185,129,0.35);">
+                    <span>🖨️</span> IN PHIẾU BÀI TẬP & TÔ MÀU A4
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+        // Bind events
+        m.querySelector('#btn-close-theater').onclick = () => m.remove();
+
+        m.querySelector('#btn-toggle-morph').onclick = () => {
+          isMorphed = !isMorphed;
+          soundSynth.play('win');
+          fireConfetti();
+          renderTheaterStage();
+          if (isMorphed) {
+            speakVN(`Biến hình! Chữ ${item.upper} biến thành ${item.characterName}!`);
+          } else {
+            speakVN(greetingText);
+          }
+        };
+
+        m.querySelector('#btn-speak-phonics').onclick = () => {
+          soundSynth.play('pop');
+          speakVN(greetingText);
+        };
+
+        const btnReadRhyme = m.querySelector('#btn-read-rhyme-poem');
+        if (btnReadRhyme) {
+          btnReadRhyme.onclick = () => {
+            soundSynth.play('pop');
+            speakVN(item.rhyme);
+          };
+        }
+
+        const boxRhyme = m.querySelector('#box-rhyme-poem');
+        if (boxRhyme) {
+          boxRhyme.onclick = (e) => {
+            if (e.target !== btnReadRhyme) {
+              soundSynth.play('pop');
+              speakVN(item.rhyme);
+            }
+          };
+        }
+
+        m.querySelectorAll('.theater-word-card').forEach(wCard => {
+          wCard.onclick = () => {
+            const word = wCard.getAttribute('data-word');
+            const ph = wCard.getAttribute('data-phonics');
+            soundSynth.play('correct');
+            speakVN(`${ph} ➔ ${word}!`);
+          };
+        });
+
+        m.querySelector('#btn-open-magic-tracing').onclick = () => {
+          openMagicTraceCanvas(item);
+        };
+
+              const btnOpenTree = m.querySelector('#btn-theater-open-tree');
+      if (btnOpenTree) {
+        btnOpenTree.onclick = () => {
+          m.remove();
+          globalSelectedConsonant = item.id;
+          activeSubTab = 'blending';
+          soundSynth.play('pop');
+          renderContent();
+        };
+      }
+
+      m.querySelector('#btn-print-letter-worksheet').onclick = () => {
+          printLetterWorksheetA4(item);
+        };
+      };
+
+      document.body.appendChild(m);
+      renderTheaterStage();
+
+      // AUTO GREETING VOICE: "Xin chào! Mình là chữ C trong từ Con Cá!"
+      setTimeout(() => {
+        speakVN(greetingText);
+      }, 250);
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // ✍️ BẢNG TẬP TÔ VỞ 4 Ô LY TIỂU HỌC GDPT 2018 (CHỮ HOA & CHỮ THƯỜNG SONG HÀNH)
+    // ─────────────────────────────────────────────────────────────
+    const openMagicTraceCanvas = (item) => {
+      const traceM = document.createElement('div');
+      traceM.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.95);backdrop-filter:blur(18px);z-index:99999999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.25s ease-out;';
+
+      let currentBrush = 'rainbow';
+      let fontStyleMode = 'handwriting'; // 'handwriting' (Viết Tay Tiểu Học) | 'print' (Chữ In Chuẩn)
+      let demoAnimId = null;
+      let userDrawnPoints = [];
+
+      traceM.innerHTML = `
+        <div style="background:#0b0f19;border-radius:36px;max-width:1260px;width:96vw;max-height:94vh;overflow-y:auto;padding:1.8rem 2.2rem;box-shadow:0 35px 100px rgba(0,0,0,0.85);border:3.5px solid #f472b6;color:#fff;display:flex;flex-direction:column;gap:1.1rem;position:relative;">
+          
+          <!-- Close Button -->
+          <button id="btn-close-trace" style="position:absolute;top:1.2rem;right:1.4rem;background:rgba(255,255,255,0.18);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.2rem;cursor:pointer;font-weight:900;z-index:10;">✕</button>
+
+          <!-- Top Navigation Header -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+            <div>
+              <div style="font-size:0.82rem;font-weight:900;color:#f472b6;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem;display:flex;align-items:center;gap:0.4rem;">
+                <span>✍️</span> VỞ TẬP VIẾT 4 Ô LY CHUẨN BỘ GIÁO DỤC & ĐÀO TẠO (GDPT 2018)
+              </div>
+              <h2 style="margin:0;font-family:var(--font-title);font-size:1.75rem;font-weight:900;color:#ffffff;">
+                Luyện Viết: <span style="color:#fef08a;font-size:2.4rem;text-shadow:0 0 25px rgba(254,240,138,0.85);">${item.upper}</span> (Chữ Hoa) & <span style="color:#38bdf8;font-size:2.4rem;text-shadow:0 0 25px rgba(56,189,248,0.85);">${item.lower}</span> (Chữ Thường)
+              </h2>
+            </div>
+
+            <!-- Kiểu Chữ Switcher & Bút Vẽ -->
+            <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+              
+              <!-- Style Switcher -->
+              <div style="display:flex;background:rgba(255,255,255,0.1);padding:0.25rem;border-radius:14px;border:1px solid rgba(255,255,255,0.2);">
+                <button id="btn-mode-handwriting" style="padding:0.35rem 0.85rem;border-radius:10px;border:none;background:#3b82f6;color:#fff;font-weight:900;font-size:0.82rem;cursor:pointer;">
+                  ✒️ Viết Tay Tiểu Học
+                </button>
+                <button id="btn-mode-print" style="padding:0.35rem 0.85rem;border-radius:10px;border:none;background:transparent;color:#cbd5e1;font-weight:900;font-size:0.82rem;cursor:pointer;">
+                  🔤 Chữ In Chuẩn
+                </button>
+              </div>
+
+              <!-- 4 Magic Brush Selectors -->
+              <div style="display:flex;gap:0.4rem;align-items:center;background:rgba(255,255,255,0.08);padding:0.35rem 0.55rem;border-radius:14px;border:1px solid rgba(255,255,255,0.15);">
+                <button class="btn-trace-brush active" data-brush="rainbow" style="padding:0.35rem 0.65rem;border-radius:10px;border:1.5px solid #f472b6;background:linear-gradient(135deg,#f43f5e,#ec4899,#3b82f6);color:#fff;font-weight:900;font-size:0.78rem;cursor:pointer;">🌈 Cầu Vồng</button>
+                <button class="btn-trace-brush" data-brush="gold" style="padding:0.35rem 0.65rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:#334155;color:#fef08a;font-weight:800;font-size:0.78rem;cursor:pointer;">⭐ Kim Tuyến</button>
+                <button class="btn-trace-brush" data-brush="pink" style="padding:0.35rem 0.65rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:#334155;color:#f472b6;font-weight:800;font-size:0.78rem;cursor:pointer;">🍬 Kẹo Hồng</button>
+                <button class="btn-trace-brush" data-brush="aqua" style="padding:0.35rem 0.65rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:#334155;color:#38bdf8;font-weight:800;font-size:0.78rem;cursor:pointer;">💧 Nước Biển</button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- PRIMARY 4-LINE GRID CANVAS CONTAINER -->
+          <div style="background:#020617;border-radius:28px;border:2.5px solid #334155;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:inset 0 4px 30px rgba(0,0,0,0.8);">
+            <canvas id="kids-trace-canvas" width="1180" height="420" style="width:100%;max-width:1180px;height:420px;touch-action:none;cursor:crosshair;"></canvas>
+          </div>
+
+          <!-- Bottom Control Toolbar -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.85rem;">
+            
+            <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+              <button id="btn-demo-trace-anim" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:16px;font-weight:800;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:0.45rem;box-shadow:0 4px 14px rgba(99,102,241,0.4);">
+                <span>▶️</span> Xem Nét Bút Chạy Mẫu (Chữ Hoa ➔ Chữ Thường)
+              </button>
+              <button id="btn-clear-trace" style="background:#334155;color:#fff;border:none;padding:0.75rem 1.3rem;border-radius:16px;font-weight:700;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;">
+                <span>🔄</span> Xóa Tô Lại
+              </button>
+              <button id="btn-trace-sound" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:0.75rem 1.3rem;border-radius:16px;font-weight:700;font-size:0.92rem;cursor:pointer;">
+                🔊 Nghe Hướng Dẫn Nét
+              </button>
+            </div>
+
+            <button id="btn-done-trace" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:0.85rem 2.2rem;border-radius:18px;font-weight:900;font-size:1.1rem;cursor:pointer;box-shadow:0 8px 24px rgba(16,185,129,0.5);display:flex;align-items:center;gap:0.5rem;">
+              <span>🌟</span> HOÀN THÀNH (+2 SAO)
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+      document.body.appendChild(traceM);
+      traceM.querySelector('#btn-close-trace').onclick = () => {
+        if (demoAnimId) cancelAnimationFrame(demoAnimId);
+        traceM.remove();
+      };
+
+      const canvas = traceM.querySelector('#kids-trace-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const topY = 60;   // Dòng 5 (Đỉnh chữ hoa 4 ly: 240px)
+      const midY = 180;  // Dòng 3 (Đỉnh chữ thường 2 ly: 120px)
+      const baseY = 300; // Dòng 1 (Đường kẻ đáy đậm đỏ)
+      const cx1 = 340;   // Tâm Chữ Hoa
+      const cx2 = 820;   // Tâm Chữ Thường
+
+      // HỆ THỐNG PHÂN BIỆT RÕ RÀNG 100% GIỮA CHỮ VIẾT TAY TIỂU HỌC & CHỮ IN CHUẨN
+      const getMultiStrokeLetterData = (letterId, isPrint = false) => {
+        const char = String(letterId || 'c').toLowerCase();
+        let strokesHoa = [];
+        let strokesThuong = [];
+
+        const line = (x1, y1, x2, y2, count = 25) => {
+          const res = [];
+          for (let i = 0; i <= count; i++) {
+            const t = i / count;
+            res.push({ x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t });
+          }
+          return res;
+        };
+
+        if (isPrint) {
+          // ═══════════════════════════════════════════════════════════
+          // 🔤 1. CHẾ ĐỘ CHỮ IN CHUẨN (CÁC NÉT THẲNG, HÌNH HỌC, DỨT KHOÁT)
+          // ═══════════════════════════════════════════════════════════
+          if (char === 'a' || char === 'aw' || char === 'aa') {
+            // A in hoa: 3 nét thẳng góc cạnh
+            strokesHoa.push(line(cx1 - 75, baseY, cx1, topY + 15, 30));
+            strokesHoa.push(line(cx1, topY + 15, cx1 + 75, baseY, 30));
+            strokesHoa.push(line(cx1 - 42, midY + 20, cx1 + 42, midY + 20, 20));
+
+            // a in thường: Nét tròn đều & nét thẳng đứng không móc đuôi
+            const sa = [];
+            for (let i = 0; i <= 35; i++) {
+              const a = (i / 35) * Math.PI * 2 + Math.PI / 2;
+              sa.push({ x: cx2 - 15 - Math.cos(a) * 45, y: (midY + baseY) / 2 - Math.sin(a) * 55 });
+            }
+            strokesThuong.push(sa);
+            strokesThuong.push(line(cx2 + 30, midY + 10, cx2 + 30, baseY, 25));
+          } else if (char === 'b') {
+            // B in hoa: 1 nét đứng + 2 nửa tròn đều
+            strokesHoa.push(line(cx1 - 60, topY + 15, cx1 - 60, baseY, 30));
+            const sb1 = [];
+            for (let i = 0; i <= 25; i++) {
+              const a = (i / 25) * Math.PI - Math.PI / 2;
+              sb1.push({ x: cx1 - 60 + Math.cos(a) * 65, y: topY + 70 + Math.sin(a) * 55 });
+            }
+            strokesHoa.push(sb1);
+            const sb2 = [];
+            for (let i = 0; i <= 25; i++) {
+              const a = (i / 25) * Math.PI - Math.PI / 2;
+              sb2.push({ x: cx1 - 60 + Math.cos(a) * 75, y: midY + 65 + Math.sin(a) * 55 });
+            }
+            strokesHoa.push(sb2);
+
+            // b in thường: 1 nét đứng + 1 bụng tròn
+            strokesThuong.push(line(cx2 - 35, topY + 15, cx2 - 35, baseY, 35));
+            const sb3 = [];
+            for (let i = 0; i <= 30; i++) {
+              const a = (i / 30) * Math.PI * 2 - Math.PI / 2;
+              sb3.push({ x: cx2 + 10 - Math.cos(a) * 45, y: (midY + baseY) / 2 - Math.sin(a) * 55 });
+            }
+            strokesThuong.push(sb3);
+          } else if (char === 'c') {
+            // C in hoa: Hình bán nguyệt tròn đều
+            const sc1 = [];
+            for (let i = 0; i <= 60; i++) {
+              const a = (i / 60) * Math.PI * 1.5 - 0.75;
+              sc1.push({ x: cx1 + Math.cos(a) * 85, y: (topY + baseY) / 2 + Math.sin(a) * 115 });
+            }
+            strokesHoa.push(sc1);
+
+            // c in thường
+            const sc2 = [];
+            for (let i = 0; i <= 50; i++) {
+              const a = (i / 50) * Math.PI * 1.5 - 0.75;
+              sc2.push({ x: cx2 + Math.cos(a) * 55, y: (midY + baseY) / 2 + Math.sin(a) * 55 });
+            }
+            strokesThuong.push(sc2);
+          } else if (char === 'o' || char === 'oo' || char === 'ow') {
+            const so1 = [];
+            for (let i = 0; i <= 70; i++) {
+              const a = (i / 70) * Math.PI * 2 + Math.PI / 2;
+              so1.push({ x: cx1 - Math.cos(a) * 85, y: (topY + baseY) / 2 - Math.sin(a) * 115 });
+            }
+            strokesHoa.push(so1);
+
+            const so2 = [];
+            for (let i = 0; i <= 50; i++) {
+              const a = (i / 50) * Math.PI * 2 + Math.PI / 2;
+              so2.push({ x: cx2 - Math.cos(a) * 55, y: (midY + baseY) / 2 - Math.sin(a) * 55 });
+            }
+            strokesThuong.push(so2);
+          } else {
+            // Chữ in mặc định
+            const sdef1 = [];
+            for (let i = 0; i <= 70; i++) {
+              const a = (i / 70) * Math.PI * 1.6 - 0.8;
+              sdef1.push({ x: cx1 + Math.cos(a) * 85, y: (topY + baseY) / 2 + Math.sin(a) * 115 });
+            }
+            strokesHoa.push(sdef1);
+
+            const sdef2 = [];
+            for (let i = 0; i <= 50; i++) {
+              const a = (i / 50) * Math.PI * 1.6 - 0.8;
+              sdef2.push({ x: cx2 + Math.cos(a) * 55, y: (midY + baseY) / 2 + Math.sin(a) * 55 });
+            }
+            strokesThuong.push(sdef2);
+          }
+        } else {
+          // ═══════════════════════════════════════════════════════════
+          // ✒️ 2. CHẾ ĐỘ CHỮ VIẾT TAY TIỂU HỌC (CHUẨN QĐ 31/2002 & GDPT 2018)
+          // ═══════════════════════════════════════════════════════════
+          if (char === 'a' || char === 'aw' || char === 'aa') {
+            // A HOA VIẾT TAY:
+            // Nét 1: Nét móc ngược trái (từ dòng 2 uốn lượn lên đỉnh dòng 5)
+            const sA1 = [];
+            for (let i = 0; i <= 35; i++) {
+              const t = i / 35;
+              const x = (1-t)*(1-t)*(cx1 - 75) + 2*(1-t)*t*(cx1 - 85) + t*t*cx1;
+              const y = (1-t)*(1-t)*(midY + 50) + 2*(1-t)*t*(topY + 30) + t*t*topY;
+              sA1.push({ x, y });
+            }
+            strokesHoa.push(sA1);
+
+            // Nét 2: Nét móc ngược phải (từ đỉnh kéo thẳng xuống đáy và uốn lượn móc lên dòng 2)
+            const sA2 = [];
+            for (let i = 0; i <= 35; i++) {
+              const t = i / 35;
+              if (t < 0.75) {
+                const u = t / 0.75;
+                sA2.push({ x: cx1 + u * 75, y: topY + u * 240 });
+              } else {
+                const u = (t - 0.75) / 0.25;
+                sA2.push({ x: cx1 + 75 + u * 25, y: baseY - u * 35 });
+              }
+            }
+            strokesHoa.push(sA2);
+
+            // Nét 3: Nét lượn ngang thân (lượn sóng chữ A hoa)
+            const sA3 = [];
+            for (let i = 0; i <= 25; i++) {
+              const t = i / 25;
+              sA3.push({ x: cx1 - 60 + t * 120, y: midY + 20 - Math.sin(t * Math.PI * 2) * 14 });
+            }
+            strokesHoa.push(sA3);
+
+            // a THƯỜNG VIẾT TAY:
+            // Nét 1: Cong kín
+            const sa1 = [];
+            for (let i = 0; i <= 40; i++) {
+              const ang = (i / 40) * Math.PI * 2 + Math.PI / 2;
+              sa1.push({ x: cx2 - 20 - Math.cos(ang) * 45, y: (midY + baseY) / 2 - Math.sin(ang) * 60 });
+            }
+            strokesThuong.push(sa1);
+
+            // Nét 2: Móc ngược ĐÁ ĐUÔI LÊN CHẠM GIỮA DÒNG 1 VÀ 2
+            const sa2 = [];
+            for (let i = 0; i <= 30; i++) {
+              const t = i / 30;
+              if (t < 0.7) {
+                const u = t / 0.7;
+                sa2.push({ x: cx2 + 25, y: midY + u * 120 });
+              } else {
+                const u = (t - 0.7) / 0.3;
+                sa2.push({ x: cx2 + 25 + u * 30, y: baseY - u * 35 }); // Đá đuôi lên!
+              }
+            }
+            strokesThuong.push(sa2);
+          } else if (char === 'b') {
+            // B HOA VIẾT TAY: Nét 1 móc ngược trái + Nét 2 thắt nút giữa
+            const sb1 = [];
+            for (let i = 0; i <= 35; i++) {
+              const t = i / 35;
+              sb1.push({ x: cx1 - 65 + Math.sin(t * Math.PI) * 10, y: topY + 20 + t * 220 });
+            }
+            strokesHoa.push(sb1);
+
+            const sb2 = [];
+            // Bụng trên
+            for (let i = 0; i <= 25; i++) {
+              const a = (i / 25) * Math.PI - Math.PI / 2;
+              sb2.push({ x: cx1 - 65 + Math.cos(a) * 75, y: topY + 60 + Math.sin(a) * 55 });
+            }
+            // Thắt nút ở giữa
+            sb2.push({ x: cx1 - 45, y: midY });
+            // Bụng dưới
+            for (let i = 0; i <= 25; i++) {
+              const a = (i / 25) * Math.PI - Math.PI / 2;
+              sb2.push({ x: cx1 - 65 + Math.cos(a) * 85, y: topY + 175 + Math.sin(a) * 65 });
+            }
+            strokesHoa.push(sb2);
+
+            // b THƯỜNG VIẾT TAY: Nét khuyết trên cao 5 ly + Thắt nút nhỏ ở đỉnh dòng 3
+            const sb3 = [];
+            // Nét khuyết trên
+            for (let i = 0; i <= 40; i++) {
+              const t = i / 40;
+              if (t < 0.5) {
+                const u = t / 0.5;
+                sb3.push({ x: cx2 - 35 + u * 35, y: midY - u * 120 });
+              } else {
+                const u = (t - 0.5) / 0.5;
+                sb3.push({ x: cx2 - u * 35, y: topY + u * 240 });
+              }
+            }
+            // Nét móc thắt
+            for (let i = 0; i <= 25; i++) {
+              const a = (i / 25) * Math.PI - Math.PI / 2;
+              sb3.push({ x: cx2 - 35 + Math.cos(a) * 55, y: (midY + baseY) / 2 + Math.sin(a) * 60 });
+            }
+            strokesThuong.push(sb3);
+          } else if (char === 'c') {
+            // C HOA VIẾT TAY: Cong dưới kết hợp cong trái uốn lượn
+            const s1 = [];
+            for (let i = 0; i <= 80; i++) {
+              const t = i / 80;
+              const x = (1-t)*(1-t)*(1-t)*(cx1 + 80) + 3*(1-t)*(1-t)*t*(cx1 - 20) + 3*(1-t)*t*t*(cx1 - 140) + t*t*t*(cx1 + 90);
+              const y = (1-t)*(1-t)*(1-t)*(topY + 50) + 3*(1-t)*(1-t)*t*(topY - 18) + 3*(1-t)*t*t*(baseY + 18) + t*t*t*(baseY - 50);
+              s1.push({ x, y });
+            }
+            strokesHoa.push(s1);
+
+            // c THƯỜNG VIẾT TAY: Cong hở phải có đuôi móc lên
+            const s2 = [];
+            for (let i = 0; i <= 60; i++) {
+              const t = i / 60;
+              const x = (1-t)*(1-t)*(1-t)*(cx2 + 50) + 3*(1-t)*(1-t)*t*(cx2 - 15) + 3*(1-t)*t*t*(cx2 - 90) + t*t*t*(cx2 + 60);
+              const y = (1-t)*(1-t)*(1-t)*(midY + 30) + 3*(1-t)*(1-t)*t*(midY - 12) + 3*(1-t)*t*t*(baseY + 12) + t*t*t*(baseY - 35);
+              s2.push({ x, y });
+            }
+            strokesThuong.push(s2);
+          } else {
+            // Mặc định chữ viết tay
+            const sh = [];
+            for (let i = 0; i <= 80; i++) {
+              const ang = (i / 80) * Math.PI * 1.6 - 0.8;
+              sh.push({ x: cx1 + Math.cos(ang) * 90, y: (topY + baseY) / 2 + Math.sin(ang) * 120 });
+            }
+            strokesHoa.push(sh);
+
+            const st = [];
+            for (let i = 0; i <= 60; i++) {
+              const ang = (i / 60) * Math.PI * 1.6 - 0.8;
+              st.push({ x: cx2 + Math.cos(ang) * 55, y: (midY + baseY) / 2 + Math.sin(ang) * 60 });
+            }
+            strokesThuong.push(st);
+          }
+        }
+
+        return { strokesHoa, strokesThuong };
+      };
+
+            // VẼ VỞ Ô LY & VẼ HÌNH MẪU ĐỒNG BỘ 100% THEO CHẾ ĐỘ ĐANG CHỌN
+      const drawCanvasContent = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const cell = 60;
+
+        // Kẻ các đường dọc mờ
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+        ctx.lineWidth = 1;
+        for (let x = 30; x <= canvas.width - 30; x += cell) {
+          ctx.beginPath();
+          ctx.moveTo(x, topY - 20);
+          ctx.lineTo(x, baseY + 30);
+          ctx.stroke();
+        }
+
+        // 5 Dòng kẻ ngang ô ly
+        for (let r = 0; r <= 4; r++) {
+          const y = topY + r * cell;
+          ctx.beginPath();
+          if (r === 4) {
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
+            ctx.lineWidth = 3;
+          } else if (r === 2) {
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+            ctx.lineWidth = 1.6;
+          } else {
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.2)';
+            ctx.lineWidth = 1.2;
+          }
+          ctx.moveTo(30, y);
+          ctx.lineTo(canvas.width - 30, y);
+          ctx.stroke();
+        }
+
+        // Nhãn dòng kẻ
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText('Dòng 5 (Đỉnh chữ hoa 4 ly)', 35, topY - 8);
+        ctx.fillText('Dòng 3 (Đỉnh chữ thường 2 ly)', 35, midY - 8);
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.95)';
+        ctx.fillText('Đường kẻ đáy 1 (Chân chữ đứng)', 35, baseY + 20);
+
+        const isPrint = (fontStyleMode === 'print');
+        const { strokesHoa, strokesThuong } = getMultiStrokeLetterData(item.id, isPrint);
+
+        // 1. VẼ HÌNH MẪU CHỮ HOA (BÊN TRÁI cx1=340) & CHỮ THƯỜNG (BÊN PHẢI cx2=820) ĐỒNG BỘ 100%
+        ctx.save();
+        ctx.strokeStyle = 'rgba(244, 114, 182, 0.55)';
+        ctx.lineWidth = 6;
+        ctx.setLineDash([14, 10]);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        // Vẽ từng nét của Chữ Hoa
+        strokesHoa.forEach(stroke => {
+          if (stroke.length > 0) {
+            ctx.beginPath();
+            stroke.forEach((p, idx) => {
+              if (idx === 0) ctx.moveTo(p.x, p.y);
+              else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+          }
+        });
+
+        // Vẽ từng nét của Chữ Thường
+        strokesThuong.forEach(stroke => {
+          if (stroke.length > 0) {
+            ctx.beginPath();
+            stroke.forEach((p, idx) => {
+              if (idx === 0) ctx.moveTo(p.x, p.y);
+              else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+          }
+        });
+        ctx.restore();
+
+        // 2. ĐÁNH DẤU ĐIỂM ĐẶT BÚT SỐ 1 🟢 & MŨI TÊN ➔ CHO CẢ CHỮ HOA VÀ CHỮ THƯỜNG
+        if (strokesHoa.length > 0 && strokesHoa[0].length > 0) {
+          const startHoa = strokesHoa[0][0];
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.font = 'bold 13px sans-serif';
+
+          ctx.fillStyle = '#22c55e';
+          ctx.shadowColor = '#4ade80';
+          ctx.shadowBlur = 14;
+          ctx.beginPath();
+          ctx.arc(startHoa.x, startHoa.y, 14, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText('1', startHoa.x, startHoa.y);
+
+          ctx.fillStyle = '#fef08a';
+          ctx.font = 'bold 18px sans-serif';
+          ctx.fillText('➔', startHoa.x - 26, startHoa.y);
+          ctx.restore();
+        }
+
+        if (strokesThuong.length > 0 && strokesThuong[0].length > 0) {
+          const startThuong = strokesThuong[0][0];
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.font = 'bold 13px sans-serif';
+
+          ctx.fillStyle = '#22c55e';
+          ctx.beginPath();
+          ctx.arc(startThuong.x, startThuong.y, 14, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText('1', startThuong.x, startThuong.y);
+
+          ctx.fillStyle = '#fef08a';
+          ctx.font = 'bold 18px sans-serif';
+          ctx.fillText('➔', startThuong.x - 24, startThuong.y);
+          ctx.restore();
+        }
+
+        // 3. VẼ LẠI CÁC NÉT NGƯỜI DÙNG ĐÃ TÔ (BẢO VỆ TUYỆT ĐỐI KHÔNG VẼ NỐI CHÉO KHI p2.isNew)
+        if (userDrawnPoints.length > 0) {
+          ctx.save();
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          for (let i = 1; i < userDrawnPoints.length; i++) {
+            const p1 = userDrawnPoints[i-1];
+            const p2 = userDrawnPoints[i];
+            if (p2.isNew) continue;
+            ctx.strokeStyle = p2.color;
+            ctx.shadowColor = p2.shadow;
+            ctx.shadowBlur = 16;
+            ctx.lineWidth = 16;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      };
+
+            drawCanvasContent();
+
+      // Style Switchers (Viết Tay vs In Chuẩn)
+      const btnHandwriting = traceM.querySelector('#btn-mode-handwriting');
+      const btnPrint = traceM.querySelector('#btn-mode-print');
+
+      btnHandwriting.onclick = () => {
+        fontStyleMode = 'handwriting';
+        btnHandwriting.style.background = '#3b82f6';
+        btnHandwriting.style.color = '#fff';
+        btnPrint.style.background = 'transparent';
+        btnPrint.style.color = '#cbd5e1';
+        soundSynth.play('pop');
+        drawCanvasContent();
+      };
+
+      btnPrint.onclick = () => {
+        fontStyleMode = 'print';
+        btnPrint.style.background = '#3b82f6';
+        btnPrint.style.color = '#fff';
+        btnHandwriting.style.background = 'transparent';
+        btnHandwriting.style.color = '#cbd5e1';
+        soundSynth.play('pop');
+        drawCanvasContent();
+      };
+
+      // Brush Pickers
+      traceM.querySelectorAll('.btn-trace-brush').forEach(bBtn => {
+        bBtn.onclick = () => {
+          currentBrush = bBtn.dataset.brush;
+          traceM.querySelectorAll('.btn-trace-brush').forEach(b => {
+            b.classList.remove('active');
+            b.style.borderColor = 'rgba(255,255,255,0.2)';
+            b.style.background = '#334155';
+          });
+          bBtn.classList.add('active');
+          bBtn.style.borderColor = '#f472b6';
+          bBtn.style.background = currentBrush === 'rainbow' ? 'linear-gradient(135deg,#f43f5e,#ec4899,#3b82f6)' : '#1e1b4b';
+          soundSynth.play('pop');
+        };
+      });
+
+      // Freehand Drawing with Touch & Mouse support
+      let isDrawing = false;
+      let hue = 0;
+
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * (canvas.width / rect.width),
+          y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+      };
+
+      const startDraw = (e) => {
+        isDrawing = true;
+        const pos = getPos(e);
+        let color = '#fef08a';
+        let shadow = '#f59e0b';
+        if (currentBrush === 'rainbow') {
+          hue = (hue + 8) % 360;
+          color = `hsl(${hue}, 100%, 65%)`;
+          shadow = `hsl(${hue}, 100%, 75%)`;
+        } else if (currentBrush === 'pink') {
+          color = '#f472b6'; shadow = '#ec4899';
+        } else if (currentBrush === 'aqua') {
+          color = '#38bdf8'; shadow = '#0284c7';
+        }
+        userDrawnPoints.push({ x: pos.x, y: pos.y, color: color, shadow: shadow, isNew: true });
+        draw(e);
+      };
+
+      const stopDraw = () => {
+        isDrawing = false;
+      };
+
+      const draw = (e) => {
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        
+        let color = '#fef08a';
+        let shadow = '#f59e0b';
+        if (currentBrush === 'rainbow') {
+          hue = (hue + 8) % 360;
+          color = `hsl(${hue}, 100%, 65%)`;
+          shadow = `hsl(${hue}, 100%, 75%)`;
+        } else if (currentBrush === 'pink') {
+          color = '#f472b6'; shadow = '#ec4899';
+        } else if (currentBrush === 'aqua') {
+          color = '#38bdf8'; shadow = '#0284c7';
+        }
+
+        userDrawnPoints.push({ x: pos.x, y: pos.y, color: color, shadow: shadow, isNew: false });
+
+        ctx.save();
+        ctx.lineWidth = 16;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = color;
+        ctx.shadowColor = shadow;
+        ctx.shadowBlur = 16;
+
+        const prev = userDrawnPoints[userDrawnPoints.length - 2];
+        if (prev && !prev.isNew) {
+          ctx.beginPath();
+          ctx.moveTo(prev.x, prev.y);
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        soundSynth.play('pop');
+      };
+
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mouseleave', stopDraw);
+
+      canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
+      canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
+      canvas.addEventListener('touchend', stopDraw);
+
+      // DEMO NÉT BÚT CHẠY MẪU TUẦN TỰ TỪNG NÉT (CÓ NHẤC BÚT CHUẨN XÁC 100%)
+      traceM.querySelector('#btn-demo-trace-anim').onclick = () => {
+        if (demoAnimId) cancelAnimationFrame(demoAnimId);
+        userDrawnPoints = [];
+        drawCanvasContent();
+        soundSynth.play('win');
+
+        const { strokesHoa, strokesThuong } = getMultiStrokeLetterData(item.id, fontStyleMode === 'print');
+
+        speakVN(`Bé hãy quan sát cây bút chì viết nắn nót từng nét chữ hoa ${item.upper} rồi đến chữ thường ${item.lower} nhé!`);
+
+        // Gộp tất cả các nét thành một chuỗi các nét tuần tự
+        const allStrokes = [
+          ...strokesHoa.map(s => ({ stroke: s, type: 'hoa' })),
+          ...strokesThuong.map(s => ({ stroke: s, type: 'thuong' }))
+        ];
+
+        let strokeIdx = 0;
+        let ptIdx = 0;
+        let hue = 0;
+
+        const animateProgressiveStroke = () => {
+          if (strokeIdx < allStrokes.length) {
+            const currentStrokeObj = allStrokes[strokeIdx];
+            const currentStroke = currentStrokeObj.stroke;
+
+            if (ptIdx < currentStroke.length) {
+              const pt = currentStroke[ptIdx];
+              hue = (hue + 4) % 360;
+              const color = `hsl(${hue}, 100%, 65%)`;
+              const shadow = `hsl(${hue}, 100%, 75%)`;
+
+              // Điểm đầu tiên của mỗi nét ĐƯỢC ĐÁNH DẤU isNew = true để NHẤC BÚT
+              userDrawnPoints.push({
+                x: pt.x,
+                y: pt.y,
+                color: color,
+                shadow: shadow,
+                isNew: (ptIdx === 0)
+              });
+
+              ptIdx++;
+              drawCanvasContent();
+
+              // Vẽ Đầu Bút Chì Nghiêng 45 Độ Ngay Đầu Ngòi Bút
+              ctx.save();
+              ctx.fillStyle = '#fde047';
+              ctx.shadowColor = '#f59e0b';
+              ctx.shadowBlur = 25;
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, 10, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.font = '26px sans-serif';
+              ctx.fillText('✏️', pt.x + 10, pt.y - 10);
+              ctx.restore();
+
+              soundSynth.play('pop');
+              demoAnimId = requestAnimationFrame(animateProgressiveStroke);
+            } else {
+              // Hoàn thành 1 nét -> Nhấc bút chuyển sang nét tiếp theo sau 300ms
+              strokeIdx++;
+              ptIdx = 0;
+              soundSynth.play('correct');
+              setTimeout(() => {
+                demoAnimId = requestAnimationFrame(animateProgressiveStroke);
+              }, 350);
+            }
+          } else {
+            // Hoàn thành toàn bộ các nét của cả Chữ Hoa & Chữ Thường
+            soundSynth.play('win');
+            fireConfetti();
+            addStar(1);
+            speakVN(`Hoan hô! Cây bút chì đã viết xong cả chữ hoa ${item.upper} và chữ thường ${item.lower} rất chuẩn rồi! Bây giờ bé hãy tự tay tô lại nhé!`);
+          }
+        };
+
+        demoAnimId = requestAnimationFrame(animateProgressiveStroke);
+      };
+
+            traceM.querySelector('#btn-clear-trace').onclick = () => {
+        if (demoAnimId) cancelAnimationFrame(demoAnimId);
+        userDrawnPoints = [];
+        drawCanvasContent();
+      };
+
+      traceM.querySelector('#btn-trace-sound').onclick = () => {
+        speakVN(`Quy tắc viết chữ ${item.upper} và ${item.lower}: Đặt bút tại điểm số 1, di chuyển nét bút theo hướng mũi tên chạm đường kẻ rồi dừng bút!`);
+      };
+
+      let failCount = 0;
+
+      const triggerWarningAlert = (msgText, spokenText, isOffPath = false) => {
+        failCount++;
+        soundSynth.play('wrong');
+
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        speakVN(spokenText);
+
+        let warnEl = traceM.querySelector('#trace-feedback-alert');
+        if (warnEl) warnEl.remove();
+
+        warnEl = document.createElement('div');
+        warnEl.id = 'trace-feedback-alert';
+        warnEl.style.cssText = `
+          background: linear-gradient(135deg, #fee2e2, #fef2f2);
+          border: 2.5px solid #ef4444;
+          color: #991b1b;
+          padding: 0.85rem 1.3rem;
+          border-radius: 16px;
+          font-weight: 900;
+          font-size: 0.95rem;
+          margin-bottom: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          box-shadow: 0 8px 25px rgba(239,68,68,0.25);
+          animation: shake 0.5s ease-in-out;
+        `;
+        warnEl.innerHTML = `
+          <span style="font-size:1.6rem;animation:bounce 0.8s infinite;">⚠️</span>
+          <div>
+            <div>${msgText}</div>
+            <div style="font-size:0.82rem;color:#b91c1c;margin-top:0.2rem;font-weight:700;">
+              👉 Hãy bấm nút <strong>[🗑️ Xóa Vẽ Lại]</strong> màu đỏ bên dưới để tô lại cho thật chuẩn nhé!
+            </div>
+          </div>
+        `;
+        (traceM.querySelector('.ait-card') || traceM.firstElementChild).prepend(warnEl);
+
+        // Highlight & Flash the Clear button
+        const clearBtn = traceM.querySelector('#btn-clear-trace');
+        if (clearBtn) {
+          clearBtn.style.transform = 'scale(1.1)';
+          clearBtn.style.boxShadow = '0 0 20px #ef4444';
+          clearBtn.style.border = '2.5px solid #ef4444';
+          setTimeout(() => {
+            clearBtn.style.transform = '';
+            clearBtn.style.boxShadow = '';
+            clearBtn.style.border = '';
+          }, 1200);
+        }
+      };
+
+      traceM.querySelector('#btn-done-trace').onclick = () => {
+        if (demoAnimId) cancelAnimationFrame(demoAnimId);
+
+        // Lấy toàn bộ các nét chuẩn của chữ hoa & chữ thường
+        const { strokesHoa, strokesThuong } = getMultiStrokeLetterData(item.id, fontStyleMode === 'print');
+        const allSampleStrokes = [...strokesHoa, ...strokesThuong];
+
+        const distToSegment = (px, py, x1, y1, x2, y2) => {
+          const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+          if (l2 === 0) return Math.hypot(px - x1, py - y1);
+          let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+          t = Math.max(0, Math.min(1, t));
+          return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+        };
+
+        if (!userDrawnPoints || userDrawnPoints.length < 20) {
+          triggerWarningAlert(
+            `Bé chưa tô chữ ${item.upper} kìa!`,
+            `Bé chưa tô chữ ${item.upper} kìa! Bé hãy chọn màu bút và nắn nót tô theo các nét chấm đứt phát sáng nhé!`
+          );
+          return;
+        }
+
+        const segments = [];
+        const samplePoints = [];
+        allSampleStrokes.forEach(stroke => {
+          for (let i = 0; i < stroke.length; i++) {
+            samplePoints.push(stroke[i]);
+            if (i > 0) {
+              segments.push({ x1: stroke[i - 1].x, y1: stroke[i - 1].y, x2: stroke[i].x, y2: stroke[i].y });
+            }
+          }
+        });
+
+        // 1. Kiểm tra Độ Bao Phủ (Coverage)
+        let hitCount = 0;
+        samplePoints.forEach(sp => {
+          let minD = Infinity;
+          for (let j = 0; j < userDrawnPoints.length; j += 2) {
+            const d = Math.hypot(sp.x - userDrawnPoints[j].x, sp.y - userDrawnPoints[j].y);
+            if (d < minD) minD = d;
+            if (minD <= 42) break;
+          }
+          if (minD <= 42) hitCount++;
+        });
+        const coverageRatio = (samplePoints.length > 0) ? (hitCount / samplePoints.length) : 1;
+
+        // 2. Kiểm tra Độ Chuẩn Nét (On-Track Accuracy - phát hiện vẽ lung tung)
+        let onTrackCount = 0;
+        userDrawnPoints.forEach(up => {
+          let minD = Infinity;
+          for (let s = 0; s < segments.length; s++) {
+            const seg = segments[s];
+            const d = distToSegment(up.x, up.y, seg.x1, seg.y1, seg.x2, seg.y2);
+            if (d < minD) minD = d;
+            if (minD <= 58) break;
+          }
+          if (minD <= 58) onTrackCount++;
+        });
+        const onTrackRatio = (userDrawnPoints.length > 0) ? (onTrackCount / userDrawnPoints.length) : 0;
+
+        // 3. Phân loại và cảnh báo liên tục nếu sai
+        if (onTrackRatio < 0.55) {
+          triggerWarningAlert(
+            `Nét vẽ bị chệch ra ngoài đường mẫu (${Math.round(onTrackRatio*100)}% đúng)!`,
+            `Nét vẽ bị chệch ra ngoài đường mẫu rồi! Bé hãy nhấn nút Xóa Vẽ Lại và nắn nót tô theo đường nét mẫu nhé!`,
+            true
+          );
+          return;
+        }
+
+        if (coverageRatio < 0.50) {
+          triggerWarningAlert(
+            `Bé mới tô được ${Math.round(coverageRatio*100)}% chữ cái, còn thiếu nét!`,
+            `Bé mới tô được một phần chữ ${item.upper} thôi, còn thiếu nét kìa! Bé hãy tô tiếp cho trọn vẹn cả chữ nhé!`
+          );
+          return;
+        }
+
+        // ĐẠT CHUẨN -> KHEN THƯỞNG
+        soundSynth.play('win');
+        fireConfetti();
+        addStar(2);
+
+        let warnEl = traceM.querySelector('#trace-feedback-alert');
+        if (warnEl) warnEl.remove();
+
+        warnEl = document.createElement('div');
+        warnEl.id = 'trace-feedback-alert';
+        warnEl.style.cssText = 'background:#f0fdf4;border:2.5px solid #22c55e;color:#15803d;padding:0.85rem 1.3rem;border-radius:16px;font-weight:900;font-size:0.95rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;box-shadow:0 8px 25px rgba(34,197,94,0.25);';
+        warnEl.innerHTML = '<span>🌟</span> XUẤT SẮC! Độ chuẩn xác: ' + Math.round(((coverageRatio + onTrackRatio)/2)*100) + '% — Bé nhận được +2 ⭐ Sao Vàng!';
+        (traceM.querySelector('.ait-card') || traceM.firstElementChild).prepend(warnEl);
+
+        if (coverageRatio >= 0.70 && onTrackRatio >= 0.75) {
+          speakVN(`Xuất sắc! Bé tô chữ ${item.upper} và ${item.lower} rất đẹp, chuẩn nét ô ly! Bé nhận được hai Sao Vàng!`);
+        } else {
+          speakVN(`Bé tô chữ ${item.upper} khá tốt rồi! Lần sau bé uốn nét nắn nót hơn nữa nhé!`);
+        }
+
+        setTimeout(() => traceM.remove(), 1600);
+      };
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 🖨️ IN PHIẾU BÀI TẬP TÔ CHỮ & TÔ MÀU A4 (PRINTABLE WORKSHEET)
+    // ─────────────────────────────────────────────────────────────
+    const printLetterWorksheetA4 = (item) => {
+      const pWin = window.open('', '_blank');
+      if (!pWin) {
+        alert('Trình duyệt đã chặn cửa sổ bật lên. Vui lòng cho phép popup để in phiếu bài tập.');
+        return;
+      }
+
+      pWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Phiếu Bài Tập Tô Chữ & Tô Màu - Chữ ${item.upper}</title>
+          <style>
+            @page { size: A4 portrait; margin: 15mm; }
+            body { font-family: 'Arial', sans-serif; color: #1e293b; margin: 0; padding: 0; }
+            .header-table { width: 100%; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+            .school-name { font-size: 13pt; font-weight: bold; text-transform: uppercase; }
+            .sheet-title { font-size: 18pt; font-weight: bold; text-align: center; color: #be123c; margin: 15px 0 5px; }
+            .subtitle { font-size: 11pt; text-align: center; color: #475569; margin-bottom: 20px; }
+            .student-info { display: flex; justify-content: space-between; font-size: 11pt; margin-bottom: 20px; }
+            .box-trace { border: 2px solid #cbd5e1; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+            .trace-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; text-align: center; font-size: 32pt; font-weight: bold; color: #94a3b8; }
+            .trace-cell { border-bottom: 1px dashed #cbd5e1; padding: 10px 0; }
+            .color-box { display: flex; gap: 20px; align-items: center; border: 2px dashed #94a3b8; border-radius: 12px; padding: 20px; }
+            .color-img { font-size: 70pt; text-align: center; flex: 1; }
+            .color-info { flex: 2; font-size: 12pt; line-height: 1.6; }
+            .footer-sign { display: flex; justify-content: space-between; margin-top: 40px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td class="school-name">TRƯỜNG TIỂU HỌC AMA TRANG LƠNG</td>
+              <td style="text-align:right; font-size:11pt; font-weight:bold;">TIẾNG VIỆT LỚP 1 — GDPT 2018</td>
+            </tr>
+          </table>
+
+          <div class="sheet-title">PHIẾU BÀI TẬP: BÉ TẬP TÔ CHỮ & TÔ MÀU</div>
+          <div class="subtitle">Chủ đề Chữ Cái: <strong>CHỮ ${item.upper} — ${item.lower} (${item.name})</strong></div>
+
+          <div class="student-info">
+            <div>Họ và tên học sinh: .....................................................................</div>
+            <div>Lớp: 1......</div>
+            <div>Ngày: ..... / ..... / 202...</div>
+          </div>
+
+          <div class="box-trace">
+            <div style="font-weight:bold; font-size:12pt; margin-bottom:10px;">✍️ PHẦN 1: BÉ TẬP TÔ CHỮ IN HOA VÀ IN THƯỜNG</div>
+            <div class="trace-grid">
+              <div class="trace-cell">${item.upper}</div>
+              <div class="trace-cell">${item.lower}</div>
+              <div class="trace-cell">${item.upper}</div>
+              <div class="trace-cell">${item.lower}</div>
+              <div class="trace-cell">${item.upper}</div>
+              <div class="trace-cell">${item.lower}</div>
+              <div class="trace-cell">${item.upper}</div>
+              <div class="trace-cell">${item.lower}</div>
+              <div class="trace-cell">${item.upper}</div>
+              <div class="trace-cell">${item.lower}</div>
+              <div class="trace-cell">${item.upper}</div>
+              <div class="trace-cell">${item.lower}</div>
+            </div>
+          </div>
+
+          <div class="box-trace">
+            <div style="font-weight:bold; font-size:12pt; margin-bottom:10px;">🎨 PHẦN 2: BÉ TÔ MÀU NHÂN VẬT & ĐỌC THƠ</div>
+            <div class="color-box">
+              <div class="color-img">${item.icon}</div>
+              <div class="color-info">
+                <p><strong>📖 Bài thơ bé đọc:</strong><br><em>"${item.rhyme}"</em></p>
+                <p><strong>🌟 Từ vựng bắt đầu bằng chữ ${item.upper}:</strong><br>
+                  ${item.words.map(w => `• ${w.w} (${w.icon})`).join('<br>')}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-sign">
+            <div>
+              <strong>Ý KIẾN PHỤ HUYNH</strong><br><br><br><br>
+              <em>(Ký và ghi rõ họ tên)</em>
+            </div>
+            <div>
+              <strong>LỜI PHÊ CỦA GIÁO VIÊN</strong><br>
+              ⭐ ⭐ ⭐ ⭐ ⭐<br><br><br>
+              <em>(Khen ngợi và động viên bé)</em>
+            </div>
+          </div>
+
+          <script>
+            window.onload = function() { window.print(); };
+          </script>
+        </body>
+        </html>
+      `);
+      pWin.document.close();
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────
+    // 🧪 TAB 2: SƠ ĐỒ CÂY GHÉP ÂM & BẢNG MA TRẬN 6 THANH ĐIỆU (GDPT 2018)
+    // ─────────────────────────────────────────────────────────────
+    let globalSelectedConsonant = 'c';
+
+    const renderBlendingTab = (container) => {
+
+      const getConsonantOrthoCard = (key, name) => {
+        const k = String(key || '').toLowerCase();
+        if (k === 'c') {
+          return `Phụ âm <span style="color:#d9480f;font-weight:900;font-size:1.35rem;">C</span><br>không ghép<br>được với<br><span style="color:#d9480f;font-weight:900;font-size:1.35rem;">e, ê, i, y</span>`;
+        }
+        if (k === 'k') {
+          return `Phụ âm <span style="color:#d9480f;font-weight:900;font-size:1.35rem;">K</span><br>chỉ ghép<br>được với<br><span style="color:#d9480f;font-weight:900;font-size:1.35rem;">e, ê, i, y</span>`;
+        }
+        if (k === 'g') {
+          return `Phụ âm <span style="color:#d9480f;font-weight:900;font-size:1.35rem;">G</span><br>không ghép<br>được với<br><span style="color:#d9480f;font-weight:900;font-size:1.35rem;">e, ê, i</span>`;
+        }
+        if (k === 'gh') {
+          return `Phụ âm <span style="color:#d9480f;font-weight:900;font-size:1.35rem;">Gh</span><br>chỉ ghép<br>được với<br><span style="color:#d9480f;font-weight:900;font-size:1.35rem;">e, ê, i</span>`;
+        }
+        if (k === 'ng') {
+          return `Phụ âm <span style="color:#d9480f;font-weight:900;font-size:1.35rem;">Ng</span><br>không ghép<br>được với<br><span style="color:#d9480f;font-weight:900;font-size:1.35rem;">e, ê, i</span>`;
+        }
+        if (k === 'ngh') {
+          return `Phụ âm <span style="color:#d9480f;font-weight:900;font-size:1.35rem;">Ngh</span><br>chỉ ghép<br>được với<br><span style="color:#d9480f;font-weight:900;font-size:1.35rem;">e, ê, i</span>`;
+        }
+        if (k === 'qu') {
+          return `Phụ âm <span style="color:#d9480f;font-weight:900;font-size:1.35rem;">Qu</span><br>kết hợp tạo<br>âm đệm u<br><span style="color:#d9480f;font-weight:900;font-size:1.35rem;">tròn môi</span>`;
+        }
+        return `Phụ âm <span style="color:#d9480f;font-weight:900;font-size:1.35rem;">${name.toUpperCase()}</span><br>ghép được<br>với các<br><span style="color:#d9480f;font-weight:900;font-size:1.35rem;">nguyên âm</span>`;
+      };
+
+      let selConsonant = globalSelectedConsonant || 'c';
+      let isAutoSpelling = false;
+      let autoSpellTimer = null;
+
+      // Danh sách các phụ âm đầu chuẩn GDPT 2018 & Quy tắc ghép nguyên âm
+      const CONSONANT_RULES = {
+        'b': { name: 'b', sound: 'bờ', color: '#3b82f6', bg: '#dbeafe', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư','y'], rule: 'Phụ âm B ghép được với tất cả 12 nguyên âm đơn tiếng Việt.' },
+        'c': { name: 'c', sound: 'cờ', color: '#ef4444', bg: '#fee2e2', vowels: ['a','o','ô','ơ','u','ư'], rule: 'Phụ âm C không ghép được với e, ê, i, y (khi gặp e, ê, i, y phải dùng chữ K).' },
+        'ch': { name: 'ch', sound: 'chờ', color: '#06b6d4', bg: '#cffafe', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư'], rule: 'Phụ âm ch ghép được với hầu hết các nguyên âm đơn.' },
+        'd': { name: 'd', sound: 'dờ', color: '#10b981', bg: '#d1fae5', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư','y'], rule: 'Phụ âm D ghép với các nguyên âm tạo âm dờ nhẹ.' },
+        'đ': { name: 'đ', sound: 'đờ', color: '#8b5cf6', bg: '#ede9fe', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư'], rule: 'Phụ âm Đ có gạch ngang ghép được với các nguyên âm.' },
+        'g': { name: 'g', sound: 'gờ', color: '#f59e0b', bg: '#fef3c7', vowels: ['a','o','ô','ơ','u','ư'], rule: 'Phụ âm G đơn không đi với e, ê, i (khi gặp e, ê, i phải dùng chữ Gh).' },
+        'gh': { name: 'gh', sound: 'ghờ', color: '#ec4899', bg: '#fce7f3', vowels: ['e','ê','i'], rule: 'Phụ âm Gh ghép luôn luôn chỉ đứng trước 3 nguyên âm: e, ê, i.' },
+        'gi': { name: 'gi', sound: 'giờ', color: '#6366f1', bg: '#e0e7ff', vowels: ['a','ă','â','e','ê','o','ô','ơ','u','ư'], rule: 'Phụ âm Gi phát âm là giờ, đi với các nguyên âm.' },
+        'h': { name: 'h', sound: 'hờ', color: '#84cc16', bg: '#ecfccb', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư','y'], rule: 'Phụ âm H ghép được với tất cả các nguyên âm đơn.' },
+        'k': { name: 'k', sound: 'cờ', color: '#a855f7', bg: '#f3e8ff', vowels: ['e','ê','i','y'], rule: 'Phụ âm K luôn luôn chỉ đứng trước 4 nguyên âm: e, ê, i, y.' },
+        'kh': { name: 'kh', sound: 'khờ', color: '#14b8a6', bg: '#ccfbf1', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư'], rule: 'Phụ âm Kh ghép được với hầu hết các nguyên âm.' },
+        'l': { name: 'l', sound: 'lờ', color: '#f43f5e', bg: '#ffe4e6', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư','y'], rule: 'Phụ âm L phát âm uốn lưỡi, ghép được với các nguyên âm.' },
+        'm': { name: 'm', sound: 'mờ', color: '#eab308', bg: '#fef9c3', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư','y'], rule: 'Phụ âm M khép môi ghép được với tất cả các nguyên âm.' },
+        'n': { name: 'n', sound: 'nờ', color: '#ec4899', bg: '#fce7f3', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư','y'], rule: 'Phụ âm N đầu lưỡi chạm lợi ghép được với các nguyên âm.' },
+        'nh': { name: 'nh', sound: 'nhờ', color: '#0ea5e9', bg: '#e0f2fe', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư'], rule: 'Phụ âm Nh ghép được với các nguyên âm tạo âm nhờ êm dịu.' },
+        'ng': { name: 'ng', sound: 'ngờ', color: '#ca8a04', bg: '#fefce8', vowels: ['a','o','ô','ơ','u','ư'], rule: 'Phụ âm Ng đơn không đi với e, ê, i (khi gặp e, ê, i phải dùng Ngh).' },
+        'ngh': { name: 'ngh', sound: 'nghờ', color: '#db2777', bg: '#fce7f3', vowels: ['e','ê','i'], rule: 'Phụ âm Ngh ghép luôn luôn chỉ đứng trước 3 nguyên âm: e, ê, i.' },
+        'p': { name: 'p', sound: 'pờ', color: '#8b5cf6', bg: '#ede9fe', vowels: ['a','e','ê','i','o','ô','u'], rule: 'Phụ âm P ít khi đứng một mình ở đầu, thường dùng trong từ mượn.' },
+        'ph': { name: 'ph', sound: 'phờ', color: '#f97316', bg: '#ffedd5', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư'], rule: 'Phụ âm Ph răng trên chạm môi dưới phát âm là phờ.' },
+        'qu': { name: 'qu', sound: 'quờ', color: '#059669', bg: '#d1fae5', vowels: ['a','ă','â','e','ê','i','o','ơ','y'], rule: 'Phụ âm Qu kết hợp với các nguyên âm tạo âm đệm u tròn môi.' },
+        'r': { name: 'r', sound: 'rờ', color: '#0284c7', bg: '#e0f2fe', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư'], rule: 'Phụ âm R phát âm rung lưỡi, ghép được với các nguyên âm.' },
+        's': { name: 's', sound: 'sờ', color: '#ea580c', bg: '#ffedd5', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư'], rule: 'Phụ âm S sờ cong uốn lưỡi ghép được với các nguyên âm.' },
+        't': { name: 't', sound: 'tờ', color: '#2563eb', bg: '#dbeafe', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư','y'], rule: 'Phụ âm T đầu lưỡi chạm răng trên ghép được với các nguyên âm.' },
+        'th': { name: 'th', sound: 'thờ', color: '#7c3aed', bg: '#ede9fe', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư','y'], rule: 'Phụ âm Th bật hơi ghép được với hầu hết các nguyên âm.' },
+        'tr': { name: 'tr', sound: 'trờ', color: '#be123c', bg: '#ffe4e6', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư'], rule: 'Phụ âm Tr uốn lưỡi phát âm chuẩn trờ.' },
+        'v': { name: 'v', sound: 'vờ', color: '#0d9488', bg: '#ccfbf1', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư','y'], rule: 'Phụ âm V răng chạm môi phát âm là vờ.' },
+        'x': { name: 'x', sound: 'xờ', color: '#d97706', bg: '#fef3c7', vowels: ['a','ă','â','e','ê','i','o','ô','ơ','u','ư'], rule: 'Phụ âm X xờ nhẹ phát âm xì gió êm dịu.' }
+      };
+
+      // 6 Cột Thanh Điệu & Bảng Màu Tương Ứng
+      const TONE_COLUMNS = [
+        { id: 'ngang', name: 'Không Dấu', mark: '—', color: '#ec4899', bg: '#fdf2f8', border: '#f472b6', toneRead: '' },
+        { id: 'huyen', name: 'Dấu Huyền', mark: ' \\ ', color: '#8b5cf6', bg: '#f5f3ff', border: '#a78bfa', toneRead: 'huyền' },
+        { id: 'sac',   name: 'Dấu Sắc',   mark: ' / ', color: '#0284c7', bg: '#f0f9ff', border: '#38bdf8', toneRead: 'sắc' },
+        { id: 'hoi',   name: 'Dấu Hỏi',   mark: ' ? ', color: '#16a34a', bg: '#f0fdf4', border: '#4ade80', toneRead: 'hỏi' },
+        { id: 'nga',   name: 'Dấu Ngã',   mark: ' ~ ', color: '#65a30d', bg: '#f7fee7', border: '#a3e635', toneRead: 'ngã' },
+        { id: 'nang',  name: 'Dấu Nặng',  mark: ' . ', color: '#ea580c', bg: '#fff7ed', border: '#fb923c', toneRead: 'nặng' }
+      ];
+
+      // Hàm gán dấu thanh vào tiếng
+      const buildTonedSyllable = (c, v, toneId) => {
+        const toneMap = {
+          'a': { 'sac':'á', 'huyen':'à', 'hoi':'ả', 'nga':'ã', 'nang':'ạ' },
+          'ă': { 'sac':'ắ', 'huyen':'ằ', 'hoi':'ẳ', 'nga':'ẵ', 'nang':'ặ' },
+          'â': { 'sac':'ấ', 'huyen':'ầ', 'hoi':'ẩ', 'nga':'ẫ', 'nang':'ậ' },
+          'e': { 'sac':'é', 'huyen':'è', 'hoi':'ẻ', 'nga':'ẽ', 'nang':'ẹ' },
+          'ê': { 'sac':'ế', 'huyen':'ề', 'hoi':'ể', 'nga':'ễ', 'nang':'ệ' },
+          'i': { 'sac':'í', 'huyen':'ì', 'hoi':'ỉ', 'nga':'ĩ', 'nang':'ị' },
+          'o': { 'sac':'ó', 'huyen':'ò', 'hoi':'ỏ', 'nga':'õ', 'nang':'ọ' },
+          'ô': { 'sac':'ố', 'huyen':'ồ', 'hoi':'ổ', 'nga':'ỗ', 'nang':'ộ' },
+          'ơ': { 'sac':'ớ', 'huyen':'ờ', 'hoi':'ở', 'nga':'ỡ', 'nang':'ợ' },
+          'u': { 'sac':'ú', 'huyen':'ù', 'hoi':'ủ', 'nga':'ũ', 'nang':'ụ' },
+          'ư': { 'sac':'ứ', 'huyen':'ừ', 'hoi':'ử', 'nga':'ữ', 'nang':'ự' },
+          'y': { 'sac':'ý', 'huyen':'ỳ', 'hoi':'ỷ', 'nga':'ỹ', 'nang':'ỵ' }
+        };
+
+        let tonedV = v;
+        if (toneId !== 'ngang') {
+          if (toneMap[v] && toneMap[v][toneId]) {
+            tonedV = toneMap[v][toneId];
+          }
+        }
+        return `${c}${tonedV}`;
+      };
+
+      // Từ điển nghĩa từ minh họa phong phú
+      const VOCAB_MEANINGS = {
+        'ca': { w: 'Cái Ca', icon: '🥛', desc: 'Vật dụng đựng nước sạch của bé.' },
+        'cà': { w: 'Quả Cà', icon: '🍆', desc: 'Rau quả giàu vitamin cho bữa ăn.' },
+        'cá': { w: 'Con Cá', icon: '🐟', desc: 'Loài vật bơi lội tung tăng dưới nước.' },
+        'cả': { w: 'Tất Cả', icon: '👨‍👩‍👧‍👦', desc: 'Toàn thể mọi người cùng chung vui.' },
+        'cã': { w: 'Cãi Cọ', icon: '🗣️', desc: 'Bé ngoan không nên cãi cọ nhé.' },
+        'cạ': { w: 'Cọ Xát', icon: '⚡', desc: 'Sự tiếp xúc cọ xát tạo ra năng lượng.' },
+        'co': { w: 'Co Lại', icon: '🤏', desc: 'Thu nhỏ kích thước lại.' },
+        'cò': { w: 'Con Cò', icon: '🦩', desc: 'Cánh cò trắng muốt chao nghiêng bờ lúa.' },
+        'có': { w: 'Có Bạn Bè', icon: '🤝', desc: 'Tình bạn thân thiết cùng nhau học tập.' },
+        'cỏ': { w: 'Đồng Cỏ', icon: '🌿', desc: 'Thảm cỏ xanh mướt mát lành.' },
+        'cõ': { w: 'Cõng Bạn', icon: '🎒', desc: 'Giúp đỡ bạn bè khi khó khăn.' },
+        'cọ': { w: 'Cây Cọ', icon: '🌴', desc: 'Cây cọ xòe ô che mát đồi quê.' },
+        'cô': { w: 'Cô Giáo', icon: '👩‍🏫', desc: 'Người mẹ hiền thứ hai dạy dỗ bé lớn khôn.' },
+        'cồ': { w: 'Gà Cồ', icon: '🐓', desc: 'Chú gà to khỏe gáy vang ò ó o.' },
+        'cố': { w: 'Cố Gắng', icon: '💪', desc: 'Chăm chỉ nỗ lực để đạt điểm mười.' },
+        'cổ': { w: 'Cổ Áo', icon: '👔', desc: 'Chiếc cổ áo trắng tinh ngày khai trường.' },
+        'cỗ': { w: 'Mâm Cỗ', icon: '🍲', desc: 'Bữa tiệc ngày Tết sum vầy ấm cúng.' },
+        'cộ': { w: 'Xe Cộ', icon: '🚗', desc: 'Phương tiện giao thông đi lại tấp nập.' },
+        'cơ': { w: 'Cờ Tướng', icon: '♟️', desc: 'Trò chơi trí tuệ rèn luyện tư duy.' },
+        'cờ': { w: 'Lá Cờ', icon: '🚩', desc: 'Lá cờ đỏ sao vàng thiêng liêng Tổ quốc.' },
+        'cớ': { w: 'Cớ Sao', icon: '❓', desc: 'Nguyên do vì sao.' },
+        'cở': { w: 'Cởi Mở', icon: '😊', desc: 'Tính tình vui vẻ thân thiện với mọi người.' },
+        'cỡ': { w: 'Kích Cỡ', icon: '📏', desc: 'Độ lớn nhỏ vừa vặn của quần áo, giày dép.' },
+        'cợ': { w: 'Cợt Nhã', icon: '🎭', desc: 'Đùa vui chừng mực lễ phép.' },
+        'cu': { w: 'Chim Cu', icon: '🕊️', desc: 'Chim cu gáy gù gọi nắng hè.' },
+        'cù': { w: 'Cù Lao', icon: '🏝️', desc: 'Vùng đất bãi bồi trù phú giữa sông.' },
+        'cú': { w: 'Con Cú', icon: '🦉', desc: 'Loài chim thông minh mắt sáng trong đêm.' },
+        'củ': { w: 'Củ Cà Rốt', icon: '🥕', desc: 'Rau củ thơm ngon giàu dinh dưỡng cho thỏ con.' },
+        'cũ': { w: 'Đồ Cũ', icon: '📦', desc: 'Kỷ niệm đồ dùng thân thương của bé.' },
+        'cụ': { w: 'Cụ Già', icon: '👴', desc: 'Ông bà lớn tuổi cần được kính trọng lễ phép.' },
+        'cư': { w: 'Cư Trú', icon: '🏠', desc: 'Nơi sinh sống của con người.' },
+        'cừ': { w: 'Con Cừu', icon: '🐑', desc: 'Chú cừu trắng có bộ lông ấm áp.' },
+        'cứ': { w: 'Căn Cứ', icon: '⛺', desc: 'Địa điểm vững chắc an toàn.' },
+        'cử': { w: 'Cử Động', icon: '🏃', desc: 'Vận động thể thao cho cơ thể khỏe khoắn.' },
+        'cữ': { w: 'Đúng Cữ', icon: '⏰', desc: 'Đúng giờ giấc theo thời gian biểu.' },
+        'cự': { w: 'Cự Ly', icon: '🏁', desc: 'Khoảng cách chạy đua trong thể thao.' },
+        'ba': { w: 'Người Ba', icon: '👨', desc: 'Người cha luôn bảo bọc yêu thương con.' },
+        'bà': { w: 'Bà Ngoại', icon: '👵', desc: 'Người bà hiền kể chuyện cổ tích đêm trăng.' },
+        'bá': { w: 'Bác Bá', icon: '🧑', desc: 'Người thân trong gia đình.' },
+        'bả': { w: 'Bả Vả', icon: '🌿', desc: 'Từ ngữ tiếng Việt.' },
+        'bã': { w: 'Bã Mía', icon: '🎋', desc: 'Xơ mía ngọt ngào.' },
+        'bạ': { w: 'Học Bạ', icon: '📑', desc: 'Sổ ghi điểm ngoan giỏi của học sinh.' },
+        'bò': { w: 'Con Bò', icon: '🐂', desc: 'Chú bò vàng gặm cỏ trên đồi xanh.' },
+        'bó': { w: 'Bó Hoa', icon: '💐', desc: 'Bó hoa tươi thắm tặng thầy cô.' },
+        'gà': { w: 'Con Gà', icon: '🐓', desc: 'Chú gà mào đỏ gáy vang ò ó o.' },
+        'dê': { w: 'Con Dê', icon: '🐐', desc: 'Chú dê con thích leo núi đá.' },
+        'đò': { w: 'Con Đò', icon: '🚣', desc: 'Thuyền đò chở khách qua dòng sông quê.' },
+        'mẹ': { w: 'Người Mẹ', icon: '👩', desc: 'Mẹ là tình yêu bao la nhất của đời con.' },
+        'nơ': { w: 'Cái Nơ', icon: '🎀', desc: 'Chiếc nơ cài áo xinh xắn ngày khai giảng.' },
+        'ô': { w: 'Cái Ô', icon: '🌂', desc: 'Che mưa che nắng cho bé đến trường.' }
+      };
+
+      // RENDER GIAO DIỆN
+      const renderMain = () => {
+        const cData = CONSONANT_RULES[selConsonant] || CONSONANT_RULES['c'];
+        
+        container.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:1.4rem;animation:fadeIn 0.25s ease-out;font-family:var(--font-body);">
+            
+            <!-- TOP CONTROLS & CONSONANT CAROUSEL -->
+            <div style="background:#ffffff;border-radius:26px;padding:1.4rem 1.8rem;border:2.5px solid #e2e8f0;box-shadow:0 10px 25px rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:1rem;">
+              
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.8rem;">
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                  <span style="font-size:1.6rem;">🌳</span>
+                  <div>
+                    <h3 style="margin:0;font-family:var(--font-title);font-size:1.25rem;font-weight:900;color:#0f172a;">
+                      SƠ ĐỒ CÂY GHÉP ÂM & BẢNG MA TRẬN 6 THANH ĐIỆU (GDPT 2018)
+                    </h3>
+                    <span style="font-size:0.82rem;color:#64748b;font-weight:700;">Nhấp chọn phụ âm đầu để mở sơ đồ rẽ nhánh và 6 cột thanh điệu tương ứng</span>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                  <button id="btn-auto-spell-matrix" style="background:${isAutoSpelling?'#ef4444':'linear-gradient(135deg,#10b981,#059669)'};color:#fff;border:none;padding:0.6rem 1.25rem;border-radius:14px;font-weight:900;font-size:0.88rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:0 4px 14px rgba(16,185,129,0.35);">
+                    <span>${isAutoSpelling?'⏸️ TẠM DỪNG':'▶️ TỰ ĐỘNG ĐỌC BẢNG'}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- PHỤ ÂM ĐẦU CHỌN NHANH (CAROUSEL PILLS) -->
+              <div style="display:flex;gap:0.45rem;overflow-x:auto;padding-bottom:0.4rem;" id="consonant-pills-bar">
+                ${Object.keys(CONSONANT_RULES).map(k => {
+                  const item = CONSONANT_RULES[k];
+                  const isSel = (k === selConsonant);
+                  return `
+                    <button class="btn-pick-consonant" data-consonant="${k}" style="flex-shrink:0;padding:0.6rem 1.1rem;border-radius:14px;border:2px solid ${isSel?item.color:'#cbd5e1'};background:${isSel?item.color:'#f8fafc'};color:${isSel?'#ffffff':'#1e293b'};font-family:var(--font-title);font-weight:900;font-size:1.15rem;cursor:pointer;transition:all 0.2s;box-shadow:${isSel?'0 6px 16px '+item.color+'55':'none'};" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='';">
+                      ${item.name.toUpperCase()}
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+
+            </div>
+
+            <!-- ORTHOGRAPHY RULE NOTIFICATION BANNER -->
+            <div style="background:#fffbeb;border:2px solid #fde68a;border-radius:20px;padding:0.9rem 1.4rem;display:flex;align-items:center;gap:0.9rem;box-shadow:0 4px 12px rgba(245,158,11,0.08);">
+              <div style="width:42px;height:42px;border-radius:12px;background:#fef3c7;border:1.5px solid #f59e0b;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">
+                💡
+              </div>
+              <div style="flex:1;">
+                <div style="font-weight:900;font-size:0.85rem;color:#b45309;text-transform:uppercase;letter-spacing:0.5px;">
+                  QUY TẮC CHÍNH TẢ CHỮ "${cData.name.toUpperCase()}" (GDPT 2018):
+                </div>
+                <div style="font-size:0.95rem;font-weight:700;color:#92400e;margin-top:0.15rem;">
+                  ${cData.rule}
+                </div>
+              </div>
+            </div>
+
+            <!-- MAIN WORKSPACE: SƠ ĐỒ CÂY (LEFT) + BẢNG MA TRẬN 6 CỘT (RIGHT) -->
+            <div style="background:#ffffff;border:3px solid #e2e8f0;border-radius:28px;padding:1.8rem;box-shadow:0 15px 40px rgba(0,0,0,0.05);overflow-x:auto;">
+              
+              <!-- GRID: SƠ ĐỒ CÂY BÊN TRÁI + BẢNG MA TRẬN BÊN PHẢI -->
+              <div style="display:flex;align-items:center;min-width:980px;gap:1.5rem;">
+                
+                <!-- 1. CỘT TRÁI: THẺ QUY TẮC CHÍNH TẢ GÓC TRÊN + VÒNG TRÒN PHỤ ÂM LỚN -->
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:space-between;flex-shrink:0;width:165px;align-self:stretch;padding:0.5rem 0;">
+                  
+                  <!-- 📌 THẺ QUY TẮC CHÍNH TẢ CHUẨN XÁC THEO MẪU SÁCH (HỘP VÀNG BO TRÒN GÓC TRÊN) -->
+                  <div style="background:linear-gradient(135deg, #ffd43b 0%, #fcc419 100%);color:#78350f;border:3px solid #f59f00;border-radius:24px;padding:0.9rem 0.75rem;text-align:center;box-shadow:0 8px 20px rgba(245,159,0,0.3);width:100%;font-family:var(--font-title);animation:fadeIn 0.25s;">
+                    <div style="font-size:1.1rem;font-weight:800;line-height:1.4;letter-spacing:-0.2px;">
+                      ${getConsonantOrthoCard(cData.name, cData.name)}
+                    </div>
+                  </div>
+
+                  <!-- VÒNG TRÒN LỚN MÀU VÀNG CÓ CHỮ ĐỎ Ở GIỮA -->
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:0.6rem;margin:1.2rem 0;">
+                    <div style="width:130px;height:130px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #fff9db, #fde047 50%, #f59f00 100%);border:4.5px solid #ffffff;box-shadow:0 12px 30px rgba(245,159,0,0.5), inset 0 2px 6px rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-size:5.5rem;font-weight:900;color:#e03131;text-shadow:0 4px 12px rgba(224,49,49,0.35);animation:pulseGlow 2.5s infinite;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='';" id="center-consonant-circle" title="Nhấp để nghe đọc phụ âm ${cData.name.toUpperCase()}">
+                      ${cData.name.toUpperCase()}
+                    </div>
+
+                    <!-- Vòng tròn chữ thường bên dưới -->
+                    <div style="display:flex;flex-direction:column;align-items:center;">
+                      <div style="width:4px;height:12px;background:#38bdf8;border-radius:2px;"></div>
+                      <div style="width:42px;height:42px;border-radius:50%;background:#e0f2fe;border:2.5px solid #38bdf8;display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-weight:900;font-size:1.45rem;color:#0284c7;box-shadow:0 4px 10px rgba(56,189,248,0.3);">
+                        ${cData.name.toLowerCase()}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tag ghi chú phát âm -->
+                  <div style="background:#f1f5f9;color:#475569;border:1.5px solid #cbd5e1;font-size:0.78rem;font-weight:800;padding:0.35rem 0.75rem;border-radius:12px;text-align:center;">
+                    Âm đọc: <strong style="color:#0f172a;">/${cData.sound}/</strong>
+                  </div>
+
+                </div>
+
+                <!-- 2. CỘT GIỮA: SƠ ĐỒ RẼ NHÁNH CÂY NỐI VÀO BẢNG (BRANCH ARROWS GIỐNG 100% ẢNH) -->
+                <div style="display:flex;flex-direction:column;gap:0.75rem;flex-shrink:0;width:160px;justify-content:space-around;">
+                  ${cData.vowels.map(v => `
+                    <div style="display:flex;align-items:center;justify-content:space-between;height:52px;background:#ffffff;padding:0.2rem 0.5rem;border-radius:16px;border:2px solid #e2e8f0;box-shadow:0 3px 8px rgba(0,0,0,0.03);">
+                      <span style="font-size:1.3rem;color:#f59f00;font-weight:900;">➔</span>
+                      <span style="font-family:var(--font-title);font-size:1.9rem;font-weight:900;color:#0284c7;min-width:28px;text-align:center;">${v}</span>
+                      <span style="font-size:1.3rem;color:#38bdf8;font-weight:900;">➔</span>
+                      <span style="font-family:var(--font-title);font-size:1.9rem;font-weight:900;color:#e03131;letter-spacing:-0.5px;">${cData.name.toLowerCase()}<span style="color:#0284c7;">${v}</span></span>
+                      <span style="font-size:1.3rem;color:#38bdf8;font-weight:900;">➔</span>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <!-- 3. CỘT PHẢI: BẢNG MA TRẬN 6 CỘT MÀU SẮC (6 THANH ĐIỆU) -->
+                <div style="flex:1;display:flex;flex-direction:column;gap:0.75rem;">
+                  
+                  <!-- HEADER 6 CỘT THANH ĐIỆU -->
+                  <div style="display:grid;grid-template-columns:repeat(6, 1fr);gap:0.65rem;text-align:center;">
+                    ${TONE_COLUMNS.map(col => `
+                      <div style="background:${col.color};color:#ffffff;padding:0.5rem 0.2rem;border-radius:14px;font-family:var(--font-title);font-weight:900;font-size:0.85rem;box-shadow:0 4px 10px ${col.color}44;display:flex;flex-direction:column;align-items:center;gap:0.15rem;">
+                        <span>${col.name}</span>
+                        <span style="font-size:1.1rem;background:rgba(255,255,255,0.25);padding:0 0.5rem;border-radius:6px;font-weight:900;">${col.mark}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+
+                  <!-- ROWS: CÁC DÒNG TIẾNG GHÉP THEO TỪNG NGUYÊN ÂM -->
+                  <div style="display:flex;flex-direction:column;gap:0.75rem;" id="matrix-syllables-body">
+                    ${cData.vowels.map((v, vIdx) => `
+                      <div style="display:grid;grid-template-columns:repeat(6, 1fr);gap:0.65rem;height:52px;">
+                        ${TONE_COLUMNS.map((col, cIdx) => {
+                          const syl = buildTonedSyllable(cData.name.toLowerCase(), v, col.id);
+                          return `
+                            <button class="btn-syllable-tile" data-consonant="${cData.name.toLowerCase()}" data-vowel="${v}" data-tone="${col.id}" data-syllable="${syl}" data-tone-name="${col.toneRead}" style="background:${col.bg};border:2px solid ${col.border};border-radius:14px;color:#0f172a;font-family:var(--font-title);font-size:1.65rem;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.18s;box-shadow:0 3px 8px rgba(0,0,0,0.03);" onmouseover="this.style.transform='scale(1.08) translateY(-2px)';this.style.boxShadow='0 8px 18px ${col.color}44';this.style.background='${col.color}';this.style.color='#ffffff';" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 8px rgba(0,0,0,0.03)';this.style.background='${col.bg}';this.style.color='#0f172a';">
+                              ${syl}
+                            </button>
+                          `;
+                        }).join('')}
+                      </div>
+                    `).join('')}
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- POPUP MINH HỌA NGHĨA TỪ PHÓNG TO KHI NHẤP CHUỘT -->
+            <div id="syllable-detail-card" style="background:#ffffff;border:3px solid #10b981;border-radius:24px;padding:1.4rem 2rem;box-shadow:0 12px 35px rgba(16,185,129,0.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.2rem;">
+              <div style="display:flex;align-items:center;gap:1.4rem;">
+                <div id="detail-word-icon" style="font-size:4.2rem;animation:bounce 1.5s infinite;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.12));">
+                  🐟
+                </div>
+                <div>
+                  <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.2rem;">
+                    <span id="detail-word-text" style="font-family:var(--font-title);font-size:2.4rem;font-weight:900;color:#15803d;">
+                      Con Cá
+                    </span>
+                    <span id="detail-syllable-badge" style="background:#dcfce7;color:#166534;font-weight:900;font-size:1.1rem;padding:0.2rem 0.8rem;border-radius:10px;border:1.5px solid #86efac;">
+                      cá
+                    </span>
+                  </div>
+                  <div id="detail-spelling-formula" style="font-size:1.15rem;font-weight:800;color:#0369a1;background:#f0f9ff;padding:0.3rem 0.85rem;border-radius:10px;display:inline-block;border:1px solid #bae6fd;">
+                    🔊 Đánh vần: cờ - a - ca - ca - sắc - cá
+                  </div>
+                  <div id="detail-word-desc" style="font-size:0.92rem;font-weight:700;color:#475569;margin-top:0.4rem;max-width:650px;">
+                    Loài vật bơi lội tung tăng dưới nước có vây và đuôi óng ánh.
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <button id="btn-replay-detail-audio" style="background:linear-gradient(135deg,#10b981,#059669);color:#ffffff;border:none;padding:0.75rem 1.6rem;border-radius:16px;font-weight:900;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:0.45rem;box-shadow:0 6px 18px rgba(16,185,129,0.35);">
+                  🔊 Nghe Lại Đánh Vần
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `;
+
+        // Bind center circle audio
+        const centerCircle = container.querySelector('#center-consonant-circle');
+        if (centerCircle) {
+          centerCircle.onclick = () => {
+            soundSynth.play('pop');
+            speakVN(`Phụ âm ${cData.name.toUpperCase()}, âm đọc là ${cData.sound}`);
+          };
+        }
+
+        // Bind Pick Consonant Pills
+        container.querySelectorAll('.btn-pick-consonant').forEach(btn => {
+          btn.onclick = () => {
+            soundSynth.play('pop');
+            selConsonant = btn.dataset.consonant;
+            globalSelectedConsonant = selConsonant;
+            if (autoSpellTimer) { clearInterval(autoSpellTimer); autoSpellTimer = null; isAutoSpelling = false; }
+            renderMain();
+          };
+        });
+
+        // Current active syllable data for replay
+        let currentActiveFormula = 'cờ, a, ca, ca, sắc, cá, con cá';
+
+        // Bind Syllable Tiles
+        const detailCard = container.querySelector('#syllable-detail-card');
+        const dIcon = container.querySelector('#detail-word-icon');
+        const dText = container.querySelector('#detail-word-text');
+        const dBadge = container.querySelector('#detail-syllable-badge');
+        const dFormula = container.querySelector('#detail-spelling-formula');
+        const dDesc = container.querySelector('#detail-word-desc');
+
+        const triggerSyllableAction = (tile, onDone = null, isAutoMode = false) => {
+          const c = tile.dataset.consonant;
+          const v = tile.dataset.vowel;
+          const toneId = tile.dataset.tone;
+          const syl = tile.dataset.syllable;
+          const toneName = tile.dataset.toneName;
+
+          if (!isAutoMode) {
+            soundSynth.play('win');
+            fireConfetti();
+            addStar(1);
+          }
+
+          // Reset all tile highlights
+          container.querySelectorAll('.btn-syllable-tile').forEach(t => {
+            t.style.transform = '';
+            t.style.boxShadow = '0 3px 8px rgba(0,0,0,0.03)';
+          });
+
+          // Highlight selected tile
+          tile.style.transform = 'scale(1.18) translateY(-4px)';
+          tile.style.boxShadow = '0 10px 25px rgba(239,68,68,0.5)';
+
+          const cRead = CONSONANT_RULES[c] ? CONSONANT_RULES[c].sound : c;
+          let spellFormula = '';
+          const baseSound = `${c}${v}`;
+
+          // Format phonetic string with pauses for crystal-clear TTS pronunciation
+          if (toneId === 'ngang') {
+            spellFormula = `${cRead}. ${v}. ${syl}.`;
+          } else {
+            spellFormula = `${cRead}. ${v}. ${baseSound}. ${baseSound}, ${toneName}, ${syl}.`;
+          }
+
+          const vocab = VOCAB_MEANINGS[syl] || { w: `Tiếng "${syl}"`, icon: '✨', desc: `Tiếng ghép từ âm đầu [${c.toUpperCase()}] + âm chính [${v}] + [${toneName||'thanh ngang'}].` };
+          
+          currentActiveFormula = `${spellFormula} ${vocab.w}.`;
+
+          dIcon.textContent = vocab.icon;
+          dText.textContent = vocab.w;
+          dBadge.textContent = syl;
+          dFormula.textContent = `🔊 Đánh vần: ${spellFormula.replace(/\./g, ' -').replace(/,/g, ' -').replace(/-+/g, '-').trim()}`;
+          dDesc.textContent = vocab.desc;
+
+          speakVN(currentActiveFormula, 0.85, onDone);
+        };
+
+        container.querySelectorAll('.btn-syllable-tile').forEach(tile => {
+          tile.onclick = () => triggerSyllableAction(tile);
+        });
+
+        // Replay audio button
+        const btnReplay = container.querySelector('#btn-replay-detail-audio');
+        if (btnReplay) {
+          btnReplay.onclick = () => {
+            speakVN(currentActiveFormula);
+          };
+        }
+
+        // Auto Spell Whole Matrix (Karaoke Mode - Đọc tuần tự chuẩn xác sau khi hết câu)
+        const btnAutoSpell = container.querySelector('#btn-auto-spell-matrix');
+        if (btnAutoSpell) {
+          btnAutoSpell.onclick = () => {
+            if (isAutoSpelling) {
+              if (autoSpellTimer) clearTimeout(autoSpellTimer);
+              autoSpellTimer = null;
+              isAutoSpelling = false;
+              if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+              renderMain();
+            } else {
+              isAutoSpelling = true;
+              btnAutoSpell.textContent = '⏸️ TẠM DỪNG';
+              btnAutoSpell.style.background = '#ef4444';
+
+              const allTiles = Array.from(container.querySelectorAll('.btn-syllable-tile'));
+              let curTileIdx = 0;
+
+              const runNextTile = () => {
+                if (!isAutoSpelling || curTileIdx >= allTiles.length) {
+                  if (autoSpellTimer) clearTimeout(autoSpellTimer);
+                  autoSpellTimer = null;
+                  isAutoSpelling = false;
+                  renderMain();
+                  return;
+                }
+                const targetTile = allTiles[curTileIdx];
+                curTileIdx++;
+                
+                // Đọc hết câu đánh vần hoàn chỉnh, sau đó nghỉ 1.5 giây rồi mới sang từ kế tiếp
+                triggerSyllableAction(targetTile, () => {
+                  if (isAutoSpelling) {
+                    autoSpellTimer = setTimeout(runNextTile, 1500);
+                  }
+                }, true);
+              };
+
+              runNextTile();
+            }
+          };
+        }
+      };
+
+      renderMain();
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 🎈 TAB 3: TRÒ CHƠI ÔN LUYỆN, VÒNG QUAY CHỮ CÁI & IN PHIẾU A4
+    // ─────────────────────────────────────────────────────────────
+    const renderGamesTab = (container) => {
+
+      const renderGameArea = () => {
+        const gArea = container.querySelector('#mini-game-stage');
+        if (activeMiniGame === 'wheel') renderLuckyWheelGame(gArea);
+        else if (activeMiniGame === 'bubbles') renderBubblesGame(gArea);
+        else if (activeMiniGame === 'guess') renderGuessWordGame(gArea);
+        else if (activeMiniGame === 'print') renderPrintHub(gArea);
+        else if (activeMiniGame === 'badges') renderBadgesGallery(gArea);
+      };
+
+      container.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:1.25rem;animation:fadeIn 0.25s;">
+          
+          <!-- Mini Game Switcher (5 PHÂN KHU TRÒ CHƠI & TIỆN ÍCH) -->
+          <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;background:#f8fafc;padding:0.6rem;border-radius:20px;border:1.5px solid #e2e8f0;">
+            
+            <button id="btn-gm-wheel" style="padding:0.65rem 1.2rem;border-radius:14px;border:none;font-weight:900;font-size:0.9rem;cursor:pointer;background:${activeMiniGame==='wheel'?'linear-gradient(135deg,#f59e0b,#d97706)':'#ffffff'};color:${activeMiniGame==='wheel'?'#000':'#475569'};box-shadow:${activeMiniGame==='wheel'?'0 4px 12px rgba(245,158,11,0.35)':'none'};">
+              🎡 1. VÒNG QUAY CHỮ CÁI
+            </button>
+
+            <button id="btn-gm-bubbles" style="padding:0.65rem 1.2rem;border-radius:14px;border:none;font-weight:900;font-size:0.9rem;cursor:pointer;background:${activeMiniGame==='bubbles'?'linear-gradient(135deg,#10b981,#059669)':'#ffffff'};color:${activeMiniGame==='bubbles'?'#fff':'#475569'};box-shadow:${activeMiniGame==='bubbles'?'0 4px 12px rgba(16,185,129,0.35)':'none'};">
+              🎈 2. BẮT BÓNG CHỮ CÁI
+            </button>
+            
+            <button id="btn-gm-guess" style="padding:0.65rem 1.2rem;border-radius:14px;border:none;font-weight:900;font-size:0.9rem;cursor:pointer;background:${activeMiniGame==='guess'?'linear-gradient(135deg,#3b82f6,#2563eb)':'#ffffff'};color:${activeMiniGame==='guess'?'#fff':'#475569'};box-shadow:${activeMiniGame==='guess'?'0 4px 12px rgba(59,130,246,0.35)':'none'};">
+              🖼️ 3. ĐỐ HÌNH BẮT CHỮ
+            </button>
+
+            <button id="btn-gm-print" style="padding:0.65rem 1.2rem;border-radius:14px;border:none;font-weight:900;font-size:0.9rem;cursor:pointer;background:${activeMiniGame==='print'?'linear-gradient(135deg,#8b5cf6,#7c3aed)':'#ffffff'};color:${activeMiniGame==='print'?'#fff':'#475569'};box-shadow:${activeMiniGame==='print'?'0 4px 12px rgba(139,92,246,0.35)':'none'};">
+              🖨️ 4. IN PHIẾU BÀI TẬP A4
+            </button>
+
+            <button id="btn-gm-badges" style="padding:0.65rem 1.2rem;border-radius:14px;border:none;font-weight:900;font-size:0.9rem;cursor:pointer;background:${activeMiniGame==='badges'?'linear-gradient(135deg,#ec4899,#db2777)':'#ffffff'};color:${activeMiniGame==='badges'?'#fff':'#475569'};box-shadow:${activeMiniGame==='badges'?'0 4px 12px rgba(236,72,153,0.35)':'none'};">
+              🏆 5. BỘ SƯU TẬP HUY HIỆU
+            </button>
+          </div>
+
+          <div id="mini-game-stage" style="background:#ffffff;border:2.5px solid #e2e8f0;border-radius:28px;padding:1.8rem;box-shadow:0 10px 30px rgba(0,0,0,0.03);min-height:420px;">
+            <!-- Dynamic game stage -->
+          </div>
+
+        </div>
+      `;
+
+      container.querySelector('#btn-gm-wheel').onclick = () => { soundSynth.play('pop'); activeMiniGame = 'wheel'; renderGamesTab(container); };
+      container.querySelector('#btn-gm-bubbles').onclick = () => { soundSynth.play('pop'); activeMiniGame = 'bubbles'; renderGamesTab(container); };
+      container.querySelector('#btn-gm-guess').onclick = () => { soundSynth.play('pop'); activeMiniGame = 'guess'; renderGamesTab(container); };
+      container.querySelector('#btn-gm-print').onclick = () => { soundSynth.play('pop'); activeMiniGame = 'print'; renderGamesTab(container); };
+      container.querySelector('#btn-gm-badges').onclick = () => { soundSynth.play('pop'); activeMiniGame = 'badges'; renderGamesTab(container); };
+
+      renderGameArea();
+    };
+
+    // 🎡 1. GAME VÒNG QUAY CHỮ CÁI MAY MẮN (ALPHABET LUCKY WHEEL)
+    const renderLuckyWheelGame = (stage) => {
+      let isSpinning = false;
+      let currentDeg = 0;
+
+      stage.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:1.5rem;">
+          <div>
+            <span style="background:#fef3c7;color:#b45309;font-weight:900;font-size:0.85rem;padding:0.3rem 0.85rem;border-radius:12px;border:1.5px solid #fde68a;">GAMESHOW VUI HỌC CHỮ</span>
+            <h2 style="margin:0.4rem 0 0;font-family:var(--font-title);font-size:2rem;font-weight:900;color:#0f172a;">
+              🎡 VÒNG QUAY CHỮ CÁI MAY MẮN
+            </h2>
+            <p style="margin:0.2rem 0 0;color:#64748b;font-size:0.95rem;">
+              Bấm nút "QUAY NGAY" để chọn chữ cái ngẫu nhiên và nhận thử thách bắt Sao Vàng!
+            </p>
+          </div>
+
+          <div style="position:relative;width:320px;height:320px;display:flex;align-items:center;justify-content:center;">
+            <!-- Mũi tên chỉ đỉnh -->
+            <div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:2.4rem;z-index:10;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
+              🔻
+            </div>
+
+            <!-- Bánh xe quay Canvas -->
+            <canvas id="lucky-wheel-canvas" width="320" height="320" style="border-radius:50%;box-shadow:0 15px 35px rgba(0,0,0,0.2);border:6px solid #f59e0b;transition:transform 4s cubic-bezier(0.15, 0.9, 0.25, 1);"></canvas>
+
+            <!-- Nút bấm quay ở tâm bánh xe -->
+            <button id="btn-spin-wheel-center" style="position:absolute;width:82px;height:82px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;border:4px solid #fff;font-family:var(--font-title);font-weight:900;font-size:1.15rem;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,0.35);z-index:5;transition:transform 0.15s;" onmouseover="this.style.transform='scale(1.1)';" onmouseout="this.style.transform='';">
+              QUAY
+            </button>
+          </div>
+
+          <!-- Result Challenge Box -->
+          <div id="wheel-challenge-result" style="display:none;background:#f0fdf4;border:2.5px solid #22c55e;border-radius:24px;padding:1.4rem 2rem;max-width:650px;width:100%;box-shadow:0 10px 25px rgba(34,197,94,0.2);animation:zoomIn 0.3s ease;">
+            <!-- Populated on spin end -->
+          </div>
+
+        </div>
+      `;
+
+      const canvas = stage.querySelector('#lucky-wheel-canvas');
+      const ctx = canvas.getContext('2d');
+      const wheelLetters = ALPHABET_DATA.slice(0, 12); // 12 ô màu sắc
+      const numSlices = wheelLetters.length;
+      const arc = (Math.PI * 2) / numSlices;
+
+      const drawWheel = () => {
+        const cx = 160;
+        const cy = 160;
+        const radius = 150;
+
+        for (let i = 0; i < numSlices; i++) {
+          const angle = i * arc;
+          ctx.beginPath();
+          ctx.fillStyle = wheelLetters[i].color;
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, radius, angle, angle + arc);
+          ctx.lineTo(cx, cy);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+
+          // Draw Letter
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(angle + arc / 2);
+          ctx.textAlign = 'right';
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 24px sans-serif';
+          ctx.shadowColor = 'rgba(0,0,0,0.4)';
+          ctx.shadowBlur = 4;
+          ctx.fillText(wheelLetters[i].upper, radius - 20, 8);
+          ctx.restore();
+        }
+      };
+
+      drawWheel();
+
+      const spinBtn = stage.querySelector('#btn-spin-wheel-center');
+      spinBtn.onclick = () => {
+        if (isSpinning) return;
+        isSpinning = true;
+        soundSynth.play('pop');
+
+        const targetIdx = Math.floor(Math.random() * numSlices);
+        const extraRounds = 5 + Math.floor(Math.random() * 3);
+        const sliceAngleDeg = 360 / numSlices;
+        
+        // Target angle aligned with top pointer (270 deg)
+        const targetDeg = extraRounds * 360 + (360 - (targetIdx * sliceAngleDeg) - (sliceAngleDeg / 2) - 90);
+        currentDeg += targetDeg;
+
+        canvas.style.transform = `rotate(${currentDeg}deg)`;
+
+        setTimeout(() => {
+          isSpinning = false;
+          const targetLetter = wheelLetters[targetIdx];
+          soundSynth.play('win');
+          fireConfetti();
+          addStar(2);
+
+          const resultBox = stage.querySelector('#wheel-challenge-result');
+          resultBox.style.display = 'block';
+          resultBox.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:0.6rem;">
+              <span style="font-size:3.2rem;">${targetLetter.icon}</span>
+              <div style="text-align:left;">
+                <div style="font-family:var(--font-title);font-size:2rem;font-weight:900;color:#15803d;">
+                  CHÚC MỪNG: Ô CHỮ ${targetLetter.upper} (${targetLetter.lower})
+                </div>
+                <div style="font-size:1rem;font-weight:800;color:#0369a1;">
+                  Âm đọc: /${targetLetter.phoneme}/ • Từ mẫu: ${targetLetter.words[0].w}
+                </div>
+              </div>
+            </div>
+            <p style="font-size:1.05rem;font-weight:700;color:#1e293b;line-height:1.5;margin:0.5rem 0;">
+              📖 <em>"${targetLetter.rhyme}"</em>
+            </p>
+            <div style="margin-top:0.8rem;background:#dcfce7;color:#166534;font-weight:900;padding:0.4rem 1rem;border-radius:12px;display:inline-block;">
+              ⭐ Bé nhận được +2 Sao Vàng may mắn!
+            </div>
+          `;
+
+          speakVN(`Chúc mừng bé đã quay trúng chữ ${targetLetter.upper}! ${targetLetter.rhyme}`);
+        }, 4200);
+      };
+    };
+
+    // 🖨️ 4. TRUNG TÂM XUẤT PHIẾU BÀI TẬP IN A4 (PRINTABLE WORKSHEETS HUB)
+    const renderPrintHub = (stage) => {
+      stage.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:1.5rem;animation:fadeIn 0.25s;">
+          <div style="text-align:center;">
+            <span style="background:#ede9fe;color:#7c3aed;font-weight:900;font-size:0.85rem;padding:0.3rem 0.85rem;border-radius:12px;border:1.5px solid #ddd6fe;">XUẤT PHIẾU IN A4 CHUẨN BỘ GD&ĐT</span>
+            <h2 style="margin:0.4rem 0 0;font-family:var(--font-title);font-size:2rem;font-weight:900;color:#0f172a;">
+              🖨️ TRUNG TÂM IN PHIẾU BÀI TẬP TIẾNG VIỆT 1
+            </h2>
+            <p style="margin:0.2rem 0 0;color:#64748b;font-size:0.95rem;">
+              Dành cho giáo viên & phụ huynh in phiếu bài tập khổ A4 cho học sinh luyện tập tại lớp và ở nhà.
+            </p>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;">
+            
+            <!-- Phiếu 1: Tập tô nét ô ly -->
+            <div style="background:#ffffff;border:2.5px solid #3b82f6;border-radius:24px;padding:1.6rem;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 18px rgba(59,130,246,0.1);text-align:center;gap:1rem;">
+              <div>
+                <div style="font-size:3.5rem;margin-bottom:0.4rem;">✍️</div>
+                <h3 style="margin:0 0 0.4rem;font-family:var(--font-title);font-size:1.25rem;color:#1e3a8a;">Phiếu 1: Luyện Viết Ô Ly</h3>
+                <p style="font-size:0.88rem;color:#475569;line-height:1.45;margin:0;">
+                  Khung ô ly 4 dòng kẻ chuẩn Bộ GD&ĐT, có sẵn chữ mẫu in hoa & in thường kèm mũi tên đặt bút.
+                </p>
+              </div>
+              <button id="btn-print-sheet-trace" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:0.75rem 1.4rem;border-radius:14px;font-weight:900;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;box-shadow:0 4px 12px rgba(59,130,246,0.35);">
+                🖨️ In Phiếu Luyện Viết A4
+              </button>
+            </div>
+
+            <!-- Phiếu 2: Nối chữ cái với tranh -->
+            <div style="background:#ffffff;border:2.5px solid #10b981;border-radius:24px;padding:1.6rem;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 18px rgba(16,185,129,0.1);text-align:center;gap:1rem;">
+              <div>
+                <div style="font-size:3.5rem;margin-bottom:0.4rem;">🔗</div>
+                <h3 style="margin:0 0 0.4rem;font-family:var(--font-title);font-size:1.25rem;color:#065f46;">Phiếu 2: Nối Chữ & Tranh</h3>
+                <p style="font-size:0.88rem;color:#475569;line-height:1.45;margin:0;">
+                  Bài tập nối chữ cái tương ứng với hình ảnh đồ vật, con vật minh họa sinh động.
+                </p>
+              </div>
+              <button id="btn-print-sheet-match" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:0.75rem 1.4rem;border-radius:14px;font-weight:900;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;box-shadow:0 4px 12px rgba(16,185,129,0.35);">
+                🖨️ In Phiếu Nối Tranh A4
+              </button>
+            </div>
+
+            <!-- Phiếu 3: Bảng 29 chữ cái tô màu -->
+            <div style="background:#ffffff;border:2.5px solid #ec4899;border-radius:24px;padding:1.6rem;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 6px 18px rgba(236,72,153,0.1);text-align:center;gap:1rem;">
+              <div>
+                <div style="font-size:3.5rem;margin-bottom:0.4rem;">🎨</div>
+                <h3 style="margin:0 0 0.4rem;font-family:var(--font-title);font-size:1.25rem;color:#9d174d;">Phiếu 3: Bảng Chữ Cái & Tô Màu</h3>
+                <p style="font-size:0.88rem;color:#475569;line-height:1.45;margin:0;">
+                  Bảng tổng hợp 29 chữ cái Tiếng Việt kèm hình hoạt hình dễ thương cho bé tô màu.
+                </p>
+              </div>
+              <button id="btn-print-sheet-full" style="background:linear-gradient(135deg,#ec4899,#db2777);color:#fff;border:none;padding:0.75rem 1.4rem;border-radius:14px;font-weight:900;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.4rem;box-shadow:0 4px 12px rgba(236,72,153,0.35);">
+                🖨️ In Bảng 29 Chữ Tô Màu A4
+              </button>
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      // Event handlers for printing
+      stage.querySelector('#btn-print-sheet-trace').onclick = () => {
+        printLetterWorksheetA4(ALPHABET_DATA[0]);
+      };
+
+      stage.querySelector('#btn-print-sheet-match').onclick = () => {
+        printMatchingWorksheetA4();
+      };
+
+      stage.querySelector('#btn-print-sheet-full').onclick = () => {
+        printFullAlphabetColoringSheetA4();
+      };
+    };
+
+    // IN PHIẾU NỐI TRANH A4
+    const printMatchingWorksheetA4 = () => {
+      const pWin = window.open('', '_blank');
+      if (!pWin) { alert('Vui lòng cho phép popup để in phiếu bài tập.'); return; }
+      const samples = ALPHABET_DATA.slice(0, 6);
+
+      pWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Phiếu Bài Tập Nối Chữ Cái & Hình Ảnh A4</title>
+          <style>
+            @page { size: A4 portrait; margin: 15mm; }
+            body { font-family: 'Arial', sans-serif; color: #1e293b; margin: 0; padding: 0; }
+            .header-table { width: 100%; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+            .school-name { font-size: 13pt; font-weight: bold; text-transform: uppercase; }
+            .sheet-title { font-size: 18pt; font-weight: bold; text-align: center; color: #0284c7; margin: 15px 0 5px; }
+            .student-info { display: flex; justify-content: space-between; font-size: 11pt; margin-bottom: 25px; }
+            .match-grid { display: flex; justify-content: space-between; padding: 20px 40px; border: 2px solid #cbd5e1; border-radius: 12px; min-height: 520px; }
+            .col-letters, .col-icons { display: flex; flex-direction: column; justify-content: space-around; gap: 20px; }
+            .letter-circle { width: 60px; height: 60px; border-radius: 50%; border: 3px solid #0284c7; font-size: 24pt; font-weight: bold; display: flex; align-items: center; justify-content: center; text-align: center; }
+            .icon-box { border: 2px dashed #64748b; border-radius: 12px; padding: 10px 20px; font-size: 24pt; display: flex; align-items: center; gap: 15px; }
+            .footer-sign { display: flex; justify-content: space-between; margin-top: 30px; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td class="school-name">TRƯỜNG TIỂU HỌC AMA TRANG LƠNG</td>
+              <td style="text-align:right; font-size:11pt; font-weight:bold;">TIẾNG VIỆT LỚP 1 — GDPT 2018</td>
+            </tr>
+          </table>
+
+          <div class="sheet-title">PHIẾU BÀI TẬP: NỐI CHỮ CÁI VỚI TRANH THÍCH HỢP</div>
+          <p style="text-align:center; font-size:11pt; color:#475569;">Bé hãy dùng bút chì nối từng chữ cái ở cột trái với hình tương ứng ở cột phải nhé!</p>
+
+          <div class="student-info">
+            <div>Họ và tên học sinh: .....................................................................</div>
+            <div>Lớp: 1......</div>
+            <div>Ngày: ..... / ..... / 202...</div>
+          </div>
+
+          <div class="match-grid">
+            <div class="col-letters">
+              ${samples.map(s => `<div class="letter-circle">○ ${s.upper}</div>`).join('')}
+            </div>
+            <div class="col-icons">
+              ${[...samples].reverse().map(s => `<div class="icon-box">${s.icon} <span style="font-size:14pt;font-weight:bold;">${s.words[0].w}</span> ○</div>`).join('')}
+            </div>
+          </div>
+
+          <div class="footer-sign">
+            <div><strong>Ý KIẾN PHỤ HUYNH</strong><br><br><br><em>(Ký tên)</em></div>
+            <div><strong>LỜI PHÊ GIÁO VIÊN</strong><br>⭐ ⭐ ⭐ ⭐ ⭐<br><br><em>(Khen ngợi bé)</em></div>
+          </div>
+
+          <script>window.onload = function() { window.print(); };</script>
+        </body>
+        </html>
+      `);
+      pWin.document.close();
+    };
+
+    // IN BẢNG 29 CHỮ CÁI TÔ MÀU A4
+    const printFullAlphabetColoringSheetA4 = () => {
+      const pWin = window.open('', '_blank');
+      if (!pWin) { alert('Vui lòng cho phép popup để in phiếu bài tập.'); return; }
+
+      pWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Bảng 29 Chữ Cái Tiếng Việt Tô Màu A4</title>
+          <style>
+            @page { size: A4 landscape; margin: 10mm; }
+            body { font-family: 'Arial', sans-serif; color: #1e293b; margin: 0; padding: 0; }
+            .sheet-title { font-size: 16pt; font-weight: bold; text-align: center; color: #be123c; margin-bottom: 10px; }
+            .grid-29 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+            .card-item { border: 2px solid #cbd5e1; border-radius: 10px; padding: 8px; text-align: center; }
+            .char-big { font-size: 28pt; font-weight: bold; color: #0f172a; }
+            .char-word { font-size: 10pt; font-weight: bold; margin-top: 4px; color: #475569; }
+          </style>
+        </head>
+        <body>
+          <div class="sheet-title">BẢNG 29 CHỮ CÁI TIẾNG VIỆT CHUẨN GDPT 2018 (BÉ TẬP TÔ MÀU)</div>
+          <div class="grid-29">
+            ${ALPHABET_DATA.map(item => `
+              <div class="card-item">
+                <div class="char-big">${item.upper} ${item.lower}</div>
+                <div style="font-size:20pt;">${item.icon}</div>
+                <div class="char-word">${item.words[0].w}</div>
+              </div>
+            `).join('')}
+          </div>
+          <script>window.onload = function() { window.print(); };</script>
+        </body>
+        </html>
+      `);
+      pWin.document.close();
+    };
+
+    // GAME 2: BẮT BÓNG CHỮ CÁI (BUBBLE POP)
+    const renderBubblesGame = (stage) => {
+      const targetItem = ALPHABET_DATA[Math.floor(Math.random() * ALPHABET_DATA.length)];
+      const wrongList = ALPHABET_DATA.filter(x => x.id !== targetItem.id).sort(() => 0.5 - Math.random()).slice(0, 3);
+      const choices = [targetItem, ...wrongList].sort(() => 0.5 - Math.random());
+
+      stage.innerHTML = `
+        <div style="text-align:center;display:flex;flex-direction:column;gap:1.5rem;animation:fadeIn 0.25s;">
+          <div>
+            <span style="background:#ecfdf5;color:#059669;font-weight:900;font-size:0.85rem;padding:0.3rem 0.85rem;border-radius:12px;border:1.5px solid #a7f3d0;">TRÒ CHƠI BẮT BÓNG CHỮ CÁI</span>
+            <h2 style="margin:0.6rem 0 0;font-family:var(--font-title);font-size:1.8rem;font-weight:900;color:#0f172a;">
+              Bé hãy tìm và bắt quả bóng <span style="color:#ef4444;font-size:2.4rem;">${targetItem.upper} (${targetItem.lower})</span>
+            </h2>
+            <button id="btn-re-prompt-bubble" style="background:#f1f5f9;border:1px solid #cbd5e1;padding:0.4rem 0.85rem;border-radius:10px;font-weight:800;font-size:0.85rem;color:#475569;cursor:pointer;margin-top:0.4rem;">
+              🔊 Nghe lại giọng đọc
+            </button>
+          </div>
+
+          <div style="display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;padding:1.5rem 0;">
+            ${choices.map(c => `
+              <div class="bubble-choice-item" data-id="${c.id}" style="width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #ffffff, ${c.color});box-shadow:0 12px 28px ${c.color}55;display:flex;align-items:center;justify-content:center;font-family:var(--font-title);font-weight:900;font-size:2.8rem;color:#ffffff;cursor:pointer;transition:all 0.25s;animation:float 3s ease-in-out infinite;text-shadow:0 2px 6px rgba(0,0,0,0.3);" onmouseover="this.style.transform='scale(1.15)';" onmouseout="this.style.transform='scale(1)';">
+                ${c.upper}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      speakVN(`Bé hãy tìm giúp cô quả bóng chữ ${targetItem.upper}`);
+
+      stage.querySelector('#btn-re-prompt-bubble').onclick = () => {
+        speakVN(`Bé hãy tìm chữ ${targetItem.upper}`);
+      };
+
+      stage.querySelectorAll('.bubble-choice-item').forEach(bEl => {
+        bEl.onclick = () => {
+          const chosenId = bEl.getAttribute('data-id');
+          if (chosenId === targetItem.id) {
+            soundSynth.play('win');
+            fireConfetti();
+            addStar(1);
+            bEl.style.transform = 'scale(1.35) rotate(20deg)';
+            speakVN(`Chính xác! Bé giỏi quá, chữ ${targetItem.upper} đây rồi!`);
+            setTimeout(() => renderBubblesGame(stage), 1200);
+          } else {
+            soundSynth.play('wrong');
+            bEl.style.transform = 'translateX(-10px)';
+            setTimeout(() => { bEl.style.transform = 'translateX(10px)'; }, 100);
+            setTimeout(() => { bEl.style.transform = ''; }, 200);
+            speakVN('Chưa đúng rồi, bé hãy thử lại nhé!');
+          }
+        };
+      });
+    };
+
+    // 🖼️ 2. TRÒ CHƠI NHÌN TRANH ĐOÁN CHỮ ĐẦU (GAME ĐỐ HÌNH BẮT CHỮ)
+    const renderGuessWordGame = (stage) => {
+      const targetItem = ALPHABET_DATA[Math.floor(Math.random() * ALPHABET_DATA.length)];
+      const wObj = (targetItem.words && targetItem.words.length > 0) 
+        ? targetItem.words[Math.floor(Math.random() * targetItem.words.length)]
+        : { w: targetItem.characterName, icon: targetItem.icon };
+
+      const wrongLetters = ALPHABET_DATA.filter(x => x.id !== targetItem.id).sort(() => 0.5 - Math.random()).slice(0, 3);
+      const options = [targetItem, ...wrongLetters].sort(() => 0.5 - Math.random());
+
+      stage.innerHTML = `
+        <div style="text-align:center;display:flex;flex-direction:column;gap:1.5rem;animation:fadeIn 0.25s;">
+          
+          <div>
+            <span style="background:#eff6ff;color:#1d4ed8;font-weight:900;font-size:0.85rem;padding:0.35rem 0.95rem;border-radius:14px;border:1.5px solid #bfdbfe;">
+              TRÒ CHƠI NHÌN TRANH ĐOÁN CHỮ ĐẦU
+            </span>
+            <div style="font-size:6.5rem;margin:0.8rem 0 0.2rem;animation:bounce 1.8s infinite;filter:drop-shadow(0 10px 20px rgba(0,0,0,0.12));">
+              ${wObj.icon}
+            </div>
+            <h2 style="margin:0;font-family:var(--font-title);font-size:2.2rem;font-weight:900;color:#0f172a;">
+              "${wObj.w}" bắt đầu bằng chữ cái nào?
+            </h2>
+            <button id="btn-re-prompt-guess" style="background:#f1f5f9;border:1.5px solid #cbd5e1;padding:0.45rem 1rem;border-radius:12px;font-weight:800;font-size:0.88rem;color:#475569;cursor:pointer;margin-top:0.6rem;display:inline-flex;align-items:center;gap:0.4rem;">
+              🔊 Nghe lại câu hỏi
+            </button>
+          </div>
+
+          <!-- 4 LỰA CHỌN CHỮ CÁI Ô VUÔNG LỚN -->
+          <div style="display:flex;justify-content:center;gap:1.4rem;flex-wrap:wrap;padding:0.5rem 0;">
+            ${options.map(opt => `
+              <button class="btn-guess-opt" data-id="${opt.id}" style="background:#ffffff;border:3px solid ${opt.color};border-radius:24px;padding:1.2rem 2.4rem;font-family:var(--font-title);font-weight:900;font-size:2.6rem;color:${opt.color};cursor:pointer;transition:all 0.2s;box-shadow:0 8px 20px rgba(0,0,0,0.06);min-width:140px;" onmouseover="this.style.transform='scale(1.08) translateY(-4px)';this.style.boxShadow='0 12px 28px ${opt.color}44';this.style.background='${opt.color}';this.style.color='#ffffff';" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 20px rgba(0,0,0,0.06)';this.style.background='#ffffff';this.style.color='${opt.color}';">
+                ${opt.upper} <span style="font-size:1.8rem;opacity:0.85;">${opt.lower}</span>
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- Hộp thông báo kết quả tương tác -->
+          <div id="guess-result-feedback" style="display:none;font-weight:900;font-size:1.2rem;padding:0.85rem 1.6rem;border-radius:18px;margin:0 auto;max-width:550px;animation:zoomIn 0.2s;"></div>
+
+        </div>
+      `;
+
+      const promptQuestion = () => {
+        speakVN(`Hình ${wObj.w}... bắt đầu bằng chữ cái nào bé nhỉ?`);
+      };
+      promptQuestion();
+
+      stage.querySelector('#btn-re-prompt-guess').onclick = promptQuestion;
+
+      const fbBox = stage.querySelector('#guess-result-feedback');
+
+      stage.querySelectorAll('.btn-guess-opt').forEach(btn => {
+        btn.onclick = () => {
+          const chosen = btn.getAttribute('data-id');
+          if (chosen === targetItem.id) {
+            soundSynth.play('win');
+            fireConfetti();
+            addStar(1);
+
+            btn.style.background = '#10b981';
+            btn.style.color = '#ffffff';
+            btn.style.borderColor = '#059669';
+            btn.style.transform = 'scale(1.15)';
+            btn.style.boxShadow = '0 12px 30px rgba(16,185,129,0.5)';
+
+            fbBox.style.display = 'block';
+            fbBox.style.background = '#dcfce7';
+            fbBox.style.color = '#166534';
+            fbBox.style.border = '2px solid #86efac';
+            fbBox.innerHTML = `🎉 CHÍNH XÁC! <strong>${wObj.w}</strong> bắt đầu bằng <strong>Chữ ${targetItem.upper}</strong>! (+1 ⭐)`;
+
+            speakVN(`Hoan hô! Bé giỏi quá! ${wObj.w}. bắt đầu bằng chữ ${targetItem.upper}. Âm ${targetItem.phoneme}.`, 0.85, () => {
+              setTimeout(() => renderGuessWordGame(stage), 1200);
+            });
+          } else {
+            soundSynth.play('wrong');
+            btn.style.transform = 'translateX(-10px)';
+            btn.style.borderColor = '#ef4444';
+            setTimeout(() => { btn.style.transform = 'translateX(10px)'; }, 100);
+            setTimeout(() => { btn.style.transform = ''; }, 200);
+
+            fbBox.style.display = 'block';
+            fbBox.style.background = '#fee2e2';
+            fbBox.style.color = '#991b1b';
+            fbBox.style.border = '2px solid #f87171';
+            fbBox.innerHTML = `❌ Chưa đúng rồi! Bé hãy quan sát kỹ hình <strong>${wObj.w}</strong> và chọn lại nhé!`;
+
+            speakVN(`Chưa đúng rồi. Bé hãy quan sát lại hình ${wObj.w} và chọn chữ cái đúng nhé!`);
+          }
+        };
+      });
+    };
+
+    // 🏆 3. BỘ SƯU TẬP HUY HIỆU DANH DỰ ĐỘNG VẬT TIẾNG VIỆT
+    const renderBadgesGallery = (stage) => {
+      const BADGES = [
+        { id: 1, name: 'Mèo Con Tinh Mắt', icon: '🐱', req: 5, color: '#f59e0b', desc: 'Nhận biết xuất sắc 5 chữ cái đầu tiên' },
+        { id: 2, name: 'Thỏ Trắng Nhanh Nhẹn', icon: '🐰', req: 15, color: '#10b981', desc: 'Vượt qua 15 thử thách ghép vần xuất sắc' },
+        { id: 3, name: 'Khỉ Nhỏ Thông Minh', icon: '🐵', req: 30, color: '#3b82f6', desc: 'Đạt thành tích 30 Sao Vàng trong các trò chơi' },
+        { id: 4, name: 'Sư Tử Trí Tuệ', icon: '🦁', req: 50, color: '#8b5cf6', desc: 'Bậc thầy nhận biết âm vần và thanh điệu' },
+        { id: 5, name: 'Rồng Vàng Siêu Đẳng', icon: '🐲', req: 100, color: '#ef4444', desc: 'Đại sứ xuất sắc Xứ Sở Chữ Cái GDPT 2018' }
+      ];
+
+      const maxReq = 100;
+      const progressPercent = Math.min(100, Math.round((currentStars / maxReq) * 100));
+
+      stage.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:1.6rem;animation:fadeIn 0.25s;">
+          
+          <div style="text-align:center;">
+            <span style="background:#fef3c7;color:#b45309;font-weight:900;font-size:0.85rem;padding:0.35rem 0.95rem;border-radius:14px;border:1.5px solid #fde68a;">
+              VINH DANH THÀNH TÍCH BÉ HỌC GIỎI
+            </span>
+            <h2 style="margin:0.4rem 0 0;font-family:var(--font-title);font-size:2.2rem;font-weight:900;color:#0f172a;">
+              🏆 BỘ SƯU TẬP HUY HIỆU ĐỘNG VẬT
+            </h2>
+            <p style="margin:0.25rem 0 0;font-size:1rem;color:#64748b;">
+              Bé đang có <strong style="color:#d97706;font-size:1.35rem;">⭐ ${currentStars} Sao Vàng</strong>. Nhấp vào từng huy hiệu để nghe vinh danh!
+            </p>
+          </div>
+
+          <!-- THANH TIẾN ĐỘ THU THẬP SAO VÀNG -->
+          <div style="background:#f8fafc;border:2px solid #e2e8f0;border-radius:24px;padding:1.2rem 1.6rem;box-shadow:0 4px 14px rgba(0,0,0,0.03);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;font-weight:900;font-size:0.95rem;color:#1e293b;">
+              <span>📈 Tiến Trình Chinh Phục Rồng Vàng:</span>
+              <span style="color:#d97706;">${currentStars} / 100 Sao Vàng (${progressPercent}%)</span>
+            </div>
+            <div style="height:14px;background:#e2e8f0;border-radius:10px;overflow:hidden;position:relative;">
+              <div style="height:100%;width:${progressPercent}%;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:10px;transition:width 0.8s ease;box-shadow:0 0 10px rgba(245,158,11,0.5);"></div>
+            </div>
+          </div>
+
+          <!-- 5 THẺ HUY HIỆU ĐỘNG VẬT SẮC NÉT -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1.2rem;">
+            ${BADGES.map(b => {
+              const isUnlocked = currentStars >= b.req;
+              return `
+                <div class="badge-item-card" data-id="${b.id}" style="background:${isUnlocked?'#ffffff':'#f8fafc'};border:3px solid ${isUnlocked?b.color:'#cbd5e1'};border-radius:26px;padding:1.6rem 1.2rem;text-align:center;box-shadow:${isUnlocked?'0 12px 30px '+b.color+'33':'none'};opacity:${isUnlocked?'1':'0.65'};cursor:pointer;transition:all 0.25s;" onmouseover="this.style.transform='scale(1.05) translateY(-4px)';" onmouseout="this.style.transform='';">
+                  
+                  <div style="font-size:4.5rem;margin-bottom:0.5rem;filter:${isUnlocked?'none':'grayscale(100%)'};animation:${isUnlocked?'bounce 2s infinite':'none'};">
+                    ${b.icon}
+                  </div>
+
+                  <div style="font-family:var(--font-title);font-weight:900;font-size:1.25rem;color:${isUnlocked?'#0f172a':'#64748b'};margin-bottom:0.3rem;">
+                    ${b.name}
+                  </div>
+
+                  <div style="font-size:0.85rem;color:#475569;line-height:1.4;margin-bottom:0.8rem;min-height:38px;">
+                    ${b.desc}
+                  </div>
+
+                  <div style="font-weight:900;font-size:0.88rem;color:${isUnlocked?'#166534':'#94a3b8'};background:${isUnlocked?'#dcfce7':'#f1f5f9'};padding:0.4rem 0.85rem;border-radius:14px;border:1.5px solid ${isUnlocked?'#86efac':'#cbd5e1'};display:inline-block;">
+                    ${isUnlocked ? '🌟 ĐÃ MỞ KHÓA' : `🔒 Cần ${b.req} ⭐`}
+                  </div>
+
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+        </div>
+      `;
+
+      // Event listener for clicking badges to hear celebratory speech
+      stage.querySelectorAll('.badge-item-card').forEach(bCard => {
+        bCard.onclick = () => {
+          const bId = parseInt(bCard.dataset.id, 10);
+          const bObj = BADGES.find(x => x.id === bId);
+          if (bObj) {
+            const isUnlocked = currentStars >= bObj.req;
+            if (isUnlocked) {
+              soundSynth.play('win');
+              fireConfetti();
+              speakVN(`Huy hiệu ${bObj.name}! ${bObj.desc}. Chúc mừng bé đã mở khóa thành công danh hiệu này!`);
+            } else {
+              soundSynth.play('pop');
+              const remaining = bObj.req - currentStars;
+              speakVN(`Huy hiệu ${bObj.name}. Yêu cầu ${bObj.req} Sao Vàng. Bé còn thiếu ${remaining} Sao Vàng nữa, cố lên nhé!`);
+            }
+          }
+        };
+      });
+    };
+
+        renderContent();
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 🔢 PHÂN HỆ VIP: VƯƠNG QUỐC CÁC CON SỐ DIỆU KỲ & TẬP ĐẾM (CHUẨN TOÁN LỚP 1 GDPT 2018)
+  // ─────────────────────────────────────────────────────────────────────────────
+  _renderNumbersKidsDashboard() {
+
+    // Ensure smooth scrolling in fullscreen mode
+    if (!document.getElementById('kids-fullscreen-scroll-style')) {
+      const st = document.createElement('style');
+      st.id = 'kids-fullscreen-scroll-style';
+      st.textContent = `
+        #chart100-matrix-scrollbox::-webkit-scrollbar {
+          width: 8px;
+        }
+        #chart100-matrix-scrollbox::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 8px;
+        }
+        #chart100-matrix-scrollbox::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #f59e0b, #ec4899);
+          border-radius: 8px;
+        }
+        #chart100-matrix-scrollbox::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #d97706, #db2777);
+        }
+
+        :fullscreen, :-webkit-full-screen {
+          overflow-y: auto !important;
+          max-height: 100vh !important;
+          box-sizing: border-box !important;
+          scroll-behavior: smooth;
+        }
+        :fullscreen::-webkit-scrollbar, :-webkit-full-screen::-webkit-scrollbar {
+          width: 12px;
+          height: 12px;
+        }
+        :fullscreen::-webkit-scrollbar-track, :-webkit-full-screen::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.8);
+          border-radius: 8px;
+        }
+        :fullscreen::-webkit-scrollbar-thumb, :-webkit-full-screen::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, #f59e0b, #ec4899);
+          border-radius: 8px;
+          border: 2px solid rgba(15, 23, 42, 0.8);
+        }
+        :fullscreen::-webkit-scrollbar-thumb:hover, :-webkit-full-screen::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, #fbbf24, #f43f5e);
+        }
+      `;
+      document.head.appendChild(st);
+    }
+
+    const container = this._area();
+    if (!container) return;
+
+    const soundSynth = this._getAudioSynth();
+
+    const speakVN = (text, customRate = 0.88) => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        let cleanText = String(text || '')
+          .replace(/[➔>]+/g, ', ')
+          .replace(/[-–—]+/g, ', ')
+          .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
+          .trim();
+        const utter = new SpeechSynthesisUtterance(cleanText);
+        utter.lang = 'vi-VN';
+        utter.rate = customRate;
+        utter.pitch = 1.0;
+        utter.volume = 1.0;
+        window.speechSynthesis.speak(utter);
+      }
+    };
+
+    let totalStars = parseInt(localStorage.getItem('numbers_kids_stars') || '0', 10);
+    const addStar = (amt = 1) => {
+      totalStars += amt;
+      localStorage.setItem('numbers_kids_stars', totalStars);
+      const sBadge = document.getElementById('numbers-star-count');
+      if (sBadge) sBadge.textContent = totalStars;
+    };
+
+    const fireConfetti = () => {
+      if (window.confetti) {
+        window.confetti({ particleCount: 75, spread: 80, origin: { y: 0.6 } });
+      }
+    };
+
+    // Kho Dữ Liệu 11 Số (0 đến 10) Chuẩn Toán Lớp 1 GDPT 2018
+    const NUMBERS_DATA = [
+      { id: 0, num: '0', word: 'Không', character: 'Quả Trứng Tròn', icon: '🥚', animIcon: '🐣', color: '#64748b', bg: '#f1f5f9', intro: 'Đây là số 0. Số 0 biểu thị không có đồ vật nào. Số 0 biến hình thành Quả Trứng Gà tròn xoe!', rhyme: 'Số 0 như quả trứng gà, bé chưa có bạn ở nhà một thân.', items: [], countWord: '0 quả trứng' },
+      { id: 1, num: '1', word: 'Một', character: 'Cây Nến Thắp Sáng', icon: '🕯️', animIcon: '✨', color: '#ef4444', bg: '#fee2e2', intro: 'Đây là số 1. Số 1 biểu thị số lượng là một. Số 1 đứng thẳng biến hình thành Cây Nến thắp sáng lung linh!', rhyme: 'Số 1 như chiếc nến hồng, thắp lên ánh sáng ấm nồng đêm đông.', items: ['🍎'], countWord: '1 quả táo' },
+      { id: 2, num: '2', word: 'Hai', character: 'Chú Vịt Bơi Lội', icon: '🦆', animIcon: '🌊', color: '#f97316', bg: '#ffedd5', intro: 'Đây là số 2. Số 2 biểu thị số lượng là hai. Số 2 có cổ cong biến hình thành Chú Vịt Bơi quẫy nước!', rhyme: 'Số 2 như chú vịt xinh, cổ cong bơi lội một mình bờ ao.', items: ['🦆', '🦆'], countWord: '2 chú vịt' },
+      { id: 3, num: '3', word: 'Ba', character: 'Cánh Bướm Xòe Hoa', icon: '🦋', animIcon: '🌸', color: '#eab308', bg: '#fef9c3', intro: 'Đây là số 3. Số 3 biểu thị số lượng là ba. Số 3 có hai vòm cong biến hình thành Cánh Bướm Rập Rờn!', rhyme: 'Số 3 đôi cánh bướm xinh, rập rờn hoa nắng lung linh vườn hồng.', items: ['🦋', '🦋', '🦋'], countWord: '3 chú bướm' },
+      { id: 4, num: '4', word: 'Bốn', character: 'Cánh Buồm Đón Gió', icon: '⛵', animIcon: '🌊', color: '#3b82f6', bg: '#dbeafe', intro: 'Đây là số 4. Số 4 biểu thị số lượng là bốn. Số 4 hình tam giác biến hình thành Cánh Buồm giương cao lướt sóng!', rhyme: 'Số 4 như cánh buồm căng, lướt sóng ra biển đón trăng đêm rằm.', items: ['⛵', '⛵', '⛵', '⛵'], countWord: '4 cánh buồm' },
+      { id: 5, num: '5', word: 'Năm', character: 'Chiếc Móc Câu Cá', icon: '🪝', animIcon: '🐟', color: '#10b981', bg: '#d1fae5', intro: 'Đây là số 5. Số 5 biểu thị số lượng là năm. Số 5 có nét móc cong biến hình thành Chiếc Móc Câu săn cá!', rhyme: 'Số 5 như chiếc móc câu, đón cá bơi lội dưới sâu mặt hồ.', items: ['⭐', '⭐', '⭐', '⭐', '⭐'], countWord: '5 ngôi sao' },
+      { id: 6, num: '6', word: 'Sáu', character: 'Chú Ốc Sên Nhỏ', icon: '🐌', animIcon: '🌿', color: '#06b6d4', bg: '#cffafe', intro: 'Đây là số 6. Số 6 biểu thị số lượng là sáu. Số 6 có bụng tròn ở dưới biến hình thành Chú Ốc Sên vác nhà đi dạo!', rhyme: 'Số 6 chú ốc sên con, vác nhà đi dạo đường mòn quanh co.', items: ['🍓', '🍓', '🍓', '🍓', '🍓', '🍓'], countWord: '6 quả dâu' },
+      { id: 7, num: '7', word: 'Bảy', character: 'Chiếc Búa Thợ Mộc', icon: '🪓', animIcon: '🪵', color: '#8b5cf6', bg: '#ede9fe', intro: 'Đây là số 7. Số 7 biểu thị số lượng là bảy. Số 7 có nét ngang và xiên biến hình thành Chiếc Búa thợ mộc chắc khỏe!', rhyme: 'Số 7 như chiếc búa xinh, giúp bác thợ mộc dựng đình dựng non.', items: ['🎈', '🎈', '🎈', '🎈', '🎈', '🎈', '🎈'], countWord: '7 quả bóng' },
+      { id: 8, num: '8', word: 'Tám', character: 'Người Tuyết Tròn Vo', icon: '⛄', animIcon: '❄️', color: '#ec4899', bg: '#fce7f3', intro: 'Đây là số 8. Số 8 biểu thị số lượng là tám. Số 8 có hai vòng tròn biến hình thành Bạn Người Tuyết tròn xoe mùa đông!', rhyme: 'Số 8 người tuyết tròn vo, mùa đông lạnh buốt chẳng lo gió lùa.', items: ['🍦', '🍦', '🍦', '🍦', '🍦', '🍦', '🍦', '🍦'], countWord: '8 que kem' },
+      { id: 9, num: '9', word: 'Chín', character: 'Quả Bóng Bay Cao', icon: '🎈', animIcon: '🌈', color: '#f43f5e', bg: '#ffe4e6', intro: 'Đây là số 9. Số 9 biểu thị số lượng là chín. Số 9 có đầu tròn ở trên biến hình thành Quả Bóng Bay lượn trời cao!', rhyme: 'Số 9 quả bóng bay cao, vi vu theo gió đón chào bình minh.', items: ['🚗', '🚗', '🚗', '🚗', '🚗', '🚗', '🚗', '🚗', '🚗'], countWord: '9 xe ô tô' },
+      { id: 10, num: '10', word: 'Mười', character: 'Cây Gậy & Quả Bóng', icon: '🔟', animIcon: '🏆', color: '#ca8a04', bg: '#fefce8', intro: 'Đây là số 10. Số 10 gồm chữ số 1 đứng trước và chữ số 0 đứng sau. Số 10 biến hình thành Điểm Mười Đỏ Thắm!', rhyme: 'Số 10 có một và không, mười điểm đỏ thắm bé mong mỗi ngày.', items: ['⭐', '⭐', '⭐', '⭐', '⭐', '⭐', '⭐', '⭐', '⭐', '⭐'], countWord: '10 điểm mười' }
+    ];
+
+    let activeSubTab = 'garden'; // 'garden' (Vườn Số) | 'counting' (Bàn Tập Đếm) | 'quiz' (Thử Thách Đố Vui)
+
+    const renderMainDashboard = () => {
+      container.innerHTML = `
+        <div style="padding:1.5rem 0;display:flex;flex-direction:column;gap:1.5rem;font-family:var(--font-body);">
+          
+          <!-- VIP HEADER BANNER -->
+          <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:32px;padding:2.2rem 2.8rem;border:3.5px solid #f59e0b;color:#ffffff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.5rem;box-shadow:0 25px 60px rgba(0,0,0,0.5);position:relative;overflow:hidden;">
+            <div style="position:absolute;right:-20px;bottom:-30px;font-size:10rem;opacity:0.1;pointer-events:none;">🔢</div>
+
+            <div>
+              <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.5rem;">
+                <span style="background:#f59e0b;color:#000;font-weight:900;padding:0.25rem 0.8rem;border-radius:10px;font-size:0.8rem;">TOÁN TIỂU HỌC 2018</span>
+                <span style="background:rgba(255,255,255,0.18);color:#fff;font-weight:800;padding:0.25rem 0.8rem;border-radius:10px;font-size:0.8rem;">LÀM QUEN CHỮ SỐ 0 - 10</span>
+              </div>
+              <h1 style="margin:0;font-family:var(--font-title);font-size:2.2rem;font-weight:900;color:#fef08a;text-shadow:0 3px 12px rgba(245,158,11,0.4);">
+                🔢 Vương Quốc Con Số Diệu Kỳ & Tập Đếm
+              </h1>
+              <p style="margin:0.4rem 0 0;font-size:1.05rem;color:#cbd5e1;max-width:700px;line-height:1.5;">
+                Giúp bé nhận biết mặt số từ 0 đến 10, xem hoạt hình biến hình, tập đếm trực quan bằng khung 10 chấm tròn và tập viết nét số chuẩn ô ly.
+              </p>
+            </div>
+
+            <!-- STAR BADGE & CONTROLS -->
+            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:0.8rem;background:rgba(0,0,0,0.3);padding:0.65rem 1.3rem;border-radius:20px;border:1.5px solid rgba(255,255,255,0.15);">
+                <div style="font-size:2.2rem;">⭐</div>
+                <div>
+                  <div style="font-size:0.75rem;font-weight:800;color:#cbd5e1;text-transform:uppercase;">Sao Vàng Đạt Được</div>
+                  <div id="numbers-star-count" style="font-size:1.6rem;font-weight:900;color:#fef08a;">${totalStars}</div>
+                </div>
+              </div>
+
+              <button id="btn-numbers-full-projector" style="background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);color:#ffffff;border:1.5px solid rgba(255,255,255,0.4);padding:0.75rem 1.25rem;border-radius:20px;font-weight:900;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;box-shadow:0 6px 18px rgba(0,0,0,0.25);transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)';" onmouseout="this.style.background='rgba(255,255,255,0.18)';" title="Phóng to toàn màn hình máy chiếu lớp học">
+                📺 Chiếu Lớp Học
+              </button>
+            </div>
+          </div>
+
+          <!-- SUB TABS NAVIGATION -->
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button id="btn-sub-garden" style="padding:0.75rem 1.6rem;border-radius:16px;border:none;background:${activeSubTab==='garden'?'linear-gradient(135deg,#f59e0b,#d97706)':'#1e293b'};color:${activeSubTab==='garden'?'#000':'#fff'};font-weight:900;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:${activeSubTab==='garden'?'0 4px 14px rgba(245,158,11,0.4)':'none'};">
+              <span>🔢</span> 1. Vườn Số (0 - 10) & Tập Tô
+            </button>
+            <button id="btn-sub-chart100" style="padding:0.75rem 1.6rem;border-radius:16px;border:none;background:${activeSubTab==='chart100'?'linear-gradient(135deg,#ec4899,#db2777)':'#1e293b'};color:#fff;font-weight:900;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:${activeSubTab==='chart100'?'0 4px 14px rgba(236,72,153,0.4)':'none'};">
+              <span>💯</span> 2. Bảng 100 Số Ma Thuật (1 - 100) ⭐
+            </button>
+            <button id="btn-sub-counting" style="padding:0.75rem 1.6rem;border-radius:16px;border:none;background:${activeSubTab==='counting'?'linear-gradient(135deg,#3b82f6,#2563eb)':'#1e293b'};color:#fff;font-weight:900;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:${activeSubTab==='counting'?'0 4px 14px rgba(59,130,246,0.4)':'none'};">
+              <span>🧮</span> 3. Bàn Tập Đếm & So Sánh Số Lượng
+            </button>
+            <button id="btn-sub-quiz" style="padding:0.75rem 1.6rem;border-radius:16px;border:none;background:${activeSubTab==='quiz'?'linear-gradient(135deg,#10b981,#059669)':'#1e293b'};color:#fff;font-weight:900;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:${activeSubTab==='quiz'?'0 4px 14px rgba(16,185,129,0.4)':'none'};">
+              <span>🎮</span> 4. Thử Thách Đếm Hình Bắt Số
+            </button>
+          </div>
+
+          <!-- DYNAMIC SUB-TAB CONTENT -->
+          <div id="numbers-subtab-container"></div>
+
+        </div>
+      `;
+
+      // Sub-tab handlers
+      const subContainer = container.querySelector('#numbers-subtab-container');
+      const btnG = container.querySelector('#btn-sub-garden');
+      const btnH = container.querySelector('#btn-sub-chart100');
+      const btnC = container.querySelector('#btn-sub-counting');
+      const btnQ = container.querySelector('#btn-sub-quiz');
+      const btnFullNumbers = container.querySelector('#btn-numbers-full-projector');
+
+      if (btnFullNumbers) {
+        btnFullNumbers.onclick = () => {
+          soundSynth.play('pop');
+          if (!document.fullscreenElement) {
+            container.style.overflow = 'hidden';
+            container.style.maxHeight = '100vh';
+            container.style.background = '#0f172a';
+            container.style.padding = '1.2rem 2rem';
+            container.style.boxSizing = 'border-box';
+            container.requestFullscreen().catch(() => {});
+            btnFullNumbers.innerHTML = '📴 Thoát Chiếu';
+          } else {
+            document.exitFullscreen().catch(() => {});
+            container.style.overflowY = '';
+            container.style.maxHeight = '';
+            container.style.background = '';
+            container.style.padding = '';
+            btnFullNumbers.innerHTML = '📺 Chiếu Lớp Học';
+          }
+        };
+      }
+
+      document.addEventListener('fullscreenchange', () => {
+        const bf = container.querySelector('#btn-numbers-full-projector');
+        if (!document.fullscreenElement) {
+          container.style.overflowY = '';
+          container.style.maxHeight = '';
+          container.style.background = '';
+          container.style.padding = '';
+          if (bf) bf.innerHTML = '📺 Chiếu Lớp Học';
+        } else {
+          container.style.overflowY = 'auto';
+          container.style.maxHeight = '100vh';
+          container.style.background = '#0f172a';
+          container.style.padding = '1.5rem 2rem';
+          container.style.boxSizing = 'border-box';
+          if (bf) bf.innerHTML = '📴 Thoát Chiếu';
+        }
+      });
+
+      const switchSubTab = (tab) => {
+        if (window._chart100AutoTimer) {
+          clearInterval(window._chart100AutoTimer);
+          window._chart100AutoTimer = null;
+        }
+        activeSubTab = tab;
+        soundSynth.play('pop');
+        renderMainDashboard();
+      };
+
+      if (btnG) btnG.onclick = () => switchSubTab('garden');
+      if (btnH) btnH.onclick = () => switchSubTab('chart100');
+      if (btnC) btnC.onclick = () => switchSubTab('counting');
+      if (btnQ) btnQ.onclick = () => switchSubTab('quiz');
+
+      if (activeSubTab === 'garden') renderGardenView(subContainer);
+      else if (activeSubTab === 'chart100') renderChart100View(subContainer);
+      else if (activeSubTab === 'counting') renderCountingStudio(subContainer);
+      else if (activeSubTab === 'quiz') renderQuizGame(subContainer);
+    };
+
+
+    // Thuật toán đọc số Tiếng Việt chuẩn GDPT 2018 từ 1 đến 100
+    const getVNNumberWord = (n) => {
+      const units = ['', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+      if (n === 0) return 'không';
+      if (n === 100) return 'một trăm';
+      if (n <= 9) return units[n];
+      if (n === 10) return 'mười';
+      if (n > 10 && n < 20) {
+        const u = n % 10;
+        if (u === 1) return 'mười một';
+        if (u === 4) return 'mười bốn';
+        if (u === 5) return 'mười lăm';
+        return 'mười ' + units[u];
+      }
+      const tens = Math.floor(n / 10);
+      const u = n % 10;
+      let tenWord = units[tens] + ' mươi';
+      if (u === 0) return tenWord;
+      if (u === 1) return tenWord + ' mốt';
+      if (u === 4) return tenWord + ' tư';
+      if (u === 5) return tenWord + ' lăm';
+      return tenWord + ' ' + units[u];
+    };
+
+
+    // ─────────────────────────────────────────────────────────────
+    // 💯 2. BẢNG 100 SỐ MA THUẬT & HỌC SỐ TỪ 1 ĐẾN 100 (GDPT 2018)
+    // ─────────────────────────────────────────────────────────────
+    const renderChart100View = (parent) => {
+      let selectedNum = 1;
+      let filterMode = 'all'; // 'all' | 'round' (tròn chục) | 'even' (chẵn) | 'odd' (lẻ) | 'step5' (cách 5)
+      let isAutoCounting = false;
+      let targetQuizNum = null;
+      let quizModeActive = false;
+
+      const colorsRow = [
+        '#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4',
+        '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e'
+      ];
+
+      const renderUI = () => {
+        const tens = Math.floor(selectedNum / 10);
+        const units = selectedNum % 10;
+        const word = getVNNumberWord(selectedNum);
+
+        parent.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:1.5rem;animation:fadeIn 0.25s;">
+            
+            <!-- TOP CONTROL PANEL & FILTER BAR -->
+            <div style="background:#ffffff;border-radius:24px;padding:1.4rem 1.8rem;border:2.5px solid #e2e8f0;box-shadow:0 10px 25px rgba(0,0,0,0.04);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+              
+              <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+                <span style="font-weight:900;color:#1e293b;font-size:0.92rem;margin-right:0.3rem;">🎯 CHẾ ĐỘ ĐẾM SỐ:</span>
+                <button class="btn-filter-c100" data-mode="all" style="padding:0.5rem 1rem;border-radius:12px;font-weight:800;font-size:0.85rem;cursor:pointer;border:1.5px solid #cbd5e1;background:${filterMode==='all'?'#3b82f6':'#f8fafc'};color:${filterMode==='all'?'#fff':'#334155'};">
+                  🌈 Tất cả (1-100)
+                </button>
+                <button class="btn-filter-c100" data-mode="round" style="padding:0.5rem 1rem;border-radius:12px;font-weight:800;font-size:0.85rem;cursor:pointer;border:1.5px solid #cbd5e1;background:${filterMode==='round'?'#10b981':'#f8fafc'};color:${filterMode==='round'?'#fff':'#334155'};">
+                  🔟 Số Tròn Chục (10, 20...)
+                </button>
+                <button class="btn-filter-c100" data-mode="even" style="padding:0.5rem 1rem;border-radius:12px;font-weight:800;font-size:0.85rem;cursor:pointer;border:1.5px solid #cbd5e1;background:${filterMode==='even'?'#8b5cf6':'#f8fafc'};color:${filterMode==='even'?'#fff':'#334155'};">
+                  ⚡ Số Chẵn (2, 4, 6...)
+                </button>
+                <button class="btn-filter-c100" data-mode="odd" style="padding:0.5rem 1rem;border-radius:12px;font-weight:800;font-size:0.85rem;cursor:pointer;border:1.5px solid #cbd5e1;background:${filterMode==='odd'?'#f59e0b':'#f8fafc'};color:${filterMode==='odd'?'#fff':'#334155'};">
+                  ⭐ Số Lẻ (1, 3, 5...)
+                </button>
+                <button class="btn-filter-c100" data-mode="step5" style="padding:0.5rem 1rem;border-radius:12px;font-weight:800;font-size:0.85rem;cursor:pointer;border:1.5px solid #cbd5e1;background:${filterMode==='step5'?'#ec4899':'#f8fafc'};color:${filterMode==='step5'?'#fff':'#334155'};">
+                  🚀 Đếm Cách 5 (5, 10, 15...)
+                </button>
+              </div>
+
+              <!-- ACTION BUTTONS -->
+              <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                <button id="btn-auto-count-100" style="background:${isAutoCounting?'#ef4444':'linear-gradient(135deg,#10b981,#059669)'};color:#fff;border:none;padding:0.65rem 1.4rem;border-radius:14px;font-weight:900;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:0 4px 14px rgba(16,185,129,0.3);">
+                  <span>${isAutoCounting?'⏸️ TẠM DỪNG ĐẾM':'▶️ TỰ ĐỘNG ĐẾM 1-100'}</span>
+                </button>
+                <button id="btn-quiz-find-number" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;border:none;padding:0.65rem 1.4rem;border-radius:14px;font-weight:900;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:0 4px 14px rgba(245,158,11,0.3);">
+                  <span>🎯</span> ${quizModeActive?'ĐỐ SỐ TIẾP THEO':'TRÒ CHƠI TÌM SỐ'}
+                </button>
+              </div>
+            </div>
+
+            <!-- MAIN WORKSPACE: 100-GRID ON LEFT + INSPECTOR ON RIGHT -->
+            <div style="display:grid;grid-template-columns:1fr 360px;gap:1.5rem;align-items:start;">
+              
+              <!-- LEFT: THE 100-GRID (10 x 10) -->
+              <div style="background:#ffffff;border-radius:28px;padding:1.6rem;border:3px solid #e2e8f0;box-shadow:0 12px 30px rgba(0,0,0,0.05);">
+                
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                  <div style="font-weight:900;font-size:1.15rem;color:#1e293b;display:flex;align-items:center;gap:0.5rem;">
+                    <span>💯 BẢNG CÁC SỐ TỪ 1 ĐẾN 100</span>
+                    <span style="font-size:0.8rem;background:#ede9fe;color:#7c3aed;padding:0.15rem 0.5rem;border-radius:6px;">GDPT 2018</span>
+                  </div>
+                  <div style="font-size:0.85rem;color:#64748b;font-weight:700;">
+                    Nhấn vào số bất kỳ để nghe đọc & xem cấu tạo
+                  </div>
+                </div>
+
+                <!-- 10x10 NUMBER MATRIX WITH DEDICATED INTERNAL SCROLLBAR -->
+                <div style="max-height:460px;overflow-y:auto;overflow-x:hidden;padding-right:8px;scroll-behavior:smooth;" id="chart100-matrix-scrollbox">
+                  <div style="display:grid;grid-template-columns:repeat(10, 1fr);gap:0.45rem;">
+                  ${Array.from({ length: 100 }, (_, idx) => {
+                    const num = idx + 1;
+                    const rowIdx = Math.floor(idx / 10);
+                    const rowColor = colorsRow[rowIdx];
+                    
+                    let isVisible = true;
+                    if (filterMode === 'round') isVisible = (num % 10 === 0);
+                    else if (filterMode === 'even') isVisible = (num % 2 === 0);
+                    else if (filterMode === 'odd') isVisible = (num % 2 !== 0);
+                    else if (filterMode === 'step5') isVisible = (num % 5 === 0);
+
+                    const isSelected = (selectedNum === num);
+                    const isTarget = (quizModeActive && targetQuizNum === num);
+
+                    return `
+                      <button class="btn-cell-100" data-num="${num}" style="
+                        aspect-ratio:1;
+                        border-radius:12px;
+                        font-family:var(--font-title);
+                        font-size:1.15rem;
+                        font-weight:900;
+                        cursor:pointer;
+                        transition:all 0.18s cubic-bezier(0.34,1.56,0.64,1);
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        border:${isSelected ? '3px solid #000' : isTarget ? '3px dashed #f59e0b' : '1.5px solid ' + (isVisible ? rowColor + '44' : '#f1f5f9')};
+                        background:${isSelected ? rowColor : isVisible ? rowColor + '12' : '#f8fafc'};
+                        color:${isSelected ? '#ffffff' : isVisible ? rowColor : '#cbd5e1'};
+                        transform:${isSelected ? 'scale(1.15)' : 'scale(1)'};
+                        box-shadow:${isSelected ? '0 6px 18px ' + rowColor + '66' : 'none'};
+                        z-index:${isSelected ? '5' : '1'};
+                        opacity:${isVisible ? '1' : '0.25'};
+                      " onmouseover="if(!${isSelected}) this.style.transform='scale(1.1)';" onmouseout="if(!${isSelected}) this.style.transform='scale(1)';">
+                        ${num}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                </div>
+                <!-- ROW LEGEND HINT -->
+                <div style="margin-top:1.2rem;display:flex;justify-content:space-between;font-size:0.78rem;font-weight:800;color:#64748b;padding-top:0.75rem;border-top:1px dashed #e2e8f0;flex-wrap:wrap;gap:0.5rem;">
+                  <span>💡 Hàng 1 (1-10): Số có 1 chữ số & 10</span>
+                  <span>💡 Hàng 2 (11-20): Dãy mười</span>
+                  <span>💡 Cột cuối cùng (10, 20... 100): Các số tròn chục</span>
+                </div>
+              </div>
+
+              <!-- RIGHT: NUMBER INSPECTOR & BASE-10 VISUALIZER -->
+              <div style="display:flex;flex-direction:column;gap:1.2rem;">
+                
+                <!-- BIG NUMBER CARD -->
+                <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:28px;padding:2rem 1.5rem;color:#ffffff;text-align:center;border:3px solid #f59e0b;box-shadow:0 15px 35px rgba(30,27,75,0.3);position:relative;overflow:hidden;">
+                  
+                  <div style="font-size:0.85rem;font-weight:800;color:#fef08a;text-transform:uppercase;letter-spacing:1px;">
+                    CÙNG ĐỌC SỐ
+                  </div>
+
+                  <!-- HUGE NUMBER -->
+                  <div style="font-family:var(--font-title);font-size:5.5rem;font-weight:900;color:#fef08a;margin:0.2rem 0;line-height:1;text-shadow:0 4px 20px rgba(245,158,11,0.5);">
+                    ${selectedNum}
+                  </div>
+
+                  <!-- NUMBER IN WORDS -->
+                  <div style="font-size:1.6rem;font-weight:900;color:#ffffff;text-transform:capitalize;margin-bottom:0.8rem;">
+                    "${word}"
+                  </div>
+
+                  <!-- SPEAK BUTTON -->
+                  <button id="btn-speak-selected-100" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:0.7rem 1.5rem;border-radius:14px;font-weight:900;font-size:0.95rem;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;box-shadow:0 4px 14px rgba(59,130,246,0.4);">
+                    <span>🔊</span> NGHE ĐỌC SỐ
+                  </button>
+                </div>
+
+                <!-- PLACE VALUE & BASE-10 BLOCKS DECOMPOSITION -->
+                <div style="background:#ffffff;border-radius:24px;padding:1.4rem;border:2.5px solid #e2e8f0;box-shadow:0 8px 20px rgba(0,0,0,0.04);">
+                  <div style="font-weight:900;font-size:1rem;color:#0f172a;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem;">
+                    <span>🧱 CẤU TẠO SỐ THEO HÀNG</span>
+                  </div>
+
+                  ${selectedNum === 100 ? `
+                    <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:16px;padding:1rem;text-align:center;">
+                      <div style="font-weight:900;font-size:1.2rem;color:#16a34a;">100 = 1 Trăm = 10 Chục</div>
+                      <div style="font-size:0.85rem;color:#475569;margin-top:0.3rem;">Gồm 100 khối đơn vị ghép lại!</div>
+                    </div>
+                  ` : `
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;text-align:center;">
+                      
+                      <!-- TENS -->
+                      <div style="background:#eff6ff;border:2px solid #93c5fd;border-radius:16px;padding:0.85rem 0.5rem;">
+                        <div style="font-size:0.75rem;font-weight:800;color:#1e40af;text-transform:uppercase;">Hàng Chục</div>
+                        <div style="font-size:2rem;font-weight:900;color:#2563eb;">${tens}</div>
+                        <div style="font-size:0.78rem;font-weight:700;color:#3b82f6;">${tens} chục (${tens * 10})</div>
+                      </div>
+
+                      <!-- UNITS -->
+                      <div style="background:#fef2f2;border:2px solid #fca5a5;border-radius:16px;padding:0.85rem 0.5rem;">
+                        <div style="font-size:0.75rem;font-weight:800;color:#991b1b;text-transform:uppercase;">Hàng Đơn Vị</div>
+                        <div style="font-size:2rem;font-weight:900;color:#dc2626;">${units}</div>
+                        <div style="font-size:0.78rem;font-weight:700;color:#ef4444;">${units} đơn vị</div>
+                      </div>
+
+                    </div>
+
+                    <!-- FORMULA FORM -->
+                    <div style="margin-top:0.85rem;background:#f8fafc;border-radius:12px;padding:0.6rem;text-align:center;font-weight:900;font-size:1.05rem;color:#1e293b;border:1px solid #e2e8f0;">
+                      ${selectedNum} = ${tens * 10} + ${units}
+                    </div>
+                  `}
+
+                  <!-- NEIGHBORS (LIỀN TRƯỚC - LIỀN SAU) -->
+                  <div style="margin-top:1rem;padding-top:0.85rem;border-top:1px dashed #e2e8f0;">
+                    <div style="font-size:0.8rem;font-weight:800;color:#64748b;margin-bottom:0.4rem;">SỐ LIỀN TRƯỚC & LIỀN SAU:</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                      <button id="btn-prev-num-100" style="padding:0.4rem 0.8rem;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:10px;font-weight:800;font-size:0.82rem;cursor:pointer;" ${selectedNum<=1?'disabled':''}>
+                        ⬅️ Số ${selectedNum - 1}
+                      </button>
+                      <span style="font-weight:900;font-size:1.1rem;color:#0f172a;">[ ${selectedNum} ]</span>
+                      <button id="btn-next-num-100" style="padding:0.4rem 0.8rem;background:#f1f5f9;border:1px solid #cbd5e1;border-radius:10px;font-weight:800;font-size:0.82rem;cursor:pointer;" ${selectedNum>=100?'disabled':''}>
+                        Số ${selectedNum + 1} ➡️
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+        // Bind Cell clicks
+        parent.querySelectorAll('.btn-cell-100').forEach(btn => {
+          btn.onclick = () => {
+            const num = parseInt(btn.getAttribute('data-num'), 10);
+            
+            if (quizModeActive && targetQuizNum) {
+              if (num === targetQuizNum) {
+                soundSynth.play('win');
+                fireConfetti();
+                addStar(1);
+                speakVN(`Chính xác! Đó là số ${getVNNumberWord(num)}! Bé giỏi quá!`);
+                selectedNum = num;
+                quizModeActive = false;
+                targetQuizNum = null;
+                setTimeout(() => renderUI(), 1200);
+                return;
+              } else {
+                soundSynth.play('wrong');
+                speakVN(`Chưa đúng rồi, đây là số ${getVNNumberWord(num)}. Bé hãy tìm số ${getVNNumberWord(targetQuizNum)} nhé!`);
+                selectedNum = num;
+                renderUI();
+                return;
+              }
+            }
+
+            selectedNum = num;
+            soundSynth.play('pop');
+            speakVN(getVNNumberWord(num));
+            renderUI();
+          };
+        });
+
+        // Speak button
+        const btnSpk = parent.querySelector('#btn-speak-selected-100');
+        if (btnSpk) {
+          btnSpk.onclick = () => {
+            const w = getVNNumberWord(selectedNum);
+            const tens = Math.floor(selectedNum / 10);
+            const units = selectedNum % 10;
+            if (selectedNum === 100) {
+              speakVN(`Một trăm. Gồm 10 chục.`);
+            } else if (selectedNum <= 10) {
+              speakVN(`Số ${w}.`);
+            } else {
+              speakVN(`Số ${w}. Gồm ${tens} chục và ${units} đơn vị.`);
+            }
+          };
+        }
+
+        // Prev / Next neighbors
+        const btnPrev = parent.querySelector('#btn-prev-num-100');
+        if (btnPrev) {
+          btnPrev.onclick = () => {
+            if (selectedNum > 1) {
+              selectedNum--;
+              soundSynth.play('pop');
+              speakVN(getVNNumberWord(selectedNum));
+              renderUI();
+            }
+          };
+        }
+
+        const btnNext = parent.querySelector('#btn-next-num-100');
+        if (btnNext) {
+          btnNext.onclick = () => {
+            if (selectedNum < 100) {
+              selectedNum++;
+              soundSynth.play('pop');
+              speakVN(getVNNumberWord(selectedNum));
+              renderUI();
+            }
+          };
+        }
+
+        // Filter Mode buttons
+        parent.querySelectorAll('.btn-filter-c100').forEach(btn => {
+          btn.onclick = () => {
+            filterMode = btn.getAttribute('data-mode');
+            soundSynth.play('pop');
+            renderUI();
+          };
+        });
+
+        // Auto count button
+        const btnAuto = parent.querySelector('#btn-auto-count-100');
+        if (btnAuto) {
+          btnAuto.onclick = () => {
+            if (isAutoCounting) {
+              clearInterval(window._chart100AutoTimer);
+              window._chart100AutoTimer = null;
+              isAutoCounting = false;
+              renderUI();
+            } else {
+              isAutoCounting = true;
+              renderUI();
+              speakVN(`Bắt đầu đếm từ ${selectedNum} đến 100.`);
+              window._chart100AutoTimer = setInterval(() => {
+                if (selectedNum >= 100) {
+                  clearInterval(window._chart100AutoTimer);
+                  window._chart100AutoTimer = null;
+                  isAutoCounting = false;
+                  soundSynth.play('win');
+                  fireConfetti();
+                  speakVN('Hoan hô bé đã đếm đến một trăm!');
+                  renderUI();
+                  return;
+                }
+                selectedNum++;
+                speakVN(getVNNumberWord(selectedNum), 0.95);
+                renderUI();
+              }, 1100);
+            }
+          };
+        }
+
+        // Quiz Find Number Button
+        const btnQuiz = parent.querySelector('#btn-quiz-find-number');
+        if (btnQuiz) {
+          btnQuiz.onclick = () => {
+            if (window._chart100AutoTimer) {
+              clearInterval(window._chart100AutoTimer);
+              window._chart100AutoTimer = null;
+              isAutoCounting = false;
+            }
+            quizModeActive = true;
+            targetQuizNum = Math.floor(Math.random() * 100) + 1;
+            const w = getVNNumberWord(targetQuizNum);
+            soundSynth.play('pop');
+            speakVN(`Bé hãy tìm và bấm vào số ${w} trên bảng 100 nhé!`);
+            renderUI();
+          };
+        }
+      };
+
+      renderUI();
+    };
+
+
+    // ─────────────────────────────────────────────────────────────
+    // 🌸 1. VƯỜN 10 CON SỐ DIỆU KỲ (0 - 10)
+    // ─────────────────────────────────────────────────────────────
+    const renderGardenView = (parent) => {
+      parent.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.2rem;">
+          ${NUMBERS_DATA.map(item => `
+            <div class="number-card-item" data-id="${item.id}" style="background:#ffffff;border-radius:28px;padding:1.6rem 1.2rem;border:3px solid #e2e8f0;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:all 0.25s;box-shadow:0 8px 20px rgba(0,0,0,0.04);position:relative;overflow:hidden;" onmouseover="this.style.transform='translateY(-6px) scale(1.03)';this.style.borderColor='${item.color}';this.style.boxShadow='0 18px 36px rgba(0,0,0,0.12)';" onmouseout="this.style.transform='';this.style.borderColor='#e2e8f0';this.style.boxShadow='0 8px 20px rgba(0,0,0,0.04)';">
+              
+              <!-- Badge Word -->
+              <span style="position:absolute;top:0.9rem;right:0.9rem;background:${item.bg};color:${item.color};font-weight:900;font-size:0.75rem;padding:0.2rem 0.55rem;border-radius:8px;">
+                Số ${item.word}
+              </span>
+
+              <!-- Icon Character -->
+              <div style="font-size:3.2rem;margin-top:0.4rem;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.1));">
+                ${item.icon}
+              </div>
+
+              <!-- Big Number -->
+              <div style="font-family:var(--font-title);font-size:4.5rem;font-weight:900;color:${item.color};line-height:1;margin:0.4rem 0;">
+                ${item.num}
+              </div>
+
+              <!-- Character Name -->
+              <div style="font-weight:800;font-size:1.05rem;color:#1e293b;margin-bottom:0.6rem;">
+                ${item.character}
+              </div>
+
+              <!-- Ten-frame mini preview -->
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:#f8fafc;padding:0.4rem;border-radius:10px;border:1px solid #e2e8f0;width:100%;max-width:140px;">
+                ${Array.from({ length: 10 }).map((_, i) => `
+                  <div style="width:18px;height:18px;border-radius:50%;background:${i < item.id ? item.color : '#e2e8f0'};"></div>
+                `).join('')}
+              </div>
+
+              <div style="margin-top:0.8rem;font-size:0.8rem;font-weight:800;color:${item.color};display:flex;align-items:center;gap:0.3rem;">
+                <span>✨</span> Khám phá số ${item.num}
+              </div>
+
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      parent.querySelectorAll('.number-card-item').forEach(card => {
+        card.onclick = () => {
+          const numId = parseInt(card.dataset.id, 10);
+          const item = NUMBERS_DATA.find(n => n.id === numId);
+          if (item) openNumberTheaterModal(item);
+        };
+      });
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 🎭 RẠP XIẾC CON SỐ WIDESCREEN & TẬP TÔ NÉT SỐ (MODAL)
+    // ─────────────────────────────────────────────────────────────
+    const openNumberTheaterModal = (item) => {
+      let isMorphed = false;
+      const m = document.createElement('div');
+      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(14px);z-index:9999999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.2s ease-out;';
+
+      const greetingText = `Xin chào! Mình là Số ${item.num} trong từ ${item.countWord}!`;
+
+      const renderTheater = () => {
+        m.innerHTML = `
+          <div style="background:#ffffff;border-radius:36px;max-width:1260px;width:96vw;max-height:92vh;overflow:hidden;box-shadow:0 35px 95px rgba(0,0,0,0.6);border:4px solid ${item.color};display:flex;flex-direction:column;position:relative;">
+            
+            <!-- Close Button -->
+            <button id="btn-close-num-theater" style="position:absolute;top:1.2rem;right:1.4rem;background:rgba(0,0,0,0.6);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.2rem;cursor:pointer;z-index:20;">✕</button>
+
+            <div style="display:grid;grid-template-columns:1.05fr 1.15fr;flex:1;overflow-y:auto;">
+              
+              <!-- LEFT COLUMN: SÂN KHẤU SỐ SIÊU TO KHỔNG LỒ (13.5rem) & BIẾN HÌNH -->
+              <div style="background:linear-gradient(145deg,#0f172a,#1e1b4b);padding:2.5rem 2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;color:#fff;border-right:3px solid #e2e8f0;text-align:center;">
+                
+                <!-- GREETING BANNER -->
+                <div style="position:relative;z-index:2;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.3);padding:0.5rem 1.4rem;border-radius:20px;margin-bottom:1.2rem;font-weight:900;font-size:1.1rem;color:#fef08a;display:flex;align-items:center;gap:0.4rem;">
+                  <span>🗣️</span> "${greetingText}"
+                </div>
+
+                <!-- BIG STAGE (13.5rem) -->
+                <div id="num-stage-display" style="position:relative;z-index:2;min-height:260px;display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem;">
+                  ${!isMorphed ? `
+                    <div style="font-family:var(--font-title);font-size:13.5rem;font-weight:900;color:${item.color};line-height:1;text-shadow:0 0 45px ${item.color}, 0 10px 30px rgba(0,0,0,0.8);animation:scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                      ${item.num}
+                    </div>
+                  ` : `
+                    <div style="display:flex;flex-direction:column;align-items:center;animation:scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                      <div style="font-size:10.5rem;filter:drop-shadow(0 15px 35px rgba(0,0,0,0.7));">${item.icon}</div>
+                      <div style="font-family:var(--font-title);font-size:1.7rem;font-weight:900;color:#fef08a;margin-top:0.5rem;">${item.character}</div>
+                    </div>
+                  `}
+                </div>
+
+                <!-- Phonics Badge -->
+                <div style="position:relative;z-index:2;margin-bottom:1rem;font-size:1.1rem;font-weight:900;color:#e2e8f0;background:rgba(0,0,0,0.3);padding:0.4rem 1.4rem;border-radius:16px;">
+                  Số: <strong style="color:#fef08a;font-size:1.4rem;">${item.num}</strong> • Đọc là: <strong style="color:#ffffff;background:${item.color};padding:0.2rem 0.7rem;border-radius:8px;">${item.word}</strong>
+                </div>
+
+                <!-- Transform Action Buttons -->
+                <div style="position:relative;z-index:2;display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center;width:100%;">
+                  <button id="btn-toggle-num-morph" style="flex:1.2;min-width:200px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#ffffff;border:none;padding:0.9rem 1.4rem;border-radius:20px;font-family:var(--font-title);font-weight:900;font-size:1.05rem;cursor:pointer;box-shadow:0 8px 24px rgba(245,158,11,0.5);">
+                    <span>${!isMorphed ? '🪄 BIẾN HÌNH HOẠT HÌNH' : '🔍 XEM LẠI SỐ SIÊU TO'}</span>
+                  </button>
+
+                  <button id="btn-speak-num-greeting" style="flex:1;min-width:160px;background:#ffffff;color:${item.color};border:none;padding:0.9rem 1.2rem;border-radius:20px;font-weight:900;font-size:1rem;cursor:pointer;">
+                    🔊 Đọc Lời Chào
+                  </button>
+                </div>
+
+              </div>
+
+              <!-- RIGHT COLUMN: PEDAGOGY, RHYMES, TEN-FRAME & TRACE BUTTON -->
+              <div style="padding:2.2rem 2.5rem;display:flex;flex-direction:column;justify-content:space-between;gap:1.4rem;overflow-y:auto;">
+                
+                <!-- Lời Cô Giáo Hướng Dẫn Nét Số -->
+                <div style="background:#f8fafc;border-left:6px solid ${item.color};border-radius:0 20px 20px 0;padding:1.2rem 1.4rem;">
+                  <div style="font-size:0.85rem;font-weight:900;color:${item.color};text-transform:uppercase;letter-spacing:1px;margin-bottom:0.35rem;display:flex;align-items:center;gap:0.4rem;">
+                    <span>🎓</span> LỜI CÔ GIÁO HƯỚNG DẪN MẶT SỐ:
+                  </div>
+                  <div style="font-size:1.1rem;font-weight:700;color:#1e293b;line-height:1.55;">
+                    ${item.intro}
+                  </div>
+                </div>
+
+                <!-- Bài Thơ Ghi Nhớ Nét Số -->
+                <div id="box-num-rhyme" style="background:${item.bg};border:2.5px dashed ${item.color};border-radius:22px;padding:1.15rem 1.4rem;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.03);">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;flex-wrap:wrap;gap:0.4rem;">
+                    <span style="font-size:0.85rem;font-weight:900;color:${item.color};text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:0.3rem;">
+                      <span>📜</span> CÂU VÈ GHI NHỚ NÉT SỐ:
+                    </span>
+                    <button id="btn-read-num-rhyme" style="background:${item.color};color:#ffffff;border:none;padding:0.4rem 0.95rem;border-radius:12px;font-weight:900;font-size:0.85rem;cursor:pointer;">
+                      🔊 Nghe Đọc Câu Vè
+                    </button>
+                  </div>
+                  <div style="font-size:1.35rem;font-weight:900;color:#1e293b;line-height:1.5;margin-top:0.2rem;">
+                    "${item.rhyme}"
+                  </div>
+                </div>
+
+                <!-- Khung 10 Chấm Tròn (Ten-Frame Chuẩn Toán Lớp 1) -->
+                <div>
+                  <div style="font-size:0.95rem;font-weight:900;color:#334155;margin-bottom:0.75rem;display:flex;align-items:center;gap:0.4rem;">
+                    <span>🧮</span> KHUNG 10 CHẤM TRÒN (TẬP ĐẾM SỐ LƯỢNG):
+                  </div>
+
+                  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;background:#f1f5f9;padding:1rem 1.4rem;border-radius:20px;border:2px solid #cbd5e1;max-width:380px;">
+                    ${Array.from({ length: 10 }).map((_, i) => `
+                      <div style="height:44px;border-radius:14px;background:${i < item.id ? item.color : '#ffffff'};border:2px solid ${i < item.id ? item.color : '#cbd5e1'};display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;font-weight:900;box-shadow:${i < item.id ? '0 4px 10px rgba(0,0,0,0.15)' : 'none'};">
+                        ${i < item.id ? '●' : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <!-- Nút Tập Tô Nét Số 4 Ô Ly -->
+                <button id="btn-open-num-trace" style="background:linear-gradient(135deg,#ec4899,#db2777);color:#ffffff;border:none;padding:1rem 1.8rem;border-radius:22px;font-family:var(--font-title);font-weight:900;font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.6rem;box-shadow:0 8px 24px rgba(236,72,153,0.45);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)';" onmouseout="this.style.transform='scale(1)';">
+                  <span>✍️</span> TẬP TÔ NÉT SỐ ${item.num} TRÊN VỞ 4 Ô LY
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+        // Event listeners
+        m.querySelector('#btn-close-num-theater').onclick = () => m.remove();
+
+        m.querySelector('#btn-toggle-num-morph').onclick = () => {
+          isMorphed = !isMorphed;
+          soundSynth.play('pop');
+          renderTheater();
+          if (isMorphed) speakVN(`Số ${item.num} biến hình thành ${item.character}!`);
+        };
+
+        m.querySelector('#btn-speak-num-greeting').onclick = () => {
+          soundSynth.play('pop');
+          speakVN(greetingText);
+        };
+
+        const btnRhyme = m.querySelector('#btn-read-num-rhyme');
+        if (btnRhyme) {
+          btnRhyme.onclick = () => {
+            soundSynth.play('pop');
+            speakVN(item.rhyme);
+          };
+        }
+
+        m.querySelector('#btn-open-num-trace').onclick = () => {
+          openMagicNumberTraceCanvas(item);
+        };
+      };
+
+      document.body.appendChild(m);
+      renderTheater();
+      speakVN(greetingText);
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // ✍️ BẢNG TẬP TÔ NÉT SỐ VỞ 4 Ô LY CHUẨN BỘ GD&ĐT
+    // ─────────────────────────────────────────────────────────────
+    const openMagicNumberTraceCanvas = (item) => {
+      const traceM = document.createElement('div');
+      traceM.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.95);backdrop-filter:blur(18px);z-index:99999999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.25s ease-out;';
+
+      let currentBrush = 'rainbow';
+      let fontStyleMode = 'handwriting';
+      let demoAnimId = null;
+      let userDrawnPoints = [];
+
+      traceM.innerHTML = `
+        <div style="background:#0b0f19;border-radius:36px;max-width:1150px;width:96vw;max-height:94vh;overflow-y:auto;padding:1.8rem 2.2rem;box-shadow:0 35px 100px rgba(0,0,0,0.85);border:3.5px solid #f59e0b;color:#fff;display:flex;flex-direction:column;gap:1.1rem;position:relative;">
+          
+          <button id="btn-close-num-trace" style="position:absolute;top:1.2rem;right:1.4rem;background:rgba(255,255,255,0.18);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:1.2rem;cursor:pointer;font-weight:900;z-index:10;">✕</button>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+            <div>
+              <div style="font-size:0.82rem;font-weight:900;color:#f59e0b;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem;">
+                ✍️ VỞ TẬP VIẾT NÉT SỐ 4 Ô LY (TOÁN 1 GDPT 2018)
+              </div>
+              <h2 style="margin:0;font-family:var(--font-title);font-size:1.75rem;font-weight:900;color:#ffffff;">
+                Luyện Viết Số: <span style="color:#fef08a;font-size:2.4rem;text-shadow:0 0 25px rgba(254,240,138,0.85);">${item.num}</span> (${item.word})
+              </h2>
+            </div>
+
+            <!-- Brush Pickers -->
+            <div style="display:flex;gap:0.4rem;align-items:center;background:rgba(255,255,255,0.08);padding:0.35rem 0.55rem;border-radius:14px;border:1px solid rgba(255,255,255,0.15);">
+              <button class="btn-trace-brush active" data-brush="rainbow" style="padding:0.35rem 0.65rem;border-radius:10px;border:1.5px solid #f472b6;background:linear-gradient(135deg,#f43f5e,#ec4899,#3b82f6);color:#fff;font-weight:900;font-size:0.78rem;cursor:pointer;">🌈 Cầu Vồng</button>
+              <button class="btn-trace-brush" data-brush="gold" style="padding:0.35rem 0.65rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:#334155;color:#fef08a;font-weight:800;font-size:0.78rem;cursor:pointer;">⭐ Kim Tuyến</button>
+              <button class="btn-trace-brush" data-brush="pink" style="padding:0.35rem 0.65rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:#334155;color:#f472b6;font-weight:800;font-size:0.78rem;cursor:pointer;">🍬 Kẹo Hồng</button>
+              <button class="btn-trace-brush" data-brush="aqua" style="padding:0.35rem 0.65rem;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:#334155;color:#38bdf8;font-weight:800;font-size:0.78rem;cursor:pointer;">💧 Nước Biển</button>
+            </div>
+          </div>
+
+          <!-- PRIMARY 4-LINE GRID CANVAS CONTAINER -->
+          <div style="background:#020617;border-radius:28px;border:2.5px solid #334155;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;box-shadow:inset 0 4px 30px rgba(0,0,0,0.8);">
+            <canvas id="numbers-trace-canvas" width="1050" height="420" style="width:100%;max-width:1050px;height:420px;touch-action:none;cursor:crosshair;"></canvas>
+          </div>
+
+          <!-- Bottom Control Toolbar -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.85rem;">
+            
+            <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+              <button id="btn-demo-num-trace-anim" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:16px;font-weight:800;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:0.45rem;box-shadow:0 4px 14px rgba(99,102,241,0.4);">
+                <span>▶️</span> Xem Nét Bút Chạy Mẫu Số ${item.num}
+              </button>
+              <button id="btn-clear-num-trace" style="background:#334155;color:#fff;border:none;padding:0.75rem 1.3rem;border-radius:16px;font-weight:700;font-size:0.92rem;cursor:pointer;display:flex;align-items:center;gap:0.35rem;">
+                <span>🔄</span> Xóa Tô Lại
+              </button>
+              <button id="btn-num-trace-sound" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:0.75rem 1.3rem;border-radius:16px;font-weight:700;font-size:0.92rem;cursor:pointer;">
+                🔊 Nghe Hướng Dẫn Nét
+              </button>
+            </div>
+
+            <button id="btn-done-num-trace" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:0.85rem 2.2rem;border-radius:18px;font-weight:900;font-size:1.1rem;cursor:pointer;box-shadow:0 8px 24px rgba(16,185,129,0.5);display:flex;align-items:center;gap:0.5rem;">
+              <span>🌟</span> HOÀN THÀNH (+2 SAO)
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+      document.body.appendChild(traceM);
+      traceM.querySelector('#btn-close-num-trace').onclick = () => {
+        if (demoAnimId) cancelAnimationFrame(demoAnimId);
+        traceM.remove();
+      };
+
+      const canvas = traceM.querySelector('#numbers-trace-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const topY = 60;   // Dòng 5 (Đỉnh số cao 4 ly: 240px)
+      const midY = 180;  // Dòng 3 (Đỉnh số cao 2 ly)
+      const baseY = 300; // Dòng 1 (Đường kẻ đáy đậm đỏ)
+      const centerX = canvas.width / 2; // 525px
+
+      // QUỸ ĐẠO NÉT SỐ CHUẨN TỪNG SỐ (0 - 10)
+      const getNumberStrokeStrokes = (numVal) => {
+        const strokes = [];
+        const line = (x1, y1, x2, y2, count = 25) => {
+          const res = [];
+          for (let i = 0; i <= count; i++) {
+            const t = i / count;
+            res.push({ x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t });
+          }
+          return res;
+        };
+
+        if (numVal === 0) {
+          const s0 = [];
+          for (let i = 0; i <= 80; i++) {
+            const a = (i / 80) * Math.PI * 2 + Math.PI / 2;
+            s0.push({ x: centerX - Math.cos(a) * 75, y: (topY + baseY) / 2 - Math.sin(a) * 120 });
+          }
+          strokes.push(s0);
+        } else if (numVal === 1) {
+          // Nét xiên phải từ dòng 4 lên dòng 5
+          strokes.push(line(centerX - 40, midY - 30, centerX, topY + 20, 20));
+          // Nét thẳng đứng từ dòng 5 xuống dòng 1
+          strokes.push(line(centerX, topY + 20, centerX, baseY, 35));
+        } else if (numVal === 2) {
+          const s2 = [];
+          // Nét cong trên
+          for (let i = 0; i <= 40; i++) {
+            const a = (i / 40) * Math.PI - Math.PI;
+            s2.push({ x: centerX + Math.cos(a) * 60, y: topY + 60 + Math.sin(a) * 45 });
+          }
+          // Nét xiên xuống đáy
+          s2.push(...line(centerX + 60, topY + 60, centerX - 55, baseY, 30));
+          // Nét lượn ngang ở đáy
+          s2.push(...line(centerX - 55, baseY, centerX + 65, baseY, 25));
+          strokes.push(s2);
+        } else if (numVal === 3) {
+          const s3 = [];
+          for (let i = 0; i <= 30; i++) {
+            const a = (i / 30) * Math.PI - Math.PI / 2;
+            s3.push({ x: centerX + Math.cos(a) * 60, y: topY + 60 + Math.sin(a) * 50 });
+          }
+          for (let i = 0; i <= 35; i++) {
+            const a = (i / 35) * Math.PI - Math.PI / 2;
+            s3.push({ x: centerX + Math.cos(a) * 70, y: midY + 60 + Math.sin(a) * 60 });
+          }
+          strokes.push(s3);
+        } else if (numVal === 4) {
+          // Nét xiên trái
+          strokes.push(line(centerX + 20, topY + 20, centerX - 55, midY + 40, 25));
+          // Nét ngang
+          strokes.push(line(centerX - 55, midY + 40, centerX + 55, midY + 40, 25));
+          // Nét thẳng đứng
+          strokes.push(line(centerX + 20, topY + 40, centerX + 20, baseY, 30));
+        } else if (numVal === 5) {
+          // Nét thẳng đứng
+          strokes.push(line(centerX - 40, topY + 20, centerX - 40, midY, 20));
+          // Nét cong bụng
+          const s5 = [];
+          for (let i = 0; i <= 35; i++) {
+            const a = (i / 35) * Math.PI * 1.5 - Math.PI / 2;
+            s5.push({ x: centerX - 40 + Math.cos(a) * 70, y: midY + 60 + Math.sin(a) * 60 });
+          }
+          strokes.push(s5);
+          // Nét ngang trên
+          strokes.push(line(centerX - 40, topY + 20, centerX + 45, topY + 20, 20));
+        } else if (numVal === 6) {
+          const s6 = [];
+          // Cong từ trên xuống
+          for (let i = 0; i <= 40; i++) {
+            const t = i / 40;
+            s6.push({ x: centerX + 40 - t * 80, y: topY + 20 + t * 160 });
+          }
+          // Vòng tròn dưới
+          for (let i = 0; i <= 40; i++) {
+            const a = (i / 40) * Math.PI * 2;
+            s6.push({ x: centerX + Math.sin(a) * 55, y: (midY + baseY) / 2 + Math.cos(a) * 60 });
+          }
+          strokes.push(s6);
+        } else if (numVal === 7) {
+          // Nét ngang trên
+          strokes.push(line(centerX - 55, topY + 20, centerX + 55, topY + 20, 20));
+          // Nét xiên xuống đáy
+          strokes.push(line(centerX + 55, topY + 20, centerX - 25, baseY, 35));
+          // Nét gạch ngang giữa
+          strokes.push(line(centerX - 35, midY + 15, centerX + 35, midY + 15, 15));
+        } else if (numVal === 8) {
+          const s8 = [];
+          for (let i = 0; i <= 80; i++) {
+            const t = i / 80;
+            s8.push({ x: centerX + Math.sin(t * Math.PI * 2) * 60, y: (topY + baseY) / 2 - Math.cos(t * Math.PI * 4) * 110 });
+          }
+          strokes.push(s8);
+        } else if (numVal === 9) {
+          const s9 = [];
+          // Vòng tròn trên
+          for (let i = 0; i <= 40; i++) {
+            const a = (i / 40) * Math.PI * 2;
+            s9.push({ x: centerX + Math.sin(a) * 55, y: topY + 70 + Math.cos(a) * 50 });
+          }
+          // Nét lượn xuống đáy
+          for (let i = 0; i <= 35; i++) {
+            const t = i / 35;
+            s9.push({ x: centerX + 55 - t * 75, y: topY + 70 + t * 170 });
+          }
+          strokes.push(s9);
+        } else {
+          // Số 10
+          strokes.push(line(centerX - 70, midY - 30, centerX - 40, topY + 20, 15));
+          strokes.push(line(centerX - 40, topY + 20, centerX - 40, baseY, 30));
+          const s10 = [];
+          for (let i = 0; i <= 60; i++) {
+            const a = (i / 60) * Math.PI * 2 + Math.PI / 2;
+            s10.push({ x: centerX + 45 - Math.cos(a) * 55, y: (topY + baseY) / 2 - Math.sin(a) * 110 });
+          }
+          strokes.push(s10);
+        }
+
+        return strokes;
+      };
+
+      const drawCanvasContent = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cell = 60;
+
+        // Kẻ dọc
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+        ctx.lineWidth = 1;
+        for (let x = 30; x <= canvas.width - 30; x += cell) {
+          ctx.beginPath();
+          ctx.moveTo(x, topY - 20);
+          ctx.lineTo(x, baseY + 30);
+          ctx.stroke();
+        }
+
+        // 5 Dòng ngang
+        for (let r = 0; r <= 4; r++) {
+          const y = topY + r * cell;
+          ctx.beginPath();
+          if (r === 4) {
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
+            ctx.lineWidth = 3;
+          } else if (r === 2) {
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+            ctx.lineWidth = 1.6;
+          } else {
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.2)';
+            ctx.lineWidth = 1.2;
+          }
+          ctx.moveTo(30, y);
+          ctx.lineTo(canvas.width - 30, y);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.fillText('Dòng 5 (Đỉnh số cao 4 ly)', 35, topY - 8);
+        ctx.fillText('Dòng 3 (Đỉnh số 2 ly)', 35, midY - 8);
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.95)';
+        ctx.fillText('Đường kẻ đáy 1 (Chân số đứng)', 35, baseY + 20);
+
+        const strokes = getNumberStrokeStrokes(item.id);
+
+        // 1. VẼ NÉT ĐỨT SỐ MẪU
+        ctx.save();
+        ctx.strokeStyle = 'rgba(244, 114, 182, 0.55)';
+        ctx.lineWidth = 6.5;
+        ctx.setLineDash([14, 10]);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        strokes.forEach(s => {
+          if (s.length > 0) {
+            ctx.beginPath();
+            s.forEach((p, idx) => {
+              if (idx === 0) ctx.moveTo(p.x, p.y);
+              else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+          }
+        });
+        ctx.restore();
+
+        // 2. ĐIỂM ĐẶT BÚT SỐ 1
+        if (strokes.length > 0 && strokes[0].length > 0) {
+          const startPt = strokes[0][0];
+          ctx.save();
+          ctx.fillStyle = '#22c55e';
+          ctx.shadowColor = '#4ade80';
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(startPt.x, startPt.y, 14, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 13px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('1', startPt.x, startPt.y);
+
+          ctx.fillStyle = '#fef08a';
+          ctx.font = 'bold 18px sans-serif';
+          ctx.fillText('➔', startPt.x - 26, startPt.y);
+          ctx.restore();
+        }
+
+        // 3. VẼ NÉT NGƯỜI DÙNG TÔ (CÓ NHẤC BÚT)
+        if (userDrawnPoints.length > 0) {
+          ctx.save();
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          for (let i = 1; i < userDrawnPoints.length; i++) {
+            const p1 = userDrawnPoints[i-1];
+            const p2 = userDrawnPoints[i];
+            if (p2.isNew) continue;
+            ctx.strokeStyle = p2.color;
+            ctx.shadowColor = p2.shadow;
+            ctx.shadowBlur = 16;
+            ctx.lineWidth = 16;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      };
+
+      drawCanvasContent();
+
+      // Freehand drawing listeners
+      let isDrawing = false;
+      let hue = 0;
+
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * (canvas.width / rect.width),
+          y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+      };
+
+      const startDraw = (e) => {
+        isDrawing = true;
+        const pos = getPos(e);
+        let color = '#fef08a';
+        let shadow = '#f59e0b';
+        if (currentBrush === 'rainbow') {
+          hue = (hue + 8) % 360;
+          color = `hsl(${hue}, 100%, 65%)`;
+          shadow = `hsl(${hue}, 100%, 75%)`;
+        } else if (currentBrush === 'pink') {
+          color = '#f472b6'; shadow = '#ec4899';
+        } else if (currentBrush === 'aqua') {
+          color = '#38bdf8'; shadow = '#0284c7';
+        }
+        userDrawnPoints.push({ x: pos.x, y: pos.y, color: color, shadow: shadow, isNew: true });
+        draw(e);
+      };
+
+      const stopDraw = () => { isDrawing = false; };
+
+      const draw = (e) => {
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        let color = '#fef08a';
+        let shadow = '#f59e0b';
+        if (currentBrush === 'rainbow') {
+          hue = (hue + 8) % 360;
+          color = `hsl(${hue}, 100%, 65%)`;
+          shadow = `hsl(${hue}, 100%, 75%)`;
+        } else if (currentBrush === 'pink') {
+          color = '#f472b6'; shadow = '#ec4899';
+        } else if (currentBrush === 'aqua') {
+          color = '#38bdf8'; shadow = '#0284c7';
+        }
+
+        userDrawnPoints.push({ x: pos.x, y: pos.y, color: color, shadow: shadow, isNew: false });
+
+        ctx.save();
+        ctx.lineWidth = 16;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = color;
+        ctx.shadowColor = shadow;
+        ctx.shadowBlur = 16;
+
+        const prev = userDrawnPoints[userDrawnPoints.length - 2];
+        if (prev && !prev.isNew) {
+          ctx.beginPath();
+          ctx.moveTo(prev.x, prev.y);
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+        soundSynth.play('pop');
+      };
+
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mouseleave', stopDraw);
+
+      canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e); }, { passive: false });
+      canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
+      canvas.addEventListener('touchend', stopDraw);
+
+      // Demo Nét Bút Chạy Mẫu Số
+      traceM.querySelector('#btn-demo-num-trace-anim').onclick = () => {
+        if (demoAnimId) cancelAnimationFrame(demoAnimId);
+        userDrawnPoints = [];
+        drawCanvasContent();
+        soundSynth.play('win');
+
+        const strokes = getNumberStrokeStrokes(item.id);
+        speakVN(`Bé hãy quan sát cây bút chì viết mẫu số ${item.num} nhé!`);
+
+        let strokeIdx = 0;
+        let ptIdx = 0;
+        let hueVal = 0;
+
+        const animateProgressiveStroke = () => {
+          if (strokeIdx < strokes.length) {
+            const currentStroke = strokes[strokeIdx];
+
+            if (ptIdx < currentStroke.length) {
+              const pt = currentStroke[ptIdx];
+              hueVal = (hueVal + 4) % 360;
+              const color = `hsl(${hueVal}, 100%, 65%)`;
+              const shadow = `hsl(${hueVal}, 100%, 75%)`;
+
+              userDrawnPoints.push({
+                x: pt.x,
+                y: pt.y,
+                color: color,
+                shadow: shadow,
+                isNew: (ptIdx === 0)
+              });
+
+              ptIdx++;
+              drawCanvasContent();
+
+              // Vẽ Đầu Bút Chì
+              ctx.save();
+              ctx.fillStyle = '#fde047';
+              ctx.shadowColor = '#f59e0b';
+              ctx.shadowBlur = 25;
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, 10, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.font = '26px sans-serif';
+              ctx.fillText('✏️', pt.x + 10, pt.y - 10);
+              ctx.restore();
+
+              soundSynth.play('pop');
+              demoAnimId = requestAnimationFrame(animateProgressiveStroke);
+            } else {
+              strokeIdx++;
+              ptIdx = 0;
+              soundSynth.play('correct');
+              setTimeout(() => {
+                demoAnimId = requestAnimationFrame(animateProgressiveStroke);
+              }, 350);
+            }
+          } else {
+            soundSynth.play('win');
+            fireConfetti();
+            addStar(1);
+            speakVN(`Hoan hô! Cây bút chì đã viết xong nét số ${item.num} rất chuẩn rồi! Bây giờ bé hãy tự tay tô lại nhé!`);
+          }
+        };
+
+        demoAnimId = requestAnimationFrame(animateProgressiveStroke);
+      };
+
+      traceM.querySelector('#btn-clear-num-trace').onclick = () => {
+        if (demoAnimId) cancelAnimationFrame(demoAnimId);
+        userDrawnPoints = [];
+        drawCanvasContent();
+      };
+
+      traceM.querySelector('#btn-num-trace-sound').onclick = () => {
+        speakVN(`Quy tắc viết số ${item.num}: Đặt bút tại điểm số 1, di chuyển nét bút theo hướng mũi tên uốn lượn chạm đường kẻ đáy 1 rồi dừng bút!`);
+      };
+
+      let numFailCount = 0;
+
+      const triggerNumWarningAlert = (msgText, spokenText, isOffPath = false) => {
+        numFailCount++;
+        soundSynth.play('wrong');
+
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        speakVN(spokenText);
+
+        let warnEl = traceM.querySelector('#num-trace-feedback-alert');
+        if (warnEl) warnEl.remove();
+
+        warnEl = document.createElement('div');
+        warnEl.id = 'num-trace-feedback-alert';
+        warnEl.style.cssText = `
+          background: linear-gradient(135deg, #fee2e2, #fef2f2);
+          border: 2.5px solid #ef4444;
+          color: #991b1b;
+          padding: 0.85rem 1.3rem;
+          border-radius: 16px;
+          font-weight: 900;
+          font-size: 0.95rem;
+          margin-bottom: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          box-shadow: 0 8px 25px rgba(239,68,68,0.25);
+          animation: shake 0.5s ease-in-out;
+        `;
+        warnEl.innerHTML = `
+          <span style="font-size:1.6rem;animation:bounce 0.8s infinite;">⚠️</span>
+          <div>
+            <div>${msgText}</div>
+            <div style="font-size:0.82rem;color:#b91c1c;margin-top:0.2rem;font-weight:700;">
+              👉 Hãy bấm nút <strong>[🗑️ Xóa Vẽ Lại]</strong> màu đỏ bên dưới để tô lại cho thật chuẩn nhé!
+            </div>
+          </div>
+        `;
+        (traceM.querySelector('.ait-card') || traceM.firstElementChild).prepend(warnEl);
+
+        const clearBtn = traceM.querySelector('#btn-clear-num-trace');
+        if (clearBtn) {
+          clearBtn.style.transform = 'scale(1.1)';
+          clearBtn.style.boxShadow = '0 0 20px #ef4444';
+          clearBtn.style.border = '2.5px solid #ef4444';
+          setTimeout(() => {
+            clearBtn.style.transform = '';
+            clearBtn.style.boxShadow = '';
+            clearBtn.style.border = '';
+          }, 1200);
+        }
+      };
+
+      traceM.querySelector('#btn-done-num-trace').onclick = () => {
+        if (demoAnimId) cancelAnimationFrame(demoAnimId);
+
+        const strokesNumber = getNumberStrokeStrokes(item.id);
+
+        const distToSegment = (px, py, x1, y1, x2, y2) => {
+          const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+          if (l2 === 0) return Math.hypot(px - x1, py - y1);
+          let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+          t = Math.max(0, Math.min(1, t));
+          return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+        };
+
+        if (!userDrawnPoints || userDrawnPoints.length < 20) {
+          triggerNumWarningAlert(
+            `Bé chưa tô số ${item.num} kìa!`,
+            `Bé chưa tô số ${item.num} kìa! Bé hãy chọn màu và cầm bút tô theo các đường nét chấm đứt phát sáng nhé!`
+          );
+          return;
+        }
+
+        const segments = [];
+        const samplePoints = [];
+        strokesNumber.forEach(stroke => {
+          for (let i = 0; i < stroke.length; i++) {
+            samplePoints.push(stroke[i]);
+            if (i > 0) {
+              segments.push({ x1: stroke[i - 1].x, y1: stroke[i - 1].y, x2: stroke[i].x, y2: stroke[i].y });
+            }
+          }
+        });
+
+        // 1. Coverage check
+        let hitCount = 0;
+        samplePoints.forEach(sp => {
+          let minD = Infinity;
+          for (let j = 0; j < userDrawnPoints.length; j += 2) {
+            const d = Math.hypot(sp.x - userDrawnPoints[j].x, sp.y - userDrawnPoints[j].y);
+            if (d < minD) minD = d;
+            if (minD <= 42) break;
+          }
+          if (minD <= 42) hitCount++;
+        });
+        const coverageRatio = (samplePoints.length > 0) ? (hitCount / samplePoints.length) : 1;
+
+        // 2. On-track accuracy check
+        let onTrackCount = 0;
+        userDrawnPoints.forEach(up => {
+          let minD = Infinity;
+          for (let s = 0; s < segments.length; s++) {
+            const seg = segments[s];
+            const d = distToSegment(up.x, up.y, seg.x1, seg.y1, seg.x2, seg.y2);
+            if (d < minD) minD = d;
+            if (minD <= 58) break;
+          }
+          if (minD <= 58) onTrackCount++;
+        });
+        const onTrackRatio = (userDrawnPoints.length > 0) ? (onTrackCount / userDrawnPoints.length) : 0;
+
+        // 3. Evaluate results
+        if (onTrackRatio < 0.55) {
+          triggerNumWarningAlert(
+            `Nét vẽ bị chệch ra ngoài đường mẫu (${Math.round(onTrackRatio*100)}% đúng)!`,
+            `Nét vẽ bị chệch ra ngoài đường mẫu rồi! Bé hãy nhấn nút Xóa Vẽ Lại và nắn nót tô theo đường nét số ${item.num} nhé!`,
+            true
+          );
+          return;
+        }
+
+        if (coverageRatio < 0.50) {
+          triggerNumWarningAlert(
+            `Bé mới tô được ${Math.round(coverageRatio*100)}% nét số, còn thiếu nét!`,
+            `Bé mới tô được một phần số ${item.num} thôi, còn thiếu nét kìa! Bé hãy tô tiếp cho hoàn thành cả số nhé!`
+          );
+          return;
+        }
+
+        // ĐẠT CHUẨN -> KHEN THƯỞNG
+        soundSynth.play('win');
+        fireConfetti();
+        addStar(2);
+
+        let warnEl = traceM.querySelector('#num-trace-feedback-alert');
+        if (warnEl) warnEl.remove();
+
+        warnEl = document.createElement('div');
+        warnEl.id = 'num-trace-feedback-alert';
+        warnEl.style.cssText = 'background:#f0fdf4;border:2.5px solid #22c55e;color:#15803d;padding:0.85rem 1.3rem;border-radius:16px;font-weight:900;font-size:0.95rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem;box-shadow:0 8px 25px rgba(34,197,94,0.25);';
+        warnEl.innerHTML = '<span>🌟</span> XUẤT SẮC! Độ chuẩn xác: ' + Math.round(((coverageRatio + onTrackRatio)/2)*100) + '% — Bé nhận được +2 ⭐ Sao Vàng!';
+        (traceM.querySelector('.ait-card') || traceM.firstElementChild).prepend(warnEl);
+
+        if (coverageRatio >= 0.70 && onTrackRatio >= 0.75) {
+          speakVN(`Xuất sắc! Bé tô số ${item.num} rất đẹp, chuẩn nét ô ly! Bé nhận được hai Sao Vàng!`);
+        } else {
+          speakVN(`Bé tô số ${item.num} khá tốt rồi! Lần sau bé uốn nét nắn nót hơn nữa nhé!`);
+        }
+
+        setTimeout(() => traceM.remove(), 1600);
+      };
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 🧮 2. BÀN TẬP ĐẾM & SO SÁNH SỐ LƯỢNG THÔNG MINH
+    // ─────────────────────────────────────────────────────────────
+    const renderCountingStudio = (parent) => {
+      let currentItemType = '🍎'; // '🍎' | '⭐' | '🐟' | '🚗'
+      let basketItems = ['🍎', '🍎', '🍎'];
+
+      const renderStudio = () => {
+        parent.innerHTML = `
+          <div style="background:#1e1b4b;border-radius:32px;padding:2.2rem 2.5rem;border:3px solid #3b82f6;color:#fff;box-shadow:0 25px 60px rgba(0,0,0,0.5);display:flex;flex-direction:column;gap:1.5rem;">
+            
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+              <div>
+                <div style="font-size:0.85rem;font-weight:900;color:#38bdf8;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem;">
+                  🧮 PHÒNG THÍ NGHIỆM TẬP ĐẾM & ĐO LƯỜNG TRỰC QUAN
+                </div>
+                <h2 style="margin:0;font-size:1.7rem;font-weight:900;color:#fef08a;">
+                  Bàn Tập Đếm Số Lượng Thông Minh (0 - 10)
+                </h2>
+              </div>
+
+              <!-- Chọn Đồ Vật Đếm -->
+              <div style="display:flex;gap:0.5rem;align-items:center;background:rgba(255,255,255,0.1);padding:0.4rem 0.7rem;border-radius:18px;">
+                <span style="font-size:0.82rem;font-weight:800;color:#cbd5e1;margin-right:0.2rem;">Chọn đồ vật:</span>
+                <button class="btn-count-item ${currentItemType==='🍎'?'active':''}" data-type="🍎" style="padding:0.35rem 0.75rem;border-radius:12px;border:none;background:${currentItemType==='🍎'?'#ef4444':'#334155'};color:#fff;font-size:1.1rem;cursor:pointer;">🍎 Táo</button>
+                <button class="btn-count-item ${currentItemType==='⭐'?'active':''}" data-type="⭐" style="padding:0.35rem 0.75rem;border-radius:12px;border:none;background:${currentItemType==='⭐'?'#f59e0b':'#334155'};color:#fff;font-size:1.1rem;cursor:pointer;">⭐ Sao</button>
+                <button class="btn-count-item ${currentItemType==='🐟'?'active':''}" data-type="🐟" style="padding:0.35rem 0.75rem;border-radius:12px;border:none;background:${currentItemType==='🐟'?'#06b6d4':'#334155'};color:#fff;font-size:1.1rem;cursor:pointer;">🐟 Cá</button>
+                <button class="btn-count-item ${currentItemType==='🚗'?'active':''}" data-type="🚗" style="padding:0.35rem 0.75rem;border-radius:12px;border:none;background:${currentItemType==='🚗'?'#8b5cf6':'#334155'};color:#fff;font-size:1.1rem;cursor:pointer;">🚗 Xe</button>
+              </div>
+            </div>
+
+            <!-- MAIN BASKET & COUNT DISPLAY -->
+            <div style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:1.5rem;align-items:center;">
+              
+              <!-- GIỎ ĐỒ VẬT -->
+              <div style="background:#0f172a;border-radius:26px;border:2.5px solid #475569;padding:1.8rem;min-height:240px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:1rem;position:relative;">
+                <div style="position:absolute;top:0.8rem;left:1rem;font-size:0.82rem;font-weight:800;color:#64748b;text-transform:uppercase;">
+                  🧺 Giỏ Đựng Đồ Vật (Nhấp để bớt đồ vật)
+                </div>
+
+                <div style="width:100%;margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:1.2rem;min-height:140px;align-items:center;">
+                  ${basketItems.length === 0 ? `
+                    <div style="width:100%;text-align:center;color:#64748b;font-weight:700;font-size:1.1rem;">
+                      Giỏ đang trống (Số 0). Hãy bấm nút thêm đồ vật bên dưới nhé!
+                    </div>
+                  ` : basketItems.map((it, idx) => `
+                    <div class="basket-single-item" data-idx="${idx}" style="font-size:3.8rem;cursor:pointer;transition:transform 0.2s;animation:scaleIn 0.2s ease;" onmouseover="this.style.transform='scale(1.2) rotate(10deg)';" onmouseout="this.style.transform='';" title="Nhấp để bớt vật này">
+                      ${it}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- KHUNG ĐẾM & MẶT SỐ KẾT QUẢ -->
+              <div style="background:#020617;border-radius:26px;border:2.5px solid #f59e0b;padding:1.8rem;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+                
+                <div style="font-size:0.82rem;font-weight:900;color:#fef08a;text-transform:uppercase;margin-bottom:0.2rem;">
+                  SỐ LƯỢNG TRONG GIỎ
+                </div>
+
+                <div style="font-family:var(--font-title);font-size:6.5rem;font-weight:900;color:#f59e0b;line-height:1;margin:0.2rem 0;text-shadow:0 0 25px rgba(245,158,11,0.6);">
+                  ${basketItems.length}
+                </div>
+
+                <div style="font-size:1.2rem;font-weight:900;color:#ffffff;margin-bottom:1rem;">
+                  Có tất cả: <span style="color:#fef08a;">${basketItems.length}</span> đồ vật
+                </div>
+
+                <button id="btn-count-aloud" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;padding:0.75rem 1.6rem;border-radius:16px;font-weight:900;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:0 6px 18px rgba(59,130,246,0.4);">
+                  <span>🔊</span> ĐẾM TỪNG ĐỒ VẬT
+                </button>
+              </div>
+
+            </div>
+
+            <!-- CONTROLS: ADD / REMOVE / CLEAR -->
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+              <div style="display:flex;gap:0.6rem;">
+                <button id="btn-add-item" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;padding:0.8rem 1.6rem;border-radius:16px;font-weight:900;font-size:1rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;box-shadow:0 4px 14px rgba(16,185,129,0.35);">
+                  <span>➕</span> Thêm 1 ${currentItemType}
+                </button>
+                <button id="btn-remove-item" style="background:#334155;color:#fff;border:none;padding:0.8rem 1.4rem;border-radius:16px;font-weight:800;font-size:0.95rem;cursor:pointer;">
+                  <span>➖</span> Bớt 1
+                </button>
+                <button id="btn-clear-basket" style="background:#1e293b;color:#94a3b8;border:1px solid #475569;padding:0.8rem 1.2rem;border-radius:16px;font-weight:700;font-size:0.9rem;cursor:pointer;">
+                  🔄 Đặt Lại (Số 0)
+                </button>
+              </div>
+
+              <div style="font-size:0.85rem;color:#cbd5e1;font-weight:700;">
+                💡 Bé có thể đếm tối đa 10 đồ vật chuẩn khung Toán Lớp 1!
+              </div>
+            </div>
+
+          </div>
+        `;
+
+        // Item type pickers
+        parent.querySelectorAll('.btn-count-item').forEach(b => {
+          b.onclick = () => {
+            currentItemType = b.dataset.type;
+            basketItems = basketItems.map(() => currentItemType);
+            soundSynth.play('pop');
+            renderStudio();
+          };
+        });
+
+        // Add item
+        const btnAdd = parent.querySelector('#btn-add-item');
+        if (btnAdd) {
+          btnAdd.onclick = () => {
+            if (basketItems.length < 10) {
+              basketItems.push(currentItemType);
+              soundSynth.play('pop');
+              renderStudio();
+              speakVN(`${basketItems.length}`);
+            } else {
+              speakVN('Đã đầy giỏ 10 đồ vật rồi!');
+            }
+          };
+        }
+
+        // Remove item
+        const btnRemove = parent.querySelector('#btn-remove-item');
+        if (btnRemove) {
+          btnRemove.onclick = () => {
+            if (basketItems.length > 0) {
+              basketItems.pop();
+              soundSynth.play('pop');
+              renderStudio();
+              speakVN(`${basketItems.length}`);
+            }
+          };
+        }
+
+        // Clear
+        const btnClear = parent.querySelector('#btn-clear-basket');
+        if (btnClear) {
+          btnClear.onclick = () => {
+            basketItems = [];
+            soundSynth.play('pop');
+            renderStudio();
+            speakVN('Số không, không có đồ vật nào.');
+          };
+        }
+
+        // Click single item to remove
+        parent.querySelectorAll('.basket-single-item').forEach(el => {
+          el.onclick = () => {
+            const idx = parseInt(el.dataset.idx, 10);
+            basketItems.splice(idx, 1);
+            soundSynth.play('pop');
+            renderStudio();
+          };
+        });
+
+        // Count aloud
+        const btnCount = parent.querySelector('#btn-count-aloud');
+        if (btnCount) {
+          btnCount.onclick = () => {
+            if (basketItems.length === 0) {
+              speakVN('Có không đồ vật.');
+              return;
+            }
+            soundSynth.play('win');
+            let countSeq = '';
+            for (let i = 1; i <= basketItems.length; i++) {
+              countSeq += `${i}, `;
+            }
+            countSeq += `Có tất cả ${basketItems.length} đồ vật!`;
+            speakVN(countSeq, 0.82);
+            fireConfetti();
+            addStar(1);
+          };
+        }
+      };
+
+      renderStudio();
+    };
+
+    // ─────────────────────────────────────────────────────────────
+    // 🎮 3. THỬ THÁCH ĐẾM HÌNH BẮT SỐ (QUIZ GAME)
+    // ─────────────────────────────────────────────────────────────
+    const renderQuizGame = (parent) => {
+      let currentQuestion = null;
+      let score = 0;
+
+      const generateQuestion = () => {
+        const targetCount = Math.floor(Math.random() * 10) + 1; // 1 to 10
+        const icons = ['🍎', '🐥', '⭐', '🐟', '🚗', '🐰', '🎈', '🍉'];
+        const chosenIcon = icons[Math.floor(Math.random() * icons.length)];
+
+        // 3 options
+        const opts = [targetCount];
+        while (opts.length < 3) {
+          const fake = Math.floor(Math.random() * 10) + 1;
+          if (!opts.includes(fake)) opts.push(fake);
+        }
+        opts.sort(() => Math.random() - 0.5);
+
+        return {
+          targetCount,
+          chosenIcon,
+          options: opts
+        };
+      };
+
+      currentQuestion = generateQuestion();
+
+      const renderGame = () => {
+        parent.innerHTML = `
+          <div style="background:#1e1b4b;border-radius:32px;padding:2.2rem 2.5rem;border:3px solid #10b981;color:#fff;box-shadow:0 25px 60px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;text-align:center;gap:1.5rem;">
+            
+            <div>
+              <div style="font-size:0.85rem;font-weight:900;color:#34d399;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.2rem;">
+                🎮 TRÒ CHƠI TOÁN HỌC DIỆU KỲ
+              </div>
+              <h2 style="margin:0;font-size:1.8rem;font-weight:900;color:#fef08a;">
+                Bé Hãy Đếm Xem Có Bao Nhiêu ${currentQuestion.chosenIcon}?
+              </h2>
+            </div>
+
+            <!-- OBJECTS DISPLAY CONTAINER -->
+            <div style="background:#0f172a;border-radius:24px;border:2.5px solid #334155;padding:2rem;min-height:180px;width:100%;max-width:750px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1.5rem;box-shadow:inset 0 4px 20px rgba(0,0,0,0.6);">
+              ${Array.from({ length: currentQuestion.targetCount }).map(() => `
+                <div style="font-size:4rem;animation:scaleIn 0.3s ease;filter:drop-shadow(0 6px 15px rgba(0,0,0,0.3));">${currentQuestion.chosenIcon}</div>
+              `).join('')}
+            </div>
+
+            <div style="font-size:1.1rem;font-weight:800;color:#cbd5e1;">
+              Bé hãy chọn con số tương ứng với số lượng ở trên:
+            </div>
+
+            <!-- 3 CHOICES -->
+            <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;width:100%;max-width:600px;">
+              ${currentQuestion.options.map(opt => `
+                <button class="btn-num-quiz-opt" data-val="${opt}" style="background:#ffffff;color:#1e293b;border:3.5px solid #e2e8f0;border-radius:24px;width:120px;height:120px;font-family:var(--font-title);font-size:3.5rem;font-weight:900;cursor:pointer;transition:all 0.2s;box-shadow:0 8px 25px rgba(0,0,0,0.2);" onmouseover="this.style.transform='scale(1.1) translateY(-4px)';this.style.borderColor='#10b981';" onmouseout="this.style.transform='';this.style.borderColor='#e2e8f0';">
+                  ${opt}
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- FEEDBACK MESSAGE -->
+            <div id="quiz-feedback-msg" style="min-height:30px;font-size:1.2rem;font-weight:900;color:#fef08a;"></div>
+
+          </div>
+        `;
+
+        speakVN(`Bé hãy đếm xem có bao nhiêu ${currentQuestion.chosenIcon} nhé!`);
+
+        parent.querySelectorAll('.btn-num-quiz-opt').forEach(b => {
+          b.onclick = () => {
+            const val = parseInt(b.dataset.val, 10);
+            const msg = parent.querySelector('#quiz-feedback-msg');
+
+            if (val === currentQuestion.targetCount) {
+              soundSynth.play('win');
+              fireConfetti();
+              addStar(2);
+              score++;
+              b.style.background = '#10b981';
+              b.style.color = '#fff';
+              b.style.borderColor = '#059669';
+              if (msg) msg.textContent = `🎉 Hoan hô! Chính xác, có tất cả ${val} ${currentQuestion.chosenIcon}! (+2 Sao)`;
+              speakVN(`Chính xác! Có tất cả ${val} ${currentQuestion.chosenIcon}! Bé giỏi quá!`);
+
+              setTimeout(() => {
+                currentQuestion = generateQuestion();
+                renderGame();
+              }, 1800);
+            } else {
+              soundSynth.play('pop');
+              b.style.background = '#ef4444';
+              b.style.color = '#fff';
+              b.style.borderColor = '#dc2626';
+              if (msg) msg.textContent = `❌ Chưa đúng rồi, bé hãy đếm lại nhé!`;
+              speakVN(`Chưa đúng rồi, bé hãy đếm lại từng hình một nhé!`);
+            }
+          };
+        });
+      };
+
+      renderGame();
+    };
+
+    renderMainDashboard();
   }
+
 };

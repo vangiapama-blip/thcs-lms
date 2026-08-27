@@ -2,6 +2,19 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const os = require('os');
+
+function getLocalIP() {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+  return '127.0.0.1';
+}
 
 const PORT = process.env.PORT || 8080;
 const PUBLIC_DIR = __dirname;
@@ -158,20 +171,22 @@ const server = http.createServer(async (req, res) => {
   // =========================================================================
   // API: Wireless Mobile Camera Streaming & QR Code Endpoint
   // =========================================================================
-  if (reqPath === '/api/server-ip' && req.method === 'GET') {
-    const os = require('os');
-    const nets = os.networkInterfaces();
-    let localIp = '127.0.0.1';
-    for (const name of Object.keys(nets)) {
-      for (const net of nets[name]) {
-        if (net.family === 'IPv4' && !net.internal) {
-          localIp = net.address;
-          break;
-        }
-      }
-    }
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ ip: localIp, port: PORT, url: `http://${localIp}:${PORT}/mobile-cam.html` }));
+      if (reqPath === '/api/server-ip' && req.method === 'GET') {
+    const ip = getLocalIP();
+    const httpsUrl = 'https://monetary-pics-rose-vid.trycloudflare.com/cai-dat-app.html';
+    const plickersAppUrl = 'https://monetary-pics-rose-vid.trycloudflare.com/plickers-mobile.html';
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    });
+    res.end(JSON.stringify({
+      ip: ip,
+      port: PORT,
+      url: `http://${ip}:${PORT}/mobile-cam.html`,
+      plickersUrl: httpsUrl,
+      appUrl: plickersAppUrl,
+      localUrl: `http://${ip}:${PORT}/cai-dat-app.html`
+    }));
     return;
   }
 
@@ -223,6 +238,134 @@ const server = http.createServer(async (req, res) => {
     req.on('close', () => {
       global.cameraStreamStore.activeClients.delete(res);
     });
+    return;
+  }
+
+
+  // =========================================================================
+  // PLICKERS AI MOBILE SCANNER REAL-TIME SSE SYNC STORE
+  // =========================================================================
+  if (!global.plickersStreamStore) {
+    global.plickersStreamStore = {
+      activeClients: new Set(),
+      currentState: {
+        classId: '6A',
+        questionIdx: 0,
+        totalQuestions: 4,
+        totalStudents: 40,
+        scanned: {}
+      }
+    };
+  }
+
+  // Broadcast helper
+  const broadcastPlickersEvent = (eventData) => {
+    if (!global.plickersStreamStore) return;
+    const payload = `data: ${JSON.stringify(eventData)}\n\n`;
+    global.plickersStreamStore.activeClients.forEach(clientRes => {
+      try {
+        clientRes.write(payload);
+      } catch(e) {}
+    });
+  };
+
+  // SSE Stream Endpoint for Desktop & Mobile
+  if (reqPath === '/api/plickers/events' && req.method === 'GET') {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    });
+
+    global.plickersStreamStore.activeClients.add(res);
+
+    // Send initial state
+    res.write(`data: ${JSON.stringify({ type: 'state_update', ...global.plickersStreamStore.currentState })}\n\n`);
+
+    req.on('close', () => {
+      global.plickersStreamStore.activeClients.delete(res);
+    });
+    return;
+  }
+
+  // Mobile notifies that it has connected
+  if (reqPath === '/api/plickers/phone-connected' && req.method === 'POST') {
+    broadcastPlickersEvent({
+      type: 'phone_connected',
+      ts: Date.now()
+    });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, connected: true }));
+    return;
+  }
+
+  // Mobile pushes a scanned student card
+  if (reqPath === '/api/plickers/scan' && req.method === 'POST') {
+    try {
+      const raw = await getRequestBody(req, 1024 * 1024);
+      const data = JSON.parse(raw.toString('utf8'));
+      
+      broadcastPlickersEvent({
+        type: 'scan_result',
+        studentIndex: data.studentIndex,
+        studentName: data.studentName,
+        classId: data.classId,
+        answer: data.answer,
+        rawData: data.rawData,
+        ts: Date.now()
+      });
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch(e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
+  // Mobile sends a remote control action ('reveal' | 'next' | 'reset')
+  if (reqPath === '/api/plickers/control' && req.method === 'POST') {
+    try {
+      const raw = await getRequestBody(req, 1024 * 1024);
+      const data = JSON.parse(raw.toString('utf8'));
+      
+      broadcastPlickersEvent({
+        type: 'control_action',
+        action: data.action,
+        ts: Date.now()
+      });
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch(e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
+  // Desktop updates active question / class state
+  if (reqPath === '/api/plickers/state' && req.method === 'POST') {
+    try {
+      const raw = await getRequestBody(req, 1024 * 1024);
+      const data = JSON.parse(raw.toString('utf8'));
+      
+      Object.assign(global.plickersStreamStore.currentState, data);
+
+      broadcastPlickersEvent({
+        type: 'state_update',
+        ...global.plickersStreamStore.currentState,
+        ts: Date.now()
+      });
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch(e) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
     return;
   }
 
