@@ -15987,11 +15987,13 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
         viewChoose.style.display = 'none';
         viewPhone.style.display = 'flex';
 
-        let qrUrl = 'http://' + window.location.hostname + ':' + (window.location.port || '3000') + '/plickers-mobile.html';
+        let qrUrl = window.location.origin + '/plickers-mobile.html';
         try {
           const res = await fetch('/api/server-ip');
           const d = await res.json();
-          if (d && d.plickersUrl) qrUrl = d.plickersUrl;
+          if (d && d.plickersUrl && !d.plickersUrl.includes('trycloudflare.com')) {
+            qrUrl = d.plickersUrl;
+          }
         } catch(e) {}
 
         qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&color=0f172a&bgcolor=ffffff&data=${encodeURIComponent(qrUrl)}`;

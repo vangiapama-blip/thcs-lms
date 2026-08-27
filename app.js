@@ -24138,7 +24138,7 @@ LMSApp.prototype.render_ai_picker = function(dom) {
       document.body.appendChild(modal);
     }
 
-    let defaultHost = 'thcsamatranglong.netlify.app';
+    let defaultHost = (typeof window !== 'undefined' && window.location && window.location.host) ? window.location.host : 'localhost:8080';
     if (typeof window !== 'undefined' && window.location && window.location.host) {
       if (window.location.host !== '127.0.0.1:8888' && window.location.host !== 'localhost:8888' && window.location.host !== '127.0.0.1' && window.location.host !== 'localhost') {
         defaultHost = window.location.host;

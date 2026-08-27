@@ -173,8 +173,9 @@ const server = http.createServer(async (req, res) => {
   // =========================================================================
       if (reqPath === '/api/server-ip' && req.method === 'GET') {
     const ip = getLocalIP();
-    const httpsUrl = 'https://monetary-pics-rose-vid.trycloudflare.com/cai-dat-app.html';
-    const plickersAppUrl = 'https://monetary-pics-rose-vid.trycloudflare.com/plickers-mobile.html';
+    const host = req.headers['x-forwarded-host'] || req.headers.host || `${ip}:${PORT}`;
+    const proto = req.headers['x-forwarded-proto'] || (req.connection && req.connection.encrypted ? 'https' : 'http');
+    const currentOrigin = `${proto}://${host}`;
     res.writeHead(200, {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*'
@@ -182,10 +183,10 @@ const server = http.createServer(async (req, res) => {
     res.end(JSON.stringify({
       ip: ip,
       port: PORT,
-      url: `http://${ip}:${PORT}/mobile-cam.html`,
-      plickersUrl: httpsUrl,
-      appUrl: plickersAppUrl,
-      localUrl: `http://${ip}:${PORT}/cai-dat-app.html`
+      url: `${currentOrigin}/mobile-cam.html`,
+      plickersUrl: `${currentOrigin}/plickers-mobile.html`,
+      appUrl: `${currentOrigin}/plickers-mobile.html`,
+      localUrl: `${currentOrigin}/cai-dat-app.html`
     }));
     return;
   }
