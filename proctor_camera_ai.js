@@ -102,6 +102,44 @@
             this._prepareVideo();
             this._prepareHUD();
             this._initFullscreenGuard();
+            this._prepareMobileAudioUnlock();
+        }
+
+        _prepareMobileAudioUnlock() {
+            const unlock = () => {
+                try {
+                    // 1. Kích hoạt AudioContext trên điện thoại
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        if (!this.audioCtx) this.audioCtx = new AudioCtx();
+                        if (this.audioCtx.state === 'suspended') {
+                            this.audioCtx.resume().catch(() => {});
+                        }
+                        // Mở khóa phần cứng loa di động bằng buffer câm
+                        const silentBuf = this.audioCtx.createBuffer(1, 1, 22050);
+                        const source = this.audioCtx.createBufferSource();
+                        source.buffer = silentBuf;
+                        source.connect(this.audioCtx.destination);
+                        source.start(0);
+                    }
+
+                    // 2. Kích hoạt bộ đọc giọng nói TTS trên điện thoại
+                    if (window.speechSynthesis) {
+                        if (window.speechSynthesis.paused) {
+                            try { window.speechSynthesis.resume(); } catch (_) {}
+                        }
+                        const warmUtter = new SpeechSynthesisUtterance(' ');
+                        warmUtter.volume = 0.01;
+                        warmUtter.rate = 2.0;
+                        window.speechSynthesis.speak(warmUtter);
+                    }
+                } catch (e) {}
+            };
+
+            const events = ['touchstart', 'touchend', 'click', 'pointerdown', 'mousedown'];
+            events.forEach(evt => {
+                document.addEventListener(evt, unlock, { once: true, passive: true });
+            });
         }
 
         _prepareVideo() {
@@ -1052,15 +1090,36 @@
                 const now = Date.now();
                 if (!forceImmediate && (now - (this._lastSpeakTime || 0) < 3000)) return;
                 this._lastSpeakTime = now;
-                window.speechSynthesis.cancel();
+
+                if (window.speechSynthesis.paused) {
+                    try { window.speechSynthesis.resume(); } catch (_) {}
+                }
+
                 const spokenText = String(text || '').trim();
                 if (!spokenText) return;
+
                 const utterance = new SpeechSynthesisUtterance(spokenText);
                 utterance.lang = 'vi-VN';
-                utterance.rate = 1.05;
-                utterance.volume = 1;
-                utterance.pitch = 1;
-                window.speechSynthesis.speak(utterance);
+                utterance.rate = 1.02;
+                utterance.volume = 1.0;
+                utterance.pitch = 1.0;
+
+                // Tự động gán Voice tiếng Việt phù hợp nhất trên Android / iOS
+                if (window.speechSynthesis.getVoices) {
+                    const voices = window.speechSynthesis.getVoices();
+                    if (voices && voices.length > 0) {
+                        const viVoice = voices.find(v => v.lang && (v.lang.startsWith('vi') || v.lang.includes('VIE') || (v.name && v.name.toLowerCase().includes('vietnam'))));
+                        if (viVoice) utterance.voice = viVoice;
+                    }
+                }
+
+                // Chống kẹt hàng đợi âm thanh trên iOS Safari / Android WebView
+                try { window.speechSynthesis.cancel(); } catch (_) {}
+                setTimeout(() => {
+                    try {
+                        window.speechSynthesis.speak(utterance);
+                    } catch (_) {}
+                }, 30);
             } catch (error) {}
         }
 
