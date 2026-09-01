@@ -9093,7 +9093,8 @@ render_ai_geometry(dom) {
       dom.querySelectorAll('.exam-subject-card').forEach(card => {
         card.onmouseenter = () => { card.style.transform = 'translateY(-4px)'; card.style.boxShadow = '0 12px 30px rgba(0,0,0,0.12)'; };
         card.onmouseleave = () => { card.style.transform = ''; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.05)'; };
-        card.onclick = () => {
+        card.onclick = (e) => {
+          if (e) e.preventDefault();
           this.currentExamSubject = card.getAttribute('data-sub-id');
           this.currentExamTab = 'tx';
           this.render_exams(dom);
@@ -9328,12 +9329,15 @@ render_ai_geometry(dom) {
     `;
 
     // Events
-    dom.querySelector('#btn-exam-back-subjects').onclick = () => {
-      this.currentExamSubject = null;
-      this.currentExamTab = null;
-      this.currentExamSubTab = null;
-      this.render_exams(dom);
-    };
+    const backBtn = dom.querySelector('#btn-exam-back-subjects');
+    if (backBtn) {
+      backBtn.onclick = () => {
+        this.currentExamSubject = null;
+        this.currentExamTab = null;
+        this.currentExamSubTab = null;
+        this.render_exams(dom);
+      };
+    }
 
     dom.querySelectorAll('.exam-tab-btn').forEach(btn => {
       btn.onclick = () => {

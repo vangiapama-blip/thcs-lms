@@ -350,7 +350,7 @@ class LMSDatabase {
     }
   }
 
-  async syncFromServer(forceRefresh = true) {
+  async syncFromServer(forceRefresh = false) {
     if (typeof fetch === 'undefined') return;
     try {
       const res = await fetch('/api/db/state');
@@ -384,14 +384,6 @@ class LMSDatabase {
           this.initUserGroupsAndPermissions();
           try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
           console.log('✅ LMS Central Database synchronized from Server across all devices!');
-
-          // Tự động làm mới giao diện ngay lập tức trên máy nhận (window.app)
-          if (forceRefresh && typeof window !== 'undefined' && window.app) {
-            const app = window.app;
-            if (app.currentView && app.switchView) {
-              try { app.switchView(app.currentView); } catch(e) {}
-            }
-          }
         }
       }
     } catch(err) {
