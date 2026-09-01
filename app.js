@@ -9024,7 +9024,7 @@ render_ai_geometry(dom) {
               <div style="display:inline-flex;align-items:center;gap:0.4rem;background:#fee2e2; border:1.5px solid #fca5a5; color:#991b1b; font-weight: 500;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.8rem;font-weight: 500;margin-bottom:0.4rem;">
                 📝 HỆ THỐNG KIỂM TRA & ĐÁNH GIÁ NĂNG LỰC GDPT 2018
               </div>
-              <h2 style="margin:0;font-family:var(--font-title);; font-weight: 400;font-size:1.5rem;color:#fff;">
+              <h2 style="margin:0;font-family:var(--font-title); font-weight:700; font-size:1.5rem; color:#0f172a;">
                 📋 Tạo Đề Kiểm Tra & Đánh Giá
               </h2>
               <p style="margin:0.2rem 0 0 0;font-size:0.85rem;color:#64748b; font-weight:400; font-size:0.85rem;">

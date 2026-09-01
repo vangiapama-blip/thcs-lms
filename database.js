@@ -357,7 +357,14 @@ class LMSDatabase {
       if (res.ok) {
         const remoteState = await res.json();
         if (remoteState && typeof remoteState === 'object' && (remoteState.schoolInfo || remoteState.subjects || remoteState.exams)) {
+          // Đảm bảo không bao giờ bị mất danh mục môn học, năm học, khối lớp
+          Object.keys(INITIAL_STATE).forEach(key => {
+            if (!remoteState[key] || (Array.isArray(INITIAL_STATE[key]) && Array.isArray(remoteState[key]) && remoteState[key].length === 0 && INITIAL_STATE[key].length > 0)) {
+              remoteState[key] = JSON.parse(JSON.stringify(INITIAL_STATE[key]));
+            }
+          });
           this.state = remoteState;
+          this.initUserGroupsAndPermissions();
           try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
           console.log('✅ LMS Central Database synchronized from Server across all devices!');
           if (forceRefresh && typeof window !== 'undefined' && window.LMSAppInstance && window.LMSAppInstance.switchView) {
@@ -1100,7 +1107,23 @@ class LMSDatabase {
     this.save();
   }
 
-  getSubjects() { return this.state.subjects || []; }
+  getSubjects() {
+    if (this.state && Array.isArray(this.state.subjects) && this.state.subjects.length > 0) {
+      return this.state.subjects;
+    }
+    if (this.state && Array.isArray(this.state.subjectsList) && this.state.subjectsList.length > 0) {
+      const iconMap = {
+        TOAN: '📐', VAN: '📖', ANH: '🇬🇧', KHTN: '🔬', LSDL: '🗺️', TIN: '💻', GDCD: '⚖️',
+        CN: '🛠️', GDTC: '⚽', NT: '🎨', HDTN: '🌟', GDDP: '🏛️'
+      };
+      return this.state.subjectsList.map(s => ({
+        id: s.code ? s.code.toLowerCase() : (s.id ? s.id.replace('sub_', '') : 'toan'),
+        name: s.name,
+        icon: iconMap[s.code] || s.icon || '📚'
+      }));
+    }
+    return DEFAULT_SUBJECTS;
+  }
   addSubject(subject) {
     this.state.subjects.push(subject);
     this.save();
