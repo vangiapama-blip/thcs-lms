@@ -350,16 +350,19 @@ class LMSDatabase {
     }
   }
 
-  async syncFromServer() {
+  async syncFromServer(forceRefresh = false) {
     if (typeof fetch === 'undefined') return;
     try {
       const res = await fetch('/api/db/state');
       if (res.ok) {
         const remoteState = await res.json();
-        if (remoteState && remoteState.students && remoteState.students.length > 0) {
+        if (remoteState && typeof remoteState === 'object' && (remoteState.schoolInfo || remoteState.subjects || remoteState.exams)) {
           this.state = remoteState;
           try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
-          console.log('✅ LMS Central Database synchronized from Server!');
+          console.log('✅ LMS Central Database synchronized from Server across all devices!');
+          if (forceRefresh && typeof window !== 'undefined' && window.LMSAppInstance && window.LMSAppInstance.switchView) {
+            try { window.LMSAppInstance.switchView(window.LMSAppInstance.currentView); } catch(e) {}
+          }
         }
       }
     } catch(err) {
@@ -901,7 +904,7 @@ class LMSDatabase {
       }
     }
 
-    // Asynchronously debounced sync to Central Server
+    // Asynchronously debounced sync to Central Server (Real-time 150ms)
     if (typeof fetch !== 'undefined' && this.state) {
       if (this._syncTimer) clearTimeout(this._syncTimer);
       this._syncTimer = setTimeout(() => {
@@ -912,7 +915,7 @@ class LMSDatabase {
             body: JSON.stringify(this.state)
           }).catch(() => {});
         } catch(e) {}
-      }, 600);
+      }, 150);
     }
   }
 

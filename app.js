@@ -903,6 +903,9 @@ class LMSApp {
   }
 
   switchView(view) {
+    if (typeof db !== 'undefined' && db.syncFromServer) {
+      db.syncFromServer();
+    }
     if (!this.isMenuAllowedForRole(view)) {
       const defaultView = { admin: 'info', teacher: 'lessons', student: 'study', parent: 'parent_grades' };
       this.currentView = defaultView[this.currentRole] || 'info';
@@ -13367,20 +13370,50 @@ render_ai_geometry(dom) {
       </div>
 
       ${(exam.enableCamera && stream) ? `
-        <div id="cam-pip-panel" style="position:fixed;top:60px;right:12px;z-index:100000;width:148px;background:#0f172a;border:2px solid #10b981;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;padding:0.35rem 0.35rem 0.45rem;gap:0.25rem;cursor:grab;user-select:none;touch-action:none;transition:all 0.2s;">
-          <div style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 0.25rem;cursor:grab;">
-            <span style="font-size:0.62rem;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:0.4px;display:flex;align-items:center;gap:0.3rem;">
-              <span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;"></span>
-              CAMERA AI HUD
+        <style>
+          #cam-pip-panel {
+            position: fixed; top: 60px; right: 12px; z-index: 100000;
+            width: 108px; background: #0f172a; border: 2px solid #10b981;
+            border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; align-items: center;
+            padding: 0.2rem 0.2rem 0.3rem; gap: 0.15rem;
+            cursor: grab; user-select: none; touch-action: none; transition: width 0.2s, top 0.1s, left 0.1s;
+          }
+          #cam-pip-panel .cam-pip-box {
+            position: relative; width: 100px; height: 75px;
+            border-radius: 6px; overflow: hidden; background: #000;
+          }
+          @media (max-width: 768px) {
+            #cam-pip-panel {
+              top: 8px !important; right: 8px !important;
+              width: 74px !important; padding: 0.12rem 0.12rem 0.2rem !important;
+              border-radius: 8px !important; border-width: 1.5px !important;
+            }
+            #cam-pip-panel .cam-pip-box {
+              width: 68px !important; height: 51px !important; border-radius: 5px !important;
+            }
+            #cam-pip-panel .cam-pip-title {
+              font-size: 0.46rem !important;
+            }
+            #cam-pip-panel #cam-status {
+              font-size: 0.44rem !important; line-height: 1.05 !important;
+            }
+          }
+        </style>
+        <div id="cam-pip-panel">
+          <div class="cam-pip-header" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 0.15rem;cursor:grab;">
+            <span class="cam-pip-title" style="font-size:0.56rem;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:0.3px;display:flex;align-items:center;gap:0.25rem;">
+              <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;"></span>
+              AI HUD
             </span>
-            <span style="font-size:0.65rem;color:#94a3b8;cursor:grab;" title="Kéo để di chuyển">✥</span>
+            <span style="font-size:0.6rem;color:#94a3b8;cursor:grab;" title="Kéo để di chuyển">✥</span>
           </div>
-          <div style="position:relative;width:138px;height:104px;border-radius:8px;overflow:hidden;background:#000;">
+          <div class="cam-pip-box">
             <video id="exam-pip-video" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"></video>
-            <canvas id="exam-pip-hud" width="138" height="104" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
+            <canvas id="exam-pip-hud" width="100" height="75" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
             <canvas id="exam-pip-canvas" style="display:none;"></canvas>
           </div>
-          <div id="cam-status" style="font-size:0.63rem;font-weight:700;color:#34d399;text-align:center;line-height:1.2;">● Đang giám sát AI</div>
+          <div id="cam-status" style="font-size:0.55rem;font-weight:700;color:#34d399;text-align:center;line-height:1.15;">● Giám sát AI</div>
         </div>
       ` : ''}
 
@@ -15272,20 +15305,20 @@ render_ai_geometry(dom) {
               <div id="quizizz-arena-main" style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:space-between; position:relative; z-index:2;"></div>
 
               ${mediaStream ? `
-                <div id="cam-pip-panel" style="position:fixed;top:60px;right:12px;z-index:100000;width:148px;background:#0f172a;border:2px solid #10b981;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.35);display:flex;flex-direction:column;align-items:center;padding:0.35rem 0.35rem 0.45rem;gap:0.25rem;cursor:grab;user-select:none;touch-action:none;transition:all 0.2s;">
-                  <div style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 0.25rem;cursor:grab;">
-                    <span style="font-size:0.62rem;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:0.4px;display:flex;align-items:center;gap:0.3rem;">
-                      <span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;"></span>
-                      CAMERA AI HUD
+                <div id="cam-pip-panel">
+                  <div class="cam-pip-header" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 0.15rem;cursor:grab;">
+                    <span class="cam-pip-title" style="font-size:0.56rem;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:0.3px;display:flex;align-items:center;gap:0.25rem;">
+                      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;"></span>
+                      AI HUD
                     </span>
-                    <span style="font-size:0.65rem;color:#94a3b8;cursor:grab;" title="Kéo để di chuyển">✥</span>
+                    <span style="font-size:0.6rem;color:#94a3b8;cursor:grab;" title="Kéo để di chuyển">✥</span>
                   </div>
-                  <div style="position:relative;width:138px;height:104px;border-radius:8px;overflow:hidden;background:#000;">
+                  <div class="cam-pip-box">
                     <video id="exam-pip-video" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;"></video>
-                    <canvas id="exam-pip-hud" width="138" height="104" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
+                    <canvas id="exam-pip-hud" width="100" height="75" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;"></canvas>
                     <canvas id="exam-pip-canvas" style="display:none;"></canvas>
                   </div>
-                  <div id="cam-status" style="font-size:0.63rem;font-weight:700;color:#34d399;text-align:center;line-height:1.2;">● Đang giám sát AI</div>
+                  <div id="cam-status" style="font-size:0.55rem;font-weight:700;color:#34d399;text-align:center;line-height:1.15;">● Giám sát AI</div>
                 </div>
               ` : ''}
 

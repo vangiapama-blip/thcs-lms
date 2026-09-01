@@ -1084,42 +1084,109 @@
             this.status.textContent = message;
         }
 
+        _playSuccessChime() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const audioCtx = this.audioCtx || (AudioCtx ? new AudioCtx() : null);
+                if (!audioCtx) return;
+                if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+                const notes = [523.25, 659.25, 783.99]; // Đô - Mi - Sol
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.12);
+                    gain.gain.setValueAtTime(0.4, audioCtx.currentTime + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.12 + 0.35);
+                    osc.start(audioCtx.currentTime + idx * 0.12);
+                    osc.stop(audioCtx.currentTime + idx * 0.12 + 0.35);
+                });
+            } catch (e) {}
+        }
+
+        _playWarningChime() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                const audioCtx = this.audioCtx || (AudioCtx ? new AudioCtx() : null);
+                if (!audioCtx) return;
+                if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+                const notes = [880, 587.33]; // La - Rê nhắc nhở
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.14);
+                    gain.gain.setValueAtTime(0.5, audioCtx.currentTime + idx * 0.14);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.14 + 0.3);
+                    osc.start(audioCtx.currentTime + idx * 0.14);
+                    osc.stop(audioCtx.currentTime + idx * 0.14 + 0.3);
+                });
+            } catch (e) {}
+        }
+
         _speakWithName(text, forceImmediate = false) {
             try {
-                if (!window.speechSynthesis) return;
                 const now = Date.now();
                 if (!forceImmediate && (now - (this._lastSpeakTime || 0) < 3000)) return;
                 this._lastSpeakTime = now;
 
-                if (window.speechSynthesis.paused) {
-                    try { window.speechSynthesis.resume(); } catch (_) {}
-                }
-
                 const spokenText = String(text || '').trim();
                 if (!spokenText) return;
 
-                const utterance = new SpeechSynthesisUtterance(spokenText);
-                utterance.lang = 'vi-VN';
-                utterance.rate = 1.02;
-                utterance.volume = 1.0;
-                utterance.pitch = 1.0;
+                // Chỉ phát còi hú khi vắng mặt khẩn cấp
+                if (spokenText.includes('khẩn cấp') || spokenText.includes('rời khỏi')) {
+                    this._playAlarmSiren();
+                }
 
-                // Tự động gán Voice tiếng Việt phù hợp nhất trên Android / iOS
-                if (window.speechSynthesis.getVoices) {
-                    const voices = window.speechSynthesis.getVoices();
-                    if (voices && voices.length > 0) {
-                        const viVoice = voices.find(v => v.lang && (v.lang.startsWith('vi') || v.lang.includes('VIE') || (v.name && v.name.toLowerCase().includes('vietnam'))));
-                        if (viVoice) utterance.voice = viVoice;
+                // Dùng 1 nguồn giọng nói chuẩn duy nhất (Single Voice Source), không phát đè 2 âm thanh song song
+                let hasSpoken = false;
+
+                if (window.speechSynthesis) {
+                    try {
+                        if (window.speechSynthesis.paused) {
+                            try { window.speechSynthesis.resume(); } catch (_) {}
+                        }
+                        window.speechSynthesis.cancel(); // Ngắt câu cũ trước khi đọc câu mới
+
+                        const utterance = new SpeechSynthesisUtterance(spokenText);
+                        utterance.lang = 'vi-VN';
+                        utterance.rate = 1.0;
+                        utterance.volume = 1.0;
+                        utterance.pitch = 1.0;
+
+                        if (window.speechSynthesis.getVoices) {
+                            const voices = window.speechSynthesis.getVoices();
+                            if (voices && voices.length > 0) {
+                                const viVoice = voices.find(v => v.lang && (v.lang.startsWith('vi') || v.lang.includes('VIE') || (v.name && v.name.toLowerCase().includes('vietnam'))));
+                                if (viVoice) utterance.voice = viVoice;
+                            }
+                        }
+
+                        window.speechSynthesis.speak(utterance);
+                        hasSpoken = true;
+                    } catch (_) {
+                        hasSpoken = false;
                     }
                 }
 
-                // Chống kẹt hàng đợi âm thanh trên iOS Safari / Android WebView
-                try { window.speechSynthesis.cancel(); } catch (_) {}
-                setTimeout(() => {
+                // Nếu thiết bị không hỗ trợ SpeechSynthesis thì mới dùng Audio Element
+                if (!hasSpoken) {
                     try {
-                        window.speechSynthesis.speak(utterance);
+                        if (this._currentAudioStream) {
+                            try { this._currentAudioStream.pause(); } catch (_) {}
+                            this._currentAudioStream = null;
+                        }
+                        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(spokenText)}`;
+                        const audio = new Audio(ttsUrl);
+                        audio.volume = 1.0;
+                        this._currentAudioStream = audio;
+                        audio.play().catch(() => {});
                     } catch (_) {}
-                }, 30);
+                }
             } catch (error) {}
         }
 
