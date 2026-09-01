@@ -1142,52 +1142,64 @@
                     this._playAlarmSiren();
                 }
 
-                // Dùng 1 nguồn giọng nói chuẩn duy nhất (Single Voice Source), không phát đè 2 âm thanh song song
-                let hasSpoken = false;
-
-                if (window.speechSynthesis) {
-                    try {
-                        if (window.speechSynthesis.paused) {
-                            try { window.speechSynthesis.resume(); } catch (_) {}
-                        }
-                        window.speechSynthesis.cancel(); // Ngắt câu cũ trước khi đọc câu mới
-
-                        const utterance = new SpeechSynthesisUtterance(spokenText);
-                        utterance.lang = 'vi-VN';
-                        utterance.rate = 1.0;
-                        utterance.volume = 1.0;
-                        utterance.pitch = 1.0;
-
-                        if (window.speechSynthesis.getVoices) {
-                            const voices = window.speechSynthesis.getVoices();
-                            if (voices && voices.length > 0) {
-                                const viVoice = voices.find(v => v.lang && (v.lang.startsWith('vi') || v.lang.includes('VIE') || (v.name && v.name.toLowerCase().includes('vietnam'))));
-                                if (viVoice) utterance.voice = viVoice;
-                            }
-                        }
-
-                        window.speechSynthesis.speak(utterance);
-                        hasSpoken = true;
-                    } catch (_) {
-                        hasSpoken = false;
-                    }
+                // 1. ƯU TIÊN PHÁT GIỌNG ĐỌC AI NEURAL STUDIO HD (vi-VN-HoaiMyNeural) - Tự nhiên, ấm áp 100% như người thật đọc
+                let localAudioUrl = '';
+                if (spokenText.includes('thành công') || spokenText.includes('Chúc em')) {
+                    localAudioUrl = './assets/audio/voice_face_success.mp3';
+                } else if (spokenText.includes('ngồi thẳng') || spokenText.includes('nhìn thẳng')) {
+                    localAudioUrl = './assets/audio/voice_sit_straight.mp3';
+                } else if (spokenText.includes('khẩn cấp') || spokenText.includes('rời khỏi')) {
+                    localAudioUrl = './assets/audio/voice_leave_alert.mp3';
                 }
 
-                // Nếu thiết bị không hỗ trợ SpeechSynthesis thì mới dùng Audio Element
-                if (!hasSpoken) {
+                if (localAudioUrl) {
                     try {
                         if (this._currentAudioStream) {
                             try { this._currentAudioStream.pause(); } catch (_) {}
                             this._currentAudioStream = null;
                         }
-                        const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(spokenText)}`;
-                        const audio = new Audio(ttsUrl);
+                        const audio = new Audio(localAudioUrl);
                         audio.volume = 1.0;
                         this._currentAudioStream = audio;
-                        audio.play().catch(() => {});
+                        const playPromise = audio.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(() => {
+                                this._speakWithNativeTTS(spokenText);
+                            });
+                        }
+                        return;
                     } catch (_) {}
                 }
+
+                // 2. Dự phòng qua Native SpeechSynthesis
+                this._speakWithNativeTTS(spokenText);
             } catch (error) {}
+        }
+
+        _speakWithNativeTTS(spokenText) {
+            if (!window.speechSynthesis) return;
+            try {
+                if (window.speechSynthesis.paused) {
+                    try { window.speechSynthesis.resume(); } catch (_) {}
+                }
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(spokenText);
+                utterance.lang = 'vi-VN';
+                utterance.rate = 1.0;
+                utterance.volume = 1.0;
+                utterance.pitch = 1.0;
+
+                if (window.speechSynthesis.getVoices) {
+                    const voices = window.speechSynthesis.getVoices();
+                    if (voices && voices.length > 0) {
+                        const viVoice = voices.find(v => v.lang && (v.lang.startsWith('vi') || v.lang.includes('VIE') || (v.name && v.name.toLowerCase().includes('vietnam'))));
+                        if (viVoice) utterance.voice = viVoice;
+                    }
+                }
+
+                window.speechSynthesis.speak(utterance);
+            } catch (_) {}
         }
 
         stop() {
