@@ -98,32 +98,77 @@
             this.audioData = null;
             this.voiceStreak = 0;
             this.speechRecognition = null;
+            this._voiceAudioElements = {};
+            this._decodedBuffers = {};
 
+            this._initVoiceAudioElements();
             this._prepareVideo();
             this._prepareHUD();
             this._initFullscreenGuard();
             this._prepareMobileAudioUnlock();
         }
 
+        _initVoiceAudioElements() {
+            try {
+                const voiceData = (typeof window !== 'undefined' && window.PROCTOR_VOICE_AUDIO) ? window.PROCTOR_VOICE_AUDIO : {};
+                const keys = ['SUCCESS', 'SIT_STRAIGHT', 'LEAVE_ALERT'];
+                keys.forEach(k => {
+                    const el = new Audio();
+                    el.preload = 'auto';
+                    el.setAttribute('playsinline', '');
+                    el.setAttribute('webkit-playsinline', '');
+                    if (voiceData[k]) el.src = voiceData[k];
+                    this._voiceAudioElements[k] = el;
+                });
+            } catch (_) {}
+        }
+
         _prepareMobileAudioUnlock() {
             const unlock = () => {
                 try {
-                    // 1. Kích hoạt AudioContext trên điện thoại
+                    // 1. Kích hoạt AudioContext & giải mã buffer phần cứng trên điện thoại
                     const AudioCtx = window.AudioContext || window.webkitAudioContext;
                     if (AudioCtx) {
                         if (!this.audioCtx) this.audioCtx = new AudioCtx();
                         if (this.audioCtx.state === 'suspended') {
                             this.audioCtx.resume().catch(() => {});
                         }
-                        // Mở khóa phần cứng loa di động bằng buffer câm
                         const silentBuf = this.audioCtx.createBuffer(1, 1, 22050);
                         const source = this.audioCtx.createBufferSource();
                         source.buffer = silentBuf;
                         source.connect(this.audioCtx.destination);
                         source.start(0);
+
+                        // Giải mã sẵn 3 tệp âm thanh Base64 sang AudioBuffer
+                        const voiceData = (typeof window !== 'undefined' && window.PROCTOR_VOICE_AUDIO) ? window.PROCTOR_VOICE_AUDIO : {};
+                        Object.keys(voiceData).forEach(k => {
+                            if (voiceData[k] && !this._decodedBuffers[k]) {
+                                fetch(voiceData[k])
+                                    .then(res => res.arrayBuffer())
+                                    .then(buf => this.audioCtx.decodeAudioData(buf))
+                                    .then(decoded => { this._decodedBuffers[k] = decoded; })
+                                    .catch(() => {});
+                            }
+                        });
                     }
 
-                    // 2. Kích hoạt bộ đọc giọng nói TTS trên điện thoại
+                    // 2. Pre-warm (mở khóa phần cứng) 3 phần tử Audio singleton trên iOS/Android
+                    Object.keys(this._voiceAudioElements).forEach(k => {
+                        const el = this._voiceAudioElements[k];
+                        if (el) {
+                            el.volume = 0.001;
+                            const p = el.play();
+                            if (p && p.then) {
+                                p.then(() => {
+                                    el.pause();
+                                    el.currentTime = 0;
+                                    el.volume = 1.0;
+                                }).catch(() => {});
+                            }
+                        }
+                    });
+
+                    // 3. Kích hoạt SpeechSynthesis dự phòng
                     if (window.speechSynthesis) {
                         if (window.speechSynthesis.paused) {
                             try { window.speechSynthesis.resume(); } catch (_) {}
@@ -1142,30 +1187,39 @@
                     this._playAlarmSiren();
                 }
 
-                // 1. ƯU TIÊN PHÁT GIỌNG ĐỌC AI NEURAL STUDIO HD (vi-VN-HoaiMyNeural) - Trong trẻo, ấm áp 100% như người thật
-                let audioDataUrl = '';
-                const voiceRegistry = (typeof window !== 'undefined' && window.PROCTOR_VOICE_AUDIO) ? window.PROCTOR_VOICE_AUDIO : null;
-
+                // Xác định khóa âm thanh tương ứng
+                let audioKey = '';
                 if (spokenText.includes('thành công') || spokenText.includes('Chúc em')) {
-                    audioDataUrl = voiceRegistry ? voiceRegistry.SUCCESS : './assets/audio/voice_face_success.mp3';
+                    audioKey = 'SUCCESS';
                 } else if (spokenText.includes('ngồi thẳng') || spokenText.includes('nhìn thẳng')) {
-                    audioDataUrl = voiceRegistry ? voiceRegistry.SIT_STRAIGHT : './assets/audio/voice_sit_straight.mp3';
+                    audioKey = 'SIT_STRAIGHT';
                 } else if (spokenText.includes('khẩn cấp') || spokenText.includes('rời khỏi')) {
-                    audioDataUrl = voiceRegistry ? voiceRegistry.LEAVE_ALERT : './assets/audio/voice_leave_alert.mp3';
+                    audioKey = 'LEAVE_ALERT';
                 }
 
-                if (audioDataUrl) {
+                // LAYER 1 (Ưu tiên cao nhất - 100% phần cứng điện thoại): Phát qua Web Audio Buffer
+                if (audioKey && this.audioCtx && this._decodedBuffers[audioKey]) {
                     try {
-                        if (this._currentAudioStream) {
-                            try { this._currentAudioStream.pause(); } catch (_) {}
-                            this._currentAudioStream = null;
+                        if (this.audioCtx.state === 'suspended') {
+                            this.audioCtx.resume().catch(() => {});
                         }
-                        const audio = new Audio(audioDataUrl);
-                        audio.volume = 1.0;
-                        this._currentAudioStream = audio;
-                        const playPromise = audio.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(() => {
+                        const source = this.audioCtx.createBufferSource();
+                        source.buffer = this._decodedBuffers[audioKey];
+                        source.connect(this.audioCtx.destination);
+                        source.start(0);
+                        return;
+                    } catch (_) {}
+                }
+
+                // LAYER 2: Phát qua Pre-warmed Singleton Audio Element (đã mở khóa trên iOS/Android)
+                if (audioKey && this._voiceAudioElements[audioKey]) {
+                    try {
+                        const el = this._voiceAudioElements[audioKey];
+                        el.currentTime = 0;
+                        el.volume = 1.0;
+                        const p = el.play();
+                        if (p !== undefined) {
+                            p.catch(() => {
                                 this._speakWithNativeTTS(spokenText);
                             });
                         }
@@ -1173,7 +1227,7 @@
                     } catch (_) {}
                 }
 
-                // 2. Dự phòng qua Native SpeechSynthesis
+                // LAYER 3: Dự phòng qua Native SpeechSynthesis
                 this._speakWithNativeTTS(spokenText);
             } catch (error) {}
         }
