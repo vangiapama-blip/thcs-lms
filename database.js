@@ -51,6 +51,31 @@ if (typeof globalThis !== 'undefined') {
   globalThis.formatDateVN = formatDateVN;
 }
 
+function cleanQuestionText(text) {
+  if (text === null || text === undefined) return '';
+  return String(text)
+    .replace(/^\s*\[[^\]]+\]\s*/i, '')
+    .replace(/^\s*Câu\s*\d+\s*[\:\.\-]\s*/i, '')
+    .trim();
+}
+if (typeof window !== 'undefined') {
+  window.cleanQuestionText = cleanQuestionText;
+}
+if (typeof globalThis !== 'undefined') {
+  globalThis.cleanQuestionText = cleanQuestionText;
+}
+
+function cleanChoiceText(text) {
+  if (text === null || text === undefined) return '';
+  return String(text).replace(/^(\s*[\(\[]?[A-Da-d0-9][\.\)\:\-\]\s]+)+/i, '').trim();
+}
+if (typeof window !== 'undefined') {
+  window.cleanChoiceText = cleanChoiceText;
+}
+if (typeof globalThis !== 'undefined') {
+  globalThis.cleanChoiceText = cleanChoiceText;
+}
+
 const DB_KEY = 'THCS_LMS_DATABASE_STATE_PRO_2026';
 
 const DEFAULT_SUBJECTS = [

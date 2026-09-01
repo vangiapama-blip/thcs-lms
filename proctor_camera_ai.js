@@ -222,8 +222,12 @@
         _initFullscreenGuard() {
             if (!this.enableFullscreenGuard) return;
             
-            // Tab Switch & Visibility Change Guard
+            // Tab Switch & Visibility Change Guard (Bảo vệ di động & hộp thoại đính kèm tệp)
             this._visibilityHandler = () => {
+                if (window._isExamFilePickerActive || (Date.now() - (window._lastFilePickerCloseTs || 0) < 8000)) return;
+                const isInputActive = window._isExamInputActive || (Date.now() - (window._lastInputActiveTs || 0) < 6000);
+                if (isInputActive) return;
+
                 if (document.hidden && this.running && this.isRegistered && !this.examLocked) {
                     this._speakWithName('Cảnh báo: Bạn đang rời khỏi màn hình thi! Hãy quay lại bài thi ngay!');
                     this._reportViolation('tab_switch', 'Học sinh chuyển sang tab khác hoặc ẩn trình duyệt thi!');
@@ -232,8 +236,12 @@
             };
             document.addEventListener('visibilitychange', this._visibilityHandler);
 
-            // Window Blur Guard (Alt+Tab)
+            // Window Blur Guard (Alt+Tab) (Bảo vệ bàn phím ảo trên iPad/điện thoại & tệp đính kèm)
             this._blurHandler = () => {
+                if (window._isExamFilePickerActive || (Date.now() - (window._lastFilePickerCloseTs || 0) < 8000)) return;
+                const isInputActive = window._isExamInputActive || (Date.now() - (window._lastInputActiveTs || 0) < 6000);
+                if (isInputActive) return;
+
                 if (this.running && this.isRegistered && !this.examLocked) {
                     this._reportViolation('window_blur', 'Học sinh nhấn Alt+Tab hoặc mất tiêu điểm màn hình thi!');
                 }
@@ -716,7 +724,7 @@
             }
 
             // =========================================================================
-            // GIAI ĐOẠN 2: GIÁM SÁT LIÊN TỤC TRONG SUỐT GIỜ THI
+            // GIAI ĐOẠN 2: GIÁM SÁT LIÊN TỤC TRONG SUỐT GIỜ THI (60 FPS HUD BÁM MẶT)
             // =========================================================================
             if (result.hasFace) {
                 this.noFaceStreak = 0;
@@ -740,7 +748,7 @@
                     this._unblurExamContent();
                 }
 
-                // Trường hợp 1: Phát hiện người thứ 2
+                // Trường hợp 1: Phát hiện người thứ 2 (Luôn luôn giám sát chống gian lận)
                 if (result.multiPerson) {
                     this._setStatus('warning', '⚠️ PHÁT HIỆN CÓ NGƯỜI THỨ 2 TRONG KHUNG HÌNH!');
                     this._reportViolation('multiperson', 'Phát hiện có người thứ 2 xuất hiện trong camera phòng thi!');
@@ -749,6 +757,14 @@
 
                 // Trường hợp 2: Nghiêng mặt hẳn sang bên hoặc cúi gục đầu (CHỈ NHẮC KHI THỰC SỰ LỆCH HẲN, KHÔNG TÍNH VI PHẠM)
                 if (result.lookingAside || result.lookingDown) {
+                    // Nếu đang trong ô gõ tự luận / trả lời ngắn và học sinh nhìn xuống bàn phím:
+                    const isTyping = window._isExamInputActive || (Date.now() - (window._lastInputActiveTs || 0) < 4000);
+                    if (isTyping && result.lookingDown && !result.lookingAside) {
+                        this.lookAsideStreak = 0;
+                        this._setStatus('ok', '🟢 ĐANG LÀM BÀI - TƯ THẾ HỢP LỆ');
+                        return;
+                    }
+
                     this.lookAsideStreak = (this.lookAsideStreak || 0) + 1;
                     this._setStatus('warning', '⚠️ VUI LÒNG NGỒI THẲNG, CÂN GIỮA MÀN HÌNH!');
 
@@ -778,6 +794,16 @@
             this.track.lookingAside = false;
             this.track.lookingDown = false;
             this.lookAsideStreak = 0;
+
+            // Nếu trên điện thoại/iPad học sinh đang mở Camera của máy để chụp ảnh bài viết tay đính kèm:
+            if (window._isExamFilePickerActive) {
+                if (this.absentStartTime) {
+                    this.absentStartTime = null;
+                    this.absentCount = 0;
+                    this._removeCountdownOverlay();
+                }
+                return;
+            }
 
             if (!this.absentStartTime) {
                 this.absentStartTime = Date.now();
@@ -951,8 +977,17 @@
         }
 
         _reportViolation(type, reason) {
+            // Tuyệt đối không tính vi phạm nếu đang mở hộp thoại chọn tệp / chụp ảnh đính kèm bài làm
+            if (window._isExamFilePickerActive || (Date.now() - (window._lastFilePickerCloseTs || 0) < 8000)) {
+                return;
+            }
+            // Không tính vi phạm mất tiêu điểm / tab / fullscreen nếu đang gõ bài hoặc thao tác bàn phím ảo
+            const isInputActive = window._isExamInputActive || (Date.now() - (window._lastInputActiveTs || 0) < 6000);
+            if (isInputActive && (type === 'window_blur' || type === 'tab_switch' || type === 'fullscreen_exit')) {
+                return;
+            }
             // Không tính vi phạm đối với các nhắc nhở tư thế
-            if (type === 'lookaside' || type === 'posture' || (reason && (reason.includes('nghiêng mặt') || reason.includes('lệch góc') || reason.includes('cúi nhìn')))) {
+            if (type === 'lookaside' || type === 'posture' || (reason && (reason.includes('nghiêng mặt') || reason.includes('lệch góc') || reason.includes('cúi nhìn') || reason.includes('ngồi thẳng')))) {
                 return;
             }
             const now = Date.now();

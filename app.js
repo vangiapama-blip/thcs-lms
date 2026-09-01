@@ -965,6 +965,19 @@ class LMSApp {
     });
   }
 
+  cleanQuestionText(text) {
+    if (text === null || text === undefined) return '';
+    return String(text)
+      .replace(/^\s*\[[^\]]+\]\s*/i, '')
+      .replace(/^\s*Câu\s*\d+\s*[\:\.\-]\s*/i, '')
+      .trim();
+  }
+
+  cleanChoiceText(text) {
+    if (text === null || text === undefined) return '';
+    return String(text).replace(/^(\s*[\(\[]?[A-Da-d0-9][\.\)\:\-\]\s]+)+/i, '').trim();
+  }
+
   // =====================================================
   // BỘ CHUYỂN ĐỔI BÀI GIẢNG POWERPOINT (.PPTX) SANG HTML5 BẢO TOÀN 100% BỐ CỤC GỐC (V21)
   // Bóc tách tọa độ DrawingML EMU (x, y, w, h), màu chữ, font-size, ảnh gốc đúng vị trí tuyệt đối
@@ -2364,10 +2377,10 @@ class LMSApp {
 
                     ${(q.type === 'dung_sai') ? (() => {
                       const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
-                        { text: 'Phát biểu a', isCorrect: true },
-                        { text: 'Phát biểu b', isCorrect: false },
-                        { text: 'Phát biểu c', isCorrect: true },
-                        { text: 'Phát biểu d', isCorrect: false }
+                        { text: 'Phát biểu A', isCorrect: true },
+                        { text: 'Phát biểu B', isCorrect: false },
+                        { text: 'Phát biểu C', isCorrect: true },
+                        { text: 'Phát biểu D', isCorrect: false }
                       ]);
                       return `
                         <div style="display:flex; flex-direction:column; gap:0.45rem; margin-bottom:0.65rem;">
@@ -3164,7 +3177,7 @@ class LMSApp {
         const diffLabel = curDiff === 'nhan_biet' ? 'Nhận biết' : curDiff === 'thong_hieu' ? 'Thông hiểu' : curDiff === 'van_dung' ? 'Vận dụng' : 'Vận dụng cao';
         if (curType === 'trac_nghiem') {
           if (curDiff === 'nhan_biet') {
-            qText = `[Toán ${gNum} - ${activeTopic}] Trong chương trình Toán ${gNum} (bộ sách Kết Nối Tri Thức), khẳng định nào sau đây là ĐÚNG?`;
+            qText = `Trong chương trình Toán ${gNum} (bộ sách Kết Nối Tri Thức), khẳng định nào sau đây là ĐÚNG?`;
             opts = [
               `A. ${kbItem.rule || 'Số 0 không phải là số nguyên âm cũng không phải là số nguyên dương.'}`,
               `B. Tích của hai số nguyên âm luôn luôn là một số nguyên âm.`,
@@ -3174,7 +3187,7 @@ class LMSApp {
             correct = 0;
             exp = `Giải thích (Mức độ Nhận biết): Theo chuẩn SGK Toán ${gNum} KNTT, khẳng định A là định nghĩa chính xác. B sai vì âm nhân âm ra dương; C sai vì mẫu số phải khác 0; D sai vì kề bù có tổng bằng 180°.`;
           } else if (curDiff === 'thong_hieu') {
-            qText = `[Toán ${gNum} - ${activeTopic}] Thực hiện tính hợp lí giá trị biểu thức: P = 25 . (-4) + (-15) . 4 - 4 . 60?`;
+            qText = `Thực hiện tính hợp lí giá trị biểu thức: P = 25 . (-4) + (-15) . 4 - 4 . 60?`;
             opts = [
               `A. P = -400`,
               `B. P = 400`,
@@ -3184,7 +3197,7 @@ class LMSApp {
             correct = 0;
             exp = `Giải thích (Mức độ Thông hiểu): Đặt thừa số chung 4 ra ngoài: P = 4 . [(-25) + (-15) - 60] = 4 . (-100) = -400.`;
           } else if (curDiff === 'van_dung') {
-            qText = `[Toán ${gNum} - ${activeTopic}] Bác Ba có một mảnh vườn hình chữ nhật có chiều dài 24m, chiều rộng bằng 2/3 chiều dài. Bác dành 1/4 diện tích mảnh vườn để trồng rau xanh. Tính diện tích phần đất trồng rau?`;
+            qText = `Bác Ba có một mảnh vườn hình chữ nhật có chiều dài 24m, chiều rộng bằng 2/3 chiều dài. Bác dành 1/4 diện tích mảnh vườn để trồng rau xanh. Tính diện tích phần đất trồng rau?`;
             opts = [
               `A. 96 m²`,
               `B. 144 m²`,
@@ -3194,7 +3207,7 @@ class LMSApp {
             correct = 0;
             exp = `Giải thích (Mức độ Vận dụng thực tế): Chiều rộng mảnh vườn là: 24 . 2/3 = 16 (m). Diện tích cả mảnh vườn là: 24 . 16 = 384 (m²). Diện tích trồng rau là: 384 . 1/4 = 96 (m²).`;
           } else {
-            qText = `[Toán ${gNum} - ${activeTopic}] (Vận dụng cao) Một cửa hàng nhập về một lô hàng với giá gốc 500.000 đồng/sản phẩm. Ban đầu cửa hàng bán với giá lãi 30% so với giá gốc. Sau đó, để tri ân khách hàng nhân dịp khai giảng, cửa hàng giảm giá 15% trên giá đang bán. Hỏi sau khi giảm giá, cửa hàng còn lãi bao nhiêu tiền trên mỗi sản phẩm?`;
+            qText = `(Vận dụng cao) Một cửa hàng nhập về một lô hàng với giá gốc 500.000 đồng/sản phẩm. Ban đầu cửa hàng bán với giá lãi 30% so với giá gốc. Sau đó, để tri ân khách hàng nhân dịp khai giảng, cửa hàng giảm giá 15% trên giá đang bán. Hỏi sau khi giảm giá, cửa hàng còn lãi bao nhiêu tiền trên mỗi sản phẩm?`;
             opts = [
               `A. Lãi 52.500 đồng/sản phẩm`,
               `B. Lãi 75.000 đồng/sản phẩm`,
@@ -3205,7 +3218,7 @@ class LMSApp {
             exp = `Giải thích (Vận dụng cao): Giá bán ban đầu: 500.000 x 130% = 650.000 (đồng). Giá sau khi giảm 15%: 650.000 x (1 - 0.15) = 552.500 (đồng). Tiền lãi thực tế: 552.500 - 500.000 = 52.500 (đồng/sản phẩm).`;
           }
         } else if (curType === 'dung_sai') {
-          qText = `[Toán ${gNum} - ${activeTopic}] Đọc kĩ các dữ liệu toán học liên quan đến nội dung "${activeTopic}" và xác định tính Đúng/Sai cho từng phát biểu dưới đây:`;
+          qText = `Đọc kĩ các dữ liệu toán học liên quan đến nội dung "${activeTopic}" và xác định tính Đúng/Sai cho từng phát biểu dưới đây:`;
           opts = [
             `a. Số nguyên âm được biểu diễn ở phía bên trái điểm 0 trên trục số nằm ngang.`,
             `b. Phép chia hai số nguyên cùng dấu luôn cho kết quả là một số nguyên âm.`,
@@ -3215,12 +3228,12 @@ class LMSApp {
           correct = [true, false, true, false];
           exp = `Hướng dẫn chấm Đúng/Sai: a) ĐÚNG (theo quy ước trục số); b) SAI (cùng dấu chia nhau ra số dương); c) ĐÚNG (tính chất hình chữ nhật SGK KNTT); d) SAI (tận cùng là 5 chỉ chia hết cho 5, không chia hết cho 2).`;
         } else if (curType === 'tra_loi_ngan') {
-          qText = `[Toán ${gNum} - ${activeTopic}] Tìm số nguyên x biết: 3x - (-15) = 36? (Nhập kết quả là một số)`;
+          qText = `Tìm số nguyên x biết: 3x - (-15) = 36? (Nhập kết quả là một số)`;
           opts = [];
           correct = '7';
           exp = `Đáp án đúng: 7. Lời giải: 3x + 15 = 36 => 3x = 36 - 15 = 21 => x = 21 : 3 = 7.`;
         } else {
-          qText = `[Toán ${gNum} - ${activeTopic}] Một mảnh đất hình thang cân có độ dài hai đáy lần lượt là 12m và 20m, chiều cao là 8m. Người ta lát gạch lối đi xung quanh và trồng cỏ bên trong.
+          qText = `Một mảnh đất hình thang cân có độ dài hai đáy lần lượt là 12m và 20m, chiều cao là 8m. Người ta lát gạch lối đi xung quanh và trồng cỏ bên trong.
 1) Hãy tính diện tích của mảnh đất hình thang cân này.
 2) Biết chi phí mua cỏ giống là 45.000 đồng/m². Tính tổng số tiền cần dùng để phủ kín toàn bộ diện tích mảnh đất.`;
           opts = [];
@@ -3235,7 +3248,7 @@ class LMSApp {
       else if (subKey.includes('van')) {
         const textEx = kbItem.textSample || 'Ngữ liệu văn bản SGK Kết Nối Tri Thức';
         if (curType === 'trac_nghiem') {
-          qText = `[Ngữ văn ${gNum} - ${activeTopic}] Đọc ngữ liệu bài học thuộc chủ đề "${activeTopic}" (${textEx}), biện pháp nghệ thuật nào dưới đây được tác giả vận dụng nổi bật nhất?`;
+          qText = `Đọc ngữ liệu bài học thuộc chủ đề "${activeTopic}" (${textEx}), biện pháp nghệ thuật nào dưới đây được tác giả vận dụng nổi bật nhất?`;
           opts = [
             `A. So sánh kết hợp với nhân hóa và từ ngữ giàu tính gợi hình, gợi cảm`,
             `B. Sử dụng hoàn toàn từ ngữ địa phương khó hiểu`,
@@ -3245,7 +3258,7 @@ class LMSApp {
           correct = 0;
           exp = `Giải thích (SGK Ngữ văn ${gNum} KNTT): Biện pháp so sánh và nhân hóa giúp cảnh vật và tâm trạng nhân vật trở nên sinh động, gần gũi và gợi cảm xúc sâu sắc cho người đọc.`;
         } else if (curType === 'dung_sai') {
-          qText = `[Ngữ văn ${gNum} - ${activeTopic}] Đánh giá tính Đúng hay Sai của các khẳng định sau về kiến thức Đọc hiểu và Thực hành Tiếng Việt:`;
+          qText = `Đánh giá tính Đúng hay Sai của các khẳng định sau về kiến thức Đọc hiểu và Thực hành Tiếng Việt:`;
           opts = [
             `a. Người kể chuyện ngôi thứ nhất xưng "tôi" và trực tiếp chứng kiến hoặc tham gia vào câu chuyện.`,
             `b. Từ ghép đẳng lập là từ ghép mà các tiếng bình đẳng về mặt ngữ pháp, không phân tiếng chính, tiếng phụ.`,
@@ -3255,12 +3268,12 @@ class LMSApp {
           correct = [true, true, false, true];
           exp = `Giải thích Đúng/Sai: a) ĐÚNG; b) ĐÚNG (khái niệm từ ghép đẳng lập KNTT); c) SAI (trạng ngữ là thành phần phụ của câu); d) ĐÚNG (định nghĩa ẩn dụ).`;
         } else if (curType === 'tra_loi_ngan') {
-          qText = `[Ngữ văn ${gNum} - ${activeTopic}] Xác định từ láy tượng thanh trong câu văn sau: "Tiếng suối chảy róc rách qua từng khe đá mát lạnh."? (Nhập từ láy tìm được)`;
+          qText = `Xác định từ láy tượng thanh trong câu văn sau: "Tiếng suối chảy róc rách qua từng khe đá mát lạnh."? (Nhập từ láy tìm được)`;
           opts = [];
           correct = 'róc rách';
           exp = `Đáp án đúng: róc rách. (Từ láy tượng thanh mô phỏng âm thanh tiếng nước chảy róc rách).`;
         } else {
-          qText = `[Ngữ văn ${gNum} - ${activeTopic}] Viết một đoạn văn ngắn (từ 6 đến 8 câu) ghi lại cảm nghĩ sâu sắc của em về thông điệp cuộc sống được gửi gắm trong bài học "${activeTopic}". Trong đoạn văn có sử dụng ít nhất một biện pháp tu từ so sánh (gạch chân dưới câu văn có sử dụng biện pháp so sánh đó).`;
+          qText = `Viết một đoạn văn ngắn (từ 6 đến 8 câu) ghi lại cảm nghĩ sâu sắc của em về thông điệp cuộc sống được gửi gắm trong bài học "${activeTopic}". Trong đoạn văn có sử dụng ít nhất một biện pháp tu từ so sánh (gạch chân dưới câu văn có sử dụng biện pháp so sánh đó).`;
           opts = [];
           correct = '';
           exp = `Hướng dẫn chấm bài tự luận Ngữ văn:
@@ -3272,7 +3285,7 @@ class LMSApp {
       // 3. TIẾNG ANH (GLOBAL SUCCESS - KNTT)
       else if (subKey.includes('anh') || subKey.includes('eng')) {
         if (curType === 'trac_nghiem') {
-          qText = `[English ${gNum} - ${activeTopic}] Choose the best answer (A, B, C or D) to complete the sentence: "My brother usually ________ basketball with his classmates after school on Fridays."`;
+          qText = `Choose the best answer (A, B, C or D) to complete the sentence: "My brother usually ________ basketball with his classmates after school on Fridays."`;
           opts = [
             `A. plays`,
             `B. is playing`,
@@ -3282,7 +3295,7 @@ class LMSApp {
           correct = 0;
           exp = `Explanation: In English Grade ${gNum} (Global Success), with subject "My brother" (singular noun) and the adverb of frequency "usually", we use the Present Simple tense with verb ending in -s/-es -> "plays".`;
         } else if (curType === 'dung_sai') {
-          qText = `[English ${gNum} - ${activeTopic}] Read the statements about English grammar & vocabulary in Unit "${activeTopic}" and decide whether each statement is True (T) or False (F):`;
+          qText = `Read the statements about English grammar & vocabulary in Unit "${activeTopic}" and decide whether each statement is True (T) or False (F):`;
           opts = [
             `a. The adverb of frequency "always" usually goes before the main verb and after the verb "to be".`,
             `b. The comparative form of the adjective "good" is "gooder".`,
@@ -3292,12 +3305,12 @@ class LMSApp {
           correct = [true, false, true, true];
           exp = `Answer key: a) TRUE; b) FALSE (the comparative form of "good" is "better"); c) TRUE; d) TRUE.`;
         } else if (curType === 'tra_loi_ngan') {
-          qText = `[English ${gNum} - ${activeTopic}] Give the correct form of the word in brackets: "Lan is very ________. She always helps her friends with their homework." (HELP)`;
+          qText = `Give the correct form of the word in brackets: "Lan is very ________. She always helps her friends with their homework." (HELP)`;
           opts = [];
           correct = 'helpful';
           exp = `Correct answer: helpful (Adjective describing personality from the verb help).`;
         } else {
-          qText = `[English ${gNum} - ${activeTopic}] Write a short paragraph (50 - 70 words) about your favourite topic related to "${activeTopic}". Use the following prompts:
+          qText = `Write a short paragraph (50 - 70 words) about your favourite topic related to "${activeTopic}". Use the following prompts:
 - What is it?
 - Why do you like it?
 - How often do you do it?`;
@@ -3312,7 +3325,7 @@ class LMSApp {
       // 4. KHOA HỌC TỰ NHIÊN (KHTN KNTT)
       else if (subKey.includes('khtn') || subKey.includes('ly') || subKey.includes('hoa') || subKey.includes('sinh')) {
         if (curType === 'trac_nghiem') {
-          qText = `[KHTN ${gNum} - ${activeTopic}] Theo chương trình KHTN ${gNum} bộ sách Kết Nối Tri Thức, phát biểu nào sau đây mô tả ĐÚNG nhất bản chất khoa học của bài học "${activeTopic}"?`;
+          qText = `Theo chương trình KHTN ${gNum} bộ sách Kết Nối Tri Thức, phát biểu nào sau đây mô tả ĐÚNG nhất bản chất khoa học của bài học "${activeTopic}"?`;
           opts = [
             `A. ${kbItem.focus ? kbItem.focus.split(',')[0] : 'Tế bào là đơn vị cơ bản cấu tạo nên mọi cơ thể sống.'}`,
             `B. Chất rắn không có hình dạng xác định và luôn chiếm toàn bộ thể tích bình chứa.`,
@@ -3322,7 +3335,7 @@ class LMSApp {
           correct = 0;
           exp = `Giải thích (KHTN ${gNum} KNTT): Khẳng định A phản ánh chính xác kiến thức cốt lõi. B sai vì chất rắn có hình dạng xác định; C sai vì khối lượng là lượng chất không đổi; D sai vì các chất lỏng khác nhau nở vì nhiệt khác nhau.`;
         } else if (curType === 'dung_sai') {
-          qText = `[KHTN ${gNum} - ${activeTopic}] Xác định tính Đúng hay Sai của các mệnh đề khoa học thực nghiệm sau đây:`;
+          qText = `Xác định tính Đúng hay Sai của các mệnh đề khoa học thực nghiệm sau đây:`;
           opts = [
             `a. Tế bào nhân thực có màng nhân bao bọc vật chất di truyền, tế bào nhân sơ thì không có màng nhân.`,
             `b. Lực ma sát trượt luôn cùng chiều với chiều chuyển động của vật.`,
@@ -3332,12 +3345,12 @@ class LMSApp {
           correct = [true, false, true, false];
           exp = `Giải thích: a) ĐÚNG; b) SAI (lực ma sát trượt cản trở chuyển động nên ngược chiều); c) ĐÚNG (Định luật bảo toàn năng lượng); d) SAI (nước cất là chất tinh khiết).`;
         } else if (curType === 'tra_loi_ngan') {
-          qText = `[KHTN ${gNum} - ${activeTopic}] Đơn vị đo lực chuẩn trong Hệ đo lường quốc tế (SI) là gì? (Nhập tên đầy đủ hoặc kí hiệu chữ cái)`;
+          qText = `Đơn vị đo lực chuẩn trong Hệ đo lường quốc tế (SI) là gì? (Nhập tên đầy đủ hoặc kí hiệu chữ cái)`;
           opts = [];
           correct = 'Niutơn';
           exp = `Đáp án đúng: Niutơn (hoặc N / Newton).`;
         } else {
-          qText = `[KHTN ${gNum} - ${activeTopic}] Hãy giải thích vì sao khi mùa đông thời tiết hanh khô, khi cởi áo len bằng sợi tổng hợp trong phòng tối ta thường nghe thấy tiếng lách tách nhỏ và có thể thấy những tia lửa điện nhỏ lóe sáng? Nêu cách phòng tránh hiện tượng tĩnh điện này trong đời sống.`;
+          qText = `Hãy giải thích vì sao khi mùa đông thời tiết hanh khô, khi cởi áo len bằng sợi tổng hợp trong phòng tối ta thường nghe thấy tiếng lách tách nhỏ và có thể thấy những tia lửa điện nhỏ lóe sáng? Nêu cách phòng tránh hiện tượng tĩnh điện này trong đời sống.`;
           opts = [];
           correct = '';
           exp = `Hướng dẫn chấm KHTN:
@@ -3349,7 +3362,7 @@ class LMSApp {
       // 5. TIN HỌC (KNTT)
       else if (subKey.includes('tin')) {
         if (curType === 'trac_nghiem') {
-          qText = `[Tin học ${gNum} - ${activeTopic}] Liên quan đến chủ đề "${activeTopic}" (SGK Tin học ${gNum} Kết Nối Tri Thức), khẳng định nào sau đây nêu ĐÚNG nhất theo chuẩn GDPT 2018?`;
+          qText = `Liên quan đến chủ đề "${activeTopic}" (SGK Tin học ${gNum} Kết Nối Tri Thức), khẳng định nào sau đây nêu ĐÚNG nhất theo chuẩn GDPT 2018?`;
           opts = [
             `A. Thông tin là những hiểu biết của con người về thế giới xung quanh và về chính bản thân mình`,
             `B. Dữ liệu và thông tin là hai khái niệm hoàn toàn đồng nhất và không có sự phân biệt`,
@@ -3359,7 +3372,7 @@ class LMSApp {
           correct = 0;
           exp = `Giải thích (Tin học ${gNum} KNTT): Khái niệm chuẩn SGK: Thông tin là sự hiểu biết; dữ liệu là các con số, văn bản, hình ảnh, âm thanh được máy tính tiếp nhận và xử lí.`;
         } else if (curType === 'dung_sai') {
-          qText = `[Tin học ${gNum} - ${activeTopic}] Đánh giá tính Đúng/Sai của các nhận định dưới đây về sử dụng phần mềm và an toàn thông tin số:`;
+          qText = `Đánh giá tính Đúng/Sai của các nhận định dưới đây về sử dụng phần mềm và an toàn thông tin số:`;
           opts = [
             `a. Mật khẩu mạnh nên có ít nhất 8 kí tự, kết hợp chữ hoa, chữ thường, chữ số và kí tự đặc biệt.`,
             `b. Tệp có phần mở rộng .xlsx là tệp trình chiếu do phần mềm PowerPoint tạo ra.`,
@@ -3369,12 +3382,12 @@ class LMSApp {
           correct = [true, false, true, true];
           exp = `Giải thích: a) ĐÚNG; b) SAI (.xlsx là tệp bảng tính Excel); c) ĐÚNG (hàm AVERAGE); d) ĐÚNG (khái niệm vòng lặp).`;
         } else if (curType === 'tra_loi_ngan') {
-          qText = `[Tin học ${gNum} - ${activeTopic}] Trong phần mềm soạn thảo văn bản hoặc hệ điều hành Windows, tổ hợp phím tắt nào dùng để Lưu (Save) tệp văn bản đang mở?`;
+          qText = `Trong phần mềm soạn thảo văn bản hoặc hệ điều hành Windows, tổ hợp phím tắt nào dùng để Lưu (Save) tệp văn bản đang mở?`;
           opts = [];
           correct = 'Ctrl + S';
           exp = `Đáp án đúng: Ctrl + S (hoặc Ctrl+S / Ctrl-S).`;
         } else {
-          qText = `[Tin học ${gNum} - ${activeTopic}] Em hãy nêu 3 mối nguy cơ phổ biến khi học sinh tham gia mạng xã hội và đề xuất 3 biện pháp cụ thể để bảo vệ thông tin cá nhân và tài khoản trực tuyến của bản thân một cách an toàn, văn minh.`;
+          qText = `Em hãy nêu 3 mối nguy cơ phổ biến khi học sinh tham gia mạng xã hội và đề xuất 3 biện pháp cụ thể để bảo vệ thông tin cá nhân và tài khoản trực tuyến của bản thân một cách an toàn, văn minh.`;
           opts = [];
           correct = '';
           exp = `Thang điểm chấm Tin học:
@@ -3385,7 +3398,7 @@ class LMSApp {
       // 6. LỊCH SỬ & ĐỊA LÝ, GDCD, CÔNG NGHỆ, CÁC MÔN CÒN LẠI
       else {
         if (curType === 'trac_nghiem') {
-          qText = `[${subName} ${gNum} - ${activeTopic}] Trong chương trình ${subName} ${gNum} (bộ sách Kết Nối Tri Thức Với Cuộc Sống), nội dung nào dưới đây phản ánh ĐÚNG nhất bài học "${activeTopic}"?`;
+          qText = `Trong chương trình ${subName} ${gNum} (bộ sách Kết Nối Tri Thức Với Cuộc Sống), nội dung nào dưới đây phản ánh ĐÚNG nhất bài học "${activeTopic}"?`;
           opts = [
             `A. Nắm vững bản chất kiến thức cốt lõi và vận dụng linh hoạt vào thực tiễn đời sống`,
             `B. Chỉ ghi nhớ máy móc câu chữ mà không cần hiểu ý nghĩa ứng dụng thực tế`,
@@ -3395,7 +3408,7 @@ class LMSApp {
           correct = 0;
           exp = `Giải thích (${subName} ${gNum} KNTT): Đáp án A đáp ứng đúng mục tiêu phát triển phẩm chất và năng lực của Chương trình GDPT 2018.`;
         } else if (curType === 'dung_sai') {
-          qText = `[${subName} ${gNum} - ${activeTopic}] Nhận định tính Đúng hoặc Sai cho các mệnh đề sau đây:`;
+          qText = `Nhận định tính Đúng hoặc Sai cho các mệnh đề sau đây:`;
           opts = [
             `a. Việc học tập môn ${subName} giúp học sinh nâng cao hiểu biết và rèn luyện kĩ năng giải quyết vấn đề.`,
             `b. Giữ gìn và phát huy các giá trị văn hóa truyền thống tốt đẹp là trách nhiệm của mỗi công dân.`,
@@ -3405,12 +3418,12 @@ class LMSApp {
           correct = [true, true, false, true];
           exp = `Giải thích: a) ĐÚNG; b) ĐÚNG; c) SAI (vi phạm pháp luật luôn gây hại cho xã hội); d) ĐÚNG.`;
         } else if (curType === 'tra_loi_ngan') {
-          qText = `[${subName} ${gNum} - ${activeTopic}] Nêu từ khóa khái niệm quan trọng nhất được nhấn mạnh trong bài học "${activeTopic}"?`;
+          qText = `Nêu từ khóa khái niệm quan trọng nhất được nhấn mạnh trong bài học "${activeTopic}"?`;
           opts = [];
           correct = cleanTopic.split(/[-–:]/)[0].trim() || 'Trách nhiệm';
           exp = `Đáp án: ${correct}.`;
         } else {
-          qText = `[${subName} ${gNum} - ${activeTopic}] Từ nội dung bài học "${activeTopic}", em hãy liên hệ thực tế tại trường học hoặc địa phương nơi em đang sinh sống và nêu 2 việc làm cụ thể mà học sinh THCS có thể thực hiện để đóng góp tích cực cho cộng đồng.`;
+          qText = `Từ nội dung bài học "${activeTopic}", em hãy liên hệ thực tế tại trường học hoặc địa phương nơi em đang sinh sống và nêu 2 việc làm cụ thể mà học sinh THCS có thể thực hiện để đóng góp tích cực cho cộng đồng.`;
           opts = [];
           correct = '';
           exp = `Hướng dẫn chấm:
@@ -4382,10 +4395,10 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
 
       } else if (type === 'dung_sai') {
         const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
-          { text: 'Phát biểu a', isCorrect: true },
-          { text: 'Phát biểu b', isCorrect: false },
-          { text: 'Phát biểu c', isCorrect: true },
-          { text: 'Phát biểu d', isCorrect: false }
+          { text: 'Phát biểu A', isCorrect: true },
+          { text: 'Phát biểu B', isCorrect: false },
+          { text: 'Phát biểu C', isCorrect: true },
+          { text: 'Phát biểu D', isCorrect: false }
         ]);
         optionsPanel.innerHTML = `
           <div style="margin-bottom:0.75rem;">
@@ -9505,10 +9518,10 @@ render_ai_geometry(dom) {
             </div>
           ` : qType === 'dung_sai' ? (() => {
             const rawItems = qObj.items || qObj.subItems || (qObj.subQuestions ? qObj.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(qObj.correctAnswers) ? qObj.correctAnswers[sidx] : true })) : [
-              { text: 'Phát biểu a', isCorrect: true },
-              { text: 'Phát biểu b', isCorrect: false },
-              { text: 'Phát biểu c', isCorrect: true },
-              { text: 'Phát biểu d', isCorrect: false }
+              { text: 'Phát biểu A', isCorrect: true },
+              { text: 'Phát biểu B', isCorrect: false },
+              { text: 'Phát biểu C', isCorrect: true },
+              { text: 'Phát biểu D', isCorrect: false }
             ]);
             return `
               <div>
@@ -9841,16 +9854,17 @@ render_ai_geometry(dom) {
                 return `
                   <div style="margin-bottom:10pt; page-break-inside:avoid;">
                     <div style="font-weight:bold; text-align:justify;">
-                      Câu ${qIndex}: <span style="font-weight:normal;">${q.questionText || q.title || ''}</span>
+                      Câu ${qIndex}: <span style="font-weight:normal;">${this.cleanQuestionText(q.questionText || q.title || '')}</span>
                     </div>
                     ${q.imageUrl ? `<div style="text-align:center; margin:5pt 0;"><img src="${q.imageUrl}" style="max-height:160px; max-width:80%;" /></div>` : ''}
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4pt 12pt; margin-top:4pt; padding-left:10pt;">
                       ${opts.map((opt, oIdx) => {
                         const label = String.fromCharCode(65 + oIdx);
+                        const cleanOpt = this.cleanChoiceText(opt);
                         const optImg = (q.optionImages && q.optionImages[oIdx]) ? q.optionImages[oIdx] : '';
                         return `
                           <div>
-                            <strong>${label}.</strong> ${opt}
+                            <strong>${label}.</strong> ${cleanOpt}
                             ${optImg ? `<div><img src="${optImg}" style="max-height:100px; margin-top:2pt;" /></div>` : ''}
                           </div>
                         `;
@@ -9869,21 +9883,21 @@ render_ai_geometry(dom) {
                 PHẦN II. Câu trắc nghiệm Đúng / Sai (${qĐúngSai.length} câu)
               </div>
               <div style="font-style:italic; font-size:11pt; margin-bottom:8pt;">
-                Thí sinh trả lời từ câu ${currentQNum} đến câu ${currentQNum + qĐúngSai.length - 1}. Trong mỗi ý a), b), c), d) ở mỗi câu, thí sinh chọn Đúng hoặc Sai.
+                Thí sinh trả lời từ câu ${currentQNum} đến câu ${currentQNum + qĐúngSai.length - 1}. Trong mỗi ý A), B), C), D) ở mỗi câu, thí sinh chọn Đúng hoặc Sai.
               </div>
 
               ${qĐúngSai.map(q => {
                 const qIndex = currentQNum++;
                 const items = q.items || (q.options ? q.options.map((opt, oIdx) => ({ text: opt, isCorrect: true })) : [
-                  { text: 'Phát biểu a', isCorrect: true },
-                  { text: 'Phát biểu b', isCorrect: false },
-                  { text: 'Phát biểu c', isCorrect: true },
-                  { text: 'Phát biểu d', isCorrect: false }
+                  { text: 'Phát biểu A', isCorrect: true },
+                  { text: 'Phát biểu B', isCorrect: false },
+                  { text: 'Phát biểu C', isCorrect: true },
+                  { text: 'Phát biểu D', isCorrect: false }
                 ]);
                 return `
                   <div style="margin-bottom:10pt; page-break-inside:avoid;">
                     <div style="font-weight:bold; text-align:justify; margin-bottom:4pt;">
-                      Câu ${qIndex}: <span style="font-weight:normal;">${q.questionText || q.title || ''}</span>
+                      Câu ${qIndex}: <span style="font-weight:normal;">${this.cleanQuestionText(q.questionText || q.title || '')}</span>
                     </div>
                     ${q.imageUrl ? `<div style="text-align:center; margin:5pt 0;"><img src="${q.imageUrl}" style="max-height:160px; max-width:80%;" /></div>` : ''}
                     <table style="width:100%; border-collapse:collapse; margin-top:4pt; font-size:12pt;">
@@ -9897,12 +9911,13 @@ render_ai_geometry(dom) {
                       </thead>
                       <tbody>
                         ${items.map((it, itIdx) => {
-                          const label = String.fromCharCode(97 + itIdx);
-                          const itText = typeof it === 'string' ? it : (it.text || `Ý ${label}`);
+                          const label = String.fromCharCode(65 + itIdx);
+                          const rawText = typeof it === 'string' ? it : (it.text || `Ý ${label}`);
+                          const cleanText = this.cleanChoiceText(rawText);
                           return `
                             <tr>
                               <td style="border:1pt solid #000; padding:4pt; text-align:center; font-weight:bold;">${label})</td>
-                              <td style="border:1pt solid #000; padding:4pt;">${itText}</td>
+                              <td style="border:1pt solid #000; padding:4pt;">${cleanText}</td>
                               <td style="border:1pt solid #000; padding:4pt; text-align:center;"></td>
                               <td style="border:1pt solid #000; padding:4pt; text-align:center;"></td>
                             </tr>
@@ -9931,7 +9946,7 @@ render_ai_geometry(dom) {
                 return `
                   <div style="margin-bottom:10pt; page-break-inside:avoid; display:flex; justify-content:space-between; align-items:flex-start; gap:10pt;">
                     <div style="flex:1;">
-                      <strong>Câu ${qIndex}:</strong> ${q.questionText || q.title || ''}
+                      <strong>Câu ${qIndex}:</strong> ${this.cleanQuestionText(q.questionText || q.title || '')}
                       ${q.imageUrl ? `<div><img src="${q.imageUrl}" style="max-height:140px; margin-top:3pt;" /></div>` : ''}
                     </div>
                     <div style="width:130pt; border:1pt solid #000; padding:4pt 6pt; text-align:left; min-height:22pt; font-size:11pt;">
@@ -9955,7 +9970,7 @@ render_ai_geometry(dom) {
                 return `
                   <div style="margin-bottom:12pt; page-break-inside:avoid;">
                     <div style="font-weight:bold; text-align:justify; margin-bottom:6pt;">
-                      Câu ${qIndex} (${q.score || 2.0} điểm): <span style="font-weight:normal;">${q.questionText || q.title || ''}</span>
+                      Câu ${qIndex} (${q.score || 2.0} điểm): <span style="font-weight:normal;">${this.cleanQuestionText(q.questionText || q.title || '')}</span>
                     </div>
                     ${q.imageUrl ? `<div style="text-align:center; margin:5pt 0;"><img src="${q.imageUrl}" style="max-height:160px; max-width:80%;" /></div>` : ''}
                     <div style="margin-top:6pt; font-style:italic; font-size:10.5pt; color:#444;">Bài làm:</div>
@@ -10024,10 +10039,10 @@ render_ai_geometry(dom) {
                 <thead>
                   <tr style="background:#f8fafc;">
                     <th style="border:1pt solid #000; padding:4pt; width:60pt; text-align:center;">Câu</th>
-                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý a)</th>
-                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý b)</th>
-                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý c)</th>
-                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý d)</th>
+                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý A)</th>
+                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý B)</th>
+                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý C)</th>
+                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý D)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -10327,11 +10342,13 @@ render_ai_geometry(dom) {
           answersHtml = `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-top:0.6rem;">
               ${opts.map((opt, oIdx) => {
+                const label = String.fromCharCode(65 + oIdx);
+                const cleanOpt = this.cleanChoiceText(opt);
                 const optImg = (q.optionImages && q.optionImages[oIdx]) ? q.optionImages[oIdx] : '';
                 return `
                 <div style="padding:0.45rem 0.75rem; border-radius:8px; background:${oIdx===correctIdx?'#dcfce7':'#f8fafc'}; border:1.5px solid ${oIdx===correctIdx?'#86efac':'#e2e8f0'}; color:${oIdx===correctIdx?'#166534':'#334155'}; font-weight:${oIdx===correctIdx?'600':'400'}; font-size:0.85rem;">
                   <div style="display:flex; align-items:center; justify-content:space-between;">
-                    <span><strong>${String.fromCharCode(65+oIdx)}.</strong> ${opt}</span>
+                    <span><strong>${label}.</strong> ${cleanOpt}</span>
                     ${oIdx===correctIdx ? '<span style="font-size:0.75rem; background:#166534; color:#fff; font-weight:700; padding:0.15rem 0.45rem; border-radius:6px;">✅ (Đáp án đúng)</span>' : ''}
                   </div>
                   ${optImg ? `
@@ -10344,20 +10361,21 @@ render_ai_geometry(dom) {
           `;
         } else if (qType === 'dung_sai') {
           const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
-            { text: 'Phát biểu a', isCorrect: true },
-            { text: 'Phát biểu b', isCorrect: false },
-            { text: 'Phát biểu c', isCorrect: true },
-            { text: 'Phát biểu d', isCorrect: false }
+            { text: 'Phát biểu A', isCorrect: true },
+            { text: 'Phát biểu B', isCorrect: false },
+            { text: 'Phát biểu C', isCorrect: true },
+            { text: 'Phát biểu D', isCorrect: false }
           ]);
           answersHtml = `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem; margin-top:0.45rem;">
               ${rawItems.map((it, iIdx) => {
-                const label = String.fromCharCode(97 + iIdx);
+                const label = String.fromCharCode(65 + iIdx);
                 const txt = typeof it === 'string' ? it : (it.text || `Ý ${label}`);
+                const cleanText = this.cleanChoiceText(txt);
                 const isTrue = it.isCorrect === true;
                 return `
                   <div style="padding:0.4rem 0.65rem; border-radius:6px; background:#f8fafc; border:1px solid #e2e8f0; font-size:0.82rem; display:flex; justify-content:space-between; align-items:center;">
-                    <span><strong style="color:#0284c7;">${label})</strong> ${txt}</span>
+                    <span><strong style="color:#0284c7;">${label})</strong> ${cleanText}</span>
                     <span style="font-weight:700; background:${isTrue ? '#dcfce7' : '#fee2e2'}; color:${isTrue ? '#15803d' : '#b91c1c'}; padding:0.1rem 0.45rem; border-radius:4px; font-size:0.75rem;">
                       ${isTrue ? '✅ ĐÚNG' : '❌ SAI'}
                     </span>
@@ -10860,10 +10878,10 @@ render_ai_geometry(dom) {
           </div>
           <div style="display:flex; flex-direction:column; gap:0.6rem;">
             ${variant.questions.map((q, qIdx) => {
-              const optsStr = q.options ? q.options.map((o, oi) => `${String.fromCharCode(65+oi)}. ${o}${oi===q.correctAnswer?' (✅ ĐÚNG)':''}`).join(' | ') : '';
+              const optsStr = q.options ? q.options.map((o, oi) => `${String.fromCharCode(65+oi)}. ${this.cleanChoiceText(o)}${oi===q.correctAnswer?' (✅ ĐÚNG)':''}`).join(' | ') : '';
               return `
                 <div style="font-size:0.82rem; border-bottom:1px solid #f3e8ff; padding-bottom:0.4rem;">
-                  <strong>Câu ${qIdx+1}:</strong> ${q.questionText || q.title || ''}
+                  <strong>Câu ${qIdx+1}:</strong> ${this.cleanQuestionText(q.questionText || q.title || '')}
                   ${optsStr ? `<div style="color:#6b21a8; font-weight:500; margin-top:0.2rem; font-size:0.78rem;">${optsStr}</div>` : ''}
                 </div>
               `;
@@ -11357,28 +11375,33 @@ render_ai_geometry(dom) {
           const correctIdx = q.correctAnswer !== undefined ? parseInt(q.correctAnswer) : 0;
           bodyHtml = `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-top:0.4rem; font-size:0.8rem;">
-              ${opts.map((opt, oIdx) => `
+              ${opts.map((opt, oIdx) => {
+                const label = String.fromCharCode(65 + oIdx);
+                const cleanOpt = this.cleanChoiceText(opt);
+                return `
                 <div style="padding:0.3rem 0.5rem; border-radius:6px; background:${oIdx===correctIdx?'#dcfce7':'#f8fafc'}; border:1px solid ${oIdx===correctIdx?'#86efac':'#e2e8f0'}; color:${oIdx===correctIdx?'#166534':'#334155'}; font-weight:${oIdx===correctIdx?'700':'400'}; display:flex; align-items:center; gap:0.3rem;">
-                  <span>${String.fromCharCode(65+oIdx)}. ${opt}</span>
+                  <span><strong>${label}.</strong> ${cleanOpt}</span>
                   ${oIdx===correctIdx?'<span style="margin-left:auto;">✅ (Đáp án đúng)</span>':''}
                 </div>
-              `).join('')}
+              `;}).join('')}
             </div>
           `;
         } else if (qType === 'dung_sai') {
           const items = q.items || [
-            { text: 'Ý a', isCorrect: true },
-            { text: 'Ý b', isCorrect: false },
-            { text: 'Ý c', isCorrect: true },
-            { text: 'Ý d', isCorrect: false }
+            { text: 'Phát biểu A', isCorrect: true },
+            { text: 'Phát biểu B', isCorrect: false },
+            { text: 'Phát biểu C', isCorrect: true },
+            { text: 'Phát biểu D', isCorrect: false }
           ];
           bodyHtml = `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.45rem; margin-top:0.45rem; font-size:0.82rem;">
               ${items.map((it, iIdx) => {
+                const label = String.fromCharCode(65 + iIdx);
+                const cleanText = this.cleanChoiceText(it.text);
                 const isTrue = it.isCorrect === true;
                 return `
                   <div style="padding:0.35rem 0.6rem; border-radius:6px; background:#f8fafc; border:1px solid #e2e8f0; font-size:0.8rem; display:flex; justify-content:space-between; align-items:center;">
-                    <span><strong style="color:#0284c7;">${String.fromCharCode(97+iIdx)})</strong> ${it.text}</span>
+                    <span><strong style="color:#0284c7;">${label})</strong> ${cleanText}</span>
                     <span style="font-weight:700; background:${isTrue ? '#dcfce7' : '#fee2e2'}; color:${isTrue ? '#15803d' : '#b91c1c'}; padding:0.1rem 0.4rem; border-radius:4px; font-size:0.75rem;">
                       ${isTrue ? '✅ ĐÚNG' : '❌ SAI'}
                     </span>
@@ -11422,7 +11445,7 @@ render_ai_geometry(dom) {
               </div>
             </div>
             <div style="font-weight:600; font-size:0.88rem; color:#1e293b; margin-top:0.45rem;">
-              ${q.questionText || q.title || 'Câu hỏi biên soạn'}
+              ${this.cleanQuestionText(q.questionText || q.title || 'Câu hỏi biên soạn')}
             </div>
             ${bodyHtml}
           </div>
@@ -12819,7 +12842,7 @@ render_ai_geometry(dom) {
         const globalIdx = examQs.indexOf(q);
         const qNum = globalIdx + 1;
         const studentAns = answers[globalIdx] !== undefined ? answers[globalIdx] : answers[String(globalIdx)];
-        const qText = q.questionText || q.question || `Câu ${qNum}`;
+        const qText = this.cleanQuestionText(q.questionText || q.question || `Câu ${qNum}`);
         const opts = q.options || [];
         totalQ++;
         if (key === 'trac_nghiem') {
@@ -12838,21 +12861,22 @@ render_ai_geometry(dom) {
           </tr>`;
         } else if (key === 'dung_sai') {
           const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
-            { text: 'Phát biểu a', isCorrect: true },
-            { text: 'Phát biểu b', isCorrect: false },
-            { text: 'Phát biểu c', isCorrect: true },
-            { text: 'Phát biểu d', isCorrect: false }
+            { text: 'Phát biểu A', isCorrect: true },
+            { text: 'Phát biểu B', isCorrect: false },
+            { text: 'Phát biểu C', isCorrect: true },
+            { text: 'Phát biểu D', isCorrect: false }
           ]);
           let allRight = true;
           let subRows = rawItems.map((it, si_i) => {
-            const label = String.fromCharCode(97 + si_i);
+            const label = String.fromCharCode(65 + si_i);
             const stuVal = (typeof studentAns === 'object' && studentAns !== null) ? studentAns[si_i] : undefined;
             const correctVal = (it.isCorrect !== undefined) ? it.isCorrect : (it.correct !== undefined ? it.correct : true);
             const ok = (stuVal === correctVal);
             if (!ok) allRight = false;
+            const cleanText = this.cleanChoiceText(it.text || `Ý ${label}`);
             return `
               <div style="display:flex; justify-content:space-between; align-items:center; padding:0.3rem 0.6rem; margin-top:0.25rem; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0; font-size:0.8rem;">
-                <span><strong>${label})</strong> ${it.text||`Ý ${label}`}</span>
+                <span><strong style="color:#0284c7;">${label})</strong> ${cleanText}</span>
                 <span>
                   HS: <strong style="color:${stuVal===true?'#15803d':stuVal===false?'#b91c1c':'#64748b'};">${stuVal===true?'Đúng':stuVal===false?'Sai':'Chưa chọn'}</strong> | 
                   ĐA: <strong style="color:${correctVal===true?'#15803d':'#b91c1c'};">${correctVal===true?'Đúng':'Sai'}</strong> 
@@ -12986,7 +13010,7 @@ render_ai_geometry(dom) {
 </html>`;
 
     const win = window.open('', '_blank', 'width=900,height=750,scrollbars=yes');
-    if (!win) { alert('Trình duyệt đã chặn cửa sổ in. Vui lòng cho phép popup!'); return; }
+    if (!win) { alert('Trình duyệt đã chặn cửa sổ in. V vui lòng cho phép popup!'); return; }
     win.document.write(html);
     win.document.close();
   }
@@ -13284,7 +13308,7 @@ render_ai_geometry(dom) {
              const seenTypes = new Set();
              return examQs.map((q, qIdx) => {
              const opts = q.options || [];
-             const qText = q.questionText || q.question || `Câu hỏi ${qIdx+1}`;
+             const qText = this.cleanQuestionText(q.questionText || q.question || `Câu hỏi ${qIdx+1}`);
              const qType = getType(q);
              const meta = SECT_META[qType] || SECT_META.trac_nghiem;
              let sectionHeader = '';
@@ -13303,20 +13327,21 @@ render_ai_geometry(dom) {
                 ` : ''}
                  ${(qType === 'dung_sai') ? (() => {
                    const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
-                     { text: 'Phát biểu a', isCorrect: true },
-                     { text: 'Phát biểu b', isCorrect: false },
-                     { text: 'Phát biểu c', isCorrect: true },
-                     { text: 'Phát biểu d', isCorrect: false }
+                     { text: 'Phát biểu A', isCorrect: true },
+                     { text: 'Phát biểu B', isCorrect: false },
+                     { text: 'Phát biểu C', isCorrect: true },
+                     { text: 'Phát biểu D', isCorrect: false }
                    ]);
                    return `
                      <div style="display:flex; flex-direction:column; gap:0.65rem; margin-top:0.4rem;">
                        ${rawItems.map((it, itIdx) => {
-                         const label = String.fromCharCode(97 + itIdx);
-                         const itemText = typeof it === 'string' ? it : (it.text || it.title || `Ý ${label}`);
+                         const label = String.fromCharCode(65 + itIdx);
+                         const rawText = typeof it === 'string' ? it : (it.text || it.title || `Ý ${label}`);
+                         const cleanText = this.cleanChoiceText(rawText);
                          return `
                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:0.75rem 1rem; transition:all 0.15s;" onmouseenter="this.style.background='#eff6ff'; this.style.borderColor='#93c5fd'" onmouseleave="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'">
                              <div style="flex:1; min-width:200px; font-size:0.92rem; color:#1e293b; line-height:1.45;">
-                               <strong style="color:#0284c7; font-size:0.95rem;">${label})</strong> ${itemText}
+                               <strong style="color:#0284c7; font-size:0.95rem;">${label})</strong> ${cleanText}
                              </div>
                              <div style="display:flex; gap:0.75rem; align-items:center;">
                                <label style="display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer; font-size:0.88rem; font-weight:700; color:#15803d; background:#f0fdf4; border:1.5px solid #bbf7d0; padding:0.35rem 0.85rem; border-radius:8px; user-select:none; transition:all 0.15s;" onmouseenter="this.style.background='#dcfce7'" onmouseleave="this.style.background='#f0fdf4'">
@@ -13335,7 +13360,7 @@ render_ai_geometry(dom) {
                    `;
                  })() : (qType === 'tra_loi_ngan' || qType === 'tu_luan') ? `
                    <div class="exam-essay-wrapper" data-q-idx="${qIdx}" style="display:flex;flex-direction:column;gap:0.6rem;">
-                      <textarea class="exam-essay-input" data-q-idx="${qIdx}" placeholder="${qType === 'tra_loi_ngan' ? 'Nhập câu trả lời ngắn (hoặc đính kèm tệp bài làm bên dưới)...' : 'Nhập câu trả lời của bạn (hoặc đính kèm tệp bài làm bên dưới)...'}" style="width:100%;min-height:${qType === 'tra_loi_ngan' ? '60px' : '100px'};background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:0.75rem;color:#0f172a;font-size:0.9rem;resize:vertical;box-sizing:border-box;"></textarea>
+                      <textarea class="exam-essay-input" data-q-idx="${qIdx}" placeholder="${qType === 'tra_loi_ngan' ? 'Nhập câu trả lời ngắn (hoặc đính kèm tệp bài làm bên dưới)...' : 'Nhập câu trả lời của bạn (hoặc đính kèm tệp bài làm bên dưới)...'}" style="width:100%;min-height:${qType === 'tra_loi_ngan' ? '65px' : '110px'};background:#ffffff;border:1.5px solid #cbd5e1;border-radius:10px;padding:0.75rem;color:#0f172a;font-size:0.9rem;resize:vertical;box-sizing:border-box;"></textarea>
                       <div style="border-top:1px dashed #cbd5e1;padding-top:0.45rem;">
                         <div style="font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:0.35rem;">── Đính kèm tệp bài làm (ảnh / .docx / .xlsx / .pptx / .pdf) ──</div>
                         <label class="exam-essay-file-label" data-q-idx="${qIdx}" style="display:inline-flex;align-items:center;gap:0.45rem;background:#f0f9ff;border:1.5px dashed #93c5fd;border-radius:10px;padding:0.45rem 0.9rem;cursor:pointer;font-size:0.82rem;color:#0369a1;font-weight:600;" onmouseenter="this.style.background='#dbeafe'" onmouseleave="this.style.background='#f0f9ff'">
@@ -13348,12 +13373,14 @@ render_ai_geometry(dom) {
                  ` : opts.length > 0 ? `
                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0.55rem;">
                      ${opts.map((opt, oIdx) => {
+                       const label = String.fromCharCode(65 + oIdx);
+                       const cleanOpt = this.cleanChoiceText(opt);
                        const optImg = (q.optionImages && q.optionImages[oIdx]) ? q.optionImages[oIdx] : '';
                        return `
                        <label style="display:flex;flex-direction:column;gap:0.35rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;cursor:pointer;transition:all 0.15s;" onmouseenter="this.style.background='#eff6ff';this.style.borderColor='#93c5fd'" onmouseleave="this.style.background='#f8fafc';this.style.borderColor='#e2e8f0'">
                          <div style="display:flex;align-items:center;gap:0.6rem;">
-                           <input type="radio" name="exam-q-${qIdx}" value="${oIdx}" class="exam-ans-radio" data-q-idx="${qIdx}" style="width:17px;height:17px;accent-color:#6366f1;">
-                           <span style="color:#1e293b;font-weight:400;font-size:0.9rem;">${String.fromCharCode(65+oIdx)}. ${opt}</span>
+                           <input type="radio" name="exam-q-${qIdx}" value="${oIdx}" class="exam-ans-radio" data-q-idx="${qIdx}" style="width:17px;height:17px;accent-color:#2563eb;">
+                           <span style="color:#1e293b;font-weight:500;font-size:0.9rem;"><strong>${label}.</strong> ${cleanOpt}</span>
                          </div>
                          ${optImg ? `
                            <div style="margin-top:0.2rem;margin-left:1.65rem;">
@@ -13364,7 +13391,7 @@ render_ai_geometry(dom) {
                    </div>
                  ` : `
                    <div class="exam-essay-wrapper" data-q-idx="${qIdx}" style="display:flex;flex-direction:column;gap:0.6rem;">
-                      <textarea class="exam-essay-input" data-q-idx="${qIdx}" placeholder="Nhập câu trả lời của bạn..." style="width:100%;min-height:100px;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:0.75rem;color:#0f172a;font-size:0.9rem;resize:vertical;box-sizing:border-box;"></textarea>
+                      <textarea class="exam-essay-input" data-q-idx="${qIdx}" placeholder="Nhập câu trả lời của bạn..." style="width:100%;min-height:110px;background:#ffffff;border:1.5px solid #cbd5e1;border-radius:10px;padding:0.75rem;color:#0f172a;font-size:0.9rem;resize:vertical;box-sizing:border-box;"></textarea>
                     </div>`}
               </div>
             `;
@@ -13974,7 +14001,20 @@ render_ai_geometry(dom) {
     const kbHandler = (e) => {
       if (!this.isProctoringActive) return;
       const keyLow = (e.key || '').toLowerCase();
+      const isInsideInput = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable);
       let violationReason = null;
+
+      // Nếu đang trong ô nhập liệu bài làm (tự luận / trả lời ngắn):
+      if (isInsideInput) {
+        // Cho phép các phím thao tác văn bản thông thường: Ctrl+A (chọn tất cả), Ctrl+Z (hoàn tác), Ctrl+Y (làm lại), Ctrl+C/V/X nội bộ, mũi tên, v.v.
+        if (e.ctrlKey && ['a','z','y','c','v','x'].includes(keyLow)) {
+          return;
+        }
+        if (e.key === 'Escape') {
+          // Nhấn ESC khi đang gõ: chỉ đóng bàn phím / hủy focus, không tính vi phạm gian lận
+          return;
+        }
+      }
 
       if (e.key === 'Escape') {
         violationReason = '⌨️ Cố tình bấm phím ESC để thoát toàn màn hình!';
@@ -13988,13 +14028,13 @@ render_ai_geometry(dom) {
         violationReason = '⌨️ Cố tình bấm phím tắt Alt + Tab chuyển ứng dụng!';
       } else if (e.altKey) {
         violationReason = '⌨️ Cố tình bấm phím Alt gian lận!';
-      } else if (e.ctrlKey && keyLow === 'c') {
+      } else if (e.ctrlKey && keyLow === 'c' && !isInsideInput) {
         violationReason = '📋 Cố tình bấm phím tắt Sao chép câu hỏi (Ctrl + C)!';
-      } else if (e.ctrlKey && keyLow === 'v') {
+      } else if (e.ctrlKey && keyLow === 'v' && !isInsideInput) {
         violationReason = '📋 Cố tình bấm phím tắt Dán nội dung (Ctrl + V)!';
-      } else if (e.ctrlKey && keyLow === 'x') {
+      } else if (e.ctrlKey && keyLow === 'x' && !isInsideInput) {
         violationReason = '📋 Cố tình bấm phím tắt Cắt nội dung (Ctrl + X)!';
-      } else if (e.ctrlKey && ['a','u','p','s','r','l','i','j','k'].includes(keyLow)) {
+      } else if (e.ctrlKey && ['u','p','s','r','l','i','j','k'].includes(keyLow)) {
         violationReason = `⌨️ Cố tình bấm phím tắt Ctrl + ${keyLow.toUpperCase()}!`;
       } else if (e.key === 'PrintScreen') {
         violationReason = '📸 Cố tình bấm phím chụp màn hình (PrintScreen)!';
@@ -14009,9 +14049,13 @@ render_ai_geometry(dom) {
     };
     document.addEventListener('keydown', kbHandler, true);
 
-    // Điểm 2: Chặn chuột phải & CẢNH BÁO VI PHẠM NGAY LẬP TỨC
+    // Điểm 2: Chặn chuột phải trên đề thi (nhưng cho phép menu chỉnh sửa văn bản trong ô nhập tự luận)
     const ctxHandler = (e) => {
       if (this.isProctoringActive) {
+        const t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable || (t.closest && t.closest('.exam-essay-wrapper')))) {
+          return; // Cho phép menu ngữ cảnh để sửa chữ / dán bài tự luận trên iPad, máy tính
+        }
         e.preventDefault();
         e.stopPropagation();
         handleViolation('🖱️ Cố tình nhấp chuột phải (Menu ngữ cảnh) trong phòng thi!');
@@ -14021,14 +14065,18 @@ render_ai_geometry(dom) {
     document.addEventListener('contextmenu', ctxHandler, true);
     overlay.addEventListener('contextmenu', ctxHandler, true);
 
-    // Điểm 3: Bắt sự kiện Copy / Paste / Cut trực tiếp
+    // Điểm 3: Bắt sự kiện Copy / Paste / Cut trực tiếp ngoài ô nhập liệu
     const copyHandler = (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
       if (this.isProctoringActive) {
         e.preventDefault();
         handleViolation('📋 Cố tình sao chép nội dung bài thi!');
       }
     };
     const pasteHandler = (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
       if (this.isProctoringActive) {
         e.preventDefault();
         handleViolation('📋 Cố tình dán nội dung từ bên ngoài vào bài thi!');
@@ -14037,59 +14085,124 @@ render_ai_geometry(dom) {
     document.addEventListener('copy', copyHandler, true);
     document.addEventListener('paste', pasteHandler, true);
 
-    // ─── FILE-PICKER & VIRTUAL KEYBOARD GUARD (Bảo vệ di động chống bắt sai vi phạm) ──────────
+    // ─── FILE-PICKER & VIRTUAL KEYBOARD GUARD (Bảo vệ đa nền tảng: iPad, Mobile, Laptop, Desktop) ───
+    window._isExamFilePickerActive = false;
+    window._lastFilePickerOpenTs = 0;
+    window._lastFilePickerCloseTs = 0;
+    window._isExamInputActive = false;
+    window._lastInputActiveTs = 0;
     let lastBlurTime = 0;
-    let _filePickerTs = 0; // timestamp lần cuối click vào file label/input
-    let _lastInputInteractionTs = 0; // timestamp tương tác ô nhập liệu / bàn phím ảo
-    let _isInputFocused = false;
 
+    // Helper: Kiểm tra đang mở hộp thoại chọn tệp/chụp ảnh hoặc đang trong thời gian an toàn (grace period 8s)
+    const isFilePickerActiveOrGrace = () => {
+      if (window._isExamFilePickerActive) return true;
+      if (Date.now() - window._lastFilePickerCloseTs < 8000) return true;
+      if (window._lastFilePickerOpenTs > 0 && (Date.now() - window._lastFilePickerOpenTs < 180000) && window._isExamFilePickerActive) return true;
+      return false;
+    };
+
+    // Helper: Bắt đầu trạng thái mở File Picker
+    const markFilePickerOpening = () => {
+      window._isExamFilePickerActive = true;
+      window._lastFilePickerOpenTs = Date.now();
+      if (this._currentProctorAI) {
+        try {
+          this._currentProctorAI.absentStartTime = null;
+          this._currentProctorAI.absentCount = 0;
+          this._currentProctorAI._removeCountdownOverlay();
+          this._currentProctorAI._unblurExamContent();
+        } catch(e) {}
+      }
+    };
+
+    // Helper: Kết thúc trạng thái mở File Picker
+    const markFilePickerClosed = () => {
+      window._lastFilePickerCloseTs = Date.now();
+      setTimeout(() => {
+        window._isExamFilePickerActive = false;
+      }, 500);
+      // Sau khi đóng file dialog, nhẹ nhàng khôi phục toàn màn hình sau 600ms
+      setTimeout(() => {
+        if (this.isProctoringActive && !document.fullscreenElement && !isVirtualKeyboardOrInputActive()) {
+          enterFS();
+        }
+      }, 600);
+    };
+
+    // Bắt sự kiện người dùng click vào nút chọn tệp / nhãn tệp đính kèm
     const _docFileCaptureHandler = (e) => {
       const t = e.target;
       if (t && (
         t.type === 'file' ||
+        t.classList.contains('exam-essay-file') ||
         t.classList.contains('exam-essay-file-label') ||
-        (t.closest && t.closest('.exam-essay-file-label'))
+        (t.closest && (t.closest('.exam-essay-file-label') || t.closest('.exam-essay-file')))
       )) {
-        _filePickerTs = Date.now();
+        markFilePickerOpening();
       }
     };
     document.addEventListener('mousedown',   _docFileCaptureHandler, true);
     document.addEventListener('pointerdown', _docFileCaptureHandler, true);
     document.addEventListener('touchstart',  _docFileCaptureHandler, { capture: true, passive: true });
+    document.addEventListener('click',        _docFileCaptureHandler, true);
 
-    // Cửa sổ 3 giây: nếu < 3s kể từ lần click file label → đang mở file dialog
-    const _isFilePickerJustOpened = () => (Date.now() - _filePickerTs) < 3000;
+    // Gắn sự kiện change / cancel trên tất cả input file trong phòng thi
+    overlay.querySelectorAll('input[type="file"]').forEach(inp => {
+      inp.addEventListener('change', () => { markFilePickerClosed(); });
+      inp.addEventListener('cancel', () => { markFilePickerClosed(); });
+    });
 
-    // Bắt tương tác nhập liệu (Bàn phím ảo trên điện thoại / máy tính bảng)
+    // Helper: Kiểm tra đang gõ ô trả lời hoặc bàn phím ảo đang mở / vừa đóng trong vòng 6s
+    const isVirtualKeyboardOrInputActive = () => {
+      if (window._isExamInputActive) return true;
+      const activeEl = document.activeElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) return true;
+      if (Date.now() - window._lastInputActiveTs < 6000) return true;
+      return false;
+    };
+
+    // Bắt tương tác nhập liệu (Bàn phím ảo trên iPad, iPhone, Android, ô Textarea máy tính)
     const _docInputFocusHandler = (e) => {
       const t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
-        _isInputFocused = true;
-        _lastInputInteractionTs = Date.now();
+        window._isExamInputActive = true;
+        window._lastInputActiveTs = Date.now();
       }
     };
     const _docInputBlurHandler = (e) => {
       const t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
-        _isInputFocused = false;
-        _lastInputInteractionTs = Date.now(); // Ghi nhận thời điểm vừa bấm Xong/Done đóng bàn phím ảo
+        window._lastInputActiveTs = Date.now();
+        setTimeout(() => {
+          const act = document.activeElement;
+          if (!act || (act.tagName !== 'INPUT' && act.tagName !== 'TEXTAREA' && !act.isContentEditable)) {
+            window._isExamInputActive = false;
+            // Khi bàn phím ảo đã đóng an toàn trên di động -> nhẹ nhàng khôi phục toàn màn hình
+            if (this.isProctoringActive && !document.fullscreenElement && !isFilePickerActiveOrGrace()) {
+              setTimeout(() => enterFS(), 400);
+            }
+          }
+        }, 500);
       }
     };
-    document.addEventListener('focusin', _docInputFocusHandler, true);
-    document.addEventListener('focusout', _docInputBlurHandler, true);
-    document.addEventListener('input', _docInputFocusHandler, true);
+    document.addEventListener('focusin',     _docInputFocusHandler, true);
+    document.addEventListener('focusout',    _docInputBlurHandler, true);
+    document.addEventListener('input',       _docInputFocusHandler, true);
+    document.addEventListener('touchstart',  (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+        window._isExamInputActive = true;
+        window._lastInputActiveTs = Date.now();
+      }
+    }, { capture: true, passive: true });
 
-    // Kiểm tra an toàn: nếu đang gõ hoặc vừa đóng bàn phím ảo trong vòng 3s → BỎ QUA VI PHẠM GIẢ
-    const _isVirtualKeyboardJustActive = () => {
-      if (_isInputFocused) return true;
-      if ((Date.now() - _lastInputInteractionTs) < 3000) return true;
-      const activeEl = document.activeElement;
-      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) return true;
-      return false;
+    // Khi cửa sổ lấy lại tiêu điểm (Focus window trở lại từ File Picker hoặc bàn phím ảo)
+    const windowFocusHandler = () => {
+      if (window._isExamFilePickerActive) {
+        markFilePickerClosed();
+      }
     };
-
-    // Khi window lấy lại focus → reset timestamp
-    window.addEventListener('focus', () => { _filePickerTs = 0; });
+    window.addEventListener('focus', windowFocusHandler);
     // ────────────────────────────────────────────────────────────────────────
 
     // Fullscreen exit detection & auto re-lock (có 4s grace period khởi động ban đầu)
@@ -14097,19 +14210,19 @@ render_ai_geometry(dom) {
     const fsHandler = () => {
       if (Date.now() - _examStartTs < 4000) return; // 4s đầu bỏ qua để trình duyệt ổn định toàn màn hình
       if (!document.fullscreenElement && this.isProctoringActive && !isSubmitting) {
-        if (_isFilePickerJustOpened()) return; // đang mở file dialog → bỏ qua
-        if (_isVirtualKeyboardJustActive()) {
-          // Bàn phím ảo co giãn khung nhìn → tự động khôi phục toàn màn hình mượt mà
-          setTimeout(() => { if (!document.fullscreenElement && this.isProctoringActive) enterFS(); }, 300);
+        if (isFilePickerActiveOrGrace()) return; // Đang chọn tệp / mở camera chụp bài -> bỏ qua 100%
+        if (isVirtualKeyboardOrInputActive()) {
+          // Bàn phím ảo trên iPad / điện thoại tự động thoát fullscreen để hiển thị -> bỏ qua 100% và không ép fullscreen ngay
           return;
         }
         handleViolation('Thoát chế độ toàn màn hình (Phím ESC / F11)');
       }
     };
     document.addEventListener('fullscreenchange', fsHandler);
+    document.addEventListener('webkitfullscreenchange', fsHandler);
     overlay.addEventListener('click', () => {
       if (this.isProctoringActive && !document.fullscreenElement) {
-        if (!_isFilePickerJustOpened() && !_isVirtualKeyboardJustActive()) enterFS();
+        if (!isFilePickerActiveOrGrace() && !isVirtualKeyboardOrInputActive()) enterFS();
       }
     });
 
@@ -14117,34 +14230,40 @@ render_ai_geometry(dom) {
     const visHandler = () => {
       if (Date.now() - _examStartTs < 4000) return;
       if (document.hidden && this.isProctoringActive && !isSubmitting) {
-        if (_isFilePickerJustOpened()) return; // đang mở file dialog → bỏ qua
+        if (isFilePickerActiveOrGrace()) return; // Đang chọn tệp / mở camera chụp bài -> bỏ qua 100%
+        if (isVirtualKeyboardOrInputActive()) return; // Chuyển đổi bàn phím ảo / gợi ý chữ -> bỏ qua
         handleViolation('Chuyển tab / Thu nhỏ trình duyệt');
       }
     };
     document.addEventListener('visibilitychange', visHandler);
 
-    // Window blur detection — delay 120ms để bắt chuẩn xác, bảo vệ bàn phím ảo 100%
+    // Window blur detection — delay 350ms để lọc sạch các sự kiện bàn phím ảo & hộp thoại hệ thống
     const blurHandler = () => {
       if (Date.now() - _examStartTs < 4000) return;
       setTimeout(() => {
-        if (_isFilePickerJustOpened()) return;
-        if (_isVirtualKeyboardJustActive()) return; // Bỏ qua 100% khi đóng bàn phím ảo trên điện thoại!
+        if (isFilePickerActiveOrGrace()) return; // Đang chọn tệp / chụp ảnh -> bỏ qua 100%
+        if (isVirtualKeyboardOrInputActive()) return; // Đang gõ bài / mở bàn phím ảo trên iPad, điện thoại -> bỏ qua 100%
         const now = Date.now();
         if (now - lastBlurTime > 1500 && this.isProctoringActive && !isSubmitting) {
           lastBlurTime = now;
           handleViolation('Mất tiêu điểm cửa sổ (Alt+Tab / Chuyển ứng dụng)');
         }
-      }, 120);
+      }, 350);
     };
     window.addEventListener('blur', blurHandler);
 
     // Matrix nav / Wire file preview for essay upload
-
     overlay.querySelectorAll('.exam-essay-file').forEach(inp => {
       inp.onchange = function() {
-        window._examFilePickerOpen = false;
+        markFilePickerClosed();
         const qI = this.getAttribute('data-q-idx');
         const preview = overlay.querySelector(`.exam-essay-file-preview[data-q-idx="${qI}"]`);
+        const matrixBtn = overlay.querySelector(`#exam-matrix-btn-${qI}`);
+        if (matrixBtn) {
+          matrixBtn.style.background = '#10b981';
+          matrixBtn.style.borderColor = '#10b981';
+          matrixBtn.style.color = '#ffffff';
+        }
         if (!preview) return;
         const file = this.files && this.files[0];
         if (!file) { preview.style.display = 'none'; return; }
@@ -14157,7 +14276,7 @@ render_ai_geometry(dom) {
             <div style="font-size:0.72rem;color:#94a3b8;">${(file.size/1024).toFixed(1)} KB</div></div>
             <button onclick="this.closest('.exam-essay-file-preview').style.display='none';" style="margin-left:auto;background:none;border:none;color:#f87171;font-size:1rem;cursor:pointer;">✕</button>`;
         } else {
-          const icons = {docx:'📄',xlsx:'📊',pptx:'📊'};
+          const icons = {docx:'📄',xlsx:'📊',pptx:'📊',pdf:'📕'};
           const ext = file.name.split('.').pop().toLowerCase();
           preview.innerHTML = `<span style="font-size:1.6rem;">${icons[ext]||'📎'}</span>
             <div><div style="font-size:0.8rem;font-weight:700;color:#e2e8f0;">${file.name}</div>
@@ -14166,6 +14285,35 @@ render_ai_geometry(dom) {
         }
       };
     });
+
+    // Update matrix on typing essay
+    overlay.querySelectorAll('.exam-essay-input').forEach(ta => {
+      ta.oninput = () => {
+        const qI = ta.getAttribute('data-q-idx');
+        const matrixBtn = overlay.querySelector(`#exam-matrix-btn-${qI}`);
+        if (matrixBtn) {
+          if (ta.value.trim().length > 0) {
+            matrixBtn.style.background = '#10b981';
+            matrixBtn.style.borderColor = '#10b981';
+            matrixBtn.style.color = '#ffffff';
+          }
+        }
+      };
+    });
+
+    // Update matrix on True/False
+    overlay.querySelectorAll('.exam-tf-radio, .exam-tf-single-radio').forEach(r => {
+      r.onchange = () => {
+        const qI = r.getAttribute('data-q-idx');
+        const matrixBtn = overlay.querySelector(`#exam-matrix-btn-${qI}`);
+        if (matrixBtn) {
+          matrixBtn.style.background = '#10b981';
+          matrixBtn.style.borderColor = '#10b981';
+          matrixBtn.style.color = '#ffffff';
+        }
+      };
+    });
+
     overlay.querySelectorAll('.exam-matrix-btn').forEach(btn => {
       btn.onclick = () => {
         const idx = parseInt(btn.getAttribute('data-q'));
@@ -14182,6 +14330,7 @@ render_ai_geometry(dom) {
         if (matrixBtn) {
           matrixBtn.style.background = '#10b981';
           matrixBtn.style.borderColor = '#10b981';
+          matrixBtn.style.color = '#ffffff';
         }
       };
     });
@@ -14312,6 +14461,8 @@ render_ai_geometry(dom) {
     const cleanupObserver = new MutationObserver(() => {
       if (!document.body.contains(overlay)) {
         this.isProctoringActive = false;
+        window._isExamFilePickerActive = false;
+        window._isExamInputActive = false;
         if (this._currentProctorAI) {
           this._currentProctorAI.stop();
           this._currentProctorAI = null;
@@ -14320,14 +14471,22 @@ render_ai_geometry(dom) {
         if (micInterval)     clearInterval(micInterval);
         document.removeEventListener('keydown', kbHandler, true);
         document.removeEventListener('fullscreenchange', fsHandler);
+        document.removeEventListener('webkitfullscreenchange', fsHandler);
         document.removeEventListener('visibilitychange', visHandler);
         document.removeEventListener('focusin', _docInputFocusHandler, true);
         document.removeEventListener('focusout', _docInputBlurHandler, true);
         document.removeEventListener('input', _docInputFocusHandler, true);
+        document.removeEventListener('mousedown', _docFileCaptureHandler, true);
+        document.removeEventListener('pointerdown', _docFileCaptureHandler, true);
+        document.removeEventListener('touchstart', _docFileCaptureHandler, { capture: true });
+        document.removeEventListener('click', _docFileCaptureHandler, true);
+        window.removeEventListener('focus', windowFocusHandler);
         window.removeEventListener('blur', blurHandler);
-        // Điểm 6: Cleanup ctxHandler khi overlay bị xóa khỏi DOM
+        // Điểm 6: Cleanup ctxHandler & copy/paste khi overlay bị xóa khỏi DOM
         document.removeEventListener('contextmenu', ctxHandler, true);
         overlay.removeEventListener('contextmenu', ctxHandler, true);
+        document.removeEventListener('copy', copyHandler, true);
+        document.removeEventListener('paste', pasteHandler, true);
         if (stream) stream.getTracks().forEach(t => t.stop());
         cleanupObserver.disconnect();
       }
@@ -17688,10 +17847,10 @@ render_ai_geometry(dom) {
             <!-- Edit Options and Correct Answer -->
             ${(q.type === 'dung_sai') ? (() => {
               const rawItems = q.items || q.subItems || (q.subQuestions ? q.subQuestions.map((sq, sidx) => ({ text: sq, isCorrect: Array.isArray(q.correctAnswers) ? q.correctAnswers[sidx] : true })) : [
-                { text: 'Phát biểu a', isCorrect: true },
-                { text: 'Phát biểu b', isCorrect: false },
-                { text: 'Phát biểu c', isCorrect: true },
-                { text: 'Phát biểu d', isCorrect: false }
+                { text: 'Phát biểu A', isCorrect: true },
+                { text: 'Phát biểu B', isCorrect: false },
+                { text: 'Phát biểu C', isCorrect: true },
+                { text: 'Phát biểu D', isCorrect: false }
               ]);
               return `
                 <div style="background:#f8fafc; padding:0.75rem; border-radius:10px; border:1.5px solid #e2e8f0;">

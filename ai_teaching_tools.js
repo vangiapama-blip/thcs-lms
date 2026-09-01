@@ -9758,9 +9758,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
                 generated.push({
                   id: 'ai_doc_' + Date.now() + '_' + (i+1),
                   type: 'multiple_choice',
-                  questionText: `[Trích tài liệu giáo án] Câu ${i+1}: Dựa vào tài liệu bài "${lessonName}", khẳng định nào sau đây là ĐÚNG?`,
-                  q: `[Trích tài liệu giáo án] Câu ${i+1}: Dựa vào tài liệu bài "${lessonName}", khẳng định nào sau đây là ĐÚNG?`,
-                  stmt: `[Trích tài liệu giáo án] Câu ${i+1}: Dựa vào tài liệu bài "${lessonName}", khẳng định nào sau đây là ĐÚNG?`,
+                  questionText: `Dựa vào tài liệu bài "${lessonName}", khẳng định nào sau đây là ĐÚNG?`,
+                  q: `Dựa vào tài liệu bài "${lessonName}", khẳng định nào sau đây là ĐÚNG?`,
+                  stmt: `Dựa vào tài liệu bài "${lessonName}", khẳng định nào sau đây là ĐÚNG?`,
                   options: [
                     `Nội dung tài liệu: "${mainFact}..."`,
                     `Khẳng định trái ngược với nội dung tài liệu`,
@@ -9795,9 +9795,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
                 generated.push({
                   id: 'ai_sym_' + Date.now() + '_' + (i+1),
                   type: 'multiple_choice',
-                  questionText: `[Toán 6 - ${lessonName}] Câu ${i+1}: ${item.q}`,
-                  q: `[Toán 6 - ${lessonName}] Câu ${i+1}: ${item.q}`,
-                  stmt: `[Toán 6 - ${lessonName}] Câu ${i+1}: ${item.q}`,
+                  questionText: `${item.q}`,
+                  q: `${item.q}`,
+                  stmt: `${item.q}`,
                   options: item.opts,
                   correctAnswer: item.a,
                   left: item.opts[0],
@@ -9842,9 +9842,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
                 generated.push({
                   id: 'ai_gen_' + Date.now() + '_' + (i+1),
                   type: 'multiple_choice',
-                  questionText: `[${subTitle} ${aiState.grade} - ${lessonName}] Câu ${i+1}: ${item.q}`,
-                  q: `[${subTitle} ${aiState.grade} - ${lessonName}] Câu ${i+1}: ${item.q}`,
-                  stmt: `[${subTitle} ${aiState.grade} - ${lessonName}] Câu ${i+1}: ${item.q}`,
+                  questionText: `${item.q}`,
+                  q: `${item.q}`,
+                  stmt: `${item.q}`,
                   options: item.opts,
                   correctAnswer: item.a,
                   left: item.opts[0],
@@ -10557,9 +10557,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
           filtered.push({
             id: 'bank_sample_' + Date.now() + '_' + i,
             type: 'true_false',
-            questionText: `[${subName} - Lớp ${grade==='all'?'6':grade}] Câu ${i}: Về chủ đề "${curLes}", khẳng định này Đúng hay Sai?`,
-            stmt: `[${subName} - Lớp ${grade==='all'?'6':grade}] Câu ${i}: Về chủ đề "${curLes}", khẳng định này Đúng hay Sai?`,
-            q: `[${subName} - Lớp ${grade==='all'?'6':grade}] Câu ${i}: Về chủ đề "${curLes}", khẳng định này Đúng hay Sai?`,
+            questionText: `Về chủ đề "${curLes}", khẳng định này Đúng hay Sai?`,
+            stmt: `Về chủ đề "${curLes}", khẳng định này Đúng hay Sai?`,
+            q: `Về chủ đề "${curLes}", khẳng định này Đúng hay Sai?`,
             options: ['Đúng (True)', 'Sai (False)'],
             correctAnswer: 0,
             left: 'Đúng (True)',
@@ -10575,9 +10575,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
           filtered.push({
             id: 'bank_sample_' + Date.now() + '_' + i,
             type: 'multiple_choice',
-            questionText: `[${subName} - Lớp ${grade==='all'?'6':grade}] Câu ${i}: Về kiến thức "${curLes}", lựa chọn nào đúng?`,
-            q: `[${subName} - Lớp ${grade==='all'?'6':grade}] Câu ${i}: Về kiến thức "${curLes}", lựa chọn nào đúng?`,
-            stmt: `[${subName} - Lớp ${grade==='all'?'6':grade}] Câu ${i}: Về kiến thức "${curLes}", lựa chọn nào đúng?`,
+            questionText: `Về kiến thức "${curLes}", lựa chọn nào đúng?`,
+            q: `Về kiến thức "${curLes}", lựa chọn nào đúng?`,
+            stmt: `Về kiến thức "${curLes}", lựa chọn nào đúng?`,
             options: [
               `Phương án A: Khái niệm & quy tắc chuẩn của bài ${curLes} (Đúng)`,
               `Phương án B: Nhận định chưa đầy đủ về ${curLes}`,
@@ -19102,8 +19102,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
             gameType: 'goldminer',
             stageName: `Ải 1: ⛏️ Đào Vàng Khởi Động - [${topic}]`,
             questions: [
-              { q: `[${topic}] - Khái niệm nền tảng nào quan trọng nhất?`, options: ['Khái niệm cốt lõi', 'Khái niệm phụ', 'Dữ liệu thô', 'Công thức mở rộng'], correctAnswer: 0 },
-              { q: `[${topic}] - Đâu là tính chất đặc trưng nổi bật?`, options: ['Tính chất quy luật', 'Tính ngẫu nhiên', 'Tính phỏng đoán', 'Không có tính chất'], correctAnswer: 0 }
+              { q: `- Khái niệm nền tảng nào quan trọng nhất?`, options: ['Khái niệm cốt lõi', 'Khái niệm phụ', 'Dữ liệu thô', 'Công thức mở rộng'], correctAnswer: 0 },
+              { q: `- Đâu là tính chất đặc trưng nổi bật?`, options: ['Tính chất quy luật', 'Tính ngẫu nhiên', 'Tính phỏng đoán', 'Không có tính chất'], correctAnswer: 0 }
             ]
           },
           {
@@ -19111,8 +19111,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
             gameType: 'fruitninja',
             stageName: `Ải 2: 🍉 Chém Quả Tốc Độ - [${topic}]`,
             questions: [
-              { q: `[${topic}] - Chém quả chứa phát biểu CHÍNH XÁC nhất:`, options: ['Phát biểu chuẩn quy luật', 'Phát biểu giả định', 'Phát biểu sai', 'Phát biểu thiếu'], correctAnswer: 0 },
-              { q: `[${topic}] - Chém quả chứa đơn vị/đại lượng tương ứng:`, options: ['Đơn vị chuẩn SI', 'Đơn vị tự chế', 'Đơn vị sai', 'Không đơn vị'], correctAnswer: 0 }
+              { q: `- Chém quả chứa phát biểu CHÍNH XÁC nhất:`, options: ['Phát biểu chuẩn quy luật', 'Phát biểu giả định', 'Phát biểu sai', 'Phát biểu thiếu'], correctAnswer: 0 },
+              { q: `- Chém quả chứa đơn vị/đại lượng tương ứng:`, options: ['Đơn vị chuẩn SI', 'Đơn vị tự chế', 'Đơn vị sai', 'Không đơn vị'], correctAnswer: 0 }
             ]
           },
           {
@@ -19120,7 +19120,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
             gameType: 'headtilt',
             stageName: `Ải 3: 🤸 Nghiêng Đầu AI - [${topic}]`,
             questions: [
-              { q: `[${topic}] - Kiến thức này có ứng dụng thực tiễn cao?`, options: ['Đúng (True)', 'Sai (False)'], correctAnswer: 0 }
+              { q: `- Kiến thức này có ứng dụng thực tiễn cao?`, options: ['Đúng (True)', 'Sai (False)'], correctAnswer: 0 }
             ]
           },
           {
@@ -19128,7 +19128,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
             gameType: 'tugofwar',
             stageName: `Ải 4: 🪢 Kéo Co Quyết Định - [${topic}]`,
             questions: [
-              { q: `[${topic}] - Phương pháp tối ưu để đạt kết quả chuẩn là gì?`, options: ['Quy trình khoa học chuẩn', 'Đoán mò', 'Bỏ qua bước', 'Làm đại'], correctAnswer: 0 }
+              { q: `- Phương pháp tối ưu để đạt kết quả chuẩn là gì?`, options: ['Quy trình khoa học chuẩn', 'Đoán mò', 'Bỏ qua bước', 'Làm đại'], correctAnswer: 0 }
             ]
           }
         ];
