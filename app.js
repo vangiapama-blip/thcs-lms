@@ -14120,8 +14120,12 @@ render_ai_geometry(dom) {
       window._lastFilePickerCloseTs = Date.now();
       setTimeout(() => {
         window._isExamFilePickerActive = false;
-      }, 500);
-      // Sau khi đóng file dialog, nhẹ nhàng khôi phục toàn màn hình sau 600ms
+      }, 800);
+      // Khôi phục video camera nếu bị iOS / Android tạm dừng khi chụp ảnh
+      if (this._currentProctorAI && this._currentProctorAI.video) {
+        try { this._currentProctorAI.video.play().catch(() => {}); } catch(e) {}
+      }
+      // Sau khi đóng file dialog / camera, nhẹ nhàng khôi phục toàn màn hình sau 600ms
       setTimeout(() => {
         if (this.isProctoringActive && !document.fullscreenElement && !isVirtualKeyboardOrInputActive()) {
           enterFS();
@@ -14196,8 +14200,11 @@ render_ai_geometry(dom) {
       }
     }, { capture: true, passive: true });
 
-    // Khi cửa sổ lấy lại tiêu điểm (Focus window trở lại từ File Picker hoặc bàn phím ảo)
+    // Khi cửa sổ lấy lại tiêu điểm (Focus window trở lại từ File Picker, Camera hoặc bàn phím ảo)
     const windowFocusHandler = () => {
+      if (this._currentProctorAI && this._currentProctorAI.video) {
+        try { this._currentProctorAI.video.play().catch(() => {}); } catch(e) {}
+      }
       if (window._isExamFilePickerActive) {
         markFilePickerClosed();
       }
