@@ -2890,10 +2890,15 @@ class LMSApp {
     };
   }
 
-  generateAIQuestionsList(subjectId, grade, topic, qType, difficulty, count, chapterId = null, lessonId = null) {
+// =========================================================================
+  // 🌟 HỆ THỐNG SINH CÂU HỎI AI CHUẨN GDPT 2018 & SGK KẾT NỐI TRI THỨC (CV 7991)
+  // =========================================================================
+  generateAIQuestionsList(subjectId, grade, topic, qType, difficulty, count, chapterId = null, lessonId = null, teacherPrompt = '') {
     const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
-    const subObj = subjects.find(s => s.id === subjectId) || { name: 'Môn học' };
+    const subObj = subjects.find(s => s.id === subjectId) || { id: subjectId || 'toan', name: 'Môn học' };
     const subName = subObj.name;
+    const subKey = String(subObj.id || subjectId || 'toan').toLowerCase();
+    const gNum = parseInt(grade, 10) || 6;
 
     const chapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
     const lessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons() : [];
@@ -2904,148 +2909,510 @@ class LMSApp {
     const chapterTitle = chapObj ? chapObj.title : '';
     const lessonTitle = lesObj ? lesObj.title : '';
 
-    let cleanTopic = topic ? topic.trim() : (lessonTitle || chapterTitle || `Chủ đề trọng tâm môn ${subName} Khối ${grade}`);
+    const cleanPrompt = (teacherPrompt || '').trim();
+    let cleanTopic = topic ? topic.trim() : (lessonTitle || chapterTitle || cleanPrompt || `Chương trình Kết Nối Tri Thức Khối ${gNum}`);
 
     const generated = [];
-    const diffList = ['nhan_biet', 'thong_hieu', 'van_dung'];
-    const typeList = ['trac_nghiem', 'dung_sai', 'tra_loi_ngan', 'tu_luan'];
+    const diffList = (difficulty === 'all' || !difficulty)
+      ? ['nhan_biet', 'thong_hieu', 'van_dung', 'van_dung_cao']
+      : [difficulty];
+    const typeList = (qType === 'all' || !qType)
+      ? ['trac_nghiem', 'dung_sai', 'tra_loi_ngan', 'tu_luan']
+      : [qType];
+
+    // Kho tri thức SGK Kết Nối Tri Thức Với Cuộc Sống theo môn & khối lớp
+    const knttKnowledgeBase = {
+      toan: {
+        6: [
+          { topic: 'Tập hợp các số tự nhiên & Phép tính', sampleNum: 15, rule: 'Thứ tự thực hiện phép tính, Lũy thừa, Tính chất chia hết' },
+          { topic: 'Số nguyên (Số nguyên âm, Số đối, Phép cộng trừ nhân chia)', sampleNum: -18, rule: 'Quy tắc dấu ngoặc, Quy tắc chuyển vế trong tập hợp Z' },
+          { topic: 'Phân số & Số thập phân', sampleNum: '3/4', rule: 'Phân số bằng nhau, Rút gọn phân số, Phép tính phân số và tỉ số phần trăm' },
+          { topic: 'Hình học trực quan (Hình tam giác đều, Hình vuông, Lục giác đều, Hình thoi, Hình bình hành, Hình thang cân)', rule: 'Chu vi và diện tích các hình phẳng trong thực tiễn' },
+          { topic: 'Tính đối xứng của hình phẳng & Thu thập dữ liệu thống kê', rule: 'Trục đối xứng, Tâm đối xứng, Biểu đồ cột kép' }
+        ],
+        7: [
+          { topic: 'Số hữu tỉ & Các phép tính trong tập hợp Q', sampleNum: '2.5', rule: 'Cộng trừ nhân chia số hữu tỉ, Lũy thừa với số mũ tự nhiên' },
+          { topic: 'Số thực & Căn bậc hai số học', sampleNum: 7, rule: 'Số vô tỉ, Số thực, Làm tròn số và ước lượng kết quả' },
+          { topic: 'Góc và đường thẳng song song', rule: 'Hai góc kề bù, so le trong, đồng vị, Định lí và chứng minh định lí' },
+          { topic: 'Tam giác bằng nhau (c-c-c, c-g-c, g-c-g) & Tam giác cân', rule: 'Định lí tổng 3 góc trong tam giác, Định lí Py-ta-go' },
+          { topic: 'Biểu thức đại số & Đa thức một biến', rule: 'Nghiệm của đa thức, Cộng trừ đa thức một biến' }
+        ],
+        8: [
+          { topic: 'Đa thức nhiều biến & Hằng đẳng thức đáng nhớ', rule: '7 Hằng đẳng thức đáng nhớ, Phân tích đa thức thành nhân tử' },
+          { topic: 'Phân thức đại số & Phép tính', rule: 'Điều kiện xác định của phân thức, Quy đồng mẫu thức' },
+          { topic: 'Tứ giác (Hình thang cân, Hình bình hành, Hình chữ nhật, Hình thoi, Hình vuông)', rule: 'Tính chất và dấu hiệu nhận biết các tứ giác đặc biệt' },
+          { topic: 'Định lí Thalès trong tam giác & Tam giác đồng dạng', rule: 'Tỉ số đoạn thẳng, Các trường hợp đồng dạng của tam giác' },
+          { topic: 'Hàm số bậc nhất y = ax + b', rule: 'Đồ thị hàm số bậc nhất, Hệ số góc của đường thẳng' }
+        ],
+        9: [
+          { topic: 'Phương trình và hệ phương trình bậc nhất hai ẩn', rule: 'Phương pháp thế, Phương pháp cộng đại số' },
+          { topic: 'Phương trình bậc hai một ẩn & Định lí Vi-ét', rule: 'Công thức nghiệm, Ứng dụng định lí Vi-ét tính nhẩm nghiệm' },
+          { topic: 'Hệ thức lượng trong tam giác vuông & Tỉ số lượng giác', rule: 'Sin, Cos, Tan, Cot và bài toán thực tế đo chiều cao' },
+          { topic: 'Đường tròn & Góc với đường tròn', rule: 'Góc ở tâm, Góc nội tiếp, Tứ giác nội tiếp đường tròn' }
+        ]
+      },
+      van: {
+        6: [
+          { topic: 'Bài 1: Tôi và các bạn (Truyện đồng thoại)', textSample: 'Dế Mèn phiêu lưu ký - Tô Hoài', focus: 'Người kể chuyện ngôi thứ nhất, Người kể chuyện ngôi thứ ba, Nhân hóa, So sánh' },
+          { topic: 'Bài 2: Gõ cửa trái tim (Thơ)', textSample: 'Chuyện cổ tích về loài người - Xuân Quỳnh', focus: 'Thể thơ, Vần, Nhịp, Yếu tố tự sự và miêu tả trong thơ' },
+          { topic: 'Bài 3: Yêu thương và chia sẻ (Truyện cổ tích & Truyện ngắn)', textSample: 'Cô bé bán diêm - An-đéc-xen', focus: 'Chi tiết nghệ thuật, Chủ đề và thông điệp nhân văn' },
+          { topic: 'Bài 4: Quê hương yêu dấu (Thơ lục bát)', textSample: 'Hoa bìm - Nguyễn Đức Mậu', focus: 'Vần chân, Vần lưng, Nhịp lục bát 2/2/2, 4/4' },
+          { topic: 'Thực hành Tiếng Việt: Từ đơn, Từ phức (Từ ghép, Từ láy), Biện pháp tu từ', focus: 'Nghĩa của từ, Thành phần chính của câu' }
+        ],
+        7: [
+          { topic: 'Bài 1: Bầu trời tuổi thơ (Truyện ngắn & Tản văn)', textSample: 'Bầy chim chìa vôi - Nguyễn Quang Thiều', focus: 'Tính cách nhân vật, Không gian, Thời gian nghệ thuật' },
+          { topic: 'Bài 2: Khúc nhạc tâm hồn (Thơ bốn chữ, năm chữ)', textSample: 'Đồng dao mùa xuân - Nguyễn Khoa Điềm', focus: 'Hình ảnh thơ, Cảm xúc trữ tình, Biện pháp điệp từ ngữ' },
+          { topic: 'Bài 3: Cội nguồn yêu thương (Nghị luận xã hội)', textSample: 'Vừa nhắm mắt vừa mở cửa sổ', focus: 'Ý kiến, Lí lẽ, Bằng chứng' },
+          { topic: 'Thực hành Tiếng Việt: Mở rộng trạng ngữ, Biện pháp nói giảm nói tránh, Nói quá', focus: 'Thuật ngữ, Nghĩa của từ trong ngữ cảnh' }
+        ],
+        8: [
+          { topic: 'Bài 1: Câu chuyện của lịch sử (Truyện lịch sử)', textSample: 'Lá cờ thêu sáu chữ vàng - Nguyễn Huy Tưởng', focus: 'Cốt truyện, Bối cảnh lịch sử, Lòng yêu nước' },
+          { topic: 'Bài 2: Vẻ đẹp cổ điển (Thơ Đường luật)', textSample: 'Thu điếu - Nguyễn Khuyến', focus: 'Bố cục Đề - Thực - Luận - Kết, Niêm, Luật, Đối' },
+          { topic: 'Bài 3: Lời của sông núi (Văn bản nghị luận trung đại)', textSample: 'Hịch tướng sĩ - Trần Quốc Tuấn', focus: 'Luận điểm, Lí lẽ đanh thép, Tình cảm sục sôi' },
+          { topic: 'Thực hành Tiếng Việt: Từ Hán Việt, Sắc thái nghĩa của từ, Đoạn văn diễn dịch - quy nạp', focus: 'Liên kết câu và đoạn văn' }
+        ],
+        9: [
+          { topic: 'Bài 1: Thế giới kì ảo (Chuyện người con gái Nam Xương - Nguyễn Dữ)', focus: 'Yếu tố kì ảo, Số phận người phụ nữ trong xã hội phong kiến' },
+          { topic: 'Bài 2: Khát vọng cống hiến (Lặng lẽ Sa Pa - Nguyễn Thành Long, Mùa xuân nho nhỏ)', focus: 'Vẻ đẹp người lao động, Lẽ sống cao đẹp' },
+          { topic: 'Bài 3: Tiếng nói của tình yêu thương (Bếp lửa - Bằng Việt, Ánh trăng)', focus: 'Tình cảm gia đình, Đạo lí Uống nước nhớ nguồn' }
+        ]
+      },
+      anh: {
+        6: [
+          { unit: 'Unit 1: My New School', grammar: 'Present Simple, Adverbs of frequency', voc: 'school things, subjects, activities' },
+          { unit: 'Unit 2: My House', grammar: 'Prepositions of place, Possessive case', voc: 'types of house, rooms, furniture' },
+          { unit: 'Unit 3: My Friends', grammar: 'Present Continuous for future, Personality adjectives', voc: 'body parts, appearances, character' },
+          { unit: 'Unit 4: My Neighbourhood', grammar: 'Comparative adjectives', voc: 'places in town, directions' },
+          { unit: 'Unit 5: Natural Wonders of Viet Nam', grammar: 'Countable / Uncountable nouns, Modal verb Must / Mustn\'t', voc: 'travel items, nature' }
+        ],
+        7: [
+          { unit: 'Unit 1: Hobbies', grammar: 'Present Simple for hobbies, Verbs of liking / disliking + V-ing', voc: 'hobbies, outdoor activities' },
+          { unit: 'Unit 2: Healthy Living', grammar: 'Simple sentences (Compound sentences with and, but, or, so)', voc: 'health problems, healthy habits' },
+          { unit: 'Unit 3: Community Service', grammar: 'Past Simple tense with regular and irregular verbs', voc: 'volunteer activities, donating' },
+          { unit: 'Unit 4: Music and Arts', grammar: 'Comparisons: as... as, different from, the same as', voc: 'musical instruments, art forms' },
+          { unit: 'Unit 5: Food and Drink', grammar: 'Nouns of quantity, How much / How many, Some / Any', voc: 'dishes, ingredients, recipes' }
+        ],
+        8: [
+          { unit: 'Unit 1: Leisure Time', grammar: 'Verbs of liking / disliking + gerunds / to-infinitive', voc: 'leisure activities, crafting' },
+          { unit: 'Unit 2: Life in the Countryside', grammar: 'Comparative forms of adverbs', voc: 'rural life, harvesting, peaceful' },
+          { unit: 'Unit 3: Teenagers', grammar: 'Simple & Compound sentences, Question words before to-infinitives', voc: 'clubs, peer pressure, forum' },
+          { unit: 'Unit 4: Ethnic Groups of Viet Nam', grammar: 'Articles: a, an, the and zero article', voc: 'costumes, stilt house, terraced fields' }
+        ],
+        9: [
+          { unit: 'Unit 1: Local Community', grammar: 'Question words before to-infinitive, Phrasal verbs', voc: 'handicrafts, artisans, community helpers' },
+          { unit: 'Unit 2: City Life', grammar: 'Double comparatives (The more... the more...)', voc: 'urban amenities, traffic congestion' },
+          { unit: 'Unit 3: Healthy Living for Teens', grammar: 'Modal verbs in first conditional sentences', voc: 'well-balanced life, stress management' }
+        ]
+      },
+      khtn: {
+        6: [
+          { topic: 'Chủ đề 1: Các phép đo (Độ dài, Khối lượng, Thời gian, Nhiệt độ)', focus: 'Dụng cụ đo, Giới hạn đo (GHĐ), Độ chia nhỏ nhất (ĐCNN), Sai số' },
+          { topic: 'Chủ đề 2: Các thể của chất & Sự chuyển thể', focus: 'Rắn - Lỏng - Khí, Nóng chảy, Đông đặc, Bay hơi, Ngưng tụ' },
+          { topic: 'Chủ đề 3: Tế bào - Đơn vị cơ bản của sự sống', focus: 'Màng sinh chất, Tế bào chất, Nhân/Vùng nhân, Tế bào thực vật và động vật' },
+          { topic: 'Chủ đề 4: Đa dạng thế giới sống & Phân loại sinh vật', focus: 'Khóa lưỡng phân, Vi khuẩn, Nguyên sinh vật, Nấm, Thực vật, Động vật' },
+          { topic: 'Chủ đề 5: Lực và Chuyển động (Lực tiếp xúc, Lực không tiếp xúc, Trọng lực, Lực ma sát)', focus: 'Đơn vị Niutơn (N), Biểu diễn lực, Ma sát trượt, Ma sát nghỉ' }
+        ],
+        7: [
+          { topic: 'Chủ đề 1: Nguyên tử - Nguyên tố hóa học & Sơ lược Bảng tuần hoàn', focus: 'Proton, Electron, Neutron, Kí hiệu hóa học, Chu kì, Nhóm' },
+          { topic: 'Chủ đề 2: Phân tử - Đơn chất - Hợp chất & Liên kết hóa học', focus: 'Liên kết ion, Liên kết cộng hóa trị, Hóa trị' },
+          { topic: 'Chủ đề 3: Tốc độ chuyển động (v = s / t)', focus: 'Đơn vị m/s, km/h, Đồ thị quãng đường - thời gian' },
+          { topic: 'Chủ đề 4: Âm thanh & Ánh sáng', focus: 'Sóng âm, Độ to, Độ cao, Định luật phản xạ ánh sáng' },
+          { topic: 'Chủ đề 5: Trao đổi chất và chuyển hóa năng lượng ở sinh vật (Quang hợp, Hô hấp tế bào)', focus: 'Phương trình quang hợp, Khí khổng, Vận chuyển nước và chất khoáng' }
+        ],
+        8: [
+          { topic: 'Chủ đề 1: Phản ứng hóa học & Định luật bảo toàn khối lượng', focus: 'Mol, Thể tích mol chất khí, Tỉ khối chất khí, Nồng độ dung dịch (C%, CM)' },
+          { topic: 'Chủ đề 2: Axit - Bazơ - Oxit - Muối & Thang pH', focus: 'Tính chất hóa học, Kim loại tác dụng với axit, Nhận biết dung dịch bằng quỳ tím' },
+          { topic: 'Chủ đề 3: Khối lượng riêng & Áp suất chất lỏng, Áp suất khí quyển', focus: 'Lực đẩy Ác-si-mét, Điều kiện vật nổi, chìm' },
+          { topic: 'Chủ đề 4: Tác dụng của dòng điện & Định luật Ôm', focus: 'Điện trở, Mạch điện nối tiếp và song song' },
+          { topic: 'Chủ đề 5: Hệ cơ quan trong cơ thể người', focus: 'Hệ tuần hoàn, Hệ hô hấp, Hệ tiêu hóa, Hệ bài tiết, Hệ thần kinh' }
+        ],
+        9: [
+          { topic: 'Chủ đề 1: Hóa học các hợp chất hữu cơ (Hiđrocacbon, Polime)', focus: 'Metan, Etilen, Rượu etylic, Axit axetic' },
+          { topic: 'Chủ đề 2: Năng lượng và sự truyền nhiệt', focus: 'Công cơ học, Công suất, Sự bảo toàn năng lượng' },
+          { topic: 'Chủ đề 3: Di truyền học Menden & Nhiễm sắc thể', focus: 'ADN, ARN, Đột biến gen, Di truyền học người' },
+          { topic: 'Chủ đề 4: Hệ sinh thái & Bảo vệ môi trường', focus: 'Chuỗi thức ăn, Lưới thức ăn, Tháp sinh thái, Đa dạng sinh học' }
+        ]
+      },
+      lsdl: {
+        6: [
+          { topic: 'Lịch sử: Nguồn gốc loài người & Xã hội nguyên thủy', focus: 'Người vượn, Người tinh khôn, Công cụ đá, Đồ đồng' },
+          { topic: 'Lịch sử: Các quốc gia cổ đại phương Đông & phương Tây', focus: 'Ai Cập, Lưỡng Hà, Ấn Độ, Trung Quốc, Hy Lạp, La Mã' },
+          { topic: 'Lịch sử: Nước Văn Lang - Âu Lạc & Thời kì Bắc thuộc', focus: 'Hùng Vương, An Dương Vương, Khởi nghĩa Hai Bà Trưng, Bà Triệu' },
+          { topic: 'Địa lý: Bản đồ & Trái Đất trong hệ Mặt Trời', focus: 'Tọa độ địa lí, Chuyển động tự quay quanh trục, Hiện tượng ngày đêm luân phiên' },
+          { topic: 'Địa lý: Khí hậu, Nước trên Trái Đất & Đất, Sinh vật', focus: 'Các đới khí hậu, Vòng tuần hoàn của nước, Thổ nhưỡng' }
+        ],
+        7: [
+          { topic: 'Lịch sử: Tây Âu thời kì Trung đại & Phong trào Văn hóa Phục hưng', focus: 'Lãnh địa phong kiến, Thành thị trung đại, Các cuộc phát kiến địa lí' },
+          { topic: 'Lịch sử: Đại Việt thời Lý - Trần - Hồ (Thế kỉ XI - XV)', focus: 'Kháng chiến chống Tống, 3 lần chiến thắng giặc Mông - Nguyên' },
+          { topic: 'Địa lý: Đặc điểm tự nhiên, dân cư và xã hội Châu Âu, Châu Á, Châu Phi', focus: 'Địa hình, Khí hậu, Đô thị hóa, Cơ cấu dân số' }
+        ],
+        8: [
+          { topic: 'Lịch sử: Các cuộc cách mạng tư sản & Phong trào công nhân thế kỉ XVIII - XIX', focus: 'Cách mạng tư sản Anh, Pháp, Bắc Mỹ' },
+          { topic: 'Lịch sử: Phong trào Tây Sơn & Cuộc kháng chiến chống thực dân Pháp (1858 - cuối TK XIX)', focus: 'Quang Trung - Nguyễn Huệ, Phong trào Cần Vương, Khởi nghĩa Yên Thế' },
+          { topic: 'Địa lý: Vị trí địa lí, phạm vi lãnh thổ, địa hình & khoáng sản Việt Nam', focus: 'Biển đảo Việt Nam, Khí hậu nhiệt đới ẩm gió mùa' }
+        ],
+        9: [
+          { topic: 'Lịch sử: Cách mạng Tháng Tám 1945 & Hai cuộc kháng chiến chống Pháp, chống Mỹ (1945 - 1975)', focus: 'Chiến dịch Điện Biên Phủ, Đại thắng mùa Xuân 1975' },
+          { topic: 'Địa lý: Địa lý kinh tế Việt Nam (Nông nghiệp, Công nghiệp, Dịch vụ & Các vùng kinh tế trọng điểm)', focus: 'Tây Nguyên, Đông Nam Bộ, Đồng bằng sông Cửu Long' }
+        ]
+      },
+      tin: {
+        6: [
+          { topic: 'Chủ đề A: Máy tính và cộng đồng (Thông tin & Dữ liệu)', focus: 'Khái niệm thông tin, Dữ liệu số, Biểu diễn thông tin trong máy tính' },
+          { topic: 'Chủ đề B: Mạng máy tính và Internet', focus: 'Mạng có dây, Mạng không dây, Lợi ích của Internet, Trình duyệt Web' },
+          { topic: 'Chủ đề C: Tổ chức lưu trữ, tìm kiếm và trao đổi thông tin', focus: 'Thư mục, Tệp, Công cụ tìm kiếm, Thư điện tử (Email)' },
+          { topic: 'Chủ đề D: Đạo đức, pháp luật và văn hóa trong môi trường số', focus: 'Bản quyền nội dung, An toàn thông tin cá nhân, Phòng tránh lừa đảo mạng' },
+          { topic: 'Chủ đề E: Ứng dụng tin học (Soạn thảo văn bản & Trình chiếu)', focus: 'Định dạng văn bản, Chèn bảng biểu, Tạo hiệu ứng trang chiếu' },
+          { topic: 'Chủ đề F: Giải quyết vấn đề với sự trợ giúp của máy tính (Thuật toán)', focus: 'Sơ đồ khối thuật toán, Cấu trúc tuần tự, rẽ nhánh, lặp' }
+        ],
+        7: [
+          { topic: 'Chủ đề: Thiết bị vào - ra & Phần mềm ứng dụng', focus: 'Hệ điều hành, Quản lí tệp và thư mục trên máy tính' },
+          { topic: 'Chủ đề: Mạng xã hội & Kênh truyền thông số', focus: 'Giao tiếp văn minh trên mạng xã hội, Phòng chống nghiện Internet' },
+          { topic: 'Chủ đề: Bảng tính điện tử (Phần mềm bảng tính Excel)', focus: 'Nhập dữ liệu, Sử dụng hàm SUM, AVERAGE, MIN, MAX, COUNT, Vẽ biểu đồ' },
+          { topic: 'Chủ đề: Thuật toán tìm kiếm & Thuật toán sắp xếp', focus: 'Tìm kiếm tuần tự, Tìm kiếm nhị phân, Sắp xếp nổi bọt' }
+        ],
+        8: [
+          { topic: 'Chủ đề: Lịch sử phát triển máy tính & Xử lí thông tin', focus: 'Các thế hệ máy tính, Bit, Byte, TB' },
+          { topic: 'Chủ đề: Lập trình trực quan & Thuật toán (Scratch / Python)', focus: 'Biến, Biểu thức điều kiện If-Else, Vòng lặp For/While' },
+          { topic: 'Chủ đề: Định dạng nâng cao trong bảng tính & Trình chiếu', focus: 'Hàm logic IF, Lọc dữ liệu Filter, Tạo liên kết Hyperlink' }
+        ],
+        9: [
+          { topic: 'Chủ đề: Cơ sở dữ liệu & Hệ quản trị CSDL', focus: 'Bảng, Khóa chính, Truy vấn tìm kiếm' },
+          { topic: 'Chủ đề: Lập trình với ngôn ngữ bậc cao Python', focus: 'Cấu trúc dữ liệu danh sách List, Hàm tự định nghĩa def' },
+          { topic: 'Chủ đề: Tác động của công nghệ số & Hướng nghiệp Tin học', focus: 'Trí tuệ nhân tạo (AI), Điện toán đám mây, Nghề nghiệp IT' }
+        ]
+      },
+      gdcd: {
+        6: [
+          { topic: 'Bài 1: Tự hào về truyền thống gia đình, dòng họ', focus: 'Kế thừa và phát huy nghề truyền thống, hiếu học, nhân nghĩa' },
+          { topic: 'Bài 2: Yêu thương con người & Siêng năng, kiên trì', focus: 'Hành động sẻ chia, giúp đỡ người khó khăn, vượt khó trong học tập' },
+          { topic: 'Bài 3: Tôn trọng sự thật & Tự lập', focus: 'Trung thực trong thi cử, tự chăm sóc bản thân, không dựa dẫm' },
+          { topic: 'Bài 4: Ứng phó với các tình huống nguy hiểm', focus: 'Ứng phó hỏa hoạn, lũ lụt, đuối nước, bạo lực học đường' },
+          { topic: 'Bài 5: Quyền và nghĩa vụ cơ bản của công dân', focus: 'Quyền trẻ em, Bổn phận đối với gia đình và nhà trường' }
+        ],
+        7: [
+          { topic: 'Bài 1: Tự hào về truyền thống quê hương', focus: 'Di tích lịch sử, lễ hội văn hóa, giữ gìn bản sắc dân tộc' },
+          { topic: 'Bài 2: Bảo tồn di sản văn hóa', focus: 'Di sản văn hóa vật thể và phi vật thể, Trách nhiệm công dân' },
+          { topic: 'Bài 3: Quản lí tiền & Kĩ năng giao tiếp', focus: 'Chi tiêu hợp lí, tiết kiệm, lắng nghe tích cực' },
+          { topic: 'Bài 4: Phòng, chống bạo lực học đường & Tệ nạn xã hội', focus: 'Kĩ năng tự vệ, báo tin cho thầy cô, gia đình' }
+        ],
+        8: [
+          { topic: 'Bài 1: Tự hào về truyền thống dân tộc Việt Nam', focus: 'Lòng nồng nàn yêu nước, tinh thần đoàn kết' },
+          { topic: 'Bài 2: Tôn trọng sự đa dạng của các dân tộc', focus: 'Tôn trọng phong tục tập quán các dân tộc anh em' },
+          { topic: 'Bài 3: Lao động cần cù, sáng tạo & Bảo vệ môi trường', focus: 'Ứng dụng tiến bộ khoa học, bảo vệ tài nguyên thiên nhiên' },
+          { topic: 'Bài 4: Tuân thủ pháp luật và kỉ luật', focus: 'Quyền tự do ngôn luận, Trách nhiệm pháp lí của lứa tuổi học sinh' }
+        ],
+        9: [
+          { topic: 'Bài 1: Sống có lí tưởng & Trách nhiệm của thanh niên', focus: 'Mục tiêu học tập, cống hiến cho quê hương đất nước' },
+          { topic: 'Bài 2: Bảo vệ hòa bình & Hợp tác quốc tế', focus: 'Hữu nghị giữa các dân tộc, giải quyết bất đồng bằng hòa bình' },
+          { topic: 'Bài 3: Quyền tham gia quản lí nhà nước & Bình đẳng giới', focus: 'Quyền bầu cử, ứng cử, bình đẳng trong gia đình và xã hội' }
+        ]
+      },
+      congnghe: {
+        6: [
+          { topic: 'Chương 1: Nhà ở (Kiến trúc nhà ở, Nhà thông minh, Tiết kiệm năng lượng)', focus: 'Vật liệu xây dựng, Bố trí không gian, An toàn điện' },
+          { topic: 'Chương 2: Bảo quản và chế biến thực phẩm', focus: 'Giá trị dinh dưỡng, An toàn vệ sinh thực phẩm, Chế biến món ăn' },
+          { topic: 'Chương 3: Trang phục và thời trang', focus: 'Nguồn gốc vải sợi, Lựa chọn và bảo quản trang phục học sinh' },
+          { topic: 'Chương 4: Đồ dùng điện trong gia đình', focus: 'Bàn là, Nồi cơm điện, Quạt điện, Sử dụng điện an toàn, tiết kiệm' }
+        ],
+        7: [
+          { topic: 'Chương 1: Trồng trọt (Đất trồng, Phân bón, Nhân giống cây trồng)', focus: 'Phương pháp gieo trồng, Chăm sóc và bảo vệ cây trồng khỏi sâu bệnh' },
+          { topic: 'Chương 2: Lâm nghiệp (Trồng và chăm sóc rừng)', focus: 'Vai trò của rừng, Phòng chống cháy rừng, Trồng rừng ngập mặn' },
+          { topic: 'Chương 3: Chăn nuôi (Giống vật nuôi, Thức ăn chăn nuôi)', focus: 'Quy trình nuôi dưỡng, Phòng trừ dịch bệnh cho gia súc, gia cầm' },
+          { topic: 'Chương 4: Thủy sản (Nuôi và khai thác thủy sản)', focus: 'Môi trường nuôi thủy sản, Bảo vệ nguồn lợi thủy sản bền vững' }
+        ],
+        8: [
+          { topic: 'Chương 1: Vẽ kĩ thuật (Bản vẽ các khối hình học, Bản vẽ chi tiết)', focus: 'Hình chiếu vuông góc, Khổ giấy, Tỉ lệ, Khung tên bản vẽ' },
+          { topic: 'Chương 2: Cơ khí (Vật liệu cơ khí, Dụng cụ gia công, Chi tiết máy)', focus: 'Kim loại đen, Kim loại màu, Truyền và biến đổi chuyển động' },
+          { topic: 'Chương 3: Kĩ thuật điện (An toàn điện, Đồ dùng điện, Mạch điện)', focus: 'Sơ đồ nguyên lí, Sơ đồ lắp đặt mạch điện chiếu sáng' }
+        ],
+        9: [
+          { topic: 'Chủ đề: Lắp đặt mạng điện trong nhà', focus: 'Khí cụ điện, Dây dẫn điện, Đồng hồ đo điện vạn năng, Lắp bảng điện' },
+          { topic: 'Chủ đề: Trồng cây ăn quả & Nông nghiệp công nghệ cao', focus: 'Kĩ thuật chiết cành, ghép mắt, Trồng dưa lưới trong nhà màng' }
+        ]
+      }
+    };
+
+    // Helper: Select match in knowledge base
+    let curKBList = [];
+    if (subKey.includes('toan')) curKBList = (knttKnowledgeBase.toan && knttKnowledgeBase.toan[gNum]) || knttKnowledgeBase.toan[6];
+    else if (subKey.includes('van')) curKBList = (knttKnowledgeBase.van && knttKnowledgeBase.van[gNum]) || knttKnowledgeBase.van[6];
+    else if (subKey.includes('anh')) curKBList = (knttKnowledgeBase.anh && knttKnowledgeBase.anh[gNum]) || knttKnowledgeBase.anh[6];
+    else if (subKey.includes('khtn')) curKBList = (knttKnowledgeBase.khtn && knttKnowledgeBase.khtn[gNum]) || knttKnowledgeBase.khtn[6];
+    else if (subKey.includes('lsdl') || subKey.includes('su') || subKey.includes('dia')) curKBList = (knttKnowledgeBase.lsdl && knttKnowledgeBase.lsdl[gNum]) || knttKnowledgeBase.lsdl[6];
+    else if (subKey.includes('tin')) curKBList = (knttKnowledgeBase.tin && knttKnowledgeBase.tin[gNum]) || knttKnowledgeBase.tin[6];
+    else if (subKey.includes('gdcd')) curKBList = (knttKnowledgeBase.gdcd && knttKnowledgeBase.gdcd[gNum]) || knttKnowledgeBase.gdcd[6];
+    else if (subKey.includes('congnghe') || subKey.includes('cn')) curKBList = (knttKnowledgeBase.congnghe && knttKnowledgeBase.congnghe[gNum]) || knttKnowledgeBase.congnghe[6];
+    else curKBList = [{ topic: cleanTopic, focus: 'Chuẩn kiến thức kĩ năng GDPT 2018' }];
 
     for (let i = 0; i < count; i++) {
       const curType = (qType === 'all' || !qType) ? typeList[i % typeList.length] : qType;
       const curDiff = (difficulty === 'all' || !difficulty) ? diffList[i % diffList.length] : difficulty;
+      const kbItem = curKBList[i % curKBList.length] || curKBList[0];
+      const activeTopic = cleanPrompt ? `${cleanTopic} (${cleanPrompt})` : (kbItem.topic || kbItem.unit || cleanTopic);
 
       let qText = '';
       let opts = [];
       let correct = 0;
       let exp = '';
 
-      if (subjectId === 'toan' || subName.toLowerCase().includes('toán')) {
+      // 1. TOÁN HỌC (SGK KẾT NỐI TRI THỨC)
+      if (subKey.includes('toan')) {
+        const diffLabel = curDiff === 'nhan_biet' ? 'Nhận biết' : curDiff === 'thong_hieu' ? 'Thông hiểu' : curDiff === 'van_dung' ? 'Vận dụng' : 'Vận dụng cao';
         if (curType === 'trac_nghiem') {
-          qText = `[Toán ${grade} - ${lessonTitle || cleanTopic}] Cho bài học "${cleanTopic}". Khẳng định nào sau đây là ĐÚNG theo quy tắc toán học đã học?`;
-          opts = [
-            `A. Muốn tìm số chưa biết, ta thực hiện phép tính ngược với phép tính đã cho`,
-            `B. Phép nhân hai số nguyên âm luôn cho kết quả là một số âm`,
-            `C. Tổng hai số đối nhau luôn bằng 1`,
-            `D. Phân số có mẫu số bằng 0 luôn luôn xác định`
-          ];
-          correct = 0;
-          exp = `Hướng dẫn giải: Theo lý thuyết bài ${cleanTopic}, phép tính tìm x áp dụng quy tắc chuyển vế hoặc thực hiện phép tính ngược.`;
+          if (curDiff === 'nhan_biet') {
+            qText = `[Toán ${gNum} - ${activeTopic}] Trong chương trình Toán ${gNum} (bộ sách Kết Nối Tri Thức), khẳng định nào sau đây là ĐÚNG?`;
+            opts = [
+              `A. ${kbItem.rule || 'Số 0 không phải là số nguyên âm cũng không phải là số nguyên dương.'}`,
+              `B. Tích của hai số nguyên âm luôn luôn là một số nguyên âm.`,
+              `C. Phân số có mẫu số bằng 0 là một số hữu tỉ xác định.`,
+              `D. Hai góc kề bù là hai góc có tổng số đo bằng 90 độ.`
+            ];
+            correct = 0;
+            exp = `Giải thích (Mức độ Nhận biết): Theo chuẩn SGK Toán ${gNum} KNTT, khẳng định A là định nghĩa chính xác. B sai vì âm nhân âm ra dương; C sai vì mẫu số phải khác 0; D sai vì kề bù có tổng bằng 180°.`;
+          } else if (curDiff === 'thong_hieu') {
+            qText = `[Toán ${gNum} - ${activeTopic}] Thực hiện tính hợp lí giá trị biểu thức: P = 25 . (-4) + (-15) . 4 - 4 . 60?`;
+            opts = [
+              `A. P = -400`,
+              `B. P = 400`,
+              `C. P = -240`,
+              `D. P = -100`
+            ];
+            correct = 0;
+            exp = `Giải thích (Mức độ Thông hiểu): Đặt thừa số chung 4 ra ngoài: P = 4 . [(-25) + (-15) - 60] = 4 . (-100) = -400.`;
+          } else if (curDiff === 'van_dung') {
+            qText = `[Toán ${gNum} - ${activeTopic}] Bác Ba có một mảnh vườn hình chữ nhật có chiều dài 24m, chiều rộng bằng 2/3 chiều dài. Bác dành 1/4 diện tích mảnh vườn để trồng rau xanh. Tính diện tích phần đất trồng rau?`;
+            opts = [
+              `A. 96 m²`,
+              `B. 144 m²`,
+              `C. 192 m²`,
+              `D. 384 m²`
+            ];
+            correct = 0;
+            exp = `Giải thích (Mức độ Vận dụng thực tế): Chiều rộng mảnh vườn là: 24 . 2/3 = 16 (m). Diện tích cả mảnh vườn là: 24 . 16 = 384 (m²). Diện tích trồng rau là: 384 . 1/4 = 96 (m²).`;
+          } else {
+            qText = `[Toán ${gNum} - ${activeTopic}] (Vận dụng cao) Một cửa hàng nhập về một lô hàng với giá gốc 500.000 đồng/sản phẩm. Ban đầu cửa hàng bán với giá lãi 30% so với giá gốc. Sau đó, để tri ân khách hàng nhân dịp khai giảng, cửa hàng giảm giá 15% trên giá đang bán. Hỏi sau khi giảm giá, cửa hàng còn lãi bao nhiêu tiền trên mỗi sản phẩm?`;
+            opts = [
+              `A. Lãi 52.500 đồng/sản phẩm`,
+              `B. Lãi 75.000 đồng/sản phẩm`,
+              `C. Lãi 150.000 đồng/sản phẩm`,
+              `D. Lỗ 25.000 đồng/sản phẩm`
+            ];
+            correct = 0;
+            exp = `Giải thích (Vận dụng cao): Giá bán ban đầu: 500.000 x 130% = 650.000 (đồng). Giá sau khi giảm 15%: 650.000 x (1 - 0.15) = 552.500 (đồng). Tiền lãi thực tế: 552.500 - 500.000 = 52.500 (đồng/sản phẩm).`;
+          }
         } else if (curType === 'dung_sai') {
-          qText = `[Toán ${grade} - ${cleanTopic}] Xét tính Đúng/Sai của các phát biểu sau đây:`;
+          qText = `[Toán ${gNum} - ${activeTopic}] Đọc kĩ các dữ liệu toán học liên quan đến nội dung "${activeTopic}" và xác định tính Đúng/Sai cho từng phát biểu dưới đây:`;
           opts = [
-            `a. Số 0 là số nguyên dương nhỏ nhất.`,
-            `b. Tổng của hai số nguyên âm luôn là một số nguyên âm.`,
-            `c. Tích của hai số nguyên trái dấu luôn là một số nguyên âm.`,
-            `d. Trong mặt phẳng, qua một điểm nằm ngoài đường thẳng có vô số đường thẳng song song.`
-          ];
-          correct = [false, true, true, false];
-          exp = `Lời giải: Phát biểu a sai (0 không âm không dương); d sai (Tiên đề Ơ-clit: chỉ có đúng 1 đường thẳng song song).`;
-        } else if (curType === 'tra_loi_ngan') {
-          qText = `[Toán ${grade} - ${cleanTopic}] Tính giá trị biểu thức: A = (-20) + 35 - (-15) + (-10)?`;
-          opts = [];
-          correct = '20';
-          exp = `Lời giải chi tiết: A = -20 + 35 + 15 - 10 = 15 + 15 - 10 = 20.`;
-        } else {
-          qText = `[Toán ${grade} - ${cleanTopic}] Cho bài toán thực tế thuộc nội dung "${cleanTopic}". Hãy trình bày các bước giải toán bằng cách lập phương trình và nêu lời giải chi tiết.`;
-          opts = [];
-          correct = '';
-          exp = `Hướng dẫn chấm: 1. Đặt ẩn và điều kiện ẩn (1 đ); 2. Lập phương trình (1 đ); 3. Giải và kết luận (1 đ).`;
-        }
-      } else if (subjectId === 'tin' || subName.toLowerCase().includes('tin')) {
-        if (curType === 'trac_nghiem') {
-          qText = `[Tin học ${grade} - ${cleanTopic}] Liên quan đến "${cleanTopic}", phát biểu nào sau đây nêu ĐÚNG nhất theo chuẩn kiến thức GDPT 2018?`;
-          opts = [
-            `A. Dữ liệu là thông tin được thể hiện dưới dạng ký hiệu, chữ viết, số hoặc hình ảnh`,
-            `B. Thông tin truyền trên Internet luôn tuyệt đối an toàn và không bao giờ bị nhiễm mã độc`,
-            `C. Phần cứng máy tính bao gồm các phần mềm ứng dụng và hệ điều hành`,
-            `D. Bộ nhớ RAM lưu trữ toàn bộ dữ liệu ngay cả khi ngắt nguồn điện`
-          ];
-          correct = 0;
-          exp = `Giải thích chi tiết: Khái niệm chuẩn Tin học GDPT 2018: Dữ liệu là thông tin được thể hiện dưới dạng các ký hiệu, chữ viết, con số, hình ảnh.`;
-        } else if (curType === 'dung_sai') {
-          qText = `[Tin học ${grade} - ${cleanTopic}] Xác định tính Đúng hay Sai của các phát biểu sau:`;
-          opts = [
-            `a. Mạng Internet kết nối hàng triệu máy tính trên toàn cầu.`,
-            `b. Mật khẩu an toàn nên chứa tên và ngày sinh của mình cho dễ nhớ.`,
-            `c. Tệp có đuôi .docx là tệp văn bản do phần mềm Word tạo ra.`,
-            `d. Hệ điều hành là phần mềm ứng dụng dùng để xem phim.`
+            `a. Số nguyên âm được biểu diễn ở phía bên trái điểm 0 trên trục số nằm ngang.`,
+            `b. Phép chia hai số nguyên cùng dấu luôn cho kết quả là một số nguyên âm.`,
+            `c. Trong hình chữ nhật, hai đường chéo bằng nhau và cắt nhau tại trung điểm của mỗi đường.`,
+            `d. Mọi số tự nhiên có chữ số tận cùng là 5 thì luôn chia hết cho cả 2 và 5.`
           ];
           correct = [true, false, true, false];
-          exp = `Giải thích: b sai vì thông tin cá nhân rất dễ bị lộ; d sai vì Hệ điều hành là phần mềm hệ thống.`;
+          exp = `Hướng dẫn chấm Đúng/Sai: a) ĐÚNG (theo quy ước trục số); b) SAI (cùng dấu chia nhau ra số dương); c) ĐÚNG (tính chất hình chữ nhật SGK KNTT); d) SAI (tận cùng là 5 chỉ chia hết cho 5, không chia hết cho 2).`;
         } else if (curType === 'tra_loi_ngan') {
-          qText = `[Tin học ${grade} - ${cleanTopic}] Cho biết phím tắt thông dụng để Sao chép (Copy) dữ liệu được chọn trên hệ điều hành Windows?`;
+          qText = `[Toán ${gNum} - ${activeTopic}] Tìm số nguyên x biết: 3x - (-15) = 36? (Nhập kết quả là một số)`;
           opts = [];
-          correct = 'Ctrl + C';
-          exp = `Đáp án: Phím tắt Ctrl + C (hoặc Ctrl+C).`;
+          correct = '7';
+          exp = `Đáp án đúng: 7. Lời giải: 3x + 15 = 36 => 3x = 36 - 15 = 21 => x = 21 : 3 = 7.`;
         } else {
-          qText = `[Tin học ${grade} - ${cleanTopic}] Trình bày 3 quy tắc văn hóa và an toàn thông tin quan trọng khi tham gia không gian mạng dành cho học sinh THCS.`;
+          qText = `[Toán ${gNum} - ${activeTopic}] Một mảnh đất hình thang cân có độ dài hai đáy lần lượt là 12m và 20m, chiều cao là 8m. Người ta lát gạch lối đi xung quanh và trồng cỏ bên trong.
+1) Hãy tính diện tích của mảnh đất hình thang cân này.
+2) Biết chi phí mua cỏ giống là 45.000 đồng/m². Tính tổng số tiền cần dùng để phủ kín toàn bộ diện tích mảnh đất.`;
           opts = [];
           correct = '';
-          exp = `Hướng dẫn chấm: 1. Bảo mật thông tin cá nhân; 2. Tôn trọng người khác; 3. Kiểm chứng thông tin trước khi chia sẻ.`;
+          exp = `Ma trận & Thang điểm chấm tự luận:
+- Câu 1: Công thức diện tích hình thang: S = ((12 + 20) x 8) / 2 = 128 (m²). (1.0 điểm)
+- Câu 2: Tổng chi phí mua cỏ: 128 x 45.000 = 5.760.000 (đồng). (1.0 điểm)
+- Kết luận và đơn vị chuẩn xác. (0.5 điểm)`;
         }
-      } else if (subjectId === 'van' || subName.toLowerCase().includes('văn')) {
+      }
+      // 2. NGỮ VĂN (SGK KẾT NỐI TRI THỨC)
+      else if (subKey.includes('van')) {
+        const textEx = kbItem.textSample || 'Ngữ liệu văn bản SGK Kết Nối Tri Thức';
         if (curType === 'trac_nghiem') {
-          qText = `[Ngữ văn ${grade} - ${cleanTopic}] Trong tác phẩm thuộc chủ đề "${cleanTopic}", biện pháp nghệ thuật nào được tác giả sử dụng chủ yếu để khắc họa tình cảm nhân vật?`;
+          qText = `[Ngữ văn ${gNum} - ${activeTopic}] Đọc ngữ liệu bài học thuộc chủ đề "${activeTopic}" (${textEx}), biện pháp nghệ thuật nào dưới đây được tác giả vận dụng nổi bật nhất?`;
           opts = [
-            `A. So sánh kết hợp với ẩn dụ và từ ngữ giàu hình ảnh`,
-            `B. Liệt kê không có chọn lọc`,
-            `C. Tương phản tuyệt đối giữa hiện thực và hoang đường`,
-            `D. Nhân hóa kết hợp với thành ngữ hiện đại`
+            `A. So sánh kết hợp với nhân hóa và từ ngữ giàu tính gợi hình, gợi cảm`,
+            `B. Sử dụng hoàn toàn từ ngữ địa phương khó hiểu`,
+            `C. Liệt kê trùng lặp không có chọn lọc nghệ thuật`,
+            `D. Chỉ sử dụng câu rút gọn và câu đặc biệt`
           ];
           correct = 0;
-          exp = `Giải thích: Tác giả sử dụng kết hợp nghệ thuật so sánh và ẩn dụ giúp khắc họa sâu sắc tâm trạng nhân vật.`;
+          exp = `Giải thích (SGK Ngữ văn ${gNum} KNTT): Biện pháp so sánh và nhân hóa giúp cảnh vật và tâm trạng nhân vật trở nên sinh động, gần gũi và gợi cảm xúc sâu sắc cho người đọc.`;
         } else if (curType === 'dung_sai') {
-          qText = `[Ngữ văn ${grade} - ${cleanTopic}] Đánh giá tính Đúng hay Sai của các khẳng định sau:`;
+          qText = `[Ngữ văn ${gNum} - ${activeTopic}] Đánh giá tính Đúng hay Sai của các khẳng định sau về kiến thức Đọc hiểu và Thực hành Tiếng Việt:`;
           opts = [
-            `a. Văn bản tự sự là văn bản trình bày chuỗi các sự việc nối tiếp nhau.`,
-            `b. Từ ghép là từ được tạo thành bởi các tiếng không có nghĩa.`,
-            `c. Thơ 4 chữ hoặc 5 chữ có nhịp điệu ngắn, phù hợp với cảm xúc hồn nhiên.`,
-            `d. Trạng ngữ là thành phần chính bắt buộc phải có trong câu.`
-          ];
-          correct = [true, false, true, false];
-          exp = `Giải thích: b sai vì từ ghép được tạo từ các tiếng có quan hệ về nghĩa; d sai vì trạng ngữ là thành phần phụ.`;
-        } else if (curType === 'tra_loi_ngan') {
-          qText = `[Ngữ văn ${grade} - ${cleanTopic}] Tìm từ láy tượng hình trong câu văn sau: "Những giọt sương long lanh đọng trên kẽ lá."?`;
-          opts = [];
-          correct = 'long lanh';
-          exp = `Đáp án đúng: long lanh.`;
-        } else {
-          qText = `[Ngữ văn ${grade} - ${cleanTopic}] Viết đoạn văn ngắn (khoảng 6 - 8 câu) ghi lại cảm nghĩ của em về nhân vật trung tâm trong bài học "${cleanTopic}".`;
-          opts = [];
-          correct = '';
-          exp = `Hướng dẫn chấm: Đảm bảo cấu trúc đoạn văn, nêu rõ phẩm chất nhân vật, câu văn mạch lạc, cảm xúc chân thành.`;
-        }
-      } else {
-        if (curType === 'trac_nghiem') {
-          qText = `[${subName} ${grade} - ${cleanTopic}] Khẳng định nào sau đây mô tả chính xác nhất nguyên lý trọng tâm của bài học "${cleanTopic}"?`;
-          opts = [
-            `A. Hiểu rõ bản chất khái niệm và thực hành đúng tiến trình quy định`,
-            `B. Chỉ học thuộc lòng lý thuyết mà không cần liên hệ thực tế`,
-            `C. Bỏ qua các bước kiểm tra an toàn và quy trình cơ bản`,
-            `D. Áp dụng kết quả ngẫu nhiên không có căn cứ khoa học`
-          ];
-          correct = 0;
-          exp = `Giải thích: Chuẩn kiến thức kỹ năng môn ${subName} đòi hỏi học sinh nắm vững lý thuyết và vận dụng thực hành.`;
-        } else if (curType === 'dung_sai') {
-          qText = `[${subName} ${grade} - ${cleanTopic}] Đánh giá tính Đúng/Sai của các nhận định dưới đây:`;
-          opts = [
-            `a. Bài học hỗ trợ phát triển năng lực tự học và giải quyết vấn đề.`,
-            `b. Việc thảo luận nhóm giúp học sinh hiểu sâu sắc hơn nội dung trọng tâm.`,
-            `c. Mọi bài tập thực hành đều không liên quan đến bài học lý thuyết.`,
-            `d. Đánh giá kết quả học tập bao gồm cả thái độ và kỹ năng thực hành.`
+            `a. Người kể chuyện ngôi thứ nhất xưng "tôi" và trực tiếp chứng kiến hoặc tham gia vào câu chuyện.`,
+            `b. Từ ghép đẳng lập là từ ghép mà các tiếng bình đẳng về mặt ngữ pháp, không phân tiếng chính, tiếng phụ.`,
+            `c. Trạng ngữ là thành phần chính bắt buộc phải có để câu hoàn chỉnh về mặt cấu trúc ngữ pháp.`,
+            `d. Biện pháp tu từ ẩn dụ là gọi tên sự vật, hiện tượng này bằng tên sự vật, hiện tượng khác có nét tương đồng.`
           ];
           correct = [true, true, false, true];
-          exp = `Giải thích: c sai vì thực hành là bước vận dụng lý thuyết vào thực tế.`;
+          exp = `Giải thích Đúng/Sai: a) ĐÚNG; b) ĐÚNG (khái niệm từ ghép đẳng lập KNTT); c) SAI (trạng ngữ là thành phần phụ của câu); d) ĐÚNG (định nghĩa ẩn dụ).`;
         } else if (curType === 'tra_loi_ngan') {
-          qText = `[${subName} ${grade} - ${cleanTopic}] Hãy viết tên khái niệm cốt lõi được đề cập trong bài học "${cleanTopic}"?`;
+          qText = `[Ngữ văn ${gNum} - ${activeTopic}] Xác định từ láy tượng thanh trong câu văn sau: "Tiếng suối chảy róc rách qua từng khe đá mát lạnh."? (Nhập từ láy tìm được)`;
           opts = [];
-          correct = cleanTopic;
-          exp = `Đáp án: ${cleanTopic}.`;
+          correct = 'róc rách';
+          exp = `Đáp án đúng: róc rách. (Từ láy tượng thanh mô phỏng âm thanh tiếng nước chảy róc rách).`;
         } else {
-          qText = `[${subName} ${grade} - ${cleanTopic}] Nêu 2 ví dụ thực tế trong đời sống thể hiện ứng dụng của bài học "${cleanTopic}".`;
+          qText = `[Ngữ văn ${gNum} - ${activeTopic}] Viết một đoạn văn ngắn (từ 6 đến 8 câu) ghi lại cảm nghĩ sâu sắc của em về thông điệp cuộc sống được gửi gắm trong bài học "${activeTopic}". Trong đoạn văn có sử dụng ít nhất một biện pháp tu từ so sánh (gạch chân dưới câu văn có sử dụng biện pháp so sánh đó).`;
           opts = [];
           correct = '';
-          exp = `Hướng dẫn chấm: Nêu được 2 ví dụ cụ thể, chính xác, liên hệ sát thực tế đời sống.`;
+          exp = `Hướng dẫn chấm bài tự luận Ngữ văn:
+1. Về hình thức (0.75 đ): Đúng dung lượng 6 - 8 câu, không sai chính tả, diễn đạt mạch lạc.
+2. Về nội dung (1.25 đ): Nêu rõ cảm nghĩ về thông điệp ý nghĩa (yêu thương gia đình, tình yêu quê hương, bảo vệ thiên nhiên...).
+3. Tiếng Việt (0.5 đ): Sử dụng đúng và chỉ rõ được 01 câu có biện pháp tu từ so sánh.`;
+        }
+      }
+      // 3. TIẾNG ANH (GLOBAL SUCCESS - KNTT)
+      else if (subKey.includes('anh') || subKey.includes('eng')) {
+        if (curType === 'trac_nghiem') {
+          qText = `[English ${gNum} - ${activeTopic}] Choose the best answer (A, B, C or D) to complete the sentence: "My brother usually ________ basketball with his classmates after school on Fridays."`;
+          opts = [
+            `A. plays`,
+            `B. is playing`,
+            `C. play`,
+            `D. played`
+          ];
+          correct = 0;
+          exp = `Explanation: In English Grade ${gNum} (Global Success), with subject "My brother" (singular noun) and the adverb of frequency "usually", we use the Present Simple tense with verb ending in -s/-es -> "plays".`;
+        } else if (curType === 'dung_sai') {
+          qText = `[English ${gNum} - ${activeTopic}] Read the statements about English grammar & vocabulary in Unit "${activeTopic}" and decide whether each statement is True (T) or False (F):`;
+          opts = [
+            `a. The adverb of frequency "always" usually goes before the main verb and after the verb "to be".`,
+            `b. The comparative form of the adjective "good" is "gooder".`,
+            `c. We use "must" to express an obligation or something that is very necessary.`,
+            `d. "Neighbourhood" means the area of a town where people live and each other is friendly.`
+          ];
+          correct = [true, false, true, true];
+          exp = `Answer key: a) TRUE; b) FALSE (the comparative form of "good" is "better"); c) TRUE; d) TRUE.`;
+        } else if (curType === 'tra_loi_ngan') {
+          qText = `[English ${gNum} - ${activeTopic}] Give the correct form of the word in brackets: "Lan is very ________. She always helps her friends with their homework." (HELP)`;
+          opts = [];
+          correct = 'helpful';
+          exp = `Correct answer: helpful (Adjective describing personality from the verb help).`;
+        } else {
+          qText = `[English ${gNum} - ${activeTopic}] Write a short paragraph (50 - 70 words) about your favourite topic related to "${activeTopic}". Use the following prompts:
+- What is it?
+- Why do you like it?
+- How often do you do it?`;
+          opts = [];
+          correct = '';
+          exp = `Scoring Criteria (Writing):
+- Task achievement & content relevance: 1.0 pt
+- Vocabulary & Grammar accuracy (tenses, structures): 1.0 pt
+- Coherence and connectors: 0.5 pt`;
+        }
+      }
+      // 4. KHOA HỌC TỰ NHIÊN (KHTN KNTT)
+      else if (subKey.includes('khtn') || subKey.includes('ly') || subKey.includes('hoa') || subKey.includes('sinh')) {
+        if (curType === 'trac_nghiem') {
+          qText = `[KHTN ${gNum} - ${activeTopic}] Theo chương trình KHTN ${gNum} bộ sách Kết Nối Tri Thức, phát biểu nào sau đây mô tả ĐÚNG nhất bản chất khoa học của bài học "${activeTopic}"?`;
+          opts = [
+            `A. ${kbItem.focus ? kbItem.focus.split(',')[0] : 'Tế bào là đơn vị cơ bản cấu tạo nên mọi cơ thể sống.'}`,
+            `B. Chất rắn không có hình dạng xác định và luôn chiếm toàn bộ thể tích bình chứa.`,
+            `C. Khối lượng của một vật thay đổi khi đưa vật từ Trái Đất lên Mặt Trăng.`,
+            `D. Khi nhiệt độ tăng thì sự nở vì nhiệt của các chất lỏng khác nhau luôn giống hệt nhau.`
+          ];
+          correct = 0;
+          exp = `Giải thích (KHTN ${gNum} KNTT): Khẳng định A phản ánh chính xác kiến thức cốt lõi. B sai vì chất rắn có hình dạng xác định; C sai vì khối lượng là lượng chất không đổi; D sai vì các chất lỏng khác nhau nở vì nhiệt khác nhau.`;
+        } else if (curType === 'dung_sai') {
+          qText = `[KHTN ${gNum} - ${activeTopic}] Xác định tính Đúng hay Sai của các mệnh đề khoa học thực nghiệm sau đây:`;
+          opts = [
+            `a. Tế bào nhân thực có màng nhân bao bọc vật chất di truyền, tế bào nhân sơ thì không có màng nhân.`,
+            `b. Lực ma sát trượt luôn cùng chiều với chiều chuyển động của vật.`,
+            `c. Năng lượng không tự sinh ra cũng không tự mất đi, chỉ chuyển hóa từ dạng này sang dạng khác.`,
+            `d. Nước cất là một hỗn hợp gồm nhiều chất hóa học khác nhau hòa tan.`
+          ];
+          correct = [true, false, true, false];
+          exp = `Giải thích: a) ĐÚNG; b) SAI (lực ma sát trượt cản trở chuyển động nên ngược chiều); c) ĐÚNG (Định luật bảo toàn năng lượng); d) SAI (nước cất là chất tinh khiết).`;
+        } else if (curType === 'tra_loi_ngan') {
+          qText = `[KHTN ${gNum} - ${activeTopic}] Đơn vị đo lực chuẩn trong Hệ đo lường quốc tế (SI) là gì? (Nhập tên đầy đủ hoặc kí hiệu chữ cái)`;
+          opts = [];
+          correct = 'Niutơn';
+          exp = `Đáp án đúng: Niutơn (hoặc N / Newton).`;
+        } else {
+          qText = `[KHTN ${gNum} - ${activeTopic}] Hãy giải thích vì sao khi mùa đông thời tiết hanh khô, khi cởi áo len bằng sợi tổng hợp trong phòng tối ta thường nghe thấy tiếng lách tách nhỏ và có thể thấy những tia lửa điện nhỏ lóe sáng? Nêu cách phòng tránh hiện tượng tĩnh điện này trong đời sống.`;
+          opts = [];
+          correct = '';
+          exp = `Hướng dẫn chấm KHTN:
+- Giải thích hiện tượng nhiễm điện do cọ xát giữa các lớp áo len (1.25 đ).
+- Giải thích sự phóng điện tạo tia lửa điện và tiếng nổ lách tách (0.75 đ).
+- Nêu biện pháp: tăng độ ẩm không khí, mặc áo vải cotton tự nhiên, dùng nước xả vải chống tĩnh điện (0.5 đ).`;
+        }
+      }
+      // 5. TIN HỌC (KNTT)
+      else if (subKey.includes('tin')) {
+        if (curType === 'trac_nghiem') {
+          qText = `[Tin học ${gNum} - ${activeTopic}] Liên quan đến chủ đề "${activeTopic}" (SGK Tin học ${gNum} Kết Nối Tri Thức), khẳng định nào sau đây nêu ĐÚNG nhất theo chuẩn GDPT 2018?`;
+          opts = [
+            `A. Thông tin là những hiểu biết của con người về thế giới xung quanh và về chính bản thân mình`,
+            `B. Dữ liệu và thông tin là hai khái niệm hoàn toàn đồng nhất và không có sự phân biệt`,
+            `C. Mạng không dây (Wi-Fi) chỉ có thể kết nối được tối đa hai thiết bị máy tính cùng lúc`,
+            `D. Việc chia sẻ thông tin cá nhân của người khác lên mạng xã hội không bao giờ vi phạm pháp luật`
+          ];
+          correct = 0;
+          exp = `Giải thích (Tin học ${gNum} KNTT): Khái niệm chuẩn SGK: Thông tin là sự hiểu biết; dữ liệu là các con số, văn bản, hình ảnh, âm thanh được máy tính tiếp nhận và xử lí.`;
+        } else if (curType === 'dung_sai') {
+          qText = `[Tin học ${gNum} - ${activeTopic}] Đánh giá tính Đúng/Sai của các nhận định dưới đây về sử dụng phần mềm và an toàn thông tin số:`;
+          opts = [
+            `a. Mật khẩu mạnh nên có ít nhất 8 kí tự, kết hợp chữ hoa, chữ thường, chữ số và kí tự đặc biệt.`,
+            `b. Tệp có phần mở rộng .xlsx là tệp trình chiếu do phần mềm PowerPoint tạo ra.`,
+            `c. Trong bảng tính Excel, để tính trung bình cộng của một khối ô tính ta sử dụng hàm AVERAGE.`,
+            `d. Cấu trúc lặp trong thuật toán cho phép thực hiện một khối lệnh nhiều lần theo điều kiện.`
+          ];
+          correct = [true, false, true, true];
+          exp = `Giải thích: a) ĐÚNG; b) SAI (.xlsx là tệp bảng tính Excel); c) ĐÚNG (hàm AVERAGE); d) ĐÚNG (khái niệm vòng lặp).`;
+        } else if (curType === 'tra_loi_ngan') {
+          qText = `[Tin học ${gNum} - ${activeTopic}] Trong phần mềm soạn thảo văn bản hoặc hệ điều hành Windows, tổ hợp phím tắt nào dùng để Lưu (Save) tệp văn bản đang mở?`;
+          opts = [];
+          correct = 'Ctrl + S';
+          exp = `Đáp án đúng: Ctrl + S (hoặc Ctrl+S / Ctrl-S).`;
+        } else {
+          qText = `[Tin học ${gNum} - ${activeTopic}] Em hãy nêu 3 mối nguy cơ phổ biến khi học sinh tham gia mạng xã hội và đề xuất 3 biện pháp cụ thể để bảo vệ thông tin cá nhân và tài khoản trực tuyến của bản thân một cách an toàn, văn minh.`;
+          opts = [];
+          correct = '';
+          exp = `Thang điểm chấm Tin học:
+- Nêu đúng 3 nguy cơ (lộ lọt thông tin, lừa đảo trực tuyến, bạo lực mạng) (1.25 đ).
+- Đề xuất 3 biện pháp đúng đắn (đặt mật khẩu mạnh, không kết bạn với người lạ, không truy cập liên kết đáng ngờ) (1.25 đ).`;
+        }
+      }
+      // 6. LỊCH SỬ & ĐỊA LÝ, GDCD, CÔNG NGHỆ, CÁC MÔN CÒN LẠI
+      else {
+        if (curType === 'trac_nghiem') {
+          qText = `[${subName} ${gNum} - ${activeTopic}] Trong chương trình ${subName} ${gNum} (bộ sách Kết Nối Tri Thức Với Cuộc Sống), nội dung nào dưới đây phản ánh ĐÚNG nhất bài học "${activeTopic}"?`;
+          opts = [
+            `A. Nắm vững bản chất kiến thức cốt lõi và vận dụng linh hoạt vào thực tiễn đời sống`,
+            `B. Chỉ ghi nhớ máy móc câu chữ mà không cần hiểu ý nghĩa ứng dụng thực tế`,
+            `C. Bỏ qua các bước kiểm tra an toàn và quy trình thực nghiệm quy định`,
+            `D. Áp dụng các kết quả phỏng đoán ngẫu nhiên không có cơ sở khoa học`
+          ];
+          correct = 0;
+          exp = `Giải thích (${subName} ${gNum} KNTT): Đáp án A đáp ứng đúng mục tiêu phát triển phẩm chất và năng lực của Chương trình GDPT 2018.`;
+        } else if (curType === 'dung_sai') {
+          qText = `[${subName} ${gNum} - ${activeTopic}] Nhận định tính Đúng hoặc Sai cho các mệnh đề sau đây:`;
+          opts = [
+            `a. Việc học tập môn ${subName} giúp học sinh nâng cao hiểu biết và rèn luyện kĩ năng giải quyết vấn đề.`,
+            `b. Giữ gìn và phát huy các giá trị văn hóa truyền thống tốt đẹp là trách nhiệm của mỗi công dân.`,
+            `c. Mọi hành vi vi phạm chuẩn mực đạo đức và pháp luật đều không để lại hậu quả cho xã hội.`,
+            `d. Thực hành và liên hệ thực tế là phương pháp quan trọng để ghi nhớ kiến thức sâu sắc.`
+          ];
+          correct = [true, true, false, true];
+          exp = `Giải thích: a) ĐÚNG; b) ĐÚNG; c) SAI (vi phạm pháp luật luôn gây hại cho xã hội); d) ĐÚNG.`;
+        } else if (curType === 'tra_loi_ngan') {
+          qText = `[${subName} ${gNum} - ${activeTopic}] Nêu từ khóa khái niệm quan trọng nhất được nhấn mạnh trong bài học "${activeTopic}"?`;
+          opts = [];
+          correct = cleanTopic.split(/[-–:]/)[0].trim() || 'Trách nhiệm';
+          exp = `Đáp án: ${correct}.`;
+        } else {
+          qText = `[${subName} ${gNum} - ${activeTopic}] Từ nội dung bài học "${activeTopic}", em hãy liên hệ thực tế tại trường học hoặc địa phương nơi em đang sinh sống và nêu 2 việc làm cụ thể mà học sinh THCS có thể thực hiện để đóng góp tích cực cho cộng đồng.`;
+          opts = [];
+          correct = '';
+          exp = `Hướng dẫn chấm:
+- Nêu được 2 việc làm cụ thể, thiết thực, phù hợp lứa tuổi học sinh THCS (2.0 đ).
+- Bài viết có cảm xúc chân thành, lập luận rõ ràng, thuyết phục (0.5 đ).`;
         }
       }
 
@@ -3054,8 +3421,8 @@ class LMSApp {
         subjectId: subjectId || 'toan',
         chapterId: chapterId || null,
         lessonId: lessonId || null,
-        topic: cleanTopic,
-        grade: parseInt(grade) || 6,
+        topic: activeTopic,
+        grade: gNum,
         type: curType,
         difficulty: curDiff,
         questionText: qText,
@@ -3070,6 +3437,9 @@ class LMSApp {
     return generated;
   }
 
+  // =========================================================================
+  // 🌟 MODAL CẤU HÌNH TẠO CÂU HỎI BẰNG AI (CÓ Ô NHẬP PROMPT GIÁO VIÊN & ĐẦY ĐỦ DẠNG)
+  // =========================================================================
   showGenerateQuestionsAIModal(subjectId, parentDom) {
     const oldModal = document.getElementById('generate-ai-q-modal');
     if (oldModal) oldModal.remove();
@@ -3086,30 +3456,32 @@ class LMSApp {
 
     const modal = document.createElement('div');
     modal.id = 'generate-ai-q-modal';
-    modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.7); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1.25rem; animation:fadeIn 0.2s ease-out;';
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.75); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1.25rem; animation:fadeIn 0.2s ease-out;';
 
     modal.innerHTML = `
-      <div class="glass-card" style="width:100%; max-width:820px; padding:1.75rem; border-radius:18px; background:#fff; box-shadow:0 25px 60px rgba(0,0,0,0.35); font-family:var(--font-title); max-height:92vh; display:flex; flex-direction:column;">
+      <div class="glass-card" style="width:100%; max-width:860px; padding:1.85rem; border-radius:20px; background:#ffffff; box-shadow:0 25px 70px rgba(0,0,0,0.4); font-family:var(--font-body); max-height:94vh; display:flex; flex-direction:column; border:2px solid #8b5cf6;">
         
-        <!-- Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; border-bottom:2px solid #e2e8f0; padding-bottom:0.75rem;">
+        <!-- Header Banner -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:2px solid #e2e8f0; padding-bottom:0.85rem;">
           <div>
-            <h3 style="margin:0; color:#7c3aed; ; font-weight: 400; font-size:1.25rem; display:flex; align-items:center; gap:0.4rem;">
-              <span>✨</span> Tạo Câu Hỏi Tự Động Bằng AI (Chuẩn GDPT 2018 & CV 7991)
+            <div style="display:inline-flex; align-items:center; gap:0.4rem; background:#f5f3ff; border:1px solid #ddd6fe; color:#6d28d9; padding:0.2rem 0.65rem; border-radius:20px; font-size:0.78rem; font-weight:700; margin-bottom:0.35rem;">
+              📘 BỘ SÁCH KẾT NỐI TRI THỨC VỚI CUỘC SỐNG — CHUẨN GDPT 2018 & CV 7991
+            </div>
+            <h3 style="margin:0; color:#6d28d9; font-family:var(--font-title); font-weight:800; font-size:1.35rem; display:flex; align-items:center; gap:0.45rem;">
+              <span>✨</span> TẠO CÂU HỎI TỰ ĐỘNG BẰNG AI
             </h3>
-            <p style="margin:0.2rem 0 0 0; font-size:0.83rem; color:#475569; font-weight:400; font-size:0.88rem; font-family:var(--font-body);">
-              Hệ thống AI tự động biên soạn câu hỏi theo đúng Chủ đề, Bài học, Dạng câu hỏi và Mức độ đánh giá.
-            </p>
           </div>
-          <button id="close-ai-q-modal" style="background:none; border:none; font-size:1.6rem; cursor:pointer; color:#475569; font-weight:400; font-size:0.88rem; line-height:1;">&times;</button>
+          <button id="close-ai-q-modal" style="background:#f1f5f9; border:1px solid #cbd5e1; width:34px; height:34px; border-radius:50%; font-size:1.2rem; cursor:pointer; color:#475569; display:flex; align-items:center; justify-content:center; transition:all 0.15s;">&times;</button>
         </div>
 
         <!-- Form Area -->
-        <form id="form-ai-q-config" style="display:flex; flex-direction:column; gap:1rem; flex-shrink:0;">
-          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.75rem;">
+        <form id="form-ai-q-config" style="display:flex; flex-direction:column; gap:0.9rem; flex-shrink:0; max-height:45vh; overflow-y:auto; padding-right:0.35rem;">
+          
+          <!-- Hàng 1: Môn học - Khối lớp - Số lượng -->
+          <div style="display:grid; grid-template-columns: 1.3fr 1fr 1fr; gap:0.75rem;">
             <div>
-              <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">Môn Học:</label>
-              <select id="ai-q-subject" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400; font-size:0.88rem;">
+              <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📚 Môn Học:</label>
+              <select id="ai-q-subject" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:600; font-size:0.9rem; background:#fff;">
                 ${subjects.map(s => `
                   <option value="${s.id}" ${(s.id === activeSubId) ? 'selected' : ''}>${s.icon || '📚'} ${s.name}</option>
                 `).join('')}
@@ -3117,8 +3489,8 @@ class LMSApp {
             </div>
 
             <div>
-              <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">Khối Lớp:</label>
-              <select id="ai-q-grade" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400; font-size:0.88rem;">
+              <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">🎓 Khối Lớp:</label>
+              <select id="ai-q-grade" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:600; font-size:0.9rem; background:#fff;">
                 <option value="6">Khối 6</option>
                 <option value="7">Khối 7</option>
                 <option value="8">Khối 8</option>
@@ -3127,72 +3499,97 @@ class LMSApp {
             </div>
 
             <div>
-              <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">Số Lượng Câu Hỏi:</label>
-              <select id="ai-q-count" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400; font-size:0.88rem;">
+              <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">🔢 Số Lượng Câu:</label>
+              <select id="ai-q-count" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:600; font-size:0.9rem; background:#fff;">
                 <option value="3">3 câu hỏi</option>
                 <option value="5" selected>5 câu hỏi (Khuyên dùng)</option>
                 <option value="10">10 câu hỏi</option>
+                <option value="15">15 câu hỏi</option>
+                <option value="20">20 câu hỏi</option>
               </select>
             </div>
           </div>
 
-          <!-- Chapter & Lesson selection -->
+          <!-- Hàng 2: Chủ đề / Chương - Bài học trọng tâm -->
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
             <div>
-              <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">Chủ Đề / Chương:</label>
-              <select id="ai-q-chapter" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400; font-size:0.88rem;">
+              <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📂 Chủ Đề / Chương (SGK KNTT):</label>
+              <select id="ai-q-chapter" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff;">
                 <option value="">📂 Tất cả Chủ đề / Chương</option>
                 ${subChapters.map(c => `<option value="${c.id}">${c.title}</option>`).join('')}
               </select>
             </div>
 
             <div>
-              <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">Bài Học Trọng Tâm:</label>
-              <select id="ai-q-lesson" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400; font-size:0.88rem;">
+              <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📖 Bài Học Trọng Tâm:</label>
+              <select id="ai-q-lesson" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff;">
                 <option value="">📖 Tất cả các Bài học</option>
                 ${subLessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('')}
               </select>
             </div>
           </div>
 
+          <!-- Hàng 3: Dạng câu hỏi & Mức độ đánh giá -->
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
             <div>
-              <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">Dạng Câu Hỏi (CV 7991):</label>
-              <select id="ai-q-type" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400; font-size:0.88rem;">
-                <option value="all">🌐 Tất cả các dạng câu hỏi (Phối hợp)</option>
+              <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📋 Dạng Câu Hỏi (Chuẩn CV 7991):</label>
+              <select id="ai-q-type" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff; font-weight:600;">
+                <option value="all">🌐 Phối hợp tất cả các dạng (GDPT 2018)</option>
                 <option value="trac_nghiem">📝 TNKQ Nhiều lựa chọn (4 chọn 1)</option>
-                <option value="dung_sai">⚖️ TNKQ Đúng - Sai (Các ý a, b, c, d...)</option>
+                <option value="dung_sai">⚖️ TNKQ Đúng - Sai (Các ý a, b, c, d)</option>
                 <option value="tra_loi_ngan">✍️ TNKQ Trả lời ngắn</option>
-                <option value="tu_luan">📖 Tự luận</option>
+                <option value="tu_luan">📖 Tự luận (Kèm ma trận hướng dẫn chấm)</option>
               </select>
             </div>
 
             <div>
-              <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">Mức Độ Đánh Giá:</label>
-              <select id="ai-q-diff" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400; font-size:0.88rem;">
-                <option value="all">📊 Ma trận phối hợp (Nhận biết, Thông hiểu, Vận dụng)</option>
-                <option value="nhan_biet">🟢 Nhận biết (Biết)</option>
-                <option value="thong_hieu">🟡 Thông hiểu (Hiểu)</option>
-                <option value="van_dung">🔴 Vận dụng</option>
+              <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">🎯 Mức Độ Đánh Giá:</label>
+              <select id="ai-q-diff" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff; font-weight:600;">
+                <option value="all">📊 Ma trận phối hợp (Nhận biết, Thông hiểu, Vận dụng, Vận dụng cao)</option>
+                <option value="nhan_biet">🟢 Nhận biết (Tái hiện kiến thức cơ bản)</option>
+                <option value="thong_hieu">🟡 Thông hiểu (Giải thích, suy luận)</option>
+                <option value="van_dung">🔴 Vận dụng (Tình huống thực tế)</option>
+                <option value="van_dung_cao">🟣 Vận dụng cao (Phân tích, tổng hợp phức hợp)</option>
               </select>
             </div>
           </div>
 
+          <!-- Hàng 4: Chủ đề tùy chọn -->
           <div>
-            <label style="font-weight: 500; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">Hoặc Nhập Tên Chủ Đề / Nội Dung Cụ Thể (Tùy chọn):</label>
-            <input type="text" id="ai-q-topic" placeholder="Ví dụ: Phân số và Số thập phân, Thông tin & Dữ liệu, Hệ sinh thái..." style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.9rem;">
+            <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📌 Chủ Đề / Bài Học Cụ Thể (Tùy chọn):</label>
+            <input type="text" id="ai-q-topic" placeholder="Ví dụ: Phân số và Số thập phân, Hình thang cân, Thông tin & Dữ liệu, Hiện tượng quang hợp..." style="width:100%; padding:0.6rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.9rem;">
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
-            <button type="button" id="btn-cancel-ai-q" class="btn btn-secondary" style="font-weight: 400;">Hủy</button>
-            <button type="submit" id="btn-run-ai-gen" class="btn btn-primary" style="; font-weight: 400; background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color:#fff; border:none; padding:0.6rem 1.25rem; border-radius:10px; box-shadow:0 4px 14px rgba(124,58,237,0.35); cursor:pointer;">
-              🚀 Sinh Câu Hỏi Bằng AI
+          <!-- Hàng 5 (MỚI): Ô NHẬP YÊU CẦU RIÊNG CỦA GIÁO VIÊN (TEACHER PROMPT) -->
+          <div style="background:#f8fafc; border:1.5px solid #c4b5fd; border-radius:14px; padding:0.9rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; flex-wrap:wrap; gap:0.4rem;">
+              <label for="ai-q-teacher-prompt" style="font-weight:800; font-size:0.88rem; color:#6d28d9; display:flex; align-items:center; gap:0.35rem; margin:0;">
+                <span>💡</span> YÊU CẦU RIÊNG CỦA THẦY/CÔ (PROMPT TÙY BIẾN CHO AI):
+              </label>
+              <span style="font-size:0.75rem; color:#64748b;">(Tùy chọn thêm để câu hỏi sát với bài giảng)</span>
+            </div>
+            
+            <textarea id="ai-q-teacher-prompt" rows="2" placeholder="Ví dụ: Cho bài toán thực tế có liên hệ mảnh ruộng hình chữ nhật; hoặc Tạo câu hỏi đọc hiểu bài thơ Đồng dao mùa xuân; hoặc Tập trung ngữ pháp thì Hiện tại hoàn thành..." style="width:100%; padding:0.6rem 0.8rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.88rem; font-family:var(--font-body); resize:vertical;"></textarea>
+
+            <!-- Gợi ý nhanh (Quick Prompt Chips) -->
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-top:0.45rem;">
+              <button type="button" class="ai-prompt-chip" data-text="Lồng ghép tình huống thực tế đời sống gắn liền địa phương Tây Nguyên" style="background:#fff; border:1px solid #cbd5e1; border-radius:20px; padding:0.2rem 0.6rem; font-size:0.75rem; color:#475569; cursor:pointer;">+ Tình huống thực tế</button>
+              <button type="button" class="ai-prompt-chip" data-text="Câu hỏi có bảng số liệu và yêu cầu phân tích kết quả" style="background:#fff; border:1px solid #cbd5e1; border-radius:20px; padding:0.2rem 0.6rem; font-size:0.75rem; color:#475569; cursor:pointer;">+ Bảng số liệu thống kê</button>
+              <button type="button" class="ai-prompt-chip" data-text="Trọng tâm rèn luyện kĩ năng tính toán và lập luận logic từng bước" style="background:#fff; border:1px solid #cbd5e1; border-radius:20px; padding:0.2rem 0.6rem; font-size:0.75rem; color:#475569; cursor:pointer;">+ Rèn kĩ năng tính toán</button>
+              <button type="button" class="ai-prompt-chip" data-text="Ngữ liệu chuẩn trích từ sách giáo khoa Kết Nối Tri Thức Với Cuộc Sống" style="background:#fff; border:1px solid #cbd5e1; border-radius:20px; padding:0.2rem 0.6rem; font-size:0.75rem; color:#475569; cursor:pointer;">+ Bám sát ngữ liệu SGK KNTT</button>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.3rem;">
+            <button type="button" id="btn-cancel-ai-q" class="btn btn-secondary" style="font-weight:600; padding:0.6rem 1.25rem;">✕ Đóng</button>
+            <button type="submit" id="btn-run-ai-gen" class="btn btn-primary" style="font-weight:800; font-family:var(--font-title); background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color:#fff; border:none; padding:0.65rem 1.5rem; border-radius:10px; box-shadow:0 4px 14px rgba(124,58,237,0.35); cursor:pointer; display:flex; align-items:center; gap:0.4rem;">
+              <span>🚀</span> SINH CÂU HỎI BẰNG AI
             </button>
           </div>
         </form>
 
         <!-- Preview Results Area -->
-        <div id="ai-q-results-area" style="margin-top:1.25rem; flex:1; overflow-y:auto; border-top:1.5px solid #e2e8f0; padding-top:1rem; display:none;">
+        <div id="ai-q-results-area" style="margin-top:1.2rem; flex:1; overflow-y:auto; border-top:2px solid #e2e8f0; padding-top:1rem; display:none;">
         </div>
 
       </div>
@@ -3204,6 +3601,18 @@ class LMSApp {
 
     const form = modal.querySelector('#form-ai-q-config');
     const resultsArea = modal.querySelector('#ai-q-results-area');
+    const teacherPromptInput = modal.querySelector('#ai-q-teacher-prompt');
+
+    // Quick chips click
+    modal.querySelectorAll('.ai-prompt-chip').forEach(chip => {
+      chip.onclick = () => {
+        const text = chip.getAttribute('data-text');
+        if (teacherPromptInput) {
+          teacherPromptInput.value = teacherPromptInput.value ? (teacherPromptInput.value + '; ' + text) : text;
+          teacherPromptInput.focus();
+        }
+      };
+    });
 
     // Dynamic dropdown updates on subject change
     const subSelect = modal.querySelector('#ai-q-subject');
@@ -3242,86 +3651,156 @@ class LMSApp {
       const chapterId = chapSelect.value || null;
       const lessonId = lesSelect.value || null;
       const topic = modal.querySelector('#ai-q-topic').value.trim();
+      const teacherPrompt = teacherPromptInput ? teacherPromptInput.value.trim() : '';
 
       resultsArea.style.display = 'block';
       resultsArea.innerHTML = `
-        <div style="text-align:center; padding:2rem 1rem;">
-          <div style="font-size:2.5rem; animation:spin 1s infinite linear; display:inline-block; margin-bottom:0.5rem;">🤖</div>
-          <div style="font-weight: 500; color:#7c3aed; font-size:1.1rem;">AI đang phân tích chương trình GDPT 2018 & sinh ${count} câu hỏi...</div>
-          <div style="font-size:0.85rem; color:#475569; font-weight:400; font-size:0.88rem; margin-top:0.3rem;">Vui lòng đợi trong giây lát</div>
+        <div style="text-align:center; padding:2.5rem 1rem;">
+          <div style="font-size:3rem; animation:spin 1s infinite linear; display:inline-block; margin-bottom:0.6rem;">🤖</div>
+          <div style="font-weight:700; font-family:var(--font-title); color:#6d28d9; font-size:1.15rem;">AI đang phân tích Chuẩn GDPT 2018 (SGK Kết Nối Tri Thức) & sinh ${count} câu hỏi...</div>
+          <div style="font-size:0.85rem; color:#64748b; margin-top:0.4rem;">Đang cấu trúc hóa theo 4 dạng CV 7991 và yêu cầu sư phạm của giáo viên...</div>
         </div>
       `;
 
       setTimeout(() => {
-        const questionsList = this.generateAIQuestionsList(subId, grade, topic, type, diff, count, chapterId, lessonId);
+        const questionsList = this.generateAIQuestionsList(subId, grade, topic, type, diff, count, chapterId, lessonId, teacherPrompt);
         this.renderAIGeneratedPreview(resultsArea, questionsList, parentDom, modal);
-      }, 700);
+      }, 600);
     };
   }
 
+  // =========================================================================
+  // 🌟 HIỂN THỊ XEM TRƯỚC, BIÊN TẬP VÀ LƯU CÂU HỎI AI VÀO NGÂN HÀNG
+  // =========================================================================
   renderAIGeneratedPreview(container, questionsList, parentDom, modal) {
     let generatedItems = [...questionsList];
 
     const render = () => {
       const selectedCount = generatedItems.filter(q => q.checked).length;
       container.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; background:#f3e8ff; padding:0.75rem 1rem; border-radius:12px; border:1px solid #d8b4fe;">
-          <div style="font-weight: 500; color:#6b21a8; font-size:0.95rem; display:flex; align-items:center; gap:0.4rem;">
-            <span>🎉</span> Đã sinh thành công ${generatedItems.length} câu hỏi AI chuẩn CV 7991!
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; background:#f5f3ff; padding:0.85rem 1.1rem; border-radius:14px; border:1.5px solid #ddd6fe; flex-wrap:wrap; gap:0.5rem;">
+          <div style="font-weight:700; color:#5b21b6; font-size:0.95rem; display:flex; align-items:center; gap:0.4rem;">
+            <span>🎉</span> Đã sinh ${generatedItems.length} câu hỏi AI chuẩn SGK Kết Nối Tri Thức & CV 7991!
           </div>
-          <div style="font-size:0.85rem; color:#7e22ce; font-weight: 400;">
-            Đã chọn: ${selectedCount} / ${generatedItems.length} câu
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <label style="font-size:0.83rem; font-weight:600; color:#6d28d9; display:flex; align-items:center; gap:0.35rem; cursor:pointer;">
+              <input type="checkbox" id="chk-select-all-ai-q" ${selectedCount === generatedItems.length ? 'checked' : ''} style="width:16px; height:16px; accent-color:#7c3aed;">
+              <span>Chọn tất cả (${selectedCount}/${generatedItems.length})</span>
+            </label>
           </div>
         </div>
 
-        <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.25rem;">
-          ${generatedItems.map((q, idx) => `
-            <div style="background:#ffffff; border:1.5px solid ${q.checked ? '#a855f7' : '#cbd5e1'}; border-radius:12px; padding:1rem; box-shadow:0 4px 12px rgba(0,0,0,0.03); transition:all 0.2s;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
-                <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight: 500; color:#1e293b; font-size:0.95rem;">
-                  <input type="checkbox" class="chk-ai-q" data-idx="${idx}" ${q.checked ? 'checked' : ''} style="width:18px; height:18px; accent-color:#7c3aed;">
-                  <span>Câu hỏi ${idx + 1}</span>
-                </label>
+        <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.25rem; max-height:42vh; overflow-y:auto; padding-right:0.3rem;">
+          ${generatedItems.map((q, idx) => {
+            const qType = q.type || 'trac_nghiem';
+            const qDiff = q.difficulty || 'nhan_biet';
+            
+            const typeLabel = qType === 'trac_nghiem' ? '📝 Nhiều lựa chọn' : qType === 'dung_sai' ? '⚖️ Đúng - Sai' : qType === 'tra_loi_ngan' ? '✍️ Trả lời ngắn' : '📖 Tự luận';
+            const typeBg = qType === 'trac_nghiem' ? '#eff6ff' : qType === 'dung_sai' ? '#ecfdf5' : qType === 'tra_loi_ngan' ? '#fffbeb' : '#f5f3ff';
+            const typeColor = qType === 'trac_nghiem' ? '#1d4ed8' : qType === 'dung_sai' ? '#047857' : qType === 'tra_loi_ngan' ? '#b45309' : '#6d28d9';
 
-                <div style="display:flex; align-items:center; gap:0.4rem;">
-                  <span style="background:${q.difficulty === 'nhan_biet' ? '#dcfce7' : q.difficulty === 'thong_hieu' ? '#fef9c3' : '#fee2e2'}; color:${q.difficulty === 'nhan_biet' ? '#166534' : q.difficulty === 'thong_hieu' ? '#854d0e' : '#991b1b'}; font-weight: 500; font-size:0.75rem; padding:0.2rem 0.5rem; border-radius:6px;">
-                    ${q.difficulty === 'nhan_biet' ? '🟢 Nhận biết' : q.difficulty === 'thong_hieu' ? '🟡 Thông hiểu' : '🔴 Vận dụng'}
-                  </span>
-                  <span style="background:#eff6ff; color:#1d4ed8; font-weight: 500; font-size:0.75rem; padding:0.2rem 0.5rem; border-radius:6px;">
-                    ${q.type === 'trac_nghiem' ? '📝 Nhiều lựa chọn' : q.type === 'dung_sai' ? '⚖️ Đúng-Sai' : q.type === 'tra_loi_ngan' ? '✍️ Trả lời ngắn' : '📖 Tự luận'}
-                  </span>
+            const diffLabel = qDiff === 'nhan_biet' ? '🟢 Nhận biết' : qDiff === 'thong_hieu' ? '🟡 Thông hiểu' : qDiff === 'van_dung' ? '🔴 Vận dụng' : '🟣 Vận dụng cao';
+            const diffBg = qDiff === 'nhan_biet' ? '#dcfce7' : qDiff === 'thong_hieu' ? '#fef9c3' : qDiff === 'van_dung' ? '#fee2e2' : '#f3e8ff';
+            const diffColor = qDiff === 'nhan_biet' ? '#166534' : qDiff === 'thong_hieu' ? '#854d0e' : qDiff === 'van_dung' ? '#991b1b' : '#7e22ce';
+
+            let optionsHtml = '';
+            if (qType === 'trac_nghiem' && q.options && q.options.length > 0) {
+              optionsHtml = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.45rem; margin-bottom:0.6rem;">
+                  ${q.options.map((opt, oIdx) => {
+                    const isCorrect = (q.correctAnswer === oIdx);
+                    return `
+                      <div style="font-size:0.84rem; background:${isCorrect ? '#dcfce7' : '#f8fafc'}; border:1.5px solid ${isCorrect ? '#86efac' : '#e2e8f0'}; padding:0.45rem 0.65rem; border-radius:8px; color:${isCorrect ? '#166534' : '#334155'}; font-weight:${isCorrect ? '700' : '400'}; display:flex; justify-content:space-between; align-items:center;">
+                        <span>${opt}</span>
+                        ${isCorrect ? '<span style="font-size:0.75rem; background:#16a34a; color:#fff; padding:0.1rem 0.4rem; border-radius:4px;">✅ Đúng</span>' : ''}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `;
+            } else if (qType === 'dung_sai' && q.options && q.options.length > 0) {
+              optionsHtml = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.45rem; margin-bottom:0.6rem;">
+                  ${q.options.map((opt, oIdx) => {
+                    const isTrue = Array.isArray(q.correctAnswer) ? q.correctAnswer[oIdx] : true;
+                    return `
+                      <div style="font-size:0.83rem; background:#f8fafc; border:1px solid #e2e8f0; padding:0.45rem 0.65rem; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>${opt}</span>
+                        <span style="font-weight:700; background:${isTrue ? '#dcfce7' : '#fee2e2'}; color:${isTrue ? '#15803d' : '#b91c1c'}; padding:0.15rem 0.45rem; border-radius:4px; font-size:0.75rem;">
+                          ${isTrue ? '✅ ĐÚNG' : '❌ SAI'}
+                        </span>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `;
+            } else if (qType === 'tra_loi_ngan') {
+              optionsHtml = `
+                <div style="margin-bottom:0.6rem; font-size:0.86rem; background:#fffbeb; border:1.5px solid #fde68a; padding:0.5rem 0.8rem; border-radius:8px; color:#92400e;">
+                  🎯 Đáp án mẫu tự chấm: <strong>${q.correctAnswer || '---'}</strong>
+                </div>
+              `;
+            } else if (qType === 'tu_luan') {
+              optionsHtml = `
+                <div style="margin-bottom:0.6rem; font-size:0.84rem; background:#f5f3ff; border:1.5px solid #ddd6fe; padding:0.5rem 0.8rem; border-radius:8px; color:#6d28d9; white-space:pre-line;">
+                  💡 <strong>Gợi ý chấm & Thang điểm:</strong>
+${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
+                </div>
+              `;
+            }
+
+            return `
+              <div style="background:#ffffff; border:1.5px solid ${q.checked ? '#8b5cf6' : '#cbd5e1'}; border-radius:14px; padding:1.1rem; box-shadow:0 4px 12px rgba(0,0,0,0.03); transition:all 0.15s; position:relative;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.65rem; flex-wrap:wrap; gap:0.4rem;">
+                  <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight:700; color:#0f172a; font-size:0.95rem;">
+                    <input type="checkbox" class="chk-ai-q" data-idx="${idx}" ${q.checked ? 'checked' : ''} style="width:18px; height:18px; accent-color:#7c3aed; cursor:pointer;">
+                    <span>Câu ${idx + 1}</span>
+                  </label>
+
+                  <div style="display:flex; align-items:center; gap:0.45rem;">
+                    <span style="background:${diffBg}; color:${diffColor}; font-weight:700; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:6px;">
+                      ${diffLabel}
+                    </span>
+                    <span style="background:${typeBg}; color:${typeColor}; font-weight:700; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:6px;">
+                      ${typeLabel}
+                    </span>
+                  </div>
+                </div>
+
+                <div style="margin-bottom:0.6rem;">
+                  <textarea class="ai-q-text-input" data-idx="${idx}" rows="2" style="width:100%; padding:0.55rem 0.75rem; border-radius:8px; border:1.5px solid #cbd5e1; font-family:var(--font-body); font-size:0.92rem; font-weight:600; color:#1e293b;">${q.questionText}</textarea>
+                </div>
+
+                ${optionsHtml}
+
+                <div style="font-size:0.83rem; color:#475569; background:#f8fafc; padding:0.55rem 0.75rem; border-radius:8px; border:1px solid #e2e8f0; line-height:1.45;">
+                  <strong>💡 Lời giải / Hướng dẫn:</strong> ${q.explanation}
                 </div>
               </div>
-
-              <textarea class="ai-q-text-input" data-idx="${idx}" rows="2" style="width:100%; padding:0.5rem; border-radius:8px; border:1.5px solid #cbd5e1; font-family:var(--font-body); font-size:0.9rem; margin-bottom:0.5rem;">${q.questionText}</textarea>
-
-              ${(q.options && q.options.length > 0) ? `
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.4rem; margin-bottom:0.5rem;">
-                  ${q.options.map((opt, oIdx) => `
-                    <div style="font-size:0.83rem; background:${(Array.isArray(q.correctAnswer) ? q.correctAnswer[oIdx] : q.correctAnswer === oIdx) ? '#ecfdf5' : '#f8fafc'}; border:1px solid ${(Array.isArray(q.correctAnswer) ? q.correctAnswer[oIdx] : q.correctAnswer === oIdx) ? '#10b981' : '#e2e8f0'}; padding:0.35rem 0.6rem; border-radius:6px; color:#334155;">
-                      ${opt} ${(Array.isArray(q.correctAnswer) ? q.correctAnswer[oIdx] : q.correctAnswer === oIdx) ? '✅' : ''}
-                    </div>
-                  `).join('')}
-                </div>
-              ` : ''}
-
-              <div style="font-size:0.82rem; color:#475569; background:#f8fafc; padding:0.5rem; border-radius:6px; border:1.5px solid #e2e8f0;">
-                <strong>💡 Lời giải / Hướng dẫn:</strong> ${q.explanation}
-              </div>
-            </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:0.75rem; border-top:1.5px solid #e2e8f0;">
-          <button type="button" id="btn-re-gen-ai" class="btn btn-secondary" style="font-weight: 400;">
-            🔄 Tạo Bộ Khác
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:0.85rem; border-top:1.5px solid #e2e8f0; flex-wrap:wrap; gap:0.6rem;">
+          <button type="button" id="btn-re-gen-ai" class="btn btn-secondary" style="font-weight:600; padding:0.6rem 1.2rem; display:flex; align-items:center; gap:0.35rem;">
+            <span>🔄</span> Sinh Bộ Khác
           </button>
 
-          <button type="button" id="btn-save-ai-q-to-db" class="btn btn-primary" style="; font-weight: 400; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; padding:0.6rem 1.25rem; border-radius:10px; box-shadow:0 4px 14px rgba(16,185,129,0.35); cursor:pointer;">
-            📥 Lưu ${selectedCount} Câu Hỏi Vào Ngân Hàng
+          <button type="button" id="btn-save-ai-q-to-db" class="btn btn-primary" style="font-weight:800; font-family:var(--font-title); background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; padding:0.65rem 1.5rem; border-radius:10px; box-shadow:0 4px 14px rgba(16,185,129,0.35); cursor:pointer; display:flex; align-items:center; gap:0.4rem;">
+            <span>📥</span> LƯU ${selectedCount} CÂU HỎI VÀO NGÂN HÀNG
           </button>
         </div>
       `;
+
+      // Event: select all toggle
+      const chkSelectAll = container.querySelector('#chk-select-all-ai-q');
+      if (chkSelectAll) {
+        chkSelectAll.onchange = (e) => {
+          const isCheck = e.target.checked;
+          generatedItems.forEach(q => q.checked = isCheck);
+          render();
+        };
+      }
 
       container.querySelectorAll('.chk-ai-q').forEach(chk => {
         chk.onchange = (e) => {
@@ -3345,30 +3824,46 @@ class LMSApp {
       container.querySelector('#btn-save-ai-q-to-db').onclick = () => {
         const toSave = generatedItems.filter(q => q.checked);
         if (toSave.length === 0) {
-          if (typeof this.showToast === 'function') this.showToast('Vui lòng chọn ít nhất 1 câu hỏi để lưu!', 'error');
+          if (typeof this.showToast === 'function') this.showToast('Vui lòng chọn ít nhất 1 câu hỏi để lưu!', 'warning');
           return;
         }
 
         if (typeof db !== 'undefined' && db.addQuestion) {
           toSave.forEach(q => {
+            let items = null;
+            if (q.type === 'dung_sai' && Array.isArray(q.options)) {
+              items = q.options.map((opt, oIdx) => ({
+                text: opt,
+                isCorrect: Array.isArray(q.correctAnswer) ? q.correctAnswer[oIdx] : true
+              }));
+            }
+
             const newQ = {
-              id: q.id,
-              subjectId: q.subjectId,
-              grade: q.grade,
-              type: q.type,
-              difficulty: q.difficulty,
+              id: q.id || ('q_ai_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6)),
+              subjectId: q.subjectId || 'toan',
+              chapterId: q.chapterId || null,
+              lessonId: q.lessonId || null,
+              grade: q.grade || 6,
+              type: q.type || 'trac_nghiem',
+              difficulty: q.difficulty || 'nhan_biet',
               questionText: q.questionText,
-              options: q.options,
+              options: q.options || [],
               correctAnswer: q.correctAnswer,
-              explanation: q.explanation,
+              items: items,
+              explanation: q.explanation || '',
               approved: true
             };
             db.addQuestion(newQ);
           });
 
-          this.showToast(`✅ Đã lưu ${toSave.length} câu hỏi AI vào Ngân hàng thành công!`);
+          if (db.save) db.save();
+
+          this.showToast(`✅ Đã lưu thành công ${toSave.length} câu hỏi AI chuẩn SGK Kết Nối Tri Thức vào Ngân hàng!`);
           modal.remove();
-          if (typeof this.render_questions === 'function') this.render_questions(parentDom);
+          
+          if (typeof this.render_questions === 'function') {
+            this.render_questions(parentDom);
+          }
         }
       };
     };
@@ -8548,10 +9043,25 @@ render_ai_geometry(dom) {
           <!-- Subject Grid -->
           <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.25rem;">
             ${subjects.map(sub => {
-              const subExams = allExams.filter(e => e.subjectId === sub.id);
-              const txCount = subExams.filter(e => e.examCategory === 'tx').length;
-              const mkCount = subExams.filter(e => e.examCategory === 'midterm').length;
-              const ckCount = subExams.filter(e => e.examCategory === 'final').length;
+              const subExams = allExams.filter(e => {
+                if (!e) return false;
+                if (!e.subjectId) return true;
+                const s1 = String(sub.id || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                const s2 = String(e.subjectId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                return (s1 === s2 || (s1 && s2 && (s1.startsWith(s2) || s2.startsWith(s1))));
+              });
+              const txCount = subExams.filter(e => {
+                const cat = String(e.examCategory || e.category || '').toLowerCase();
+                return cat === 'tx' || (!cat && !e.isOfficial && e.targetGradeColumn !== 'GK' && e.targetGradeColumn !== 'CK');
+              }).length;
+              const mkCount = subExams.filter(e => {
+                const cat = String(e.examCategory || e.category || '').toLowerCase();
+                return cat === 'midterm' || e.isOfficial || e.targetGradeColumn === 'GK';
+              }).length;
+              const ckCount = subExams.filter(e => {
+                const cat = String(e.examCategory || e.category || '').toLowerCase();
+                return cat === 'final' || e.targetGradeColumn === 'CK';
+              }).length;
               const colors = ['#dc2626','#2563eb','#d97706','#16a34a','#7c3aed','#0284c7','#ea580c','#0d9488','#9333ea','#be185d','#15803d'];
               const colorIdx = subjects.indexOf(sub) % colors.length;
               const cardColor = colors[colorIdx];
@@ -8595,18 +9105,22 @@ render_ai_geometry(dom) {
     const tab = this.currentExamTab || 'tx';
 
     const isExamOfSubject = (e) => {
+      if (!e) return false;
       if (!e.subjectId) return true;
-      if (e.subjectId === subjectId) return true;
-      if (subjectId === 'toan' && (e.subjectId.startsWith('toan') || e.subjectId === 'toan')) return true;
+      const s1 = String(subjectId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const s2 = String(e.subjectId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (s1 === s2) return true;
+      if (s1 && s2 && (s1.startsWith(s2) || s2.startsWith(s1))) return true;
       return false;
     };
 
     const getExamCategory = (e) => {
-      if (e.examCategory && ['tx', 'midterm', 'final'].includes(e.examCategory)) return e.examCategory;
-      if (e.category && ['tx', 'midterm', 'final'].includes(e.category)) return e.category;
+      if (!e) return 'tx';
+      const cat = String(e.examCategory || e.category || '').toLowerCase();
+      if (['tx', 'midterm', 'final'].includes(cat)) return cat;
       if (e.targetGradeColumn === 'CK') return 'final';
       if (e.targetGradeColumn === 'GK') return 'midterm';
-      if (e.targetGradeColumn && e.targetGradeColumn.startsWith('TX')) return 'tx';
+      if (e.targetGradeColumn && String(e.targetGradeColumn).startsWith('TX')) return 'tx';
       const t = (e.title || '').toLowerCase();
       if (t.includes('cuối kỳ') || t.includes('cuối kì') || t.includes('học kỳ 2') || t.includes('học kì 2') || t.includes('học kỳ ii') || t.includes('ck')) return 'final';
       if (t.includes('giữa kỳ') || t.includes('giữa kì') || t.includes('học kỳ 1') || t.includes('học kì 1') || t.includes('học kỳ i') || t.includes('gk')) return 'midterm';
@@ -8615,6 +9129,7 @@ render_ai_geometry(dom) {
     };
 
     const isQuizizzExam = (e) => {
+      if (!e) return false;
       if (e.examSubType === 'regular' || e.format === 'standard') return false;
       return Boolean(
         e.examSubType === 'quizizz' ||
@@ -8624,9 +9139,20 @@ render_ai_geometry(dom) {
       );
     };
 
+    const getExamTime = (e) => {
+      if (!e) return 0;
+      if (typeof e.updatedAt === 'number') return e.updatedAt;
+      if (typeof e.createdAt === 'number') return e.createdAt;
+      if (e.createdAt) {
+        const t = new Date(e.createdAt).getTime();
+        if (!isNaN(t)) return t;
+      }
+      return 0;
+    };
+
     const tabExams = allExams
       .filter(e => isExamOfSubject(e) && getExamCategory(e) === tab)
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      .sort((a, b) => getExamTime(b) - getExamTime(a));
     const questions = db.getQuestions ? db.getQuestions() : [];
     const students = db.getStudents ? db.getStudents() : [];
 
@@ -8655,6 +9181,9 @@ render_ai_geometry(dom) {
               </button>
               <button id="btn-exam-rand-file" class="btn" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#ffffff; font-weight:500; font-family:var(--font-title); padding:0.5rem 0.95rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(2,132,199,0.3); display:flex; align-items:center; gap:0.4rem; font-size:0.85rem;">
                 <span>📁</span> Rút ngẫu nhiên từ Tệp tải lên
+              </button>
+              <button id="btn-exam-ai-generator" class="btn" style="background:linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #8b5cf6 100%); color:#ffffff; font-weight:600; font-family:var(--font-title); padding:0.5rem 0.95rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(236,72,153,0.35); display:flex; align-items:center; gap:0.4rem; font-size:0.85rem; transition:transform 0.15s ease;">
+                <span>✨</span> Tạo Đề bằng AI
               </button>
               <button id="btn-exam-create-custom" class="btn" style="background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color:#ffffff; font-weight:500; font-family:var(--font-title); padding:0.5rem 0.95rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(124,58,237,0.3); display:flex; align-items:center; gap:0.4rem; font-size:0.85rem;">
                 <span>➕</span> Tạo Đề Mới (Thủ công)
@@ -8763,6 +9292,9 @@ render_ai_geometry(dom) {
                       <button class="btn-exam-edit" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #d97706 0%, #b45309 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:500;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px rgba(217,119,6,0.25);">
                         <span>✏️</span> Xem / Sửa
                       </button>
+                      <button class="btn-exam-print" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:600;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px rgba(2,132,199,0.25);" title="In đề kiểm tra & xuất Word">
+                        <span>🖨️</span> In Đề
+                      </button>
                       <button class="btn-exam-shuffle" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);color:#fff;border:none;padding:0.42rem 0.85rem;border-radius:8px;font-weight:600;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px rgba(124,58,237,0.3);">
                         <span>🔀</span> Trộn Đề ${(exam.variants && exam.variants.length > 0) ? `(${exam.variants.length} mã)` : ''}
                       </button>
@@ -8822,6 +9354,9 @@ render_ai_geometry(dom) {
       const btnExamFile = dom.querySelector('#btn-exam-rand-file');
       if (btnExamFile) btnExamFile.onclick = () => this.showRandomFromUploadedFileModal(subjectId, dom, true);
 
+      const btnExamAI = dom.querySelector('#btn-exam-ai-generator');
+      if (btnExamAI) btnExamAI.onclick = () => this.showAIExamGeneratorModal(subjectId, dom, true);
+
       const btnExamCustom = dom.querySelector('#btn-exam-create-custom');
       if (btnExamCustom) btnExamCustom.onclick = () => this.showCreateExamModal(subjectId, dom);
 
@@ -8845,6 +9380,10 @@ render_ai_geometry(dom) {
 
       dom.querySelectorAll('.btn-exam-edit').forEach(btn => {
         btn.onclick = () => this.showViewEditExamModal(btn.getAttribute('data-exam-id'), dom);
+      });
+
+      dom.querySelectorAll('.btn-exam-print').forEach(btn => {
+        btn.onclick = () => this.showPrintExamModal(btn.getAttribute('data-exam-id'), null);
       });
 
       dom.querySelectorAll('.btn-exam-shuffle').forEach(btn => {
@@ -9104,12 +9643,643 @@ render_ai_geometry(dom) {
     };
   }
 
+
+  // =========================================================================
+  // MODAL XEM TRƯỚC VÀ IN ĐỀ KIỂM TRA CHUẨN BỘ GDĐT & CV 7991 (A4 PRINT)
+  // =========================================================================
+  showPrintExamModal(examId, variantCode = null) {
+    const exams = (typeof db !== 'undefined' && db.getExams) ? db.getExams() : [];
+    const assignments = (typeof db !== 'undefined' && db.getAssignments) ? db.getAssignments() : [];
+    const allQuestions = (typeof db !== 'undefined' && db.getQuestions) ? db.getQuestions() : [];
+    const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
+
+    let exam = exams.find(e => String(e.id) === String(examId)) || assignments.find(a => String(a.id) === String(examId));
+    if (!exam) {
+      if (typeof this.showToast === 'function') this.showToast('Không tìm thấy đề thi cần in!', 'error');
+      return;
+    }
+
+    const subObj = subjects.find(s => s.id === exam.subjectId) || { name: 'Môn học' };
+    const subName = subObj.name || 'Môn học';
+
+    // Normalize questions list
+    let rawQuestions = exam.questions || [];
+    if ((!rawQuestions || rawQuestions.length === 0) && (exam.questionIds || exam.questionsList)) {
+      const qIds = exam.questionIds || exam.questionsList || [];
+      rawQuestions = qIds.map(qid => allQuestions.find(q => String(q.id) === String(qid))).filter(Boolean);
+    }
+
+    // Handle variant / shuffled exam code if specified
+    let displayCode = variantCode || (exam.code || '101');
+    let examTitle = exam.title || `Đề kiểm tra môn ${subName}`;
+    let examQuestions = [...rawQuestions];
+
+    if (variantCode && exam.variants) {
+      const v = exam.variants.find(item => String(item.code) === String(variantCode));
+      if (v && v.questions) {
+        examQuestions = [...v.questions];
+        displayCode = v.code;
+      }
+    }
+
+    // Remove old modal if exists
+    const oldModal = document.getElementById('print-exam-preview-modal');
+    if (oldModal) oldModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'print-exam-preview-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.85); backdrop-filter:blur(6px); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:999999; padding:1rem; animation:fadeIn 0.2s ease-out;';
+
+    modal.innerHTML = `
+      <div class="glass-card" style="width:100%; max-width:1000px; height:94vh; background:#ffffff; border-radius:20px; box-shadow:0 25px 70px rgba(0,0,0,0.5); display:flex; flex-direction:column; overflow:hidden; font-family:var(--font-body); border:2px solid #0284c7;">
+        
+        <!-- Toolbar Header (An khi in) -->
+        <div class="no-print-toolbar" style="background:#0f172a; color:#fff; padding:0.85rem 1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; border-bottom:2px solid #1e293b;">
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <span style="font-size:1.4rem;">🖨️</span>
+            <div>
+              <h3 style="margin:0; font-family:var(--font-title); font-size:1.15rem; color:#38bdf8; font-weight:800;">
+                XEM TRƯỚC & IN ĐỀ THI (CHUẨN BỘ GDĐT - CV 7991)
+              </h3>
+              <div style="font-size:0.78rem; color:#94a3b8;">
+                Khổ giấy A4 chuẩn • Tương thích 100% in trực tiếp và lưu file PDF
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls: Tabs, Font size, Print, Word, Close -->
+          <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+            
+            <!-- View Mode Switcher -->
+            <div style="display:flex; background:rgba(255,255,255,0.12); padding:0.25rem; border-radius:10px; gap:0.25rem;">
+              <button type="button" id="tab-print-student" class="print-mode-tab active" style="background:#0284c7; color:#fff; border:none; padding:0.35rem 0.75rem; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer;">
+                📄 Đề Thi Học Sinh
+              </button>
+              <button type="button" id="tab-print-teacher" class="print-mode-tab" style="background:transparent; color:#cbd5e1; border:none; padding:0.35rem 0.75rem; border-radius:8px; font-weight:600; font-size:0.8rem; cursor:pointer;">
+                🔑 Đáp Án & Barem
+              </button>
+              <button type="button" id="tab-print-bubble" class="print-mode-tab" style="background:transparent; color:#cbd5e1; border:none; padding:0.35rem 0.75rem; border-radius:8px; font-weight:600; font-size:0.8rem; cursor:pointer;">
+                📝 Phiếu Tô TN
+              </button>
+            </div>
+
+            <!-- Variant Selector -->
+            ${(exam.variants && exam.variants.length > 0) ? `
+              <select id="print-variant-select" style="padding:0.4rem 0.6rem; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #475569; font-size:0.8rem; font-weight:700;">
+                <option value="">Mã đề gốc (101)</option>
+                ${exam.variants.map(v => `<option value="${v.code}" ${v.code === displayCode ? 'selected' : ''}>Mã đề ${v.code}</option>`).join('')}
+              </select>
+            ` : ''}
+
+            <!-- Font size selector -->
+            <select id="print-font-size-select" style="padding:0.4rem 0.6rem; border-radius:8px; background:#1e293b; color:#fff; border:1px solid #475569; font-size:0.8rem;">
+              <option value="13pt" selected>Cỡ chữ: 13pt (Chuẩn)</option>
+              <option value="12pt">Cỡ chữ: 12pt (Gọn)</option>
+              <option value="14pt">Cỡ chữ: 14pt (To rõ)</option>
+            </select>
+
+            <!-- Export Word Button -->
+            <button type="button" id="btn-export-exam-word" style="background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color:#fff; border:none; padding:0.45rem 0.9rem; border-radius:8px; font-weight:700; font-size:0.82rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.35rem; box-shadow:0 2px 8px rgba(37,99,235,0.3);">
+              <span>📥</span> Xuất Word
+            </button>
+
+            <!-- Print Button -->
+            <button type="button" id="btn-trigger-print" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; padding:0.45rem 1.1rem; border-radius:8px; font-weight:800; font-size:0.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.35rem; box-shadow:0 4px 12px rgba(16,185,129,0.4);">
+              <span>🖨️</span> IN NGAY (Ctrl+P)
+            </button>
+
+            <!-- Close Button -->
+            <button type="button" id="btn-close-print-modal" style="background:#334155; color:#fff; border:none; width:32px; height:32px; border-radius:50%; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">&times;</button>
+          </div>
+        </div>
+
+        <!-- Printable Document Area -->
+        <div id="printable-exam-paper-container" style="flex:1; overflow-y:auto; background:#525659; padding:2rem 1rem; display:flex; justify-content:center;">
+          
+          <div id="printable-a4-sheet" style="width:210mm; min-height:297mm; background:#ffffff; color:#000000; padding:20mm 18mm; box-shadow:0 0 25px rgba(0,0,0,0.35); font-family:'Times New Roman', Times, serif; font-size:13pt; line-height:1.35; box-sizing:border-box;">
+            <!-- Content will be rendered dynamically by active tab -->
+          </div>
+
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const sheet = modal.querySelector('#printable-a4-sheet');
+    let currentMode = 'student'; // 'student' | 'teacher' | 'bubble'
+
+    // Separate question types
+    const renderExamContent = () => {
+      const qNhiềuLựaChọn = examQuestions.filter(q => !q.type || q.type === 'trac_nghiem');
+      const qĐúngSai = examQuestions.filter(q => q.type === 'dung_sai');
+      const qTrảLờiNgắn = examQuestions.filter(q => q.type === 'tra_loi_ngan');
+      const qTựLuận = examQuestions.filter(q => q.type === 'tu_luan');
+
+      let currentQNum = 1;
+
+      if (currentMode === 'student') {
+        sheet.innerHTML = `
+          <!-- HEADER CHUẨN QUỐC GIA & BỘ GIÁO DỤC -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12pt; border-bottom:1.5pt solid #000; padding-bottom:8pt;">
+            <div style="text-align:center; width:45%;">
+              <div style="font-size:11pt; font-weight:bold; text-transform:uppercase;" contenteditable="true" title="Nhấp để chỉnh sửa nếu cần">UBND XÃ DLIÊ YA</div>
+              <div style="font-size:11pt; font-weight:bold; text-transform:uppercase; margin-top:2pt;" contenteditable="true" title="Nhấp để chỉnh sửa nếu cần">TRƯỜNG TH - THCS AMA TRANG LƠNG</div>
+              <div style="margin-top:4pt; font-size:10.5pt; font-style:italic;">(Đề thi có ${examQuestions.length} câu)</div>
+            </div>
+            <div style="text-align:center; width:52%;">
+              <div style="font-size:11pt; font-weight:bold; text-transform:uppercase;" contenteditable="true">${examTitle.toUpperCase()}</div>
+              <div style="font-size:11.5pt; font-weight:bold; margin-top:2pt;" contenteditable="true">MÔN: ${subName.toUpperCase()} - KHỐI ${exam.grade || 6}</div>
+              <div style="font-size:10.5pt; font-style:italic; margin-top:2pt;">Thời gian làm bài: ${exam.timeLimit || 45} phút <i>(không kể phát đề)</i></div>
+              <div style="font-size:11pt; font-weight:bold; margin-top:3pt; border:1pt solid #000; display:inline-block; padding:1pt 8pt; border-radius:4px;" contenteditable="true">MÃ ĐỀ THI: ${displayCode}</div>
+            </div>
+          </div>
+
+          <!-- KHUNG THÔNG TIN HỌC SINH & ĐIỂM SỐ -->
+          <div style="border:1pt solid #000; margin-bottom:14pt; padding:6pt 8pt; font-size:11.5pt;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6pt;">
+              <div style="flex:1;">Họ và tên thí sinh: ....................................................................................</div>
+              <div style="width:120pt;">Lớp: ........................</div>
+              <div style="width:110pt;">SBD: ......................</div>
+            </div>
+            <div style="display:flex; border-top:1pt solid #000; margin-top:4pt; padding-top:4pt;">
+              <div style="width:30%; border-right:1pt solid #000; padding-right:6pt; text-align:center;">
+                <div style="font-weight:bold; font-size:10.5pt;">ĐIỂM TOÀN BÀI THI</div>
+                <div style="display:flex; justify-content:space-around; margin-top:16pt; font-size:10.5pt;">
+                  <div>Bằng số: .......</div>
+                  <div>Bằng chữ: .......</div>
+                </div>
+              </div>
+              <div style="flex:1; padding-left:8pt;">
+                <div style="font-weight:bold; font-size:10.5pt;">LỜI NHẬN XÉT CỦA GIÁO VIÊN:</div>
+                <div style="height:28pt;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PHẦN I: TRẮC NGHIỆM NHIỀU LỰA CHỌN -->
+          ${qNhiềuLựaChọn.length > 0 ? `
+            <div style="margin-bottom:14pt; page-break-inside:avoid;">
+              <div style="font-weight:bold; font-size:12.5pt; text-transform:uppercase; margin-bottom:6pt;">
+                PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn (${qNhiềuLựaChọn.length} câu)
+              </div>
+              <div style="font-style:italic; font-size:11pt; margin-bottom:8pt;">
+                Thí sinh trả lời từ câu ${currentQNum} đến câu ${currentQNum + qNhiềuLựaChọn.length - 1}. Mỗi câu hỏi thí sinh chỉ chọn một phương án đúng nhất.
+              </div>
+              
+              ${qNhiềuLựaChọn.map(q => {
+                const qIndex = currentQNum++;
+                const opts = q.options || ['Phương án A', 'Phương án B', 'Phương án C', 'Phương án D'];
+                return `
+                  <div style="margin-bottom:10pt; page-break-inside:avoid;">
+                    <div style="font-weight:bold; text-align:justify;">
+                      Câu ${qIndex}: <span style="font-weight:normal;">${q.questionText || q.title || ''}</span>
+                    </div>
+                    ${q.imageUrl ? `<div style="text-align:center; margin:5pt 0;"><img src="${q.imageUrl}" style="max-height:160px; max-width:80%;" /></div>` : ''}
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4pt 12pt; margin-top:4pt; padding-left:10pt;">
+                      ${opts.map((opt, oIdx) => {
+                        const label = String.fromCharCode(65 + oIdx);
+                        const optImg = (q.optionImages && q.optionImages[oIdx]) ? q.optionImages[oIdx] : '';
+                        return `
+                          <div>
+                            <strong>${label}.</strong> ${opt}
+                            ${optImg ? `<div><img src="${optImg}" style="max-height:100px; margin-top:2pt;" /></div>` : ''}
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : ''}
+
+          <!-- PHẦN II: TRẮC NGHIỆM ĐÚNG / SAI -->
+          ${qĐúngSai.length > 0 ? `
+            <div style="margin-bottom:14pt; page-break-inside:avoid;">
+              <div style="font-weight:bold; font-size:12.5pt; text-transform:uppercase; margin-bottom:6pt;">
+                PHẦN II. Câu trắc nghiệm Đúng / Sai (${qĐúngSai.length} câu)
+              </div>
+              <div style="font-style:italic; font-size:11pt; margin-bottom:8pt;">
+                Thí sinh trả lời từ câu ${currentQNum} đến câu ${currentQNum + qĐúngSai.length - 1}. Trong mỗi ý a), b), c), d) ở mỗi câu, thí sinh chọn Đúng hoặc Sai.
+              </div>
+
+              ${qĐúngSai.map(q => {
+                const qIndex = currentQNum++;
+                const items = q.items || (q.options ? q.options.map((opt, oIdx) => ({ text: opt, isCorrect: true })) : [
+                  { text: 'Phát biểu a', isCorrect: true },
+                  { text: 'Phát biểu b', isCorrect: false },
+                  { text: 'Phát biểu c', isCorrect: true },
+                  { text: 'Phát biểu d', isCorrect: false }
+                ]);
+                return `
+                  <div style="margin-bottom:10pt; page-break-inside:avoid;">
+                    <div style="font-weight:bold; text-align:justify; margin-bottom:4pt;">
+                      Câu ${qIndex}: <span style="font-weight:normal;">${q.questionText || q.title || ''}</span>
+                    </div>
+                    ${q.imageUrl ? `<div style="text-align:center; margin:5pt 0;"><img src="${q.imageUrl}" style="max-height:160px; max-width:80%;" /></div>` : ''}
+                    <table style="width:100%; border-collapse:collapse; margin-top:4pt; font-size:12pt;">
+                      <thead>
+                        <tr style="background:#f8fafc;">
+                          <th style="border:1pt solid #000; padding:4pt; width:35pt; text-align:center;">Ý</th>
+                          <th style="border:1pt solid #000; padding:4pt; text-align:left;">Nội dung phát biểu</th>
+                          <th style="border:1pt solid #000; padding:4pt; width:55pt; text-align:center;">Đúng</th>
+                          <th style="border:1pt solid #000; padding:4pt; width:55pt; text-align:center;">Sai</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${items.map((it, itIdx) => {
+                          const label = String.fromCharCode(97 + itIdx);
+                          const itText = typeof it === 'string' ? it : (it.text || `Ý ${label}`);
+                          return `
+                            <tr>
+                              <td style="border:1pt solid #000; padding:4pt; text-align:center; font-weight:bold;">${label})</td>
+                              <td style="border:1pt solid #000; padding:4pt;">${itText}</td>
+                              <td style="border:1pt solid #000; padding:4pt; text-align:center;"></td>
+                              <td style="border:1pt solid #000; padding:4pt; text-align:center;"></td>
+                            </tr>
+                          `;
+                        }).join('')}
+                      </tbody>
+                    </table>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : ''}
+
+          <!-- PHẦN III: TRẢ LỜI NGẮN -->
+          ${qTrảLờiNgắn.length > 0 ? `
+            <div style="margin-bottom:14pt; page-break-inside:avoid;">
+              <div style="font-weight:bold; font-size:12.5pt; text-transform:uppercase; margin-bottom:6pt;">
+                PHẦN III. Câu trắc nghiệm trả lời ngắn (${qTrảLờiNgắn.length} câu)
+              </div>
+              <div style="font-style:italic; font-size:11pt; margin-bottom:8pt;">
+                Thí sinh trả lời từ câu ${currentQNum} đến câu ${currentQNum + qTrảLờiNgắn.length - 1}. Viết câu trả lời / đáp số vào ô quy định.
+              </div>
+
+              ${qTrảLờiNgắn.map(q => {
+                const qIndex = currentQNum++;
+                return `
+                  <div style="margin-bottom:10pt; page-break-inside:avoid; display:flex; justify-content:space-between; align-items:flex-start; gap:10pt;">
+                    <div style="flex:1;">
+                      <strong>Câu ${qIndex}:</strong> ${q.questionText || q.title || ''}
+                      ${q.imageUrl ? `<div><img src="${q.imageUrl}" style="max-height:140px; margin-top:3pt;" /></div>` : ''}
+                    </div>
+                    <div style="width:130pt; border:1pt solid #000; padding:4pt 6pt; text-align:left; min-height:22pt; font-size:11pt;">
+                      <strong>Đáp số:</strong>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : ''}
+
+          <!-- PHẦN IV: TỰ LUẬN -->
+          ${qTựLuận.length > 0 ? `
+            <div style="margin-bottom:14pt; page-break-inside:avoid;">
+              <div style="font-weight:bold; font-size:12.5pt; text-transform:uppercase; margin-bottom:6pt;">
+                PHẦN IV. Tự luận (${qTựLuận.length} câu)
+              </div>
+
+              ${qTựLuận.map(q => {
+                const qIndex = currentQNum++;
+                return `
+                  <div style="margin-bottom:12pt; page-break-inside:avoid;">
+                    <div style="font-weight:bold; text-align:justify; margin-bottom:6pt;">
+                      Câu ${qIndex} (${q.score || 2.0} điểm): <span style="font-weight:normal;">${q.questionText || q.title || ''}</span>
+                    </div>
+                    ${q.imageUrl ? `<div style="text-align:center; margin:5pt 0;"><img src="${q.imageUrl}" style="max-height:160px; max-width:80%;" /></div>` : ''}
+                    <div style="margin-top:6pt; font-style:italic; font-size:10.5pt; color:#444;">Bài làm:</div>
+                    <div style="border-bottom:1pt dotted #888; height:20pt;"></div>
+                    <div style="border-bottom:1pt dotted #888; height:20pt;"></div>
+                    <div style="border-bottom:1pt dotted #888; height:20pt;"></div>
+                    <div style="border-bottom:1pt dotted #888; height:20pt;"></div>
+                    <div style="border-bottom:1pt dotted #888; height:20pt;"></div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : ''}
+
+          <!-- HẾT ĐỀ -->
+          <div style="text-align:center; margin-top:20pt; font-weight:bold; font-size:12pt; border-top:1pt solid #000; padding-top:8pt;">
+            ---------- HẾT ----------
+            <div style="font-size:10pt; font-weight:normal; font-style:italic; margin-top:3pt;">
+              (Cán bộ coi thi không giải thích gì thêm)
+            </div>
+          </div>
+        `;
+      } else if (currentMode === 'teacher') {
+        // ĐÁP ÁN & BAREM HƯỚNG DẪN CHẤM
+        sheet.innerHTML = `
+          <div style="text-align:center; margin-bottom:14pt; border-bottom:2pt solid #000; padding-bottom:8pt;">
+            <div style="font-size:11pt; font-weight:bold; text-transform:uppercase;" contenteditable="true">UBND XÃ DLIÊ YA - TRƯỜNG TH - THCS AMA TRANG LƠNG</div>
+            <div style="font-size:13pt; font-weight:bold; text-transform:uppercase; margin-top:3pt; color:#1e40af;">
+              ĐÁP ÁN VÀ HƯỚNG DẪN CHẤM ĐỀ THI
+            </div>
+            <div style="font-size:11.5pt; font-weight:bold; margin-top:2pt;">
+              MÔN: ${subName.toUpperCase()} - MÃ ĐỀ: ${displayCode}
+            </div>
+          </div>
+
+          <!-- BẢNG ĐÁP ÁN PHẦN I (TRẮC NGHIỆM) -->
+          ${qNhiềuLựaChọn.length > 0 ? `
+            <div style="margin-bottom:14pt;">
+              <div style="font-weight:bold; font-size:12pt; text-transform:uppercase; margin-bottom:6pt; background:#f1f5f9; padding:4pt 8pt; border:1pt solid #cbd5e1;">
+                I. ĐÁP ÁN PHẦN I - TRẮC NGHIỆM NHIỀU LỰA CHỌN (0.25đ / câu)
+              </div>
+              <table style="width:100%; border-collapse:collapse; text-align:center; font-size:11.5pt; margin-top:4pt;">
+                <tbody>
+                  <tr>
+                    ${qNhiềuLựaChọn.map((q, idx) => `<td style="border:1pt solid #000; padding:4pt; font-weight:bold; background:#f8fafc;">Câu ${idx + 1}</td>`).join('')}
+                  </tr>
+                  <tr>
+                    ${qNhiềuLựaChọn.map(q => {
+                      const cIdx = parseInt(q.correctAnswer) || 0;
+                      const label = String.fromCharCode(65 + cIdx);
+                      return `<td style="border:1pt solid #000; padding:4pt; font-weight:bold; color:#1e40af; font-size:12.5pt;">${label}</td>`;
+                    }).join('')}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          ` : ''}
+
+          <!-- BẢNG ĐÁP ÁN PHẦN II (ĐÚNG / SAI) -->
+          ${qĐúngSai.length > 0 ? `
+            <div style="margin-bottom:14pt;">
+              <div style="font-weight:bold; font-size:12pt; text-transform:uppercase; margin-bottom:6pt; background:#f1f5f9; padding:4pt 8pt; border:1pt solid #cbd5e1;">
+                II. ĐÁP ÁN PHẦN II - TRẮC NGHIỆM ĐÚNG / SAI (1.0đ / câu)
+              </div>
+              <table style="width:100%; border-collapse:collapse; font-size:11.5pt; margin-top:4pt;">
+                <thead>
+                  <tr style="background:#f8fafc;">
+                    <th style="border:1pt solid #000; padding:4pt; width:60pt; text-align:center;">Câu</th>
+                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý a)</th>
+                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý b)</th>
+                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý c)</th>
+                    <th style="border:1pt solid #000; padding:4pt; text-align:center;">Ý d)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${qĐúngSai.map((q, idx) => {
+                    const items = q.items || (q.options ? q.options.map((opt, oIdx) => ({ isCorrect: Array.isArray(q.correctAnswer) ? q.correctAnswer[oIdx] : true })) : []);
+                    return `
+                      <tr style="text-align:center;">
+                        <td style="border:1pt solid #000; padding:4pt; font-weight:bold;">Câu ${qNhiềuLựaChọn.length + idx + 1}</td>
+                        ${[0,1,2,3].map(i => {
+                          const isTrue = items[i] ? (items[i].isCorrect === true) : true;
+                          return `<td style="border:1pt solid #000; padding:4pt; font-weight:bold; color:${isTrue ? '#16a34a' : '#dc2626'};">${isTrue ? 'Đ' : 'S'}</td>`;
+                        }).join('')}
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+              <div style="font-size:10pt; font-style:italic; margin-top:4pt;">
+                * Quy tắc chấm Đúng/Sai: Đúng 1 ý: 0.1đ | Đúng 2 ý: 0.25đ | Đúng 3 ý: 0.5đ | Đúng 4 ý: 1.0đ.
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- BẢNG ĐÁP ÁN PHẦN III (TRẢ LỜI NGẮN) -->
+          ${qTrảLờiNgắn.length > 0 ? `
+            <div style="margin-bottom:14pt;">
+              <div style="font-weight:bold; font-size:12pt; text-transform:uppercase; margin-bottom:6pt; background:#f1f5f9; padding:4pt 8pt; border:1pt solid #cbd5e1;">
+                III. ĐÁP ÁN PHẦN III - TRẢ LỜI NGẮN (0.5đ / câu)
+              </div>
+              <table style="width:100%; border-collapse:collapse; font-size:11.5pt; margin-top:4pt;">
+                <thead>
+                  <tr style="background:#f8fafc;">
+                    <th style="border:1pt solid #000; padding:4pt; width:60pt; text-align:center;">Câu</th>
+                    <th style="border:1pt solid #000; padding:4pt; text-align:left;">Đáp án chuẩn</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${qTrảLờiNgắn.map((q, idx) => `
+                    <tr>
+                      <td style="border:1pt solid #000; padding:4pt; text-align:center; font-weight:bold;">Câu ${qNhiềuLựaChọn.length + qĐúngSai.length + idx + 1}</td>
+                      <td style="border:1pt solid #000; padding:4pt; font-weight:bold; color:#1e40af;">${q.correctAnswer || 'Theo hướng dẫn'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          ` : ''}
+
+          <!-- HƯỚNG DẪN CHẤM PHẦN IV (TỰ LUẬN) -->
+          ${qTựLuận.length > 0 ? `
+            <div style="margin-bottom:14pt;">
+              <div style="font-weight:bold; font-size:12pt; text-transform:uppercase; margin-bottom:6pt; background:#f1f5f9; padding:4pt 8pt; border:1pt solid #cbd5e1;">
+                IV. HƯỚNG DẪN CHẤM PHẦN IV - TỰ LUẬN
+              </div>
+              ${qTựLuận.map((q, idx) => `
+                <div style="margin-bottom:10pt; border:1pt solid #000; padding:6pt 8pt;">
+                  <div style="font-weight:bold; margin-bottom:4pt;">
+                    Câu ${qNhiềuLựaChọn.length + qĐúngSai.length + qTrảLờiNgắn.length + idx + 1} (${q.score || 2.0} điểm):
+                  </div>
+                  <div style="white-space:pre-line; line-height:1.45; font-size:11.5pt;">
+                    ${q.explanation || 'Giáo viên chấm điểm linh hoạt căn cứ theo bài làm của học sinh.'}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        `;
+      } else {
+        // PHIẾU TRẢ LỜI TRẮC NGHIỆM CHUẨN
+        sheet.innerHTML = `
+          <div style="text-align:center; margin-bottom:12pt; border-bottom:1.5pt solid #000; padding-bottom:6pt;">
+            <div style="font-size:11pt; font-weight:bold; text-transform:uppercase;" contenteditable="true">UBND XÃ DLIÊ YA - TRƯỜNG TH - THCS AMA TRANG LƠNG</div>
+            <div style="font-size:13.5pt; font-weight:bold; text-transform:uppercase; margin-top:2pt;">PHIẾU TRẢ LỜI TRẮC NGHIỆM</div>
+            <div style="font-size:10.5pt; font-style:italic;">(Dùng cho kiểm tra trắc nghiệm theo chuẩn GDPT 2018)</div>
+          </div>
+
+          <div style="border:1pt solid #000; padding:6pt 8pt; margin-bottom:12pt; font-size:11pt;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4pt;">
+              <div>Họ và tên thí sinh: ................................................................</div>
+              <div>Lớp: .................</div>
+              <div>SBD: .................</div>
+            </div>
+            <div>Môn thi: ${subName.toUpperCase()} • Mã đề thi: ${displayCode}</div>
+          </div>
+
+          <div style="font-weight:bold; font-size:11.5pt; margin-bottom:6pt;">PHẦN I: TRẮC NGHIỆM NHIỀU LỰA CHỌN (Tô tròn vào 1 phương án đúng)</div>
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6pt 10pt; font-size:10.5pt; border:1pt solid #000; padding:8pt; margin-bottom:12pt;">
+            ${Array.from({ length: Math.max(20, qNhiềuLựaChọn.length) }).map((_, idx) => `
+              <div style="display:flex; align-items:center; gap:4pt;">
+                <span style="font-weight:bold; min-width:22pt;">${idx + 1}.</span>
+                <span style="border:1pt solid #000; border-radius:50%; width:16pt; height:16pt; display:inline-flex; align-items:center; justify-content:center; font-size:9pt;">A</span>
+                <span style="border:1pt solid #000; border-radius:50%; width:16pt; height:16pt; display:inline-flex; align-items:center; justify-content:center; font-size:9pt;">B</span>
+                <span style="border:1pt solid #000; border-radius:50%; width:16pt; height:16pt; display:inline-flex; align-items:center; justify-content:center; font-size:9pt;">C</span>
+                <span style="border:1pt solid #000; border-radius:50%; width:16pt; height:16pt; display:inline-flex; align-items:center; justify-content:center; font-size:9pt;">D</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <div style="font-weight:bold; font-size:11.5pt; margin-bottom:6pt;">PHẦN II: TRẮC NGHIỆM ĐÚNG / SAI (Tô tròn Đ hoặc S)</div>
+          <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:6pt 10pt; font-size:10.5pt; border:1pt solid #000; padding:8pt;">
+            ${Array.from({ length: Math.max(4, qĐúngSai.length) }).map((_, idx) => `
+              <div style="border:1pt solid #ccc; padding:4pt; border-radius:4px;">
+                <div style="font-weight:bold; margin-bottom:2pt;">Câu ${idx + 1}:</div>
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:2pt; font-size:9pt;">
+                  <div>a) <span style="border:1pt solid #000; border-radius:50%; padding:0 3pt;">Đ</span> <span style="border:1pt solid #000; border-radius:50%; padding:0 3pt;">S</span></div>
+                  <div>b) <span style="border:1pt solid #000; border-radius:50%; padding:0 3pt;">Đ</span> <span style="border:1pt solid #000; border-radius:50%; padding:0 3pt;">S</span></div>
+                  <div>c) <span style="border:1pt solid #000; border-radius:50%; padding:0 3pt;">Đ</span> <span style="border:1pt solid #000; border-radius:50%; padding:0 3pt;">S</span></div>
+                  <div>d) <span style="border:1pt solid #000; border-radius:50%; padding:0 3pt;">Đ</span> <span style="border:1pt solid #000; border-radius:50%; padding:0 3pt;">S</span></div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    };
+
+    renderExamContent();
+
+    // Mode tabs binding
+    modal.querySelectorAll('.print-mode-tab').forEach(tab => {
+      tab.onclick = () => {
+        modal.querySelectorAll('.print-mode-tab').forEach(t => {
+          t.style.background = 'transparent';
+          t.style.color = '#cbd5e1';
+          t.classList.remove('active');
+        });
+        tab.style.background = '#0284c7';
+        tab.style.color = '#ffffff';
+        tab.classList.add('active');
+
+        if (tab.id === 'tab-print-student') currentMode = 'student';
+        else if (tab.id === 'tab-print-teacher') currentMode = 'teacher';
+        else if (tab.id === 'tab-print-bubble') currentMode = 'bubble';
+
+        renderExamContent();
+      };
+    });
+
+    // Font size changer
+    const fontSelect = modal.querySelector('#print-font-size-select');
+    if (fontSelect) {
+      fontSelect.onchange = (e) => {
+        sheet.style.fontSize = e.target.value;
+      };
+    }
+
+    // Variant changer
+    const variantSelect = modal.querySelector('#print-variant-select');
+    if (variantSelect) {
+      variantSelect.onchange = (e) => {
+        const vCode = e.target.value;
+        if (vCode && exam.variants) {
+          const v = exam.variants.find(item => item.code === vCode);
+          if (v && v.questions) {
+            examQuestions = [...v.questions];
+            displayCode = v.code;
+          }
+        } else {
+          examQuestions = [...rawQuestions];
+          displayCode = exam.code || '101';
+        }
+        renderExamContent();
+      };
+    }
+
+    // Close button
+    modal.querySelector('#btn-close-print-modal').onclick = () => modal.remove();
+
+    // Export Word (.doc)
+    modal.querySelector('#btn-export-exam-word').onclick = () => {
+      const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${examTitle}</title><style>body{font-family:'Times New Roman', serif; font-size:13pt; line-height:1.35; margin:1.5cm;} table{border-collapse:collapse; width:100%;} td, th{border:1px solid #000; padding:4px;} img{max-width:100%; height:auto;}</style></head><body>`;
+      const footer = "</body></html>";
+      const htmlContent = header + sheet.innerHTML + footer;
+      const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `De_Kiem_Tra_${subName}_${displayCode}.doc`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      if (typeof this.showToast === 'function') this.showToast('📥 Đã xuất file Word (.doc) thành công!');
+    };
+
+    // Print Trigger (with dedicated print iframe / print styles)
+    modal.querySelector('#btn-trigger-print').onclick = () => {
+      const printIframe = document.createElement('iframe');
+      printIframe.style.position = 'fixed';
+      printIframe.style.right = '0';
+      printIframe.style.bottom = '0';
+      printIframe.style.width = '0';
+      printIframe.style.height = '0';
+      printIframe.style.border = '0';
+      document.body.appendChild(printIframe);
+
+      const iframeDoc = printIframe.contentWindow.document;
+      iframeDoc.open();
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${examTitle} - Mã đề ${displayCode}</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 15mm 15mm 15mm 15mm;
+            }
+            body {
+              font-family: 'Times New Roman', Times, serif;
+              font-size: ${fontSelect ? fontSelect.value : '13pt'};
+              line-height: 1.35;
+              color: #000;
+              background: #fff;
+              margin: 0;
+              padding: 0;
+            }
+            table {
+              border-collapse: collapse;
+              width: 100%;
+            }
+            td, th {
+              border: 1pt solid #000;
+              padding: 4pt;
+            }
+            img {
+              max-width: 100%;
+              height: auto;
+            }
+            .page-break {
+              page-break-after: always;
+            }
+          </style>
+        </head>
+        <body>
+          ${sheet.innerHTML}
+        </body>
+        </html>
+      `);
+      iframeDoc.close();
+
+      setTimeout(() => {
+        printIframe.contentWindow.focus();
+        printIframe.contentWindow.print();
+        setTimeout(() => {
+          if (printIframe.parentNode) printIframe.parentNode.removeChild(printIframe);
+        }, 1000);
+      }, 350);
+    };
+  }
+
+
   // =====================================================
   // MODAL XEM CHI TIẾT & CHỈNH SỬA ĐỀ KIỂM TRA ĐÃ TẠO
   // =====================================================
   showViewEditExamModal(examId, parentDom) {
     const exams = db.getExams ? db.getExams() : [];
-    const exam = exams.find(e => e.id === examId);
+    const assignments = db.getAssignments ? db.getAssignments() : [];
+    let exam = exams.find(e => String(e.id) === String(examId)) || assignments.find(a => String(a.id) === String(examId));
     if (!exam) {
       this.showToast('Không tìm thấy đề thi!', 'error');
       return;
@@ -9301,6 +10471,9 @@ render_ai_geometry(dom) {
 
           <!-- BOTTOM ACTION BUTTONS -->
           <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.85rem; border-top:2px solid #e2e8f0; padding-top:1.1rem;">
+            <button type="button" id="btn-print-from-view-edit" class="btn" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:none; padding:0.65rem 1.25rem; border-radius:10px; font-weight:700; font-size:0.9rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.35rem; box-shadow:0 4px 12px rgba(2,132,199,0.3);">
+              <span>🖨️</span> IN ĐỀ KIỂM TRA
+            </button>
             <button type="button" id="btn-cancel-view-edit-exam" class="btn btn-secondary" style="font-weight:500; padding:0.65rem 1.25rem;">Hủy</button>
 
             <button type="submit" id="btn-submit-save-exam" value="save_only" style="background:linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color:#ffffff; border:none; padding:0.65rem 1.4rem; border-radius:10px; font-weight:600; font-size:0.92rem; cursor:pointer; box-shadow:0 4px 14px rgba(37,99,235,0.35); display:flex; align-items:center; gap:0.4rem;">
@@ -9319,6 +10492,19 @@ render_ai_geometry(dom) {
     document.body.appendChild(modal);
     modal.querySelector('#btn-close-view-edit-modal').onclick = () => modal.remove();
     modal.querySelector('#btn-cancel-view-edit-exam').onclick = () => modal.remove();
+    const printFromEditBtn = modal.querySelector('#btn-print-from-view-edit');
+    if (printFromEditBtn) {
+      printFromEditBtn.onclick = () => {
+        exam.title = modal.querySelector('#view-edit-exam-title').value.trim() || exam.title;
+        exam.timeLimit = parseInt(modal.querySelector('#view-edit-exam-time').value) || exam.timeLimit || 45;
+        exam.questions = examQuestions;
+        if (typeof db !== 'undefined') {
+          if (db.updateExam) db.updateExam(exam);
+          if (db.save) db.save();
+        }
+        this.showPrintExamModal(exam.id, null);
+      };
+    }
 
     // Event binding for question deletion and editing inline
     const bindQuestionEvents = () => {
@@ -9391,21 +10577,45 @@ render_ai_geometry(dom) {
       exam.dueDate = modal.querySelector('#view-edit-exam-due').value || null;
       exam.questions = examQuestions;
       exam.questionIds = examQuestions.map(q => q.id);
+      exam.questionsList = examQuestions.map(q => q.id);
       exam.updatedAt = Date.now();
 
-      if (db.updateExam) db.updateExam(exam);
-      else if (db.save) db.save();
+      // Ensure subjectId, category, subType are consistent
+      if (!exam.subjectId && this.currentExamSubject) exam.subjectId = this.currentExamSubject;
+      if (!exam.examCategory) exam.examCategory = this.currentExamTab || 'tx';
+      if (!exam.examSubType) exam.examSubType = this.currentExamSubTab || 'regular';
+      if (!exam.format) exam.format = exam.examSubType === 'quizizz' ? 'quizizz' : 'standard';
+      exam.isQuizizz = Boolean(exam.examSubType === 'quizizz' || exam.format === 'quizizz');
+
+      if (typeof db !== 'undefined') {
+        if (db.updateExam) db.updateExam(exam);
+        if (db.addExam) db.addExam(exam);
+        if (db.updateAssignment) db.updateAssignment(exam);
+        if (db.addAssignment) db.addAssignment(exam);
+        if (db.save) db.save();
+      }
 
       this.showToast('💾 Đã lưu lại đề kiểm tra thành công!');
       modal.remove();
 
-      if (typeof this.render_exams === 'function') {
-        this.render_exams(parentDom);
+      // Make sure current subject and tab align with this exam
+      if (exam.subjectId) this.currentExamSubject = exam.subjectId;
+      if (exam.examCategory) this.currentExamTab = exam.examCategory;
+      if (exam.examSubType) this.currentExamSubTab = exam.examSubType;
+
+      const renderTarget = (parentDom && document.body.contains(parentDom))
+        ? parentDom
+        : (document.getElementById('viewport') || parentDom);
+
+      if (this.currentView === 'assignments' && typeof this.render_assignments === 'function') {
+        this.render_assignments(renderTarget);
+      } else if (typeof this.render_exams === 'function') {
+        this.render_exams(renderTarget);
       }
 
       if (submitAction === 'save_assign') {
         setTimeout(() => {
-          this.showAssignExamModal(examId, parentDom);
+          this.showAssignExamModal(exam.id, renderTarget);
         }, 150);
       }
     };
@@ -12346,6 +13556,10 @@ render_ai_geometry(dom) {
     // Violation handler with Automatic Snapshot Proof
     const handleViolation = (type) => {
       if (isSubmitting || isShowingViolationModal) return;
+      // Tuyệt đối không tính vi phạm đối với các nhắc nhở tư thế ngồi / nghiêng mặt / lệch góc
+      if (type && (type.includes('nghiêng mặt') || type.includes('lookaside') || type.includes('cúi nhìn') || type.includes('lệch góc') || type.includes('ngồi thẳng'))) {
+        return;
+      }
       isShowingViolationModal = true;
       this._examViolationCount = (this._examViolationCount || 0) + 1;
       const vc = this._examViolationCount;
@@ -12424,6 +13638,19 @@ render_ai_geometry(dom) {
       if (isSubmitting) return;
       if (!forceSubmit && !confirm('🚀 Bạn có chắc chắn muốn NỘP BÀI THI không?')) return;
       isSubmitting = true;
+
+      // Dừng ngay lập tức toàn bộ hệ thống giám sát và còi báo động khi nộp bài
+      if (this._currentProctorAI) {
+        try { this._currentProctorAI.stop(); } catch(e) {}
+        this._currentProctorAI = null;
+      }
+      const cdOvl = document.getElementById('__proctor_countdown_overlay__');
+      if (cdOvl) cdOvl.remove();
+      const lkScr = document.getElementById('__proctor_lock_screen__');
+      if (lkScr) lkScr.remove();
+      if (window.speechSynthesis) {
+        try { window.speechSynthesis.cancel(); } catch(e) {}
+      }
 
       // Collect answers
       const answers = {};
@@ -12932,67 +14159,93 @@ render_ai_geometry(dom) {
         const sampleRate = audioCtx.sampleRate;
         const micSrc = audioCtx.createMediaStreamSource(stream);
 
-        // ── Bandpass Filter: CHỈ CHO QUA dải 300Hz - 3400Hz (giọng người) ──────
+        // ── Bandpass Filter: DẢI THÔNG 300Hz - 3400Hz (Dải tần giọng người Formant F1-F3) ──
         const bpFilter = audioCtx.createBiquadFilter();
         bpFilter.type = 'bandpass';
-        bpFilter.frequency.value = 1850; // trung tâm dải giọng người
-        bpFilter.Q.value = 0.85;         // độ rộng dải thông (300Hz – 3400Hz)
+        bpFilter.frequency.value = 1500;
+        bpFilter.Q.value = 0.85;
+
+        // ── Highpass Filter: CẮT TẦN SỐ TRẦM < 220Hz (Loại bỏ tiếng gió, sấm chớp, rung bàn) ──
+        const hpFilter = audioCtx.createBiquadFilter();
+        hpFilter.type = 'highpass';
+        hpFilter.frequency.value = 220;
 
         const micAnalyser = audioCtx.createAnalyser();
-        micAnalyser.fftSize = 2048;
-        micAnalyser.smoothingTimeConstant = 0.7; // làm mịn tránh bắt nhầm spike ngắn
+        micAnalyser.fftSize = 512;
+        micAnalyser.smoothingTimeConstant = 0.65;
 
-        // Chuỗi: micSrc -> bandpass -> analyser -> (silent sink)
-        micSrc.connect(bpFilter);
+        micSrc.connect(hpFilter);
+        hpFilter.connect(bpFilter);
         bpFilter.connect(micAnalyser);
-        const silentGain = audioCtx.createGain();
-        silentGain.gain.value = 0;
-        micAnalyser.connect(silentGain);
-        silentGain.connect(audioCtx.destination);
 
         const freqBuf = new Uint8Array(micAnalyser.frequencyBinCount);
         let micViolationCooldown = 0;
-        let speechAccum = 0; // số tích lũy phát hiện giọng nói liên tục
+        let speechAccum = 0;
 
-        // Tính chỉ số FFT tương ứng với 300Hz và 3400Hz
-        const binHz = sampleRate / micAnalyser.fftSize;
-        const binLow  = Math.max(0, Math.round(300  / binHz));
-        const binHigh = Math.min(micAnalyser.frequencyBinCount - 1, Math.round(3400 / binHz));
+        const binHz = (sampleRate / 2) / micAnalyser.frequencyBinCount;
+        const binLow  = Math.max(0, Math.floor(300  / binHz));
+        const binHigh = Math.min(micAnalyser.frequencyBinCount - 1, Math.floor(3400 / binHz));
 
         const doStartMic = () => {
           micInterval = setInterval(() => {
             if (!this.isProctoringActive) return;
             micAnalyser.getByteFrequencyData(freqBuf);
 
-            // Tính năng lượng trong dải giọng người 300Hz–3400Hz
-            let speechEnergy = 0;
-            for (let b = binLow; b <= binHigh; b++) {
-              speechEnergy += freqBuf[b];
+            let totalEnergy = 0;
+            let voiceEnergy = 0;
+            let logSum = 0;
+            let nonZero = 0;
+            const binCount = freqBuf.length;
+
+            for (let i = 0; i < binCount; i++) {
+              const val = freqBuf[i];
+              totalEnergy += val;
+              if (i >= binLow && i <= binHigh) {
+                voiceEnergy += val;
+              }
+              if (val > 0) {
+                logSum += Math.log(val + 0.001);
+                nonZero++;
+              }
             }
-            const speechBins = binHigh - binLow + 1;
-            const avgSpeechEnergy = speechBins > 0 ? speechEnergy / speechBins : 0;
+
+            const meanEnergy = totalEnergy / binCount;
+            if (meanEnergy < 20) {
+              speechAccum = Math.max(0, speechAccum - 1);
+              return; // Yên tĩnh
+            }
+
+            // 1. Tỉ lệ năng lượng giọng nói
+            const voiceRatio = voiceEnergy / Math.max(1, totalEnergy);
+
+            // 2. Độ phẳng phổ (Spectral Flatness): Tiếng mưa to > 0.60, Giọng người < 0.45
+            const geomMean = Math.exp(logSum / Math.max(1, nonZero));
+            const arithMean = totalEnergy / Math.max(1, nonZero);
+            const spectralFlatness = geomMean / Math.max(1, arithMean);
+
+            // Phân biệt chính xác: Giọng nói khi tập trung dải 300-3400Hz (>62%) VÀ độ phẳng thấp (<0.48)
+            const isHumanVoice = (voiceRatio >= 0.62) && (spectralFlatness <= 0.48) && (meanEnergy >= 25);
 
             if (micViolationCooldown > 0) { micViolationCooldown--; return; }
 
-            // Ngưỡng 52/255: đủ mạnh để bắt giọng nói bình thường, bỏ qua tiếng ồn nhỏ
-            if (avgSpeechEnergy > 52) {
+            if (isHumanVoice) {
               speechAccum++;
-              if (speechAccum >= 6) { // ~3 giây liên tục (6 x 500ms) = tiếng nói thật
+              if (speechAccum >= 6) { // ~2.5s liên tục có tiếng nói người
                 speechAccum = 0;
-                micViolationCooldown = 14; // 7 giây cooldown sau khi bắt vi phạm
-                handleViolation('Phát hiện tiếng nói / trao đổi đáp án liên tục trong phòng thi!');
+                micViolationCooldown = 12; // 6s cooldown
+                handleViolation('Phát hiện có tiếng nói / thì thầm trao đổi bài trong phòng thi!');
               }
             } else {
-              speechAccum = Math.max(0, speechAccum - 1); // giảm dần nếu im lặng trở lại
+              speechAccum = Math.max(0, speechAccum - 2); // Bỏ qua tiếng mưa / quạt gió
             }
-          }, 500);
+          }, 400);
         };
         audioCtx.resume().then(doStartMic).catch(() => {
           document.addEventListener('click', () => audioCtx.resume().then(doStartMic).catch(() => {}), { once: true });
         });
       } catch(e) { console.warn('Mic VAD init error:', e); }
     }
-    // 📷 AI Vision Proctoring Real-Time 60FPS Engine (ProctorCameraAI Module)
+    // 📷 AI Vision Proctoring Real-Time 60FPS Engine (ProctorCameraAI Module v3.0)
     if (exam.enableCamera && stream) {
       const vidEl   = overlay.querySelector('#exam-pip-video');
       const hudEl   = overlay.querySelector('#exam-pip-hud') || overlay.querySelector('#exam-proctor-hud');
@@ -13007,6 +14260,8 @@ render_ai_geometry(dom) {
           status: camSt,
           stream: stream,
           studentName: studentName,
+          enableMic: exam.enableMic !== false,
+          enableFullscreen: true,
           onViolation: (reason, snapshot) => {
             handleViolation(reason);
           }
@@ -13206,6 +14461,10 @@ render_ai_geometry(dom) {
 
             <button id="btn-rand-file" class="btn" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#ffffff; ; font-weight: 400; font-family:var(--font-title); padding:0.55rem 1rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(2,132,199,0.3); display:flex; align-items:center; gap:0.4rem; font-size:0.88rem;">
               <span>📁</span> Rút ngẫu nhiên từ Tệp tải lên
+            </button>
+
+            <button id="btn-ai-asm-generator" class="btn" style="background:linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #8b5cf6 100%); color:#ffffff; font-weight:600; font-family:var(--font-title); padding:0.55rem 1rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(236,72,153,0.35); display:flex; align-items:center; gap:0.4rem; font-size:0.88rem; transition:transform 0.15s ease;">
+              <span>✨</span> Tạo Đề bằng AI
             </button>
 
             <button id="btn-create-custom-asm" class="btn" style="background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color:#ffffff; ; font-weight: 400; font-family:var(--font-title); padding:0.55rem 1rem; border-radius:10px; border:none; cursor:pointer; box-shadow:0 4px 12px rgba(124,58,237,0.3); display:flex; align-items:center; gap:0.4rem; font-size:0.88rem;">
@@ -13412,6 +14671,12 @@ render_ai_geometry(dom) {
     // Action 2: Rút ngẫu nhiên từ Tệp tải lên
     dom.querySelector('#btn-rand-file').onclick = () => {
       this.showRandomFromUploadedFileModal(this.currentAssignmentSubject, dom, false);
+    };
+
+    // Action AI: Tạo Đề bằng AI
+    const btnAsmAI = dom.querySelector('#btn-ai-asm-generator');
+    if (btnAsmAI) btnAsmAI.onclick = () => {
+      this.showAIExamGeneratorModal(this.currentAssignmentSubject, dom, false);
     };
 
     // Action 3: Tạo Đề Mới (Thủ công)
@@ -15192,8 +16457,17 @@ render_ai_geometry(dom) {
       if (typeof db !== 'undefined') {
         if (db.addAssignment) db.addAssignment(newAssignment);
         if (db.addExam) db.addExam(newAssignment);
+        if (db.save) db.save();
+
         this.showToast(isQuizizzMode ? `🎮 Đã nạp thành công ${selectedQuestions.length} câu hỏi vào Đấu trường Quizizz Arena!` : `📋 Đã tạo thành công Đề kiểm tra nháp (${selectedQuestions.length} câu)!`);
         modal.remove();
+
+        if (isExamContext) {
+          this.currentExamSubject = subjectId;
+          this.currentExamTab = currentExamCat;
+          this.currentExamSubTab = isQuizizzMode ? 'quizizz' : 'regular';
+        }
+
         const renderTarget2 = (parentDom && document.body.contains(parentDom))
           ? parentDom : (document.getElementById('viewport') || parentDom);
         if (typeof this.render_exams === 'function') {
@@ -15513,8 +16787,17 @@ render_ai_geometry(dom) {
       if (typeof db !== 'undefined') {
         if (db.addAssignment) db.addAssignment(newAssignment);
         if (db.addExam) db.addExam(newAssignment);
+        if (db.save) db.save();
+
         this.showToast(isQuizizzMode ? `🎮 Đã nạp thành công ${finalPicked.length} câu từ tệp vào Đấu trường Quizizz Arena!` : `📋 Đã rút ${finalPicked.length} câu từ tệp và tạo bản nháp bài kiểm tra!`);
         modal.remove();
+
+        if (isExamContext) {
+          this.currentExamSubject = subjectId;
+          this.currentExamTab = currentExamCat;
+          this.currentExamSubTab = isQuizizzMode ? 'quizizz' : 'regular';
+        }
+
         const fileRenderTarget = (parentDom && document.body.contains(parentDom))
           ? parentDom : (document.getElementById('viewport') || parentDom);
         if (typeof this.render_exams === 'function') {
@@ -15530,6 +16813,762 @@ render_ai_geometry(dom) {
         }
       }
     };
+  }
+
+  // === MODAL 2.5: ✨ TRỢ LÝ AI SOẠN ĐỀ THI & MA TRẬN BỘ SÁCH KẾT NỐI TRI THỨC VỚI CUỘC SỐNG ===
+  showAIExamGeneratorModal(subjectId, parentDom, isExamParam) {
+    const oldModal = document.getElementById('ai-exam-generator-modal');
+    if (oldModal) oldModal.remove();
+
+    let realSubjectId = subjectId;
+    if (typeof realSubjectId === 'object' && realSubjectId !== null) {
+      realSubjectId = realSubjectId.id || realSubjectId.subjectId;
+    }
+    if (!realSubjectId && typeof this.currentAssignmentSubject !== 'undefined') {
+      realSubjectId = typeof this.currentAssignmentSubject === 'object' ? this.currentAssignmentSubject.id : this.currentAssignmentSubject;
+    }
+    subjectId = realSubjectId || 'toan';
+
+    const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
+    const subObj = subjects.find(s => s.id === subjectId) || { name: 'Toán học', icon: '📐' };
+
+    // BẢNG MỤC LỤC BÀI HỌC CHUẨN 100% THEO TỪNG MÔN SGK KẾT NỐI TRI THỨC VỚI CUỘC SỐNG
+    const KNTT_CURRICULUM = {
+      toan: {
+        '6': [
+          'Bài 1: Tập hợp. Phần tử của tập hợp',
+          'Bài 2: Cách ghi số tự nhiên & Thứ tự thực hiện phép tính',
+          'Bài 3: Phép cộng, trừ, nhân, chia số tự nhiên',
+          'Bài 4: Lũy thừa với số mũ tự nhiên & Nhân chia cùng cơ số',
+          'Bài 5: Tính chia hết trong tập hợp số tự nhiên & Dấu hiệu chia hết 2, 3, 5, 9',
+          'Bài 6: Số nguyên tố. Hợp số. Phân tích ra thừa số nguyên tố',
+          'Bài 7: Ước chung lớn nhất & Bội chung nhỏ nhất',
+          'Bài 8: Tập hợp các số nguyên & Phép cộng, trừ, nhân số nguyên',
+          'Bài 9: Hình tam giác đều, hình vuông, hình lục giác đều',
+          'Bài 10: Hình chữ nhật, hình thoi, hình bình hành, hình thang cân',
+          'Bài 11: Tính đối xứng của hình phẳng trong tự nhiên (Trục & Tâm đối xứng)',
+          'Bài 12: Phân số & Phép tính với phân số',
+          'Bài 13: Số thập phân và các phép tính với số thập phân',
+          'Bài 14: Tỉ số và tỉ số phần trăm. Bài toán thực tiễn'
+        ],
+        '7': [
+          'Bài 1: Tập hợp các số hữu tỉ & Các phép tính',
+          'Bài 2: Số thập phân vô hạn tuần hoàn & Số thực',
+          'Bài 3: Lũy thừa của một số hữu tỉ',
+          'Bài 4: Góc ở vị trí đặc biệt. Tia phân giác của một góc',
+          'Bài 5: Hai đường thẳng song song và dấu hiệu nhận biết',
+          'Bài 6: Định lí và chứng minh định lí',
+          'Bài 7: Tổng các góc trong một tam giác & Các trường hợp bằng nhau',
+          'Bài 8: Tam giác cân. Đường trung trực của đoạn thẳng',
+          'Bài 9: Tỉ lệ thức và dãy tỉ số bằng nhau',
+          'Bài 10: Biểu thức đại số & Đa thức một biến',
+          'Bài 11: Hình lăng trụ đứng tam giác và tứ giác'
+        ],
+        '8': [
+          'Bài 1: Đơn thức và đa thức nhiều biến',
+          'Bài 2: Các phép tính với đa thức nhiều biến',
+          'Bài 3: Bảy hằng đẳng thức đáng nhớ và ứng dụng',
+          'Bài 4: Phân tích đa thức thành nhân tử',
+          'Bài 5: Tứ giác, Hình thang cân, Hình bình hành, Hình chữ nhật, Hình thoi, Hình vuông',
+          'Bài 6: Định lí Thalès trong tam giác',
+          'Bài 7: Phân thức đại số & Các phép tính phân thức',
+          'Bài 8: Phương trình bậc nhất một ẩn & Hàm số bậc nhất',
+          'Bài 9: Hình chóp tam giác đều và hình chóp tứ giác đều'
+        ],
+        '9': [
+          'Bài 1: Khái niệm phương trình và hệ hai phương trình bậc nhất hai ẩn',
+          'Bài 2: Giải hệ phương trình bậc nhất hai ẩn',
+          'Bài 3: Phương trình bậc hai một ẩn & Công thức nghiệm',
+          'Bài 4: Định lí Viète và ứng dụng',
+          'Bài 5: Tỉ số lượng giác của góc nhọn & Hệ thức lượng trong tam giác vuông',
+          'Bài 6: Đường tròn, tiếp tuyến của đường tròn & Góc với đường tròn',
+          'Bài 7: Bảng tần số và biểu đồ tần số. Xác suất của biến cố'
+        ]
+      },
+      van: {
+        '6': [
+          'Bài 1: Tôi và các bạn (Truyện đồng thoại & Từ đơn, từ phức)',
+          'Bài 2: Gõ cửa trái tim (Thơ lục bát & Biện pháp tu từ ẩn dụ)',
+          'Bài 3: Yêu thương và chia sẻ (Truyện ngắn & Dấu câu, từ mượn)',
+          'Bài 4: Quê hương yêu dấu (Thơ có yếu tố tự sự & Miêu tả)',
+          'Bài 5: Những nẻo đường xứ sở (Kí & Biện pháp so sánh, điệp ngữ)',
+          'Bài 6: Chuyện kể về những người anh hùng (Truyền thuyết & Nghĩa của từ)',
+          'Bài 7: Thế giới cổ tích (Truyện cổ tích & Trạng ngữ)',
+          'Bài 8: Khác biệt và gần gũi (Văn bản nghị luận & Lập luận)',
+          'Bài 9: Trái Đất - ngôi nhà chung (Văn bản thông tin & Dữ liệu khách quan)'
+        ],
+        '7': [
+          'Bài 1: Bầu trời tuổi thơ (Truyện & Ngữ cảnh, từ địa phương)',
+          'Bài 2: Khúc nhạc tâm hồn (Thơ bốn chữ, năm chữ & Nói giảm nói tránh)',
+          'Bài 3: Cội nguồn yêu thương (Nghị luận xã hội & Mở rộng thành phần câu)',
+          'Bài 4: Giai điệu đất nước (Tùy bút, tản văn & Phép liên kết)',
+          'Bài 5: Màu sắc trăm miền (Văn bản thông tin & Thuật ngữ)'
+        ],
+        '8': [
+          'Bài 1: Câu chuyện của lịch sử (Truyện lịch sử & Từ Hán Việt)',
+          'Bài 2: Vẻ đẹp cổ điển (Thơ Đường luật & Biện pháp đảo ngữ)',
+          'Bài 3: Lời sông núi (Văn bản nghị luận trung đại & Câu phủ định, khẳng định)',
+          'Bài 4: Tiếng cười trào phúng (Truyện cười, thơ trào phúng & Nghĩa tường minh/hàm ý)',
+          'Bài 5: Những gương mặt thân yêu (Hài kịch & Thành phần biệt lập)'
+        ],
+        '9': [
+          'Bài 1: Thế giới kì ảo (Truyện truyền kì & Điển tích, điển cố)',
+          'Bài 2: Khát vọng hoà bình (Thơ hiện đại & Biện pháp tu từ chêm xen)',
+          'Bài 3: Tiếng nói của tư tưởng (Nghị luận văn học & Lập luận sắc bén)',
+          'Bài 4: Vẻ đẹp của tự nhiên (Văn bản thông tin & Phương tiện phi ngôn ngữ)',
+          'Bài 5: Tiếng cười trên sân khấu (Kịch bản văn học & Hội thoại)'
+        ]
+      },
+      khtn: {
+        '6': [
+          'Bài 1: Mở đầu về Khoa học tự nhiên & Các phép đo cơ bản',
+          'Bài 2: Các thể của chất và sự chuyển thể',
+          'Bài 3: Oxygen và không khí. Vai trò của không khí sạch',
+          'Bài 4: Một số vật liệu, nhiên liệu, nguyên liệu và lương thực thực phẩm thông dụng',
+          'Bài 5: Tách chất ra khỏi hỗn hợp (Lọc, cô cạn, chiết)',
+          'Bài 6: Tế bào - Đơn vị cơ sở của sự sống (Cấu tạo và sự phân chia tế bào)',
+          'Bài 7: Từ tế bào đến cơ thể (Mô, cơ quan, hệ cơ quan)',
+          'Bài 8: Đa dạng thế giới sống (Phân loại sinh vật, vi khuẩn, virus, nấm, thực vật, động vật)',
+          'Bài 9: Lực và tác dụng của lực (Lực tiếp xúc, lực không tiếp xúc, lực ma sát)',
+          'Bài 10: Khối lượng và trọng lượng. Độ biến dạng của lò xo',
+          'Bài 11: Năng lượng và sự truyền năng lượng. Năng lượng tái tạo',
+          'Bài 12: Trái Đất và Bầu trời (Hệ Mặt Trời, chuyển động tự quay và quanh Mặt Trời)'
+        ],
+        '7': [
+          'Bài 1: Phương pháp và kĩ năng học tập môn Khoa học tự nhiên',
+          'Bài 2: Nguyên tử. Nguyên tố hóa học và Bảng tuần hoàn các nguyên tố hóa học',
+          'Bài 3: Phân tử. Đơn chất. Hợp chất. Liên kết hóa học',
+          'Bài 4: Hóa trị và công thức hóa học',
+          'Bài 5: Tốc độ chuyển động & Đồ thị quãng đường - thời gian',
+          'Bài 6: Âm thanh: Nguồn âm, độ cao, độ to, phản xạ âm và chống ô nhiễm tiếng ồn',
+          'Bài 7: Ánh sáng: Sự truyền ánh sáng, định luật phản xạ ánh sáng, ảnh tạo bởi gương phẳng',
+          'Bài 8: Từ trường, từ phổ và nam châm điện',
+          'Bài 9: Trao đổi chất và chuyển hóa năng lượng ở sinh vật (Quang hợp và Hô hấp tế bào)',
+          'Bài 10: Cảm ứng ở sinh vật và tập tính của động vật',
+          'Bài 11: Sinh trưởng và phát triển ở sinh vật. Sinh sản ở sinh vật'
+        ],
+        '8': [
+          'Bài 1: Phản ứng hóa học & Định luật bảo toàn khối lượng',
+          'Bài 2: Mol và tỉ khối của chất khí. Dung dịch và nồng độ dung dịch',
+          'Bài 3: Acid - Base - pH - Oxide - Muối & Phân bón hóa học',
+          'Bài 4: Khối lượng riêng và Áp suất (Áp suất chất lỏng, chất khí, lực đẩy Archimedes)',
+          'Bài 5: Tác dụng làm quay của lực. Moment lực và Đòn bẩy',
+          'Bài 6: Điện học: Hiện tượng nhiễm điện, dòng điện, nguồn điện, mạch điện và an toàn điện',
+          'Bài 7: Nhiệt học: Nhiệt năng, sự truyền nhiệt, nở vì nhiệt',
+          'Bài 8: Sinh học người: Hệ vận động, hệ tuần hoàn, hệ hô hấp, hệ bài tiết, hệ thần kinh và giác quan'
+        ],
+        '9': [
+          'Bài 1: Kim loại và phi kim. Dãy hoạt động hóa học của kim loại',
+          'Bài 2: Hợp chất hữu cơ, Alkane, Alkene, Alcohol, Acetic acid và Polymer',
+          'Bài 3: Cơ năng: Động năng, thế năng và định luật bảo toàn cơ năng',
+          'Bài 4: Ánh sáng: Khúc xạ ánh sáng, phản xạ toàn phần, thấu kính hội tụ và phân kì',
+          'Bài 5: Điện từ học: Cảm ứng điện từ, máy biến áp và truyền tải điện năng',
+          'Bài 6: Di truyền và biến dị: Các quy luật di truyền của Mendel, DNA, RNA và Protein',
+          'Bài 7: Tiến hóa và Sinh thái học: Quần thể, quần xã và hệ sinh thái'
+        ]
+      },
+      anh: {
+        '6': [
+          'Unit 1: My New School (Present simple & School items)',
+          'Unit 2: My House (Types of houses, rooms & Prepositions of place)',
+          'Unit 3: My Friends (Personality adjectives & Present continuous)',
+          'Unit 4: My Neighbourhood (Comparative adjectives & Directions)',
+          'Unit 5: Natural Wonders of Vietnam (Must/Mustn\'t & Geography)',
+          'Unit 6: Our Tet Holiday (Should/Shouldn\'t & Traditions)'
+        ],
+        '7': [
+          'Unit 1: Hobbies (Verbs of liking & Present simple)',
+          'Unit 2: Healthy Living (Simple sentences & Health tips)',
+          'Unit 3: Community Service (Past simple & Volunteer activities)',
+          'Unit 4: Music and Arts (Comparisons: as...as, different from, like)',
+          'Unit 5: Food and Drink (Countable/Uncountable nouns, Some/Any)',
+          'Unit 6: A Visit to a School (Prepositions of time and place)'
+        ],
+        '8': [
+          'Unit 1: Leisure Time (Verbs of liking + Gerunds/To-infinitives)',
+          'Unit 2: Life in the Countryside (Comparative adverbs)',
+          'Unit 3: Teenagers (Simple and compound sentences & Modals)',
+          'Unit 4: Ethnic Groups of Vietnam (Articles: a, an, the)',
+          'Unit 5: Our Customs and Traditions (Zero and first conditionals)',
+          'Unit 6: Lifestyles (Future continuous)'
+        ],
+        '9': [
+          'Unit 1: Local Environment (Complex sentences & Phrasal verbs)',
+          'Unit 2: City Life (Comparison of adjectives and adverbs)',
+          'Unit 3: Teen Stress and Pressure (Reported speech with Wh-words)',
+          'Unit 4: Life in the Past (Used to & Wishes for the present)',
+          'Unit 5: Wonders of Vietnam (Passive voice with impersonal reporting)'
+        ]
+      },
+      lsdl: {
+        '6': [
+          'Phần Lịch sử - Bài 1: Lịch sử và cuộc sống. Thời gian trong lịch sử',
+          'Phần Lịch sử - Bài 2: Nguồn gốc loài người và các nền văn minh cổ đại (Ai Cập, Lưỡng Hà, Ấn Độ, Hy Lạp, La Mã)',
+          'Phần Lịch sử - Bài 3: Nhà nước Văn Lang, Âu Lạc & Khởi nghĩa Hai Bà Trưng, Bà Triệu',
+          'Phần Lịch sử - Bài 4: Bước ngoặt lịch sử đầu thế kỉ X (Khúc Thừa Dụ & Chiến thắng Bạch Đằng 938 của Ngô Quyền)',
+          'Phần Địa lý - Bài 1: Hệ thống kinh vĩ tuyến và tọa độ địa lý trên bản đồ',
+          'Phần Địa lý - Bài 2: Trái Đất trong hệ Mặt Trời & Các chuyển động của Trái Đất',
+          'Phần Địa lý - Bài 3: Khí hậu và các đới khí hậu trên Trái Đất. Sông ngòi và nước ngầm',
+          'Phần Địa lý - Bài 4: Đa dạng sinh vật & Bảo vệ môi trường tự nhiên'
+        ],
+        '7': [
+          'Phần Lịch sử - Bài 1: Tây Âu từ thế kỉ V đến nửa đầu thế kỉ XVI & Phong trào Văn hóa Phục hưng',
+          'Phần Lịch sử - Bài 2: Đại Việt thời Lý - Trần - Hồ (Tổ chức nhà nước, kinh tế, văn hóa, kháng chiến chống Nguyên Mông)',
+          'Phần Lịch sử - Bài 3: Khởi nghĩa Lam Sơn và nước Đại Việt thời Lê Sơ',
+          'Phần Địa lý - Bài 1: Đặc điểm tự nhiên, dân cư và xã hội Châu Âu',
+          'Phần Địa lý - Bài 2: Vị trí địa lý và đặc điểm tự nhiên Châu Á',
+          'Phần Địa lý - Bài 3: Khí hậu nhiệt đới gió mùa & Sông ngòi Châu Á'
+        ],
+        '8': [
+          'Phần Lịch sử - Bài 1: Các cuộc cách mạng tư sản thời cận đại (Cách mạng Anh, Bắc Mỹ, Cách mạng Pháp)',
+          'Phần Lịch sử - Bài 2: Phong trào Tây Sơn và công cuộc thống nhất đất nước, bảo vệ Tổ quốc',
+          'Phần Lịch sử - Bài 3: Việt Nam từ đầu thế kỉ XIX đến trước năm 1858',
+          'Phần Địa lý - Bài 1: Vị trí địa lý, phạm vi lãnh thổ và biển đảo Việt Nam',
+          'Phần Địa lý - Bài 2: Địa hình và khoáng sản Việt Nam (Đặc điểm các vùng núi và đồng bằng)',
+          'Phần Địa lý - Bài 3: Khí hậu và thủy văn Việt Nam (Gió mùa, bão, mạng lưới sông ngòi)'
+        ],
+        '9': [
+          'Phần Lịch sử - Bài 1: Chiến tranh thế giới thứ nhất và thứ hai',
+          'Phần Lịch sử - Bài 2: Phong trào giải phóng dân tộc và Cách mạng tháng Tám năm 1945',
+          'Phần Lịch sử - Bài 3: Kháng chiến chống thực dân Pháp và đế quốc Mỹ (1945 - 1975)',
+          'Phần Địa lý - Bài 1: Địa lý dân cư và các ngành kinh tế Việt Nam (Nông nghiệp, công nghiệp, dịch vụ)',
+          'Phần Địa lý - Bài 2: Sự phân hóa lãnh thổ và các vùng kinh tế trọng điểm Việt Nam'
+        ]
+      },
+      tin: {
+        '6': [
+          'Bài 1: Thông tin và dữ liệu. Biểu diễn thông tin trong máy tính (Bit, Byte)',
+          'Bài 2: Mạng máy tính và Internet. Tìm kiếm thông tin an toàn',
+          'Bài 3: Soạn thảo văn bản và biên tập tài liệu số',
+          'Bài 4: Sơ đồ khối và Thuật toán (Thuật toán tìm kiếm tuần tự & Thuật toán sắp xếp)',
+          'Bài 5: Ứng dụng phần mềm trong học tập và đời sống'
+        ],
+        '7': [
+          'Bài 1: Thiết bị vào - ra và an toàn dữ liệu số',
+          'Bài 2: Phần mềm bảng tính điện tử (Các hàm SUM, AVERAGE, MAX, MIN, COUNT)',
+          'Bài 3: Định dạng bảng tính, chèn công thức và biểu đồ',
+          'Bài 4: Thuật toán tìm kiếm nhị phân & Sắp xếp nổi bọt (Bubble sort)',
+          'Bài 5: Đạo đức, pháp luật và văn hóa trong môi trường số'
+        ],
+        '8': [
+          'Bài 1: Lịch sử phát triển của máy tính & Thế giới số',
+          'Bài 2: Xử lý thông tin và lập bảng biểu nâng cao',
+          'Bài 3: Lập trình trực quan Scratch / Python: Biến, kiểu dữ liệu và phép toán',
+          'Bài 4: Cấu trúc rẽ nhánh (if...else) và Cấu trúc lặp (for/while)',
+          'Bài 5: Giải quyết bài toán thực tế bằng thuật toán lập trình'
+        ],
+        '9': [
+          'Bài 1: Mạng máy tính nâng cao, Điện toán đám mây và Trí tuệ nhân tạo (AI)',
+          'Bài 2: Đa phương tiện và xử lý hình ảnh, video số',
+          'Bài 3: Lập trình Python giải quyết bài toán nâng cao: Danh sách (List), Hàm (Function)',
+          'Bài 4: Thiết kế trang web đơn giản với HTML/CSS',
+          'Bài 5: An toàn thông tin, an ninh mạng và định hướng nghề nghiệp Tin học'
+        ]
+      },
+      gdcd: {
+        '6': [
+          'Bài 1: Tự hào về truyền thống gia đình, dòng họ',
+          'Bài 2: Yêu thương con người. Giúp đỡ bạn bè và cộng đồng',
+          'Bài 3: Siêng năng, kiên trì và tự lập trong học tập',
+          'Bài 4: Tôn trọng sự thật và bảo vệ lẽ phải',
+          'Bài 5: Tiết kiệm thời gian, tiền bạc và của cải xã hội',
+          'Bài 6: Quyền cơ bản của trẻ em và quyền con người'
+        ],
+        '7': [
+          'Bài 1: Tự hào về truyền thống quê hương và đất nước',
+          'Bài 2: Giữ chữ tín trong học tập và giao tiếp',
+          'Bài 3: Quản lý tiền hiệu quả và kĩ năng tài chính cá nhân',
+          'Bài 4: Phòng, chống bạo lực học đường và kĩ năng ứng phó',
+          'Bài 5: Bảo tồn và phát huy di sản văn hóa dân tộc'
+        ],
+        '8': [
+          'Bài 1: Tự hào về truyền thống dân tộc Việt Nam',
+          'Bài 2: Tôn trọng sự đa dạng của các dân tộc và nền văn hóa',
+          'Bài 3: Lao động cần cù, sáng tạo và trách nhiệm với công việc',
+          'Bài 4: Bảo vệ môi trường và tài nguyên thiên nhiên',
+          'Bài 5: Phòng ngừa tai nạn vũ khí, cháy nổ và các chất độc hại',
+          'Bài 6: Quyền và nghĩa vụ của công dân đối với Tổ quốc'
+        ],
+        '9': [
+          'Bài 1: Sống có lý tưởng và khát vọng cống hiến của thanh niên',
+          'Bài 2: Khoan dung, hòa bình và hữu nghị giữa các dân tộc',
+          'Bài 3: Dân chủ và kỉ luật trong nhà trường và xã hội',
+          'Bài 4: Bảo vệ hòa bình, độc lập dân tộc và chủ quyền lãnh thổ',
+          'Bài 5: Quyền tự do kinh doanh và nghĩa vụ đóng thuế',
+          'Bài 6: Pháp luật và đời sống: Quyền và nghĩa vụ hôn nhân, gia đình'
+        ]
+      },
+      congnghe: {
+        '6': [
+          'Bài 1: Nhà ở đối với con người & Nhà ở thông minh (Smart home)',
+          'Bài 2: Xây dựng nhà ở và sử dụng năng lượng tiết kiệm trong gia đình',
+          'Bài 3: Bảo quản và chế biến thực phẩm an toàn, đủ dinh dưỡng',
+          'Bài 4: Trang phục và thời trang trong cuộc sống hiện đại'
+        ],
+        '7': [
+          'Bài 1: Vai trò và triển vọng của nông nghiệp trồng trọt',
+          'Bài 2: Các phương thức trồng trọt và kĩ thuật chăm sóc cây trồng',
+          'Bài 3: Phòng trừ sâu, bệnh hại cây trồng bằng biện pháp sinh học',
+          'Bài 4: Kĩ thuật chăn nuôi gia súc, gia cầm và thủy sản an toàn'
+        ],
+        '8': [
+          'Bài 1: Bản vẽ kĩ thuật và các hình chiếu vuông góc',
+          'Bài 2: Vật liệu cơ khí và dụng cụ gia công cơ khí cầm tay',
+          'Bài 3: Cơ cấu truyền và biến đổi chuyển động (Bộ truyền xích, đai, bánh răng)',
+          'Bài 4: An toàn điện và các thiết bị đóng cắt, lấy điện trong gia đình'
+        ],
+        '9': [
+          'Bài 1: Thiết bị điện và sơ đồ mạch điện điều khiển trong gia đình',
+          'Bài 2: Lắp đặt mạch điện chiếu sáng và bảng điện gia đình',
+          'Bài 3: Định hướng nghề nghiệp trong lĩnh vực kĩ thuật, công nghệ'
+        ]
+      }
+    };
+
+    const isExamContext = typeof isExamParam === 'boolean' ? isExamParam : (Boolean(this.currentExamSubject) || this.currentTab === 'exams' || Boolean(this.currentExamSubTab));
+    const defaultTitle = isExamContext
+      ? `Đề kiểm tra KNTT môn ${subObj.name} - Ngày ${new Date().toLocaleDateString('vi-VN')}`
+      : `Bài tập KNTT môn ${subObj.name} - Ngày ${new Date().toLocaleDateString('vi-VN')}`;
+
+    const modal = document.createElement('div');
+    modal.id = 'ai-exam-generator-modal';
+    modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.8); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1.25rem; animation:fadeIn 0.25s ease-out;';
+
+    const getSubjectCurriculum = (sId, gr) => {
+      const baseKey = (sId || '').toLowerCase();
+      let key = 'toan';
+      if (baseKey.includes('toan') || baseKey === 'math') key = 'toan';
+      else if (baseKey.includes('van') || baseKey.includes('lit')) key = 'van';
+      else if (baseKey.includes('khtn') || baseKey.includes('ly') || baseKey.includes('hoa') || baseKey.includes('sinh')) key = 'khtn';
+      else if (baseKey.includes('anh') || baseKey.includes('eng')) key = 'anh';
+      else if (baseKey.includes('lsdl') || baseKey.includes('su') || baseKey.includes('dia') || baseKey.includes('lichsu')) key = 'lsdl';
+      else if (baseKey.includes('tin')) key = 'tin';
+      else if (baseKey.includes('gdcd') || baseKey.includes('congdan')) key = 'gdcd';
+      else if (baseKey.includes('congnghe')) key = 'congnghe';
+      
+      const subList = KNTT_CURRICULUM[key] || KNTT_CURRICULUM.toan;
+      return subList[String(gr)] || subList['6'] || [];
+    };
+
+    const initialTopics = getSubjectCurriculum(subjectId, '6');
+
+    modal.innerHTML = `
+      <div class="glass-card modal-card-container" style="width:100%; max-width:880px; padding:2rem; border-radius:24px; background:#ffffff; box-shadow:0 25px 70px rgba(0,0,0,0.45); font-family:var(--font-body); max-height:92vh; overflow-y:auto; border:2px solid #e0e7ff;">
+        
+        <!-- HEADER KHOA HỌC & ĐẲNG CẤP -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; border-bottom:2px solid #f1f5f9; padding-bottom:1.2rem;">
+          <div>
+            <!-- Banner KNTT -->
+            <div style="display:inline-flex; align-items:center; gap:0.5rem; background:linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color:#ffffff; padding:0.35rem 0.85rem; border-radius:20px; font-weight:700; font-size:0.78rem; margin-bottom:0.45rem; box-shadow:0 2px 8px rgba(37,99,235,0.25);">
+              <span>📘</span> BỘ SÁCH: KẾT NỐI TRI THỨC VỚI CUỘC SỐNG (NXB GIÁO DỤC VIỆT NAM)
+            </div>
+            <h3 style="margin:0; color:#0f172a; font-weight:800; font-size:1.4rem; font-family:var(--font-title); display:flex; align-items:center; gap:0.5rem;">
+              <span>✨</span> Trợ Lý AI Soạn Đề & Ma Trận Môn ${subObj.name.toUpperCase()}
+            </h3>
+            <div style="font-size:0.85rem; color:#64748b; margin-top:0.3rem;">
+              Tự động bám sát mục lục SGK Kết Nối Tri Thức, ngôn ngữ & kiến thức chuẩn chuyên môn từng môn học, phân hóa 4 cấp độ.
+            </div>
+          </div>
+          <button id="close-ai-exam-modal" style="background:#f1f5f9; border:none; width:36px; height:36px; border-radius:50%; font-size:1.4rem; cursor:pointer; color:#64748b; display:flex; align-items:center; justify-content:center; transition:all 0.15s;">&times;</button>
+        </div>
+
+        <!-- FORM CONFIG (BỐ CỤC KHOA HỌC 4 PHẦN RÕ RÀNG) -->
+        <div id="ai-exam-stage-config">
+          <form id="form-ai-exam-gen" style="display:flex; flex-direction:column; gap:1.35rem;">
+            
+            <!-- PHẦN 1: THÔNG TIN CHUNG & BỘ SÁCH -->
+            <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:18px; padding:1.25rem;">
+              <div style="font-weight:700; color:#1e293b; font-size:0.92rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.4rem;">
+                <span style="background:#2563eb; color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.75rem;">1</span>
+                <span>Thông Tin Đề Thi & Phạm Vi Chương Trình KNTT</span>
+              </div>
+
+              <!-- Tiêu đề đề thi -->
+              <div style="margin-bottom:1rem;">
+                <label style="font-weight:600; font-size:0.83rem; color:#475569; display:block; margin-bottom:0.35rem;">
+                  Tên / Tiêu Đề Đề Kiểm Tra:
+                </label>
+                <input type="text" id="ai-exam-title" value="${defaultTitle}" required style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.92rem; font-weight:600; color:#0f172a; background:#fff;">
+              </div>
+
+              <!-- 3 Cột: Môn, Khối lớp, Thời gian -->
+              <div style="display:grid; grid-template-columns: 1.2fr 1fr 1fr; gap:0.85rem;">
+                <div>
+                  <label style="font-weight:600; font-size:0.82rem; color:#475569; display:block; margin-bottom:0.3rem;">📚 Môn Học:</label>
+                  <select id="ai-exam-subject" style="width:100%; padding:0.6rem 0.75rem; border-radius:10px; border:1.5px solid #cbd5e1; background:#fff; font-size:0.88rem; font-weight:600;">
+                    ${subjects.map(s => `<option value="${s.id}" ${s.id === subjectId ? 'selected' : ''}>${s.icon || '📖'} ${s.name}</option>`).join('')}
+                  </select>
+                </div>
+
+                <div>
+                  <label style="font-weight:600; font-size:0.82rem; color:#475569; display:block; margin-bottom:0.3rem;">🏫 Khối Lớp (SGK KNTT):</label>
+                  <select id="ai-exam-grade" style="width:100%; padding:0.6rem 0.75rem; border-radius:10px; border:1.5px solid #cbd5e1; background:#fff; font-size:0.88rem; font-weight:600;">
+                    <option value="6" selected>Lớp 6 (KNTT Tập 1 & 2)</option>
+                    <option value="7">Lớp 7 (KNTT Tập 1 & 2)</option>
+                    <option value="8">Lớp 8 (KNTT Tập 1 & 2)</option>
+                    <option value="9">Lớp 9 (KNTT Tập 1 & 2)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style="font-weight:600; font-size:0.82rem; color:#475569; display:block; margin-bottom:0.3rem;">⏱️ Thời Lượng Làm Bài:</label>
+                  <select id="ai-exam-duration" style="width:100%; padding:0.6rem 0.75rem; border-radius:10px; border:1.5px solid #cbd5e1; background:#fff; font-size:0.88rem; font-weight:600;">
+                    <option value="15">15 phút (Đánh giá thường xuyên)</option>
+                    <option value="45" selected>45 phút (Kiểm tra định kì 1 tiết)</option>
+                    <option value="60">60 phút (Kiểm tra giữa kì)</option>
+                    <option value="90">90 phút (Kiểm tra cuối học kì)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- PHẦN 2: CHỦ ĐỀ SGK KNTT & Ô NHẬP THÊM YÊU CẦU CỦA GIÁO VIÊN -->
+            <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:18px; padding:1.25rem;">
+              <div style="font-weight:700; color:#1e40af; font-size:0.92rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.4rem;">
+                <span style="background:#1d4ed8; color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.75rem;">2</span>
+                <span>Chủ Đề Bài Học KNTT & Yêu Cầu Chuyên Môn Của Giáo Viên</span>
+              </div>
+
+              <!-- Chọn bài học KNTT -->
+              <div style="margin-bottom:1rem;">
+                <label style="font-weight:600; font-size:0.83rem; color:#1e3a8a; display:block; margin-bottom:0.35rem;">
+                  📖 Chọn Bài Học / Chủ Đề Theo Mục Lục SGK Kết Nối Tri Thức:
+                </label>
+                <select id="ai-exam-topic-select" style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #93c5fd; background:#fff; font-size:0.9rem; font-weight:600; color:#0f172a;">
+                  ${initialTopics.map((t, idx) => `<option value="${t}" ${idx === 0 ? 'selected' : ''}>${t}</option>`).join('')}
+                  <option value="custom">✏️ [Nhập chủ đề tùy chỉnh khác...]</option>
+                </select>
+                <input type="text" id="ai-exam-topic-custom" placeholder="Nhập tên bài học / chủ đề nâng cao..." style="display:none; width:100%; margin-top:0.5rem; padding:0.6rem 0.8rem; border-radius:10px; border:1.5px solid #93c5fd; font-size:0.88rem;">
+              </div>
+
+              <!-- Ô NHẬP YÊU CẦU BỔ SUNG CỦA GIÁO VIÊN -->
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                  <label style="font-weight:700; font-size:0.84rem; color:#1e3a8a; display:flex; align-items:center; gap:0.35rem;">
+                    <span>✍️</span> Yêu Cầu & Lưu Ý Bổ Sung Của Giáo Viên (Prompt Tùy Biến):
+                  </label>
+                  <span style="font-size:0.75rem; color:#2563eb; font-weight:600;">(AI sẽ áp dụng 100% yêu cầu này)</span>
+                </div>
+                <textarea id="ai-teacher-prompt" rows="2" placeholder="Ví dụ: Tập trung ra bài toán liên hệ thực tế đời sống; câu hỏi mức độ Vận dụng cao cho tình huống thực tiễn; cho phép số liệu lẻ hoặc phân số; tránh các câu lý thuyết thuộc lòng..." style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #93c5fd; font-size:0.88rem; font-weight:500; font-family:var(--font-body); color:#0f172a; background:#ffffff; resize:vertical;"></textarea>
+
+                <!-- Quick Prompt Suggestions -->
+                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-top:0.45rem;">
+                  <span style="font-size:0.75rem; color:#64748b; align-self:center; font-weight:600;">Gợi ý nhanh:</span>
+                  <button type="button" class="btn-quick-req" data-req="Tập trung vào các bài toán thực tế đời sống và tình huống thực tiễn" style="background:#dbeafe; color:#1e40af; border:none; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.74rem; font-weight:600; cursor:pointer;">
+                    + Ứng dụng thực tế đời sống
+                  </button>
+                  <button type="button" class="btn-quick-req" data-req="Bám sát 100% dạng bài tập trong sách giáo khoa Kết Nối Tri Thức" style="background:#dbeafe; color:#1e40af; border:none; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.74rem; font-weight:600; cursor:pointer;">
+                    + Bám sát SGK KNTT
+                  </button>
+                  <button type="button" class="btn-quick-req" data-req="Tăng cường câu hỏi tư duy logic và phân tích hình vẽ/sơ đồ" style="background:#dbeafe; color:#1e40af; border:none; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.74rem; font-weight:600; cursor:pointer;">
+                    + Phân tích hình vẽ/sơ đồ
+                  </button>
+                  <button type="button" class="btn-quick-req" data-req="Phân hóa học sinh khá giỏi ở câu cuối, lời giải chi tiết từng bước" style="background:#dbeafe; color:#1e40af; border:none; padding:0.25rem 0.6rem; border-radius:12px; font-size:0.74rem; font-weight:600; cursor:pointer;">
+                    + Phân hóa học sinh khá giỏi
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- PHẦN 3: MA TRẬN 4 CẤP ĐỘ NHẬN THỨC THEO CHUẨN BGD -->
+            <div style="background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:18px; padding:1.25rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
+                <div style="font-weight:700; color:#166534; font-size:0.92rem; display:flex; align-items:center; gap:0.4rem;">
+                  <span style="background:#15803d; color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.75rem;">3</span>
+                  <span>Ma Trận Phân Hóa Đề Thi Chuẩn GDPT 2018</span>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                  <span style="font-size:0.85rem; font-weight:700; color:#166534;">Số lượng câu:</span>
+                  <select id="ai-exam-qcount" style="padding:0.35rem 0.75rem; border-radius:8px; border:1.5px solid #86efac; font-weight:800; color:#15803d; background:#fff; font-size:0.92rem;">
+                    <option value="5">5 câu (Đề 15 phút)</option>
+                    <option value="10" selected>10 câu (Đề 1 tiết chuẩn)</option>
+                    <option value="15">15 câu</option>
+                    <option value="20">20 câu (Đề kiểm tra chuẩn)</option>
+                    <option value="30">30 câu</option>
+                    <option value="40">40 câu (Thi học kì chuẩn)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 4 Cột Cấp Độ Nhận Thức -->
+              <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:0.65rem; text-align:center;">
+                <div style="background:#ffffff; padding:0.75rem 0.5rem; border-radius:12px; border:1.5px solid #86efac; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                  <div style="font-size:0.74rem; font-weight:800; color:#16a34a;">🟢 NHẬN BIẾT</div>
+                  <div style="font-size:1.25rem; font-weight:900; color:#0f172a; margin:0.15rem 0;" id="badge-nb-cnt">4 câu</div>
+                  <div style="font-size:0.72rem; color:#64748b; font-weight:600;">(40% Ma trận)</div>
+                </div>
+                <div style="background:#ffffff; padding:0.75rem 0.5rem; border-radius:12px; border:1.5px solid #93c5fd; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                  <div style="font-size:0.74rem; font-weight:800; color:#2563eb;">🔵 THÔNG HIỂU</div>
+                  <div style="font-size:1.25rem; font-weight:900; color:#0f172a; margin:0.15rem 0;" id="badge-th-cnt">3 câu</div>
+                  <div style="font-size:0.72rem; color:#64748b; font-weight:600;">(30% Ma trận)</div>
+                </div>
+                <div style="background:#ffffff; padding:0.75rem 0.5rem; border-radius:12px; border:1.5px solid #fde047; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                  <div style="font-size:0.74rem; font-weight:800; color:#ca8a04;">🟡 VẬN DỤNG</div>
+                  <div style="font-size:1.25rem; font-weight:900; color:#0f172a; margin:0.15rem 0;" id="badge-vd-cnt">2 câu</div>
+                  <div style="font-size:0.72rem; color:#64748b; font-weight:600;">(20% Ma trận)</div>
+                </div>
+                <div style="background:#ffffff; padding:0.75rem 0.5rem; border-radius:12px; border:1.5px solid #fca5a5; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                  <div style="font-size:0.74rem; font-weight:800; color:#dc2626;">🔴 VẬN DỤNG CAO</div>
+                  <div style="font-size:1.25rem; font-weight:900; color:#0f172a; margin:0.15rem 0;" id="badge-vdc-cnt">1 câu</div>
+                  <div style="font-size:0.72rem; color:#64748b; font-weight:600;">(10% Ma trận)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PHẦN 4: TÙY CHỌN BẢO MẬT & GIÁM SÁT -->
+            <div style="display:flex; justify-content:space-between; align-items:center; background:#faf5ff; border:1.5px solid #e9d5ff; padding:0.85rem 1.1rem; border-radius:14px; font-size:0.86rem;">
+              <label style="display:flex; align-items:center; gap:0.45rem; font-weight:600; color:#581c87; cursor:pointer;">
+                <input type="checkbox" id="ai-opt-proctoring" checked style="accent-color:#9333ea; width:17px; height:17px;">
+                <span>📹 Tích hợp Giám sát Camera AI & Chống Gian Lận (15s Absence Guard)</span>
+              </label>
+              <label style="display:flex; align-items:center; gap:0.45rem; font-weight:600; color:#581c87; cursor:pointer;">
+                <input type="checkbox" id="ai-opt-shuffle" checked style="accent-color:#9333ea; width:17px; height:17px;">
+                <span>🔀 Tự động tráo câu hỏi & đáp án khi học sinh thi</span>
+              </label>
+            </div>
+
+            <!-- FOOTER THEO ĐÚNG HÌNH ẢNH: [HỦY] VÀ [📋 RÚT CÂU HỎI & TẠO ĐỀ NHÁP] -->
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem;">
+              <button type="button" id="btn-cancel-ai-exam" class="btn btn-secondary" style="font-weight: 400; padding:0.65rem 1.35rem; border-radius:10px; border:1.5px solid #cbd5e1; background:#fff; color:#475569; cursor:pointer; font-size:0.92rem;">
+                Hủy
+              </button>
+              <button type="submit" id="btn-ai-create-draft" class="btn btn-primary" style="font-weight: 500; font-size:0.95rem; background:linear-gradient(135deg, #d97706 0%, #b45309 100%); color:#fff; border:none; padding:0.65rem 1.45rem; border-radius:10px; box-shadow:0 4px 12px rgba(217,119,6,0.35); cursor:pointer; display:flex; align-items:center; gap:0.45rem; transition:transform 0.15s ease;">
+                📋 RÚT CÂU HỎI & TẠO ĐỀ NHÁP
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // DYNAMIC SYNC: UPDATE TOPICS WHEN SUBJECT OR GRADE CHANGES
+    const subSelect = modal.querySelector('#ai-exam-subject');
+    const grSelect = modal.querySelector('#ai-exam-grade');
+    const topicSelect = modal.querySelector('#ai-exam-topic-select');
+    const customTopicInput = modal.querySelector('#ai-exam-topic-custom');
+
+    const updateTopicOptions = () => {
+      const curSub = subSelect.value;
+      const curGr = grSelect.value;
+      const curTopics = getSubjectCurriculum(curSub, curGr);
+      topicSelect.innerHTML = curTopics.map((t, idx) => `<option value="${t}" ${idx === 0 ? 'selected' : ''}>${t}</option>`).join('') +
+        `<option value="custom">✏️ [Nhập chủ đề tùy chỉnh khác...]</option>`;
+      customTopicInput.style.display = 'none';
+    };
+
+    if (subSelect && grSelect && topicSelect) {
+      subSelect.onchange = updateTopicOptions;
+      grSelect.onchange = updateTopicOptions;
+      topicSelect.onchange = () => {
+        if (topicSelect.value === 'custom') {
+          customTopicInput.style.display = 'block';
+          customTopicInput.focus();
+        } else {
+          customTopicInput.style.display = 'none';
+        }
+      };
+    }
+
+    // Dynamic Matrix Count Updates
+    const qCountSelect = modal.querySelector('#ai-exam-qcount');
+    const updateMatrixBadges = (total) => {
+      const nb = Math.round(total * 0.4);
+      const th = Math.round(total * 0.3);
+      const vd = Math.round(total * 0.2);
+      const vdc = Math.max(1, total - (nb + th + vd));
+      modal.querySelector('#badge-nb-cnt').textContent = `${nb} câu`;
+      modal.querySelector('#badge-th-cnt').textContent = `${th} câu`;
+      modal.querySelector('#badge-vd-cnt').textContent = `${vd} câu`;
+      modal.querySelector('#badge-vdc-cnt').textContent = `${vdc} câu`;
+    };
+    if (qCountSelect) {
+      qCountSelect.onchange = () => updateMatrixBadges(parseInt(qCountSelect.value, 10));
+      updateMatrixBadges(parseInt(qCountSelect.value, 10));
+    }
+
+    // Quick teacher requirement buttons
+    const teacherPromptArea = modal.querySelector('#ai-teacher-prompt');
+    modal.querySelectorAll('.btn-quick-req').forEach(btn => {
+      btn.onclick = () => {
+        const text = btn.getAttribute('data-req');
+        if (teacherPromptArea) {
+          if (teacherPromptArea.value.trim().length > 0) {
+            teacherPromptArea.value += '; ' + text;
+          } else {
+            teacherPromptArea.value = text;
+          }
+        }
+      };
+    });
+
+    // Close buttons
+    const closeBtn = modal.querySelector('#close-ai-exam-modal');
+    const cancelBtn = modal.querySelector('#btn-cancel-ai-exam');
+    if (closeBtn) closeBtn.onclick = () => modal.remove();
+    if (cancelBtn) cancelBtn.onclick = () => modal.remove();
+
+    // =========================================================================
+    // 🧠 CHUYÊN BIỆT HÓA 100% KIẾN THỨC VÀ NGÔN NGỮ THEO SGK KẾT NỐI TRI THỨC (CV 7991)
+    // =========================================================================
+    const synthesizeAIQuestions = (subId, grade, topic, count, teacherPrompt) => {
+      const results = [];
+      const baseKey = (subId || '').toLowerCase();
+      const gNum = parseInt(grade, 10) || 6;
+      const cleanPrompt = (teacherPrompt || '').trim();
+
+      // Sử dụng hàm generateAIQuestionsList chuẩn hóa cao cấp
+      const rawList = this.generateAIQuestionsList(
+        subId,
+        gNum,
+        topic,
+        'all', // phối hợp các dạng câu hỏi chuẩn GDPT 2018
+        'all', // phối hợp đầy đủ 4 cấp độ
+        count,
+        null,
+        null,
+        cleanPrompt
+      );
+
+      rawList.forEach((q, idx) => {
+        let score = 0.25;
+        if (q.type === 'dung_sai') score = 1.0;
+        else if (q.type === 'tu_luan') score = 2.0;
+        else if (q.type === 'tra_loi_ngan') score = 0.5;
+        else score = 0.25;
+
+        // Tính toán độ khó chuẩn ma trận BGD
+        let lvl = 'NB';
+        if (idx < Math.round(count * 0.4)) lvl = 'NB';
+        else if (idx < Math.round(count * 0.7)) lvl = 'TH';
+        else if (idx < Math.round(count * 0.9)) lvl = 'VD';
+        else lvl = 'VDC';
+
+        results.push({
+          id: 'q_ai_exam_' + Date.now() + '_' + idx,
+          subjectId: subId || 'toan',
+          type: q.type || 'trac_nghiem',
+          difficulty: q.difficulty || (lvl === 'NB' ? 'nhan_biet' : lvl === 'TH' ? 'thong_hieu' : lvl === 'VD' ? 'van_dung' : 'van_dung_cao'),
+          level: lvl,
+          questionText: q.questionText,
+          question: q.questionText,
+          options: q.options || ['Lựa chọn A', 'Lựa chọn B', 'Lựa chọn C', 'Lựa chọn D'],
+          correctAnswer: q.correctAnswer,
+          items: q.items || null,
+          explanation: q.explanation || '',
+          score: score,
+          approved: true
+        });
+      });
+
+      return results;
+    };
+
+        // FORM SUBMIT -> SINH CÂU HỎI BẰNG AI, LƯU RA NGOÀI VÀ MỞ NGAY TRÌNH SỬA ĐỀ ĐỂ THẦY CÔ KIỂM TRA SỬA LỖI
+    const form = modal.querySelector('#form-ai-exam-gen');
+    if (form) {
+      form.onsubmit = (e) => {
+        e.preventDefault();
+
+        const title = modal.querySelector('#ai-exam-title').value.trim();
+        const selectedSubId = modal.querySelector('#ai-exam-subject').value;
+        const selectedGrade = modal.querySelector('#ai-exam-grade').value;
+        const duration = parseInt(modal.querySelector('#ai-exam-duration').value, 10) || 45;
+        
+        let topic = topicSelect.value;
+        if (topic === 'custom') {
+          topic = customTopicInput.value.trim() || 'Chương trình Kết Nối Tri Thức';
+        }
+
+        const teacherPrompt = (teacherPromptArea ? teacherPromptArea.value.trim() : '');
+        const qCount = parseInt(modal.querySelector('#ai-exam-qcount').value, 10) || 10;
+        const enableProctoring = modal.querySelector('#ai-opt-proctoring').checked;
+
+        // Sinh danh sách câu hỏi theo AI
+        const generatedQuestions = synthesizeAIQuestions(selectedSubId, selectedGrade, topic, qCount, teacherPrompt);
+
+        if (!generatedQuestions || generatedQuestions.length === 0) {
+          alert('Không thể tạo câu hỏi, vui lòng thử lại!');
+          return;
+        }
+
+        const currentExamCat = (this.currentExamTab && ['tx','midterm','final'].includes(this.currentExamTab))
+          ? this.currentExamTab : 'tx';
+
+        const newExam = {
+          id: 'exam_ai_' + Date.now(),
+          title: title,
+          examCategory: currentExamCat,
+          examSubType: 'regular',
+          format: 'standard',
+          isQuizizz: false,
+          description: `Đề thi AI bộ sách Kết Nối Tri Thức Với Cuộc Sống - Chủ đề: ${topic} (${generatedQuestions.length} câu - Khối ${selectedGrade})`,
+          subjectId: selectedSubId,
+          grade: String(selectedGrade),
+          classId: null,
+          classIds: [],
+          targetClasses: [],
+          questionIds: generatedQuestions.map(q => q.id),
+          questionsList: generatedQuestions.map(q => q.id),
+          questions: generatedQuestions,
+          timeLimit: duration,
+          maxAttempts: 2,
+          mode: 'exam',
+          enableAI: true,
+          enableNLS: true,
+          enableCamera: enableProctoring,
+          enableMic: enableProctoring,
+          enableProctoring: enableProctoring,
+          proctoring: {
+            enableCamera: enableProctoring,
+            enableMic: enableProctoring,
+            tabSwitchGuard: true,
+            disableCopyPaste: true,
+            maxViolations: 4
+          },
+          status: 'draft',
+          published: false,
+          createdAt: new Date().toISOString(),
+          dueDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 16)
+        };
+
+        if (typeof db !== 'undefined') {
+          if (db.addAssignment) db.addAssignment(newExam);
+          if (db.addExam) db.addExam(newExam);
+          if (db.save) db.save();
+
+          this.showToast(`📋 Đã tạo thành công Đề thi nháp (${generatedQuestions.length} câu) theo SGK Kết Nối Tri Thức!`);
+          modal.remove();
+
+          if (isExamContext) {
+            this.currentExamSubject = selectedSubId;
+            this.currentExamTab = currentExamCat;
+            this.currentExamSubTab = 'regular';
+          }
+
+          const renderTarget = (parentDom && document.body.contains(parentDom))
+            ? parentDom : (document.getElementById('viewport') || parentDom);
+          
+          if (typeof this.render_exams === 'function') {
+            this.render_exams(renderTarget);
+          } else if (typeof this.render_assignments === 'function') {
+            this.render_assignments(renderTarget);
+          }
+
+          // Mở ngay modal xem/sửa đề thi chuẩn để giáo viên kiểm tra, sửa lỗi, đổi câu trước khi giao
+          setTimeout(() => {
+            if (isExamContext && typeof this.showViewEditExamModal === 'function') {
+              this.showViewEditExamModal(newExam.id, renderTarget);
+            } else if (typeof this.showEditAssignmentModal === 'function') {
+              this.showEditAssignmentModal(newExam, renderTarget);
+            }
+          }, 150);
+        }
+      };
+    }
   }
 
   // === MODAL 3: XEM & SỬA ĐỀ BÀI TẬP (NHÁP / ĐÃ GIAO - SỬA NỘI DUNG CÂU HỎI VÀ ĐÁP ÁN ĐÚNG) ===
