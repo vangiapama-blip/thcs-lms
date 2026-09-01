@@ -1142,23 +1142,25 @@
                     this._playAlarmSiren();
                 }
 
-                // 1. ƯU TIÊN PHÁT GIỌNG ĐỌC AI NEURAL STUDIO HD (vi-VN-HoaiMyNeural) - Tự nhiên, ấm áp 100% như người thật đọc
-                let localAudioUrl = '';
+                // 1. ƯU TIÊN PHÁT GIỌNG ĐỌC AI NEURAL STUDIO HD (vi-VN-HoaiMyNeural) - Trong trẻo, ấm áp 100% như người thật
+                let audioDataUrl = '';
+                const voiceRegistry = (typeof window !== 'undefined' && window.PROCTOR_VOICE_AUDIO) ? window.PROCTOR_VOICE_AUDIO : null;
+
                 if (spokenText.includes('thành công') || spokenText.includes('Chúc em')) {
-                    localAudioUrl = './assets/audio/voice_face_success.mp3';
+                    audioDataUrl = voiceRegistry ? voiceRegistry.SUCCESS : './assets/audio/voice_face_success.mp3';
                 } else if (spokenText.includes('ngồi thẳng') || spokenText.includes('nhìn thẳng')) {
-                    localAudioUrl = './assets/audio/voice_sit_straight.mp3';
+                    audioDataUrl = voiceRegistry ? voiceRegistry.SIT_STRAIGHT : './assets/audio/voice_sit_straight.mp3';
                 } else if (spokenText.includes('khẩn cấp') || spokenText.includes('rời khỏi')) {
-                    localAudioUrl = './assets/audio/voice_leave_alert.mp3';
+                    audioDataUrl = voiceRegistry ? voiceRegistry.LEAVE_ALERT : './assets/audio/voice_leave_alert.mp3';
                 }
 
-                if (localAudioUrl) {
+                if (audioDataUrl) {
                     try {
                         if (this._currentAudioStream) {
                             try { this._currentAudioStream.pause(); } catch (_) {}
                             this._currentAudioStream = null;
                         }
-                        const audio = new Audio(localAudioUrl);
+                        const audio = new Audio(audioDataUrl);
                         audio.volume = 1.0;
                         this._currentAudioStream = audio;
                         const playPromise = audio.play();

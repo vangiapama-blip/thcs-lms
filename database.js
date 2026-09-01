@@ -350,25 +350,47 @@ class LMSDatabase {
     }
   }
 
-  async syncFromServer(forceRefresh = false) {
+  async syncFromServer(forceRefresh = true) {
     if (typeof fetch === 'undefined') return;
     try {
       const res = await fetch('/api/db/state');
       if (res.ok) {
         const remoteState = await res.json();
-        if (remoteState && typeof remoteState === 'object' && (remoteState.schoolInfo || remoteState.subjects || remoteState.exams)) {
+        if (remoteState && typeof remoteState === 'object' && (remoteState.schoolInfo || remoteState.subjects || remoteState.exams || remoteState.teachers)) {
+          // Bảo toàn và hợp nhất dữ liệu hai chiều (Two-Way Safe Merge)
+          if (this.state && Array.isArray(this.state.exams) && this.state.exams.length > 0) {
+            if (!Array.isArray(remoteState.exams) || remoteState.exams.length === 0) {
+              remoteState.exams = this.state.exams;
+            } else {
+              const examMap = new Map();
+              remoteState.exams.forEach(e => { if (e && e.id) examMap.set(String(e.id), e); });
+              this.state.exams.forEach(e => {
+                if (e && e.id && !examMap.has(String(e.id))) {
+                  remoteState.exams.push(e);
+                  examMap.set(String(e.id), e);
+                }
+              });
+            }
+          }
+
           // Đảm bảo không bao giờ bị mất danh mục môn học, năm học, khối lớp
           Object.keys(INITIAL_STATE).forEach(key => {
             if (!remoteState[key] || (Array.isArray(INITIAL_STATE[key]) && Array.isArray(remoteState[key]) && remoteState[key].length === 0 && INITIAL_STATE[key].length > 0)) {
               remoteState[key] = JSON.parse(JSON.stringify(INITIAL_STATE[key]));
             }
           });
+
           this.state = remoteState;
           this.initUserGroupsAndPermissions();
           try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
           console.log('✅ LMS Central Database synchronized from Server across all devices!');
-          if (forceRefresh && typeof window !== 'undefined' && window.LMSAppInstance && window.LMSAppInstance.switchView) {
-            try { window.LMSAppInstance.switchView(window.LMSAppInstance.currentView); } catch(e) {}
+
+          // Tự động làm mới giao diện ngay lập tức trên máy nhận (window.app)
+          if (forceRefresh && typeof window !== 'undefined' && window.app) {
+            const app = window.app;
+            if (app.currentView && app.switchView) {
+              try { app.switchView(app.currentView); } catch(e) {}
+            }
           }
         }
       }
