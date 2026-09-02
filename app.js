@@ -28049,144 +28049,84 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
 if (typeof window !== 'undefined') {
 
   // =========================================================
-  // 🎙️ HÀM PHÁT GIỌNG NỮ TIẾNG VIỆT GỐC QUA SERVER PROXY
-  // → Gọi /api/tts trên Render server (bypass CORS hoàn toàn)
-  // → Không bao giờ để giọng Nam tiếng Anh đọc nhầm tiếng Việt
+    // =========================================================
+  // 🎙️ HÀM TÌM GIỌNG NỮ TIẾNG VIỆT CHUẨN XUẤT SẮC (HOÀI MY / GOOGLE TIẾNG VIỆT)
+  // Ưu tiên số 1: Giọng Nữ bản xứ (Microsoft Hoài My / Google Tiếng Việt)
+  // Cực kỳ dứt khoát, chắc tiếng, trong trẻo, không bay, không ngân
+  // Hoạt động hoàn hảo cả khi chạy ONLINE lẫn LOCAL
+  // =========================================================
+  window._getStrictViVoice = function(voices) {
+    if (!voices || voices.length === 0) return null;
+    var list = Array.prototype.slice.call(voices);
+
+    // 1. Ưu tiên số 1: Microsoft Hoài My Natural / Online (Giọng Nữ chuẩn Hà Nội xuất sắc nhất)
+    var v1 = list.find(function(v) {
+      var n = (v.name || '').toLowerCase();
+      return (n.indexOf('hoaimy') >= 0 || n.indexOf('hoài my') >= 0) && (n.indexOf('natural') >= 0 || n.indexOf('online') >= 0);
+    });
+    if (v1) return v1;
+
+    // 2. Ưu tiên số 2: Google Tiếng Việt (Giọng Nữ chuẩn Google Chrome)
+    var v2 = list.find(function(v) {
+      var n = (v.name || '').toLowerCase();
+      var l = (v.lang || '').toLowerCase().replace('_', '-');
+      return (l.startsWith('vi') || n.indexOf('tiếng việt') >= 0 || n.indexOf('vietnamese') >= 0) && (n.indexOf('google') >= 0 || n.indexOf('linh') >= 0);
+    });
+    if (v2) return v2;
+
+    // 3. Ưu tiên số 3: Microsoft Hoài My bất kỳ
+    var v3 = list.find(function(v) {
+      var n = (v.name || '').toLowerCase();
+      return n.indexOf('hoaimy') >= 0 || n.indexOf('hoài my') >= 0;
+    });
+    if (v3) return v3;
+
+    // 4. Ưu tiên số 4: Giọng Tiếng Việt Nữ khác (LOẠI TRỪ 'an' / 'nam' / 'male')
+    var v4 = list.find(function(v) {
+      var n = (v.name || '').toLowerCase();
+      var l = (v.lang || '').toLowerCase().replace('_', '-');
+      var isVi = l === 'vi' || l.startsWith('vi-') || l.startsWith('vi_') || n.indexOf('vietnamese') >= 0 || n.indexOf('tiếng việt') >= 0;
+      var isMale = n.indexOf('microsoft an') >= 0 || n.indexOf('an (vi') >= 0 || n.indexOf(' nam') >= 0 || n.indexOf('male') >= 0;
+      return isVi && !isMale;
+    });
+    return v4 || null;
+  };
+
+  // =========================================================
+  // 🎙️ HÀM PHÁT AUDIO DỰ PHÒNG (KHI THIẾT BỊ HOÀN TOÀN KHÔNG CÓ VOICE VIỆT)
+  // Tăng tốc độ 1.15x để ngắt âm dứt khoát, triệt tiêu tiếng ngân bay
   // =========================================================
   window._playVietnameseAudio = function(text, onEnd) {
     try {
       if (window._currentViAudio) {
         try { window._currentViAudio.pause(); window._currentViAudio.currentTime = 0; } catch(e) {}
       }
-      if (window._currentViAudioCtx) {
-        try { window._currentViAudioCtx.close(); } catch(e) {}
-      }
       var clean = String(text || '').trim();
       if (!clean) return;
 
       var serverUrl = '/api/tts?lang=vi&text=' + encodeURIComponent(clean);
+      var audio = new Audio(serverUrl);
+      audio.playbackRate = 1.15; // Tăng 15% tốc độ: dứt câu dứt khoát, không kéo dài ngân bay
+      audio.volume = 1.0;
+      window._currentViAudio = audio;
+      if (typeof onEnd === 'function') audio.onended = onEnd;
 
-      var playWithAudioCtx = function(src) {
-        try {
-          var AudioContext = window.AudioContext || window.webkitAudioContext;
-          if (!AudioContext) {
-            // Fallback: phát trực tiếp không qua Web Audio
-            var a = new Audio(src);
-            a.volume = 1.0;
-            window._currentViAudio = a;
-            if (typeof onEnd === 'function') a.onended = onEnd;
-            a.play().catch(function(){});
-            return;
-          }
-
-          var ctx = new AudioContext();
-          window._currentViAudioCtx = ctx;
-
-          var audioEl = new Audio(src);
-          audioEl.crossOrigin = 'anonymous';
-          window._currentViAudio = audioEl;
-
-          var source = ctx.createMediaElementSource(audioEl);
-
-          // 1. Nén động (Compressor) — giọng đanh, dứt khoát, không bị ngắt
-          var compressor = ctx.createDynamicsCompressor();
-          compressor.threshold.value = -24;  // Ngưỡng nén (dB)
-          compressor.knee.value = 4;         // Độ mềm ngưỡng
-          compressor.ratio.value = 5;        // Tỉ lệ nén 5:1
-          compressor.attack.value = 0.003;   // Tấn công nhanh → đanh
-          compressor.release.value = 0.15;   // Nhả nhanh → dứt khoát
-
-          // 2. EQ Highshelf — tăng dải cao → giọng trong trẻo, sắc nét
-          var highShelf = ctx.createBiquadFilter();
-          highShelf.type = 'highshelf';
-          highShelf.frequency.value = 3200;  // Tăng từ 3.2kHz trở lên
-          highShelf.gain.value = 9;          // +9dB → rõ âm s, t, ch, nh
-
-          // 3. EQ Presence — tăng dải trung cao → giọng nổi bật, rõ lời
-          var presence = ctx.createBiquadFilter();
-          presence.type = 'peaking';
-          presence.frequency.value = 2000;   // 2kHz (dải thoại tiếng Việt)
-          presence.Q.value = 0.8;
-          presence.gain.value = 7;           // +7dB
-
-          // 4. Gain chính — to hơn
-          var gainNode = ctx.createGain();
-          gainNode.gain.value = 2.5;         // Tăng âm lượng 2.5x
-
-          // Kết nối chuỗi xử lý: source → compressor → presence → highShelf → gain → output
-          source.connect(compressor);
-          compressor.connect(presence);
-          presence.connect(highShelf);
-          highShelf.connect(gainNode);
-          gainNode.connect(ctx.destination);
-
-          if (typeof onEnd === 'function') audioEl.onended = onEnd;
-
-          audioEl.play().catch(function(err) {
-            // Nếu crossOrigin bị từ chối → phát thẳng không qua AudioContext
-            try {
-              var a2 = new Audio(src);
-              a2.volume = 1.0;
-              window._currentViAudio = a2;
-              if (typeof onEnd === 'function') a2.onended = onEnd;
-              a2.play().catch(function(){});
-            } catch(e2) {}
-          });
-        } catch(ctxErr) {
-          // Nếu AudioContext không khởi tạo được → phát bình thường
-          var af = new Audio(src);
-          af.volume = 1.0;
-          window._currentViAudio = af;
-          if (typeof onEnd === 'function') af.onended = onEnd;
-          af.play().catch(function(){});
-        }
-      };
-
-      // Thử server proxy trước (Render online), nếu fail thử direct Google
-      var testAudio = new Audio(serverUrl);
-      testAudio.play().then(function() {
-        testAudio.pause();
-        playWithAudioCtx(serverUrl);
-      }).catch(function() {
-        var directUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(clean);
-        playWithAudioCtx(directUrl);
-      });
-    } catch(e) { console.error('_playVietnameseAudio error:', e); }
-  };
-
-  // Kiểm tra xem đang chạy ONLINE hay LOCAL
-  window._isOnlineMode = function() {
-    try {
-      var h = window.location.hostname;
-      return h !== 'localhost' && h !== '127.0.0.1' && h !== '' && !h.startsWith('192.168.') && !h.startsWith('10.');
-    } catch(e) { return false; }
-  };
-
-  // Hàm lấy voice Tiếng Việt Nữ GỐC (strict — chỉ female, không bao giờ trả về voice Nam)
-  window._getStrictViVoice = function(voices) {
-    if (!voices || voices.length === 0) return null;
-    if (window._isOnlineMode()) return null; // ONLINE: luôn dùng /api/tts proxy, không dùng WebSpeech
-    var list = Array.prototype.slice.call(voices);
-    // Chỉ lấy GIỌNG NỮ Tiếng Việt (loại bỏ Microsoft An - giọng Nam)
-    var female = list.find(function(v) {
-      var n = (v.name || '').toLowerCase();
-      var l = (v.lang || '').toLowerCase().replace('_', '-');
-      var isVi = l.startsWith('vi') || n.indexOf('tiếng việt') >= 0 || n.indexOf('vietnamese') >= 0 || n.indexOf('hoaimy') >= 0;
-      var isFemale = n.indexOf('hoaimy') >= 0 || n.indexOf('hoài my') >= 0 || n.indexOf('linh') >= 0 ||
-                     n.indexOf('google tiếng việt') >= 0 || n.indexOf('google vietnamese') >= 0 ||
-                     (n.indexOf('google') >= 0 && isVi);
-      return isVi && isFemale;
-    });
-    if (female) return female;
-    // Bất kỳ voice vi nhưng loại trừ "microsoft an" (giọng Nam)
-    var anyFemale = list.find(function(v) {
-      var n = (v.name || '').toLowerCase();
-      var l = (v.lang || '').toLowerCase().replace('_', '-');
-      var isVi = l === 'vi' || l.startsWith('vi-') || l.startsWith('vi_');
-      var isMale = n === 'microsoft an (vi-vn)' || n === 'microsoft an' || (n.includes(' an ') && n.includes('vi'));
-      return isVi && !isMale;
-    });
-    return anyFemale || null; // null → sẽ dùng /api/tts proxy
+      var p = audio.play();
+      if (p !== undefined) {
+        p.catch(function() {
+          // Thử direct Google nếu server proxy bị lỗi
+          try {
+            var directUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(clean);
+            var audio2 = new Audio(directUrl);
+            audio2.playbackRate = 1.15;
+            audio2.volume = 1.0;
+            window._currentViAudio = audio2;
+            if (typeof onEnd === 'function') audio2.onended = onEnd;
+            audio2.play().catch(function(){});
+          } catch(e2) {}
+        });
+      }
+    } catch(e) {}
   };
 
   window.speakStudentName = function(name, lang) {
@@ -28213,7 +28153,7 @@ if (typeof window !== 'undefined') {
             var u = new SpeechSynthesisUtterance(text);
             u.voice = viVoice;
             u.lang = viVoice.lang || 'vi-VN';
-            u.rate = 1.12; u.pitch = 1.1; u.volume = 1.0;
+            u.rate = 1.04; u.pitch = 1.0; u.volume = 1.0;
             window.speechSynthesis.speak(u);
           } else {
             // KHÔNG có voice vi → Google Audio Stream Nữ Tiếng Việt Gốc

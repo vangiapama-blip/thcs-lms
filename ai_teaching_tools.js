@@ -24594,10 +24594,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
       // ONLINE: luôn dùng /api/tts proxy (Giọng Nữ Tiếng Việt Gốc, tránh giọng Nam)
       // LOCAL: dùng WebSpeech nếu có voice Nữ Tiếng Việt, không thì dùng proxy
-      const isOnline = typeof window._isOnlineMode === 'function' ? window._isOnlineMode() :
-        (typeof window !== 'undefined' && window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && window.location.hostname !== '');
-
-      if (!isOnline) {
+      const viVoice = typeof window._getStrictViVoice === 'function' ? window._getStrictViVoice('speechSynthesis' in window ? window.speechSynthesis.getVoices() : []) : null;
+      if (viVoice) {
         // LOCAL: dùng WebSpeech với voice Nữ nếu có
         const voices = ('speechSynthesis' in window) ? (window.speechSynthesis.getVoices() || []) : [];
         const viVoice = typeof window._getStrictViVoice === 'function' ? window._getStrictViVoice(voices) :
@@ -27262,10 +27260,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
         .trim();
       if (!cleanText) return;
 
-      const isOnline = typeof window._isOnlineMode === 'function' ? window._isOnlineMode() :
-        (typeof window !== 'undefined' && window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && window.location.hostname !== '');
-
-      if (!isOnline) {
+      const viVoice = typeof window._getStrictViVoice === 'function' ? window._getStrictViVoice('speechSynthesis' in window ? window.speechSynthesis.getVoices() : []) : null;
+      if (viVoice) {
         const voices = ('speechSynthesis' in window) ? (window.speechSynthesis.getVoices() || []) : [];
         const viVoice = typeof window._getStrictViVoice === 'function' ? window._getStrictViVoice(voices) :
           voices.find(v => { const l = (v.lang||'').toLowerCase().replace('_','-'); return l==='vi'||l.startsWith('vi-'); });
