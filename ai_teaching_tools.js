@@ -1351,17 +1351,14 @@ window.AITeachingTools = {
       try {
         window.speechSynthesis.cancel();
         const speechText = `Mời em ${studentName} trả lời!`;
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(speechText, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(speechText);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {
         console.error('SpeechSynthesis error:', e);
       }
@@ -2623,17 +2620,14 @@ window.AITeachingTools = {
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -3662,17 +3656,14 @@ window.AITeachingTools = {
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -4744,17 +4735,14 @@ window.AITeachingTools = {
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -5855,12 +5843,14 @@ window.AITeachingTools = {
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.95;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -6992,17 +6982,14 @@ window.AITeachingTools = {
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -7881,17 +7868,14 @@ window.AITeachingTools = {
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -11125,17 +11109,14 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -12331,39 +12312,16 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
         return;
       }
 
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
       const selectedLang = getLang();
-      u.lang = selectedLang;
-      u.rate = getRate();
-
-      const voices = window.speechSynthesis.getVoices() || [];
-      if (voices.length > 0) {
-        if (selectedLang === 'en-US') {
-          // Male US Voice matching
-          const usMaleVoice = voices.find(v => {
-            const n = (v.name || '').toLowerCase();
-            const l = (v.lang || '').toLowerCase().replace('_', '-');
-            return (l.includes('en-us') || l.includes('en')) && (n.includes('david') || n.includes('mark') || n.includes('guy') || n.includes('george') || n.includes('male'));
-          });
-          if (usMaleVoice) u.voice = usMaleVoice;
-          u.pitch = 0.90; // Deep masculine tone
-        } else if (selectedLang === 'en-GB') {
-          // Female UK Voice matching
-          const ukFemaleVoice = voices.find(v => {
-            const n = (v.name || '').toLowerCase();
-            const l = (v.lang || '').toLowerCase().replace('_', '-');
-            return (l.includes('en-gb') || l.includes('en')) && (n.includes('hazel') || n.includes('susan') || n.includes('victoria') || n.includes('zira') || n.includes('female'));
-          });
-          if (ukFemaleVoice) u.voice = ukFemaleVoice;
-          u.pitch = 1.15; // Higher feminine tone
-        }
+      if (typeof window.speakAI === 'function') {
+        window.speakAI(text, selectedLang, { rate: getRate() });
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = selectedLang;
+        u.rate = getRate();
+        window.speechSynthesis.speak(u);
       }
-
-      u.onstart  = () => showStatus('🔊 Đang đọc mẫu... Học sinh hãy lắng nghe!');
-      u.onend    = () => showStatus('✅ Đọc xong! Học sinh hãy luyện đọc lại.','#1d4ed8','#eff6ff','#bfdbfe');
-      u.onerror  = () => showStatus('⚠️ Lỗi phát âm. Kiểm tra kết nối mạng.','#dc2626','#fef2f2','#fecaca');
-      window.speechSynthesis.speak(u);
     };
 
     // Stop
@@ -12465,23 +12423,15 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     // Auto-Speak Word in specific dialect
     function speakWordDialect(word, langCode = 'en-US') {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(word);
-      u.lang = langCode;
-      u.rate = 0.85;
-
-      const voices = window.speechSynthesis.getVoices() || [];
-      if (voices.length > 0) {
-        if (langCode === 'en-US') {
-          const usVoice = voices.find(v => (v.lang || '').toLowerCase().replace('_', '-').includes('en-us') || (v.name || '').includes('David') || (v.name || '').includes('United States'));
-          if (usVoice) u.voice = usVoice;
-        } else {
-          const ukVoice = voices.find(v => (v.lang || '').toLowerCase().replace('_', '-').includes('en-gb') || (v.name || '').includes('George') || (v.name || '').includes('United Kingdom'));
-          if (ukVoice) u.voice = ukVoice;
-        }
+      if (typeof window.speakAI === 'function') {
+        window.speakAI(word, langCode, { rate: 0.88 });
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = langCode;
+        u.rate = 0.88;
+        window.speechSynthesis.speak(u);
       }
-      window.speechSynthesis.speak(u);
     }
 
     // Render IPA Lookup Result Card
@@ -15544,17 +15494,14 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -16745,17 +16692,14 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -18100,17 +18044,14 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       if (typeof window === 'undefined' || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
+        if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN');
+      } else if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'vi-VN';
-        utterance.rate = 0.92;
-        utterance.pitch = 1.05;
-        utterance.volume = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const viVoice = voices.find(v => (v.lang && (v.lang === 'vi-VN' || v.lang.startsWith('vi'))) || (v.name && (v.name.includes('Vietnamese') || v.name.includes('HoaiMy') || v.name.includes('NamMinh'))));
-        if (viVoice) utterance.voice = viVoice;
-
         window.speechSynthesis.speak(utterance);
+      }
       } catch(e) {}
     }
 
@@ -20483,7 +20424,10 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       const voiceBtn = modal.querySelector('#btn-tr-voice-hint');
       if (voiceBtn) {
         voiceBtn.onclick = () => {
-          if ('speechSynthesis' in window) {
+          if (typeof window.speakAI === 'function') {
+            window.speakAI(qText, 'vi-VN');
+          } else if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(qText);
             utter.lang = 'vi-VN';
             window.speechSynthesis.speak(utter);
@@ -21217,7 +21161,10 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       const voiceBtn = popup.querySelector('#btn-cw-voice-tts');
       if (voiceBtn) {
         voiceBtn.onclick = () => {
-          if ('speechSynthesis' in window) {
+          if (typeof window.speakAI === 'function') {
+            window.speakAI(qText, 'vi-VN');
+          } else if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(qText);
             utter.lang = 'vi-VN';
             window.speechSynthesis.speak(utter);
@@ -21910,7 +21857,10 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       const voiceBtn = modal.querySelector('#btn-sp-voice-hint');
       if (voiceBtn) {
         voiceBtn.onclick = () => {
-          if ('speechSynthesis' in window) {
+          if (typeof window.speakAI === 'function') {
+            window.speakAI(qText, 'vi-VN');
+          } else if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(qText);
             utter.lang = 'vi-VN';
             window.speechSynthesis.speak(utter);
@@ -22549,7 +22499,10 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       const voiceBtn = modal.querySelector('#btn-ar-voice-hint');
       if (voiceBtn) {
         voiceBtn.onclick = () => {
-          if ('speechSynthesis' in window) {
+          if (typeof window.speakAI === 'function') {
+            window.speakAI(qText, 'vi-VN');
+          } else if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(qText);
             utter.lang = 'vi-VN';
             window.speechSynthesis.speak(utter);
@@ -23330,7 +23283,10 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       const voiceBtn = modal.querySelector('#btn-st7-voice-hint');
       if (voiceBtn) {
         voiceBtn.onclick = () => {
-          if ('speechSynthesis' in window) {
+          if (typeof window.speakAI === 'function') {
+            window.speakAI(qText, 'vi-VN');
+          } else if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(qText);
             utter.lang = 'vi-VN';
             window.speechSynthesis.speak(utter);
@@ -24628,59 +24584,15 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const soundSynth = this._getAudioSynth();
 
     const speakVN = (text, customRate = 0.85, onEndCallback = null) => {
-      if ('speechSynthesis' in window) {
+      if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN', { rate: customRate, onEnd: onEndCallback });
+      } else if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        
-        let cleanText = String(text || '')
-          .replace(/[➔>]+/g, '. ')
-          .replace(/[-–—]+/g, ', ')
-          .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
-          .replace(/\s+/g, ' ')
-          .trim();
-
-        // Đảm bảo có dấu chấm câu ở cuối để giọng đọc hạ giọng trọn vẹn
-        if (!/[.!?]$/.test(cleanText)) cleanText += '.';
-
-        const utter = new SpeechSynthesisUtterance(cleanText);
-        utter.lang = 'vi-VN';
-        utter.rate = customRate;
-        utter.pitch = 1.0;
-        utter.volume = 1.0;
-
-        // Chọn giọng đọc Tiếng Việt chuẩn tự nhiên nếu máy có hỗ trợ
-        if (window.speechSynthesis.getVoices) {
-          const voices = window.speechSynthesis.getVoices();
-          const viVoice = voices.find(v => v.lang === 'vi-VN' || v.lang.startsWith('vi') || (v.name && v.name.toLowerCase().includes('vietnam')));
-          if (viVoice) utter.voice = viVoice;
-        }
-        
-        let isDone = false;
-        const completeSpeech = () => {
-          if (!isDone) {
-            isDone = true;
-            window._activeSpeechUtterance = null;
-            if (onEndCallback && typeof onEndCallback === 'function') {
-              onEndCallback();
-            }
-          }
-        };
-
-        utter.onend = completeSpeech;
-        utter.onerror = completeSpeech;
-
-        // Bảo vệ chống lỗi bộ nhớ tự động thu dọn (Garbage Collection bug) trên Chrome/Edge
-        window._activeSpeechUtterance = utter;
-
-        // Cơ chế bảo vệ dự phòng tối đa 30s
-        setTimeout(() => {
-          if (!isDone && window.speechSynthesis && !window.speechSynthesis.speaking) {
-            completeSpeech();
-          }
-        }, 30000);
-
-        window.speechSynthesis.speak(utter);
-      } else if (onEndCallback && typeof onEndCallback === 'function') {
-        setTimeout(onEndCallback, 1500);
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'vi-VN';
+        u.rate = customRate;
+        if (onEndCallback) u.onend = onEndCallback;
+        window.speechSynthesis.speak(u);
       }
     };
 
@@ -27320,20 +27232,16 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const soundSynth = this._getAudioSynth();
 
-    const speakVN = (text, customRate = 0.88) => {
-      if ('speechSynthesis' in window) {
+    const speakVN = (text, customRate = 0.88, onEndCallback = null) => {
+      if (typeof window.speakAI === 'function') {
+        window.speakAI(text, 'vi-VN', { rate: customRate, onEnd: onEndCallback });
+      } else if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        let cleanText = String(text || '')
-          .replace(/[➔>]+/g, ', ')
-          .replace(/[-–—]+/g, ', ')
-          .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
-          .trim();
-        const utter = new SpeechSynthesisUtterance(cleanText);
-        utter.lang = 'vi-VN';
-        utter.rate = customRate;
-        utter.pitch = 1.0;
-        utter.volume = 1.0;
-        window.speechSynthesis.speak(utter);
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'vi-VN';
+        u.rate = customRate;
+        if (onEndCallback) u.onend = onEndCallback;
+        window.speechSynthesis.speak(u);
       }
     };
 

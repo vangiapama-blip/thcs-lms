@@ -28059,42 +28059,73 @@ if (typeof window !== 'undefined') {
   };
 
   // Bulletproof Multi-Language Voice Reader matching Tab 3 (Male US / Female UK)
-  window.speakStudentName = function(name, lang) {
+  // =========================================================================
+// 🎙️ MASTER AI VOICE ENGINE (GIỌNG NỮ HÀ NỘI SẮC NÉT - MẠNH MẼ - DỨT KHOÁT - TO RÕ)
+// =========================================================================
+if (typeof window !== 'undefined') {
+  window.speakAI = function(rawText, lang, options) {
     try {
-      var cleanName = (name || 'student').trim();
+      if (!rawText) return;
+      options = options || {};
       var selectedLang = lang || 'vi-VN';
-      var text;
       var isVietnamese = (selectedLang === 'vi-VN' || selectedLang === 'vi' || !selectedLang.startsWith('en'));
+      
+      var cleanText = String(rawText)
+        .replace(/[➔>]+/g, ', ')
+        .replace(/[-–—]+/g, ', ')
+        .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!cleanText) return;
 
-      if (!isVietnamese) {
-        var stripped = cleanName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
-        text = 'Student ' + stripped + ', please come to the board!';
-      } else {
-        text = 'Mời em ' + cleanName + ' lên bảng';
+      // Ngắt âm thanh đang đọc dở trước đó
+      if (window._currentAIAudio) {
+        try {
+          window._currentAIAudio.pause();
+          window._currentAIAudio.currentTime = 0;
+        } catch(e) {}
+      }
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        try { window.speechSynthesis.cancel(); } catch(e) {}
       }
 
-      // 🎙️ 1. Phát trực tiếp Giọng Nữ Chuẩn Hà Nội (Qua Server Endpoint /api/tts - Không bị CORS/403)
-      var playServerHanoiTTS = function(txt, tlang, fallbackCb) {
+      // 🎙️ 1. Phát qua Server Proxy /api/tts (Giọng Nữ chuẩn Hà Nội cao cấp)
+      var playStudioTTS = function(txt, tlang, fallbackCb) {
         try {
           var targetLang = tlang || (isVietnamese ? 'vi' : (selectedLang === 'en-GB' ? 'en-GB' : 'en'));
           var endpoint = '/api/tts?text=' + encodeURIComponent(txt) + '&lang=' + encodeURIComponent(targetLang);
           var audio = new Audio(endpoint);
           audio.volume = 1.0;
+          window._currentAIAudio = audio;
+
+          if (typeof options.onEnd === 'function') {
+            audio.onended = options.onEnd;
+          }
+
           var p = audio.play();
           if (p !== undefined) {
-            p.catch(function() {
+            p.catch(function(err) {
               if (typeof fallbackCb === 'function') fallbackCb();
             });
           }
-        } catch(e) {
+        } catch(err) {
           if (typeof fallbackCb === 'function') fallbackCb();
         }
       };
 
-      // 🔊 2. Fallback Web Speech API (Chỉ phát khi THỰC SỰ có Voice Tiếng Việt Nữ chuẩn, không bao giờ để giọng Nam Tiếng Anh đọc nhầm)
+      // 🔊 2. Fallback Web Speech API (Ưu tiên Hoài My / Google Tiếng Việt chuẩn Nữ Hà Nội)
       var doNativeSpeechSynthesis = function() {
         if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
         try {
+          var u = new SpeechSynthesisUtterance(cleanText);
+          u.volume = 1.0;
+          u.rate = options.rate || (isVietnamese ? 0.95 : 0.90);
+          u.pitch = options.pitch || (isVietnamese ? 1.05 : 1.0);
+
+          if (typeof options.onEnd === 'function') {
+            u.onend = options.onEnd;
+          }
+
           var voices = window.speechSynthesis.getVoices() || [];
           if (isVietnamese) {
             var viVoice = voices.find(function(v) {
@@ -28108,57 +28139,55 @@ if (typeof window !== 'undefined') {
               return l.startsWith('vi') || n.includes('vietnamese') || n.includes('tiếng việt');
             });
 
-            // Tuyệt đối không gọi speak() nếu máy tính chỉ có giọng Nam tiếng Anh (Microsoft David)
-            if (!viVoice) {
-              console.log('Đã phát âm thanh giọng nữ qua luồng audio server.');
-              return;
-            }
-
-            window.speechSynthesis.cancel();
-            var u = new SpeechSynthesisUtterance(text);
+            // Tuyệt đối không để Microsoft David (English Male) đọc nhầm
+            if (!viVoice) return;
             u.voice = viVoice;
             u.lang = viVoice.lang || 'vi-VN';
-            u.rate = 0.95;
-            u.pitch = 1.05;
             window.speechSynthesis.speak(u);
           } else if (selectedLang === 'en-US') {
-            window.speechSynthesis.cancel();
-            var uUS = new SpeechSynthesisUtterance(text);
             var usVoice = voices.find(function(v) {
               var n = (v.name || '').toLowerCase();
               var l = (v.lang || '').toLowerCase().replace('_', '-');
               return l.startsWith('en') && (n.includes('david') || n.includes('mark') || n.includes('guy') || n.includes('us'));
             });
-            if (usVoice) uUS.voice = usVoice;
-            uUS.lang = 'en-US';
-            window.speechSynthesis.speak(uUS);
+            if (usVoice) u.voice = usVoice;
+            u.lang = 'en-US';
+            window.speechSynthesis.speak(u);
           } else if (selectedLang === 'en-GB') {
-            window.speechSynthesis.cancel();
-            var uGB = new SpeechSynthesisUtterance(text);
             var gbVoice = voices.find(function(v) {
               var n = (v.name || '').toLowerCase();
               var l = (v.lang || '').toLowerCase().replace('_', '-');
               return (l.includes('en-gb') || l.startsWith('en')) && (n.includes('hazel') || n.includes('susan') || n.includes('victoria') || n.includes('gb') || n.includes('uk'));
             });
-            if (gbVoice) uGB.voice = gbVoice;
-            uGB.lang = 'en-GB';
-            uGB.pitch = 1.10;
-            window.speechSynthesis.speak(uGB);
+            if (gbVoice) u.voice = gbVoice;
+            u.lang = 'en-GB';
+            window.speechSynthesis.speak(u);
           }
-        } catch(errNative) {
-          console.error('Speech synthesis error:', errNative);
-        }
+        } catch(e) {}
       };
 
-      // Phát trực tiếp giọng Nữ chuẩn Hà Nội
-      playServerHanoiTTS(text, isVietnamese ? 'vi' : (selectedLang === 'en-GB' ? 'en-GB' : 'en'), function() {
+      playStudioTTS(cleanText, isVietnamese ? 'vi' : (selectedLang === 'en-GB' ? 'en-GB' : 'en'), function() {
         doNativeSpeechSynthesis();
       });
-
-    } catch(e) {
-      console.error('speakStudentName error:', e);
+    } catch(errGlobal) {
+      console.error('speakAI error:', errGlobal);
     }
   };
+
+  window.speakStudentName = function(name, lang) {
+    var cleanName = (name || 'student').trim();
+    var selectedLang = lang || 'vi-VN';
+    var isVietnamese = (selectedLang === 'vi-VN' || selectedLang === 'vi' || !selectedLang.startsWith('en'));
+    var text;
+    if (!isVietnamese) {
+      var stripped = cleanName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+      text = 'Student ' + stripped + ', please come to the board!';
+    } else {
+      text = 'Mời em ' + cleanName + ' lên bảng!';
+    }
+    window.speakAI(text, selectedLang);
+  };
+}
   function fallbackMultiLangSpeechSynthesis(text, lang) {
     try {
       if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
