@@ -19042,62 +19042,311 @@ render_ai_geometry(dom) {
   }
 
   showAddUserModal(parentDom) {
-    const name = prompt('Nhập họ và tên người dùng mới:');
-    if (!name) return;
-    const username = prompt('Nhập tên đăng nhập (viết liền không dấu):', 'thcsamtl_' + Date.now().toString().slice(-4));
-    if (!username) return;
+    const oldModal = document.getElementById("add-user-modal-box");
+    if (oldModal) oldModal.remove();
 
-    const groups = db.state.userGroups || [];
-    const groupListStr = groups.map((g, idx) => (idx + 1) + '. ' + g.name + ' (' + g.id + ')').join('\n');
-    const grpChoice = prompt('Chọn nhóm người dùng:\n\n' + groupListStr + '\n\nNhập ID nhóm (admin, bgh, totruong, giaovien, hocsinh, phuhuynh):', 'giaovien') || 'giaovien';
+    const groups = db.state.userGroups || [
+      { id: "admin", name: "Quản trị hệ thống (Admin)" },
+      { id: "bgh", name: "Ban Giám Hiệu (BGH)" },
+      { id: "totruong", name: "Tổ trưởng chuyên môn" },
+      { id: "giaovien", name: "Giáo viên bộ môn" },
+      { id: "nhanvien", name: "Nhân viên văn phòng" },
+      { id: "hocsinh", name: "Học sinh" },
+      { id: "phuhuynh", name: "Phụ huynh học sinh" }
+    ];
 
-    if (!db.state.users) db.state.users = [];
-    const newId = 'usr_' + Date.now();
-    const newU = {
-      id: newId,
-      name: name,
-      username: username,
-      groupId: grpChoice,
-      status: 'active',
-      phone: '',
-      email: username + '@amatranglong.edu.vn'
+    const modal = document.createElement("div");
+    modal.id = "add-user-modal-box";
+    modal.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.7); z-index:99999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px); animation:fadeIn 0.2s ease-out;";
+
+    modal.innerHTML = `
+      <div style="background:white; border-radius:18px; width:95%; max-width:540px; box-shadow:0 25px 50px rgba(0,0,0,0.3); border:1.5px solid #e2e8f0; overflow:hidden; display:flex; flex-direction:column;">
+        <div style="background:linear-gradient(135deg, #1e40af, #2563eb); color:white; padding:1.2rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+            <span>➕</span> Thêm Mới Người Dùng
+          </h3>
+          <button id="close-add-user-modal-btn" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+
+        <form id="add-user-form" style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+          <div>
+            <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Họ và tên <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="add-user-name" required placeholder="Nhập họ và tên đầy đủ..." class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:600;">
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Tên đăng nhập <span style="color:#ef4444;">*</span></label>
+              <input type="text" id="add-user-username" required placeholder="thcsamtl_..." value="thcsamtl_${Date.now().toString().slice(-4)}" class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:700; color:#2563eb;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Mật khẩu ban đầu</label>
+              <input type="text" id="add-user-password" value="123456" class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:600;">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Nhóm vai trò</label>
+              <select id="add-user-group" class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:700;">
+                ${groups.map(g => `<option value="${g.id}" ${g.id === "giaovien" ? "selected" : ""}>${g.name}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Số điện thoại</label>
+              <input type="text" id="add-user-phone" placeholder="0901..." class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:600;">
+            </div>
+          </div>
+
+          <div>
+            <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Email</label>
+            <input type="email" id="add-user-email" placeholder="example@amatranglong.edu.vn" class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:600;">
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.75rem; border-top:1px solid #f1f5f9; padding-top:1rem;">
+            <button type="button" id="cancel-add-user-btn" style="padding:0.6rem 1.25rem; border-radius:8px; font-weight:700; border:1.5px solid #cbd5e1; background:#f8fafc; color:#475569; cursor:pointer;">Hủy bỏ</button>
+            <button type="submit" style="padding:0.6rem 1.5rem; border-radius:8px; font-weight:800; border:none; background:#2563eb; color:white; cursor:pointer; box-shadow:0 4px 12px rgba(37,99,235,0.25);">➕ Lưu Người Dùng</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const closeBtn = modal.querySelector("#close-add-user-modal-btn");
+    const cancelBtn = modal.querySelector("#cancel-add-user-btn");
+    const close = () => modal.remove();
+    if (closeBtn) closeBtn.onclick = close;
+    if (cancelBtn) cancelBtn.onclick = close;
+
+    const form = modal.querySelector("#add-user-form");
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const name = modal.querySelector("#add-user-name").value.trim();
+      const username = modal.querySelector("#add-user-username").value.trim();
+      const password = modal.querySelector("#add-user-password").value.trim() || "123456";
+      const grpChoice = modal.querySelector("#add-user-group").value;
+      const phone = modal.querySelector("#add-user-phone").value.trim();
+      const email = modal.querySelector("#add-user-email").value.trim() || (username + "@amatranglong.edu.vn");
+
+      if (!name || !username) {
+        alert("Vui lòng nhập đầy đủ Họ tên và Tên đăng nhập!");
+        return;
+      }
+
+      // Check unique username
+      const existingUser = (db.state.users || []).find(u => String(u.username).toLowerCase() === username.toLowerCase());
+      if (existingUser) {
+        alert("Tên đăng nhập [" + username + "] đã tồn tại trên hệ thống! Vui lòng chọn tên đăng nhập khác.");
+        return;
+      }
+
+      const newId = "usr_" + Date.now();
+      const newU = {
+        id: newId,
+        name: name,
+        username: username,
+        password: password,
+        groupId: grpChoice,
+        status: "active",
+        phone: phone,
+        email: email
+      };
+
+      if (grpChoice === "giaovien" || grpChoice === "totruong" || grpChoice === "bgh") {
+        db.addTeacher({ id: newId, name: name, username: username, password: password, groupId: grpChoice, phone: phone, email: email });
+      } else if (grpChoice === "hocsinh") {
+        db.addStudent({ id: newId, name: name, username: username, password: password, classId: "6A", phone: phone, email: email });
+      } else if (grpChoice === "phuhuynh") {
+        db.addParent({ id: newId, name: name, username: username, password: password, phone: phone, email: email });
+      } else {
+        if (!db.state.users) db.state.users = [];
+        db.state.users.push(newU);
+        db.save();
+      }
+
+      modal.remove();
+      this.showToast("➕ Đã thêm người dùng mới [" + name + "] thành công!");
+      this.render_user_management(parentDom || (document.getElementById("viewport") || document.getElementById("main-viewport")));
     };
-
-    if (grpChoice === 'giaovien' || grpChoice === 'totruong' || grpChoice === 'bgh') {
-      db.addTeacher({ id: newId, name: name, username: username, groupId: grpChoice, phone: '', email: newU.email });
-    } else if (grpChoice === 'hocsinh') {
-      db.addStudent({ id: newId, name: name, username: username, classId: '6A', phone: '', email: newU.email });
-    } else if (grpChoice === 'phuhuynh') {
-      db.addParent({ id: newId, name: name, username: username, phone: '', email: newU.email });
-    } else {
-      db.state.users.push(newU);
-      db.save();
-    }
-
-    this.showToast('➕ Đã thêm người dùng mới "' + name + '" vào hệ thống!');
-    this.render_user_management(parentDom || (document.getElementById('viewport') || document.getElementById('main-viewport')));
   }
 
   showEditUserModal(userId, parentDom) {
-    const user = (db.state.users || []).find(u => u.id === userId);
-    if (!user) return;
-    const newName = prompt('Chỉnh sửa họ và tên người dùng:', user.name);
-    if (newName) {
-      user.name = newName;
-      if (user.sourceType === 'teacher' || user.refId) {
-        const t = (db.state.teachers || []).find(t => t.id === user.refId || t.id === userId);
-        if (t) t.name = newName;
-      } else if (user.sourceType === 'student' || user.refId) {
-        const s = (db.state.students || []).find(s => s.id === user.refId || s.id === userId);
-        if (s) s.name = newName;
-      } else if (user.sourceType === 'parent' || user.refId) {
-        const p = (db.state.parents || []).find(p => p.id === user.refId || p.id === userId);
-        if (p) p.name = newName;
-      }
-      db.save();
-      this.showToast('✏️ Đã cập nhật họ tên người dùng thành công!');
-      this.render_user_management(parentDom || (document.getElementById('viewport') || document.getElementById('main-viewport')));
+    const user = (db.state.users || []).find(u => String(u.id) === String(userId));
+    if (!user) {
+      alert("Không tìm thấy thông tin người dùng!");
+      return;
     }
+
+    const oldModal = document.getElementById("edit-user-modal-box");
+    if (oldModal) oldModal.remove();
+
+    const groups = db.state.userGroups || [
+      { id: "admin", name: "Quản trị hệ thống (Admin)" },
+      { id: "bgh", name: "Ban Giám Hiệu (BGH)" },
+      { id: "totruong", name: "Tổ trưởng chuyên môn" },
+      { id: "giaovien", name: "Giáo viên bộ môn" },
+      { id: "nhanvien", name: "Nhân viên văn phòng" },
+      { id: "hocsinh", name: "Học sinh" },
+      { id: "phuhuynh", name: "Phụ huynh học sinh" }
+    ];
+
+    const modal = document.createElement("div");
+    modal.id = "edit-user-modal-box";
+    modal.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.7); z-index:99999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px); animation:fadeIn 0.2s ease-out;";
+
+    const currentGroupId = user.groupId || "giaovien";
+    const currentStatus = user.status || "active";
+
+    modal.innerHTML = `
+      <div style="background:white; border-radius:18px; width:95%; max-width:540px; box-shadow:0 25px 50px rgba(0,0,0,0.3); border:1.5px solid #e2e8f0; overflow:hidden; display:flex; flex-direction:column;">
+        <div style="background:linear-gradient(135deg, #ea580c, #f97316); color:white; padding:1.2rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+            <span>✏️</span> Chỉnh Sửa Thông Tin Người Dùng
+          </h3>
+          <button id="close-edit-user-modal-btn" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+        </div>
+
+        <form id="edit-user-form" style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+          <div>
+            <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Họ và tên <span style="color:#ef4444;">*</span></label>
+            <input type="text" id="edit-user-name" required value="${user.name || ""}" placeholder="Họ và tên..." class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:600;">
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Tên đăng nhập <span style="color:#ef4444;">*</span></label>
+              <input type="text" id="edit-user-username" required value="${user.username || ""}" placeholder="Tên đăng nhập..." class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:700; color:#2563eb;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Mật khẩu mới (Tùy chọn)</label>
+              <input type="text" id="edit-user-password" placeholder="Để trống nếu không đổi..." class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:600;">
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Nhóm người dùng</label>
+              <select id="edit-user-group" class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:700;">
+                ${groups.map(g => `<option value="${g.id}" ${g.id === currentGroupId ? "selected" : ""}>${g.name}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Trạng thái tài khoản</label>
+              <select id="edit-user-status" class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:700;">
+                <option value="active" ${currentStatus !== "locked" ? "selected" : ""}>🟢 Hoạt động</option>
+                <option value="locked" ${currentStatus === "locked" ? "selected" : ""}>🔒 Đã khóa</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Số điện thoại</label>
+              <input type="text" id="edit-user-phone" value="${user.phone || ""}" placeholder="0901..." class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:600;">
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:0.85rem; color:#334155; margin-bottom:0.35rem;">Email</label>
+              <input type="email" id="edit-user-email" value="${user.email || ""}" placeholder="email@..." class="form-control" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #cbd5e1; padding:0 0.85rem; font-weight:600;">
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.75rem; border-top:1px solid #f1f5f9; padding-top:1rem;">
+            <button type="button" id="cancel-edit-user-btn" style="padding:0.6rem 1.25rem; border-radius:8px; font-weight:700; border:1.5px solid #cbd5e1; background:#f8fafc; color:#475569; cursor:pointer;">Hủy bỏ</button>
+            <button type="submit" style="padding:0.6rem 1.5rem; border-radius:8px; font-weight:800; border:none; background:#ea580c; color:white; cursor:pointer; box-shadow:0 4px 12px rgba(234,88,12,0.25);">💾 Lưu Thay Đổi</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const closeBtn = modal.querySelector("#close-edit-user-modal-btn");
+    const cancelBtn = modal.querySelector("#cancel-edit-user-btn");
+    const close = () => modal.remove();
+    if (closeBtn) closeBtn.onclick = close;
+    if (cancelBtn) cancelBtn.onclick = close;
+
+    const form = modal.querySelector("#edit-user-form");
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const newName = modal.querySelector("#edit-user-name").value.trim();
+      const newUsername = modal.querySelector("#edit-user-username").value.trim();
+      const newPassword = modal.querySelector("#edit-user-password").value.trim();
+      const newGroupId = modal.querySelector("#edit-user-group").value;
+      const newStatus = modal.querySelector("#edit-user-status").value;
+      const newPhone = modal.querySelector("#edit-user-phone").value.trim();
+      const newEmail = modal.querySelector("#edit-user-email").value.trim();
+
+      if (!newName || !newUsername) {
+        alert("Vui lòng nhập đầy đủ Họ tên và Tên đăng nhập!");
+        return;
+      }
+
+      // Check username duplicate with other users
+      const dup = (db.state.users || []).find(u => String(u.id) !== String(userId) && String(u.username).toLowerCase() === newUsername.toLowerCase());
+      if (dup) {
+        alert("Tên đăng nhập [" + newUsername + "] đã thuộc về người dùng [" + dup.name + "]! Vui lòng chọn tên đăng nhập khác.");
+        return;
+      }
+
+      // Update User in State
+      const oldUsername = user.username;
+      user.name = newName;
+      user.username = newUsername;
+      user.groupId = newGroupId;
+      user.status = newStatus;
+      user.phone = newPhone;
+      user.email = newEmail;
+      if (newPassword) user.password = newPassword;
+
+      // Update linked Teachers
+      if (user.sourceType === "teacher" || user.refId || (db.state.teachers && db.state.teachers.some(t => t.id === userId || t.id === user.refId || t.username === oldUsername))) {
+        const t = (db.state.teachers || []).find(t => t.id === user.refId || t.id === userId || t.username === oldUsername);
+        if (t) {
+          t.name = newName;
+          t.username = newUsername;
+          t.phone = newPhone;
+          t.email = newEmail;
+          t.status = newStatus;
+          t.groupId = newGroupId;
+          if (newPassword) t.password = newPassword;
+        }
+      }
+
+      // Update linked Students
+      if (user.sourceType === "student" || user.refId || (db.state.students && db.state.students.some(s => s.id === userId || s.id === user.refId || s.username === oldUsername))) {
+        const s = (db.state.students || []).find(s => s.id === user.refId || s.id === userId || s.username === oldUsername);
+        if (s) {
+          s.name = newName;
+          s.username = newUsername;
+          s.phone = newPhone;
+          s.email = newEmail;
+          s.status = newStatus;
+          if (newPassword) s.password = newPassword;
+        }
+      }
+
+      // Update linked Parents
+      if (user.sourceType === "parent" || user.refId || (db.state.parents && db.state.parents.some(p => p.id === userId || p.id === user.refId || p.username === oldUsername))) {
+        const p = (db.state.parents || []).find(p => p.id === user.refId || p.id === userId || p.username === oldUsername);
+        if (p) {
+          p.name = newName;
+          p.username = newUsername;
+          p.phone = newPhone;
+          p.email = newEmail;
+          p.status = newStatus;
+          if (newPassword) p.password = newPassword;
+        }
+      }
+
+      db.save();
+      if (db.syncAllUsersFromEntities) db.syncAllUsersFromEntities();
+
+      modal.remove();
+      this.showToast("✏️ Đã cập nhật đầy đủ thông tin người dùng [" + newName + "] thành công!");
+      this.render_user_management(parentDom || (document.getElementById("viewport") || document.getElementById("main-viewport")));
+    };
   }
 
   showAssignUserGroupModal(userId, parentDom) {
