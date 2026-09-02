@@ -28060,21 +28060,20 @@ if (typeof window !== 'undefined') {
 
   // Bulletproof Multi-Language Voice Reader matching Tab 3 (Male US / Female UK)
   // =========================================================================
-// 🎙️ MASTER AI VOICE ENGINE (ĐỒNG NHẤT 100% GIỌNG NỮ HÀ NỘI CAO CẤP NEURAL HD)
+// 🎙️ MASTER AI VOICE ENGINE (GIỌNG NỮ HÀ NỘI CHẮC TIẾNG - DỨT KHOÁT - MẠNH MẼ - KHÔNG BAY)
 // =========================================================================
 if (typeof window !== 'undefined') {
-  // Tìm kiếm chính xác và ưu tiên giọng Nữ cao cấp nhất
   window.getBestVietnameseVoice = function(voices) {
     if (!voices || voices.length === 0) return null;
     
-    // 1. Ưu tiên số 1: Microsoft Hoài My Natural (Giọng Nữ Hà Nội siêu tự nhiên, chuẩn mực nhất thế giới)
+    // 1. Ưu tiên số 1: Microsoft Hoài My Natural (Giọng Nữ chuẩn Hà Nội ấm, dày tiếng, chuẩn mực)
     var v1 = voices.find(function(v) {
       var n = (v.name || '').toLowerCase();
       return (n.includes('hoaimy') || n.includes('hoài my')) && (n.includes('natural') || n.includes('online'));
     });
     if (v1) return v1;
 
-    // 2. Ưu tiên số 2: Google Tiếng Việt (Giọng Nữ chuẩn HD Google Chrome)
+    // 2. Ưu tiên số 2: Google Tiếng Việt (Giọng Nữ chuẩn Google Chrome)
     var v2 = voices.find(function(v) {
       var n = (v.name || '').toLowerCase();
       var l = (v.lang || '').toLowerCase().replace('_', '-');
@@ -28082,14 +28081,14 @@ if (typeof window !== 'undefined') {
     });
     if (v2) return v2;
 
-    // 3. Ưu tiên số 3: Microsoft Hoài My chuẩn Desktop
+    // 3. Ưu tiên số 3: Microsoft Hoài My chuẩn Desktop / An
     var v3 = voices.find(function(v) {
       var n = (v.name || '').toLowerCase();
-      return n.includes('hoaimy') || n.includes('hoài my');
+      return n.includes('hoaimy') || n.includes('hoài my') || n.includes('an');
     });
     if (v3) return v3;
 
-    // 4. Ưu tiên số 4: Giọng Tiếng Việt chuẩn bất kỳ trong máy
+    // 4. Ưu tiên số 4: Giọng Tiếng Việt bất kỳ
     var v4 = voices.find(function(v) {
       var l = (v.lang || '').toLowerCase().replace('_', '-');
       var n = (v.name || '').toLowerCase();
@@ -28113,6 +28112,11 @@ if (typeof window !== 'undefined') {
         .trim();
       if (!cleanText) return;
 
+      // Đảm bảo ngắt câu dứt điểm có dấu chấm cảm hoặc chấm câu để giọng hạ âm chắc nịch, dứt khoát
+      if (!/[.!?]$/.test(cleanText)) {
+        cleanText += '!';
+      }
+
       // Dừng âm thanh đang đọc dở trước đó
       if (window._currentAIAudio) {
         try {
@@ -28124,7 +28128,7 @@ if (typeof window !== 'undefined') {
         try { window.speechSynthesis.cancel(); } catch(e) {}
       }
 
-      // 🔊 THỰC THI PHÁT GIỌNG ĐỌC CHUẨN HD ĐỒNG BỘ
+      // 🔊 THỰC THI PHÁT GIỌNG ĐỌC ĐẦM TIẾNG, DỨT KHOÁT, MẠNH MẼ
       var executeSpeech = function(voices) {
         if (isVietnamese) {
           var viVoice = window.getBestVietnameseVoice(voices);
@@ -28133,15 +28137,17 @@ if (typeof window !== 'undefined') {
             var u = new SpeechSynthesisUtterance(cleanText);
             u.voice = viVoice;
             u.lang = viVoice.lang || 'vi-VN';
-            u.rate = options.rate || 0.95;  // Tốc độ chuẩn, rõ từng từ
-            u.pitch = options.pitch || 1.02; // Âm vực nữ tươi sáng, trong trẻo, tự nhiên
+            // Rate 1.04: nhả chữ nhanh gọn, dứt khoát, không bị kéo dài lê thê
+            u.rate = options.rate || 1.04;
+            // Pitch 0.97: âm ngực trầm ấm, chắc khỏe, có nội lực, triệt tiêu hoàn toàn cảm giác "bay bay/the thé"
+            u.pitch = options.pitch || 0.97;
             u.volume = 1.0;
             if (typeof options.onEnd === 'function') u.onend = options.onEnd;
             window.speechSynthesis.speak(u);
             return;
           }
 
-          // Trường hợp thiết bị không hỗ trợ SpeechSynthesis cục bộ -> Phát qua endpoint Server
+          // Dự phòng Endpoint Server
           try {
             var endpoint = '/api/tts?text=' + encodeURIComponent(cleanText) + '&lang=vi';
             var audio = new Audio(endpoint);
@@ -28159,8 +28165,8 @@ if (typeof window !== 'undefined') {
           });
           if (usVoice) uUS.voice = usVoice;
           uUS.lang = 'en-US';
-          uUS.rate = options.rate || 0.92;
-          uUS.pitch = 1.0;
+          uUS.rate = options.rate || 0.96;
+          uUS.pitch = 0.98;
           uUS.volume = 1.0;
           if (typeof options.onEnd === 'function') uUS.onend = options.onEnd;
           window.speechSynthesis.speak(uUS);
@@ -28173,8 +28179,8 @@ if (typeof window !== 'undefined') {
           });
           if (gbVoice) uGB.voice = gbVoice;
           uGB.lang = 'en-GB';
-          uGB.rate = options.rate || 0.92;
-          uGB.pitch = 1.08;
+          uGB.rate = options.rate || 0.96;
+          uGB.pitch = 1.02;
           uGB.volume = 1.0;
           if (typeof options.onEnd === 'function') uGB.onend = options.onEnd;
           window.speechSynthesis.speak(uGB);
@@ -28192,7 +28198,7 @@ if (typeof window !== 'undefined') {
               executed = true;
               executeSpeech(window.speechSynthesis.getVoices() || []);
             }
-          }, 600);
+          }, 500);
           window.speechSynthesis.onvoiceschanged = function() {
             if (!executed) {
               executed = true;
@@ -28209,7 +28215,7 @@ if (typeof window !== 'undefined') {
     }
   };
 
-  // Kích hoạt nạp sẵn Voice ngay khi khởi động trang để tránh độ trễ
+  // Nạp sẵn giọng đọc ngay khi khởi động
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.getVoices();
     window.speechSynthesis.onvoiceschanged = function() {
@@ -28228,7 +28234,7 @@ if (typeof window !== 'undefined') {
     } else {
       text = 'Mời em ' + cleanName + ' lên bảng!';
     }
-    window.speakAI(text, selectedLang);
+    window.speakAI(text, selectedLang, { rate: 1.04, pitch: 0.97 });
   };
 }
   function fallbackMultiLangSpeechSynthesis(text, lang) {

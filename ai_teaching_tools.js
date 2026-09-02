@@ -24585,7 +24585,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const speakVN = (text, customRate = 0.85, onEndCallback = null) => {
       if (typeof window.speakAI === 'function') {
-        window.speakAI(text, 'vi-VN', { rate: customRate, onEnd: onEndCallback });
+        window.speakAI(text, 'vi-VN', { rate: 1.04, pitch: 0.97, onEnd: onEndCallback });
       } else if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
@@ -27234,7 +27234,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const speakVN = (text, customRate = 0.88, onEndCallback = null) => {
       if (typeof window.speakAI === 'function') {
-        window.speakAI(text, 'vi-VN', { rate: customRate, onEnd: onEndCallback });
+        window.speakAI(text, 'vi-VN', { rate: 1.04, pitch: 0.97, onEnd: onEndCallback });
       } else if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
