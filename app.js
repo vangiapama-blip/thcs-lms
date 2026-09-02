@@ -28060,7 +28060,7 @@ if (typeof window !== 'undefined') {
 
   // Bulletproof Multi-Language Voice Reader matching Tab 3 (Male US / Female UK)
   // =========================================================================
-// 🎙️ MASTER AI VOICE ENGINE (GIỌNG NỮ HÀ NỘI SẮC NÉT - MẠNH MẼ - DỨT KHOÁT - TO RÕ)
+// 🎙️ MASTER AI VOICE ENGINE (GIỌNG NỮ HÀ NỘI TRONG TRẺO - SẮC NÉT - DỨT KHOÁT - CHUẨN HD)
 // =========================================================================
 if (typeof window !== 'undefined') {
   window.speakAI = function(rawText, lang, options) {
@@ -28078,7 +28078,7 @@ if (typeof window !== 'undefined') {
         .trim();
       if (!cleanText) return;
 
-      // Ngắt âm thanh đang đọc dở trước đó
+      // Dừng âm thanh đang phát trước đó
       if (window._currentAIAudio) {
         try {
           window._currentAIAudio.pause();
@@ -28089,86 +28089,112 @@ if (typeof window !== 'undefined') {
         try { window.speechSynthesis.cancel(); } catch(e) {}
       }
 
-      // 🎙️ 1. Phát qua Server Proxy /api/tts (Giọng Nữ chuẩn Hà Nội cao cấp)
-      var playStudioTTS = function(txt, tlang, fallbackCb) {
+      // Helper phát qua luồng Server /api/tts khi thiết bị không có Voice cục bộ
+      var playCloudFallback = function() {
         try {
-          var targetLang = tlang || (isVietnamese ? 'vi' : (selectedLang === 'en-GB' ? 'en-GB' : 'en'));
-          var endpoint = '/api/tts?text=' + encodeURIComponent(txt) + '&lang=' + encodeURIComponent(targetLang);
+          var targetLang = isVietnamese ? 'vi' : (selectedLang === 'en-GB' ? 'en-GB' : 'en');
+          var endpoint = '/api/tts?text=' + encodeURIComponent(cleanText) + '&lang=' + encodeURIComponent(targetLang);
           var audio = new Audio(endpoint);
           audio.volume = 1.0;
           window._currentAIAudio = audio;
+          if (typeof options.onEnd === 'function') audio.onended = options.onEnd;
+          audio.play().catch(function(e) { console.warn('Cloud audio play error:', e); });
+        } catch(err) {}
+      };
 
-          if (typeof options.onEnd === 'function') {
-            audio.onended = options.onEnd;
-          }
+      // 🌟 ƯU TIÊN 1: PHÁT BẰNG ĐỘNG CƠ NEURAL NATIVE SPEECH SYNTHESIS (MICROSOFT HOÀI MY NATURAL / GOOGLE TIẾNG VIỆT HD)
+      // Cho chất lượng giọng trong trẻo, sắc nét, dứt khoát, thanh thoát chuẩn 48kHz HD cả khi chạy Online và Offline
+      var executeNativeSpeech = function(voices) {
+        if (!voices || voices.length === 0) {
+          playCloudFallback();
+          return;
+        }
 
-          var p = audio.play();
-          if (p !== undefined) {
-            p.catch(function(err) {
-              if (typeof fallbackCb === 'function') fallbackCb();
-            });
+        if (isVietnamese) {
+          // Tìm chính xác giọng Nữ chuẩn Hà Nội cao cấp (Hoài My Natural / Google Tiếng Việt / Linh Apple)
+          var viVoice = voices.find(function(v) {
+            var n = (v.name || '').toLowerCase();
+            var l = (v.lang || '').toLowerCase().replace('_', '-');
+            return (l.startsWith('vi') || n.includes('vietnamese') || n.includes('tiếng việt')) &&
+                   (n.includes('hoaimy') || n.includes('hoài my') || n.includes('google') || n.includes('linh') || n.includes('an'));
+          }) || voices.find(function(v) {
+            var l = (v.lang || '').toLowerCase().replace('_', '-');
+            var n = (v.name || '').toLowerCase();
+            return l.startsWith('vi') || n.includes('vietnamese') || n.includes('tiếng việt');
+          });
+
+          // Nếu máy có giọng Tiếng Việt chuẩn -> Phát ngay giọng Neural HD siêu nét
+          if (viVoice) {
+            var u = new SpeechSynthesisUtterance(cleanText);
+            u.voice = viVoice;
+            u.lang = viVoice.lang || 'vi-VN';
+            u.rate = options.rate || 0.96;  // Tốc độ chuẩn mực, phát âm rõ từng chữ
+            u.pitch = options.pitch || 1.04; // Âm vực nữ tươi sáng, trong trẻo, dứt khoát
+            u.volume = 1.0;
+            if (typeof options.onEnd === 'function') u.onend = options.onEnd;
+            window.speechSynthesis.speak(u);
+            return;
+          } else {
+            // Thiết bị không có voice tiếng Việt -> Phát qua server fallback, không để giọng Nam David đọc nhầm
+            playCloudFallback();
+            return;
           }
-        } catch(err) {
-          if (typeof fallbackCb === 'function') fallbackCb();
+        } else if (selectedLang === 'en-US') {
+          var uUS = new SpeechSynthesisUtterance(cleanText);
+          var usVoice = voices.find(function(v) {
+            var n = (v.name || '').toLowerCase();
+            var l = (v.lang || '').toLowerCase().replace('_', '-');
+            return l.startsWith('en') && (n.includes('david') || n.includes('mark') || n.includes('guy') || n.includes('natural') || n.includes('us'));
+          });
+          if (usVoice) uUS.voice = usVoice;
+          uUS.lang = 'en-US';
+          uUS.rate = options.rate || 0.92;
+          uUS.pitch = 1.0;
+          uUS.volume = 1.0;
+          if (typeof options.onEnd === 'function') uUS.onend = options.onEnd;
+          window.speechSynthesis.speak(uUS);
+          return;
+        } else if (selectedLang === 'en-GB') {
+          var uGB = new SpeechSynthesisUtterance(cleanText);
+          var gbVoice = voices.find(function(v) {
+            var n = (v.name || '').toLowerCase();
+            var l = (v.lang || '').toLowerCase().replace('_', '-');
+            return (l.includes('en-gb') || l.startsWith('en')) && (n.includes('hazel') || n.includes('susan') || n.includes('victoria') || n.includes('gb') || n.includes('uk'));
+          });
+          if (gbVoice) uGB.voice = gbVoice;
+          uGB.lang = 'en-GB';
+          uGB.rate = options.rate || 0.92;
+          uGB.pitch = 1.08;
+          uGB.volume = 1.0;
+          if (typeof options.onEnd === 'function') uGB.onend = options.onEnd;
+          window.speechSynthesis.speak(uGB);
+          return;
         }
       };
 
-      // 🔊 2. Fallback Web Speech API (Ưu tiên Hoài My / Google Tiếng Việt chuẩn Nữ Hà Nội)
-      var doNativeSpeechSynthesis = function() {
-        if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-        try {
-          var u = new SpeechSynthesisUtterance(cleanText);
-          u.volume = 1.0;
-          u.rate = options.rate || (isVietnamese ? 0.95 : 0.90);
-          u.pitch = options.pitch || (isVietnamese ? 1.05 : 1.0);
-
-          if (typeof options.onEnd === 'function') {
-            u.onend = options.onEnd;
-          }
-
-          var voices = window.speechSynthesis.getVoices() || [];
-          if (isVietnamese) {
-            var viVoice = voices.find(function(v) {
-              var n = (v.name || '').toLowerCase();
-              var l = (v.lang || '').toLowerCase().replace('_', '-');
-              return (l.startsWith('vi') || n.includes('vietnamese') || n.includes('tiếng việt')) &&
-                     (n.includes('hoaimy') || n.includes('hoài my') || n.includes('google') || n.includes('an'));
-            }) || voices.find(function(v) {
-              var l = (v.lang || '').toLowerCase().replace('_', '-');
-              var n = (v.name || '').toLowerCase();
-              return l.startsWith('vi') || n.includes('vietnamese') || n.includes('tiếng việt');
-            });
-
-            // Tuyệt đối không để Microsoft David (English Male) đọc nhầm
-            if (!viVoice) return;
-            u.voice = viVoice;
-            u.lang = viVoice.lang || 'vi-VN';
-            window.speechSynthesis.speak(u);
-          } else if (selectedLang === 'en-US') {
-            var usVoice = voices.find(function(v) {
-              var n = (v.name || '').toLowerCase();
-              var l = (v.lang || '').toLowerCase().replace('_', '-');
-              return l.startsWith('en') && (n.includes('david') || n.includes('mark') || n.includes('guy') || n.includes('us'));
-            });
-            if (usVoice) u.voice = usVoice;
-            u.lang = 'en-US';
-            window.speechSynthesis.speak(u);
-          } else if (selectedLang === 'en-GB') {
-            var gbVoice = voices.find(function(v) {
-              var n = (v.name || '').toLowerCase();
-              var l = (v.lang || '').toLowerCase().replace('_', '-');
-              return (l.includes('en-gb') || l.startsWith('en')) && (n.includes('hazel') || n.includes('susan') || n.includes('victoria') || n.includes('gb') || n.includes('uk'));
-            });
-            if (gbVoice) u.voice = gbVoice;
-            u.lang = 'en-GB';
-            window.speechSynthesis.speak(u);
-          }
-        } catch(e) {}
-      };
-
-      playStudioTTS(cleanText, isVietnamese ? 'vi' : (selectedLang === 'en-GB' ? 'en-GB' : 'en'), function() {
-        doNativeSpeechSynthesis();
-      });
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        var existingVoices = window.speechSynthesis.getVoices() || [];
+        if (existingVoices.length > 0) {
+          executeNativeSpeech(existingVoices);
+        } else {
+          var executed = false;
+          var timer = setTimeout(function() {
+            if (!executed) {
+              executed = true;
+              executeNativeSpeech(window.speechSynthesis.getVoices() || []);
+            }
+          }, 300);
+          window.speechSynthesis.onvoiceschanged = function() {
+            if (!executed) {
+              executed = true;
+              clearTimeout(timer);
+              executeNativeSpeech(window.speechSynthesis.getVoices() || []);
+            }
+          };
+        }
+      } else {
+        playCloudFallback();
+      }
     } catch(errGlobal) {
       console.error('speakAI error:', errGlobal);
     }
