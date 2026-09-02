@@ -28093,154 +28093,40 @@ if (typeof window !== 'undefined') {
   };
 
   // =========================================================
-    // =========================================================
-  // 🎙️ HÀM PHÁT AUDIO STUDIO MASTERING CHO CHROME & CỐC CỐC
-  // Tự động cắt đuôi ngân vang (tail-trimming), nâng âm trầm ngực (300Hz),
-  // triệt tiêu âm gió the thé (>4.5kHz), tạo độ đanh và dứt khoát 100%
+  // 🎙️ HÀM PHÁT AUDIO DỰ PHÒNG (KHI THIẾT BỊ HOÀN TOÀN KHÔNG CÓ VOICE VIỆT)
+  // Tăng tốc độ 1.15x để ngắt âm dứt khoát, triệt tiêu tiếng ngân bay
   // =========================================================
   window._playVietnameseAudio = function(text, onEnd) {
     try {
-      if (window._activeSource) {
-        try { window._activeSource.stop(); } catch(e) {}
-        window._activeSource = null;
-      }
       if (window._currentViAudio) {
         try { window._currentViAudio.pause(); window._currentViAudio.currentTime = 0; } catch(e) {}
-        window._currentViAudio = null;
       }
       var clean = String(text || '').trim();
       if (!clean) return;
 
       var serverUrl = '/api/tts?lang=vi&text=' + encodeURIComponent(clean);
+      var audio = new Audio(serverUrl);
+      audio.playbackRate = 1.15; // Tăng 15% tốc độ: dứt câu dứt khoát, không kéo dài ngân bay
+      audio.volume = 1.0;
+      window._currentViAudio = audio;
+      if (typeof onEnd === 'function') audio.onended = onEnd;
 
-      var playStandardAudio = function(url) {
-        try {
-          var audio = new Audio(url);
-          audio.playbackRate = 1.14;
-          audio.volume = 1.0;
-          window._currentViAudio = audio;
-          if (typeof onEnd === 'function') audio.onended = onEnd;
-          audio.play().catch(function(){});
-        } catch(e) {}
-      };
-
-      var AudioCtxClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtxClass || typeof fetch === 'undefined') {
-        playStandardAudio(serverUrl);
-        return;
-      }
-
-      if (!window._masterStudioCtx) {
-        window._masterStudioCtx = new AudioCtxClass();
-      }
-      var ctx = window._masterStudioCtx;
-      if (ctx.state === 'suspended') {
-        ctx.resume().catch(function(){});
-      }
-
-      fetch(serverUrl)
-        .then(function(res) {
-          if (!res.ok) throw new Error('Fetch failed: ' + res.status);
-          return res.arrayBuffer();
-        })
-        .then(function(ab) {
-          return ctx.decodeAudioData(ab);
-        })
-        .then(function(audioBuffer) {
-          // ✂️ 1. CẮT BỎ ĐUÔI NGÂN VANG DƯ THỪA (TAIL TRIMMING)
-          // Giúp câu đọc dừng dứt khoát, chắc nịch, không kéo dài ngân bay
-          var numChannels = audioBuffer.numberOfChannels;
-          var channelData = audioBuffer.getChannelData(0);
-          var sampleRate = audioBuffer.sampleRate;
-          var endSample = channelData.length - 1;
-
-          for (var i = channelData.length - 1; i > 0; i--) {
-            if (Math.abs(channelData[i]) > 0.015) {
-              endSample = Math.min(channelData.length, i + Math.floor(sampleRate * 0.05));
-              break;
-            }
-          }
-
-          // Tạo fade-out 25ms mềm mại ở điểm ngắt để chống tiếng nổ (pop/click)
-          var fadeSamples = Math.floor(sampleRate * 0.025);
-          var fadeStart = Math.max(0, endSample - fadeSamples);
-          for (var fi = fadeStart; fi < endSample; fi++) {
-            var factor = 1 - (fi - fadeStart) / fadeSamples;
-            for (var c = 0; c < numChannels; c++) {
-              audioBuffer.getChannelData(c)[fi] *= factor;
-            }
-          }
-          for (var zi = endSample; zi < channelData.length; zi++) {
-            for (var c2 = 0; c2 < numChannels; c2++) {
-              audioBuffer.getChannelData(c2)[zi] = 0;
-            }
-          }
-
-          // 🎛️ 2. CHUỖI XỬ LÝ ÂM THANH STUDIO MASTERING
-          var source = ctx.createBufferSource();
-          source.buffer = audioBuffer;
-          source.playbackRate.value = 1.09; // Nhịp điệu nhả chữ gọn gàng, dứt khoát
-
-          // High-pass filter (120Hz): Cắt tiếng ồn ù đáy
-          var hp = ctx.createBiquadFilter();
-          hp.type = 'highpass';
-          hp.frequency.value = 120;
-
-          // Body resonance (320Hz, +3.5dB): Tăng độ dày giọng ấm, chắc khỏe, triệt tiêu giọng the thé
-          var chest = ctx.createBiquadFilter();
-          chest.type = 'peaking';
-          chest.frequency.value = 320;
-          chest.gain.value = 3.5;
-          chest.Q.value = 1.0;
-
-          // Articulation (1800Hz, +2.5dB): Tăng độ tròn vành rõ chữ của phụ âm tiếng Việt
-          var presence = ctx.createBiquadFilter();
-          presence.type = 'peaking';
-          presence.frequency.value = 1800;
-          presence.gain.value = 2.5;
-          presence.Q.value = 1.1;
-
-          // De-Air / Anti-Hiss (4500Hz, -2.5dB): Hạ bớt dải gió sibilance để giọng không bị bay bay
-          var deAir = ctx.createBiquadFilter();
-          deAir.type = 'highshelf';
-          deAir.frequency.value = 4500;
-          deAir.gain.value = -2.5;
-
-          // Fast Broadcast Compressor: Nén dứt khoát, giữ mức âm lượng ổn định, đanh thép
-          var comp = ctx.createDynamicsCompressor();
-          comp.threshold.value = -18;
-          comp.ratio.value = 4.0;
-          comp.attack.value = 0.003;
-          comp.release.value = 0.08;
-
-          // Gain khuếch đại
-          var masterGain = ctx.createGain();
-          masterGain.gain.value = 2.0;
-
-          // Nối mạch âm thanh
-          source.connect(hp);
-          hp.connect(chest);
-          chest.connect(presence);
-          presence.connect(deAir);
-          deAir.connect(comp);
-          comp.connect(masterGain);
-          masterGain.connect(ctx.destination);
-
-          window._activeSource = source;
-          source.onended = function() {
-            window._activeSource = null;
-            if (typeof onEnd === 'function') onEnd();
-          };
-
-          source.start(0);
-        })
-        .catch(function(err) {
-          playStandardAudio(serverUrl);
+      var p = audio.play();
+      if (p !== undefined) {
+        p.catch(function() {
+          // Thử direct Google nếu server proxy bị lỗi
+          try {
+            var directUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(clean);
+            var audio2 = new Audio(directUrl);
+            audio2.playbackRate = 1.15;
+            audio2.volume = 1.0;
+            window._currentViAudio = audio2;
+            if (typeof onEnd === 'function') audio2.onended = onEnd;
+            audio2.play().catch(function(){});
+          } catch(e2) {}
         });
-
-    } catch(e) {
-      console.error('_playVietnameseAudio error:', e);
-    }
+      }
+    } catch(e) {}
   };
 
   window.speakStudentName = function(name, lang) {
