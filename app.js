@@ -28058,27 +28058,100 @@ if (typeof window !== 'undefined') {
       if (window._currentViAudio) {
         try { window._currentViAudio.pause(); window._currentViAudio.currentTime = 0; } catch(e) {}
       }
+      if (window._currentViAudioCtx) {
+        try { window._currentViAudioCtx.close(); } catch(e) {}
+      }
       var clean = String(text || '').trim();
       if (!clean) return;
 
-      // Dùng /api/tts server proxy (Render) — bypass CORS hoàn toàn
       var serverUrl = '/api/tts?lang=vi&text=' + encodeURIComponent(clean);
-      var audio = new Audio(serverUrl);
-      audio.volume = 1.0;
-      window._currentViAudio = audio;
-      if (typeof onEnd === 'function') audio.onended = onEnd;
-      audio.play().catch(function() {
-        // Nếu server proxy thất bại (localhost/file://), thử direct Google TTS
+
+      var playWithAudioCtx = function(src) {
         try {
-          var directUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(clean);
-          var audio2 = new Audio(directUrl);
-          audio2.volume = 1.0;
-          window._currentViAudio = audio2;
-          if (typeof onEnd === 'function') audio2.onended = onEnd;
-          audio2.play().catch(function(e) { console.warn('VI TTS failed:', e); });
-        } catch(e2) {}
+          var AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) {
+            // Fallback: phát trực tiếp không qua Web Audio
+            var a = new Audio(src);
+            a.volume = 1.0;
+            window._currentViAudio = a;
+            if (typeof onEnd === 'function') a.onended = onEnd;
+            a.play().catch(function(){});
+            return;
+          }
+
+          var ctx = new AudioContext();
+          window._currentViAudioCtx = ctx;
+
+          var audioEl = new Audio(src);
+          audioEl.crossOrigin = 'anonymous';
+          window._currentViAudio = audioEl;
+
+          var source = ctx.createMediaElementSource(audioEl);
+
+          // 1. Nén động (Compressor) — giọng đanh, dứt khoát, không bị ngắt
+          var compressor = ctx.createDynamicsCompressor();
+          compressor.threshold.value = -18;  // Ngưỡng nén (dB)
+          compressor.knee.value = 4;         // Độ mềm ngưỡng
+          compressor.ratio.value = 5;        // Tỉ lệ nén 5:1
+          compressor.attack.value = 0.003;   // Tấn công nhanh → đanh
+          compressor.release.value = 0.15;   // Nhả nhanh → dứt khoát
+
+          // 2. EQ Highshelf — tăng dải cao → giọng trong trẻo, sắc nét
+          var highShelf = ctx.createBiquadFilter();
+          highShelf.type = 'highshelf';
+          highShelf.frequency.value = 3200;  // Tăng từ 3.2kHz trở lên
+          highShelf.gain.value = 5;          // +5dB → rõ âm s, t, ch, nh
+
+          // 3. EQ Presence — tăng dải trung cao → giọng nổi bật, rõ lời
+          var presence = ctx.createBiquadFilter();
+          presence.type = 'peaking';
+          presence.frequency.value = 2000;   // 2kHz (dải thoại tiếng Việt)
+          presence.Q.value = 0.8;
+          presence.gain.value = 4;           // +4dB
+
+          // 4. Gain chính — to hơn
+          var gainNode = ctx.createGain();
+          gainNode.gain.value = 1.7;         // Tăng âm lượng 1.7x
+
+          // Kết nối chuỗi xử lý: source → compressor → presence → highShelf → gain → output
+          source.connect(compressor);
+          compressor.connect(presence);
+          presence.connect(highShelf);
+          highShelf.connect(gainNode);
+          gainNode.connect(ctx.destination);
+
+          if (typeof onEnd === 'function') audioEl.onended = onEnd;
+
+          audioEl.play().catch(function(err) {
+            // Nếu crossOrigin bị từ chối → phát thẳng không qua AudioContext
+            try {
+              var a2 = new Audio(src);
+              a2.volume = 1.0;
+              window._currentViAudio = a2;
+              if (typeof onEnd === 'function') a2.onended = onEnd;
+              a2.play().catch(function(){});
+            } catch(e2) {}
+          });
+        } catch(ctxErr) {
+          // Nếu AudioContext không khởi tạo được → phát bình thường
+          var af = new Audio(src);
+          af.volume = 1.0;
+          window._currentViAudio = af;
+          if (typeof onEnd === 'function') af.onended = onEnd;
+          af.play().catch(function(){});
+        }
+      };
+
+      // Thử server proxy trước (Render online), nếu fail thử direct Google
+      var testAudio = new Audio(serverUrl);
+      testAudio.play().then(function() {
+        testAudio.pause();
+        playWithAudioCtx(serverUrl);
+      }).catch(function() {
+        var directUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(clean);
+        playWithAudioCtx(directUrl);
       });
-    } catch(e) {}
+    } catch(e) { console.error('_playVietnameseAudio error:', e); }
   };
 
   // Kiểm tra xem đang chạy ONLINE hay LOCAL
@@ -28140,7 +28213,7 @@ if (typeof window !== 'undefined') {
             var u = new SpeechSynthesisUtterance(text);
             u.voice = viVoice;
             u.lang = viVoice.lang || 'vi-VN';
-            u.rate = 0.90; u.pitch = 1.0; u.volume = 1.0;
+            u.rate = 1.0; u.pitch = 1.05; u.volume = 1.0;
             window.speechSynthesis.speak(u);
           } else {
             // KHÔNG có voice vi → Google Audio Stream Nữ Tiếng Việt Gốc
