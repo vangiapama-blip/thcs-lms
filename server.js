@@ -174,21 +174,26 @@ const server = http.createServer(async (req, res) => {
   // Server làm proxy: fetch Google TTS → pipe audio về trình duyệt
   // =========================================================================
   if (reqPath === '/api/tts' && req.method === 'GET') {
-    const urlParams = new URLSearchParams(parsedUrl.query || '');
+    // urlParts[1] là phần query string (e.g. "lang=vi&text=Mời em lên bảng")
+    const urlParams = new URLSearchParams(urlParts[1] || '');
     const text = urlParams.get('text') || '';
     const lang = urlParams.get('lang') || 'vi';
+    console.log(`[TTS] lang=${lang} text="${text.slice(0, 50)}"`);
     if (!text.trim()) {
-      res.writeHead(400); res.end('Missing text'); return;
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      res.end('Missing text');
+      return;
     }
     const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(lang)}&client=tw-ob&q=${encodeURIComponent(text.slice(0, 200))}`;
     const https = require('https');
     const ttsReq = https.get(ttsUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120',
         'Referer': 'https://translate.google.com/',
         'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.8'
       }
     }, (ttsRes) => {
+      console.log(`[TTS] Google response: ${ttsRes.statusCode} ${ttsRes.headers['content-type']}`);
       res.writeHead(ttsRes.statusCode || 200, {
         'Content-Type': ttsRes.headers['content-type'] || 'audio/mpeg',
         'Access-Control-Allow-Origin': '*',
@@ -197,11 +202,12 @@ const server = http.createServer(async (req, res) => {
       ttsRes.pipe(res);
     });
     ttsReq.on('error', (err) => {
-      console.error('TTS proxy error:', err.message);
+      console.error('[TTS] Proxy error:', err.message);
       if (!res.headersSent) { res.writeHead(502); res.end('TTS proxy error'); }
     });
-    ttsReq.setTimeout(8000, () => {
+    ttsReq.setTimeout(10000, () => {
       ttsReq.destroy();
+      console.error('[TTS] Timeout!');
       if (!res.headersSent) { res.writeHead(504); res.end('TTS timeout'); }
     });
     return;
