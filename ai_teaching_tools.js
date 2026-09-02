@@ -24584,28 +24584,44 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const soundSynth = this._getAudioSynth();
 
     const speakVN = (text, customRate = 0.85, onEndCallback = null) => {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        let cleanText = String(text || '')
-          .replace(/[➔>]+/g, ', ')
-          .replace(/[-–—]+/g, ', ')
-          .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
-          .trim();
-        if (!/[.!?]$/.test(cleanText)) cleanText += '.';
+      let cleanText = String(text || '')
+        .replace(/[➔>]+/g, ', ')
+        .replace(/[-–—]+/g, ', ')
+        .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
+        .trim();
+      if (!cleanText) return;
+      if (!/[.!?]$/.test(cleanText)) cleanText += '.';
 
+      // Kiểm tra voice Tiếng Việt gốc (strict)
+      const voices = ('speechSynthesis' in window) ? (window.speechSynthesis.getVoices() || []) : [];
+      const viVoice = voices.find(v => {
+        const l = (v.lang || '').toLowerCase().replace('_', '-');
+        return l === 'vi' || l.startsWith('vi-') || l.startsWith('vi_');
+      });
+
+      if (viVoice && 'speechSynthesis' in window) {
+        // CÓ voice vi-VN gốc → WebSpeech
+        window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(cleanText);
-        utter.lang = 'vi-VN';
+        utter.voice = viVoice;
+        utter.lang = viVoice.lang || 'vi-VN';
         utter.rate = customRate;
         utter.pitch = 1.0;
         utter.volume = 1.0;
-
-        if (window.speechSynthesis.getVoices) {
-          const voices = window.speechSynthesis.getVoices();
-          const viVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('vi') || (v.name && v.name.toLowerCase().includes('vietnamese')));
-          if (viVoice) utter.voice = viVoice;
-        }
         if (onEndCallback) utter.onend = onEndCallback;
         window.speechSynthesis.speak(utter);
+      } else {
+        // KHÔNG có voice vi-VN → Google Audio Stream Nữ Tiếng Việt Gốc (không để giọng Nam đọc nhầm!)
+        if (typeof window._playVietnameseAudio === 'function') {
+          window._playVietnameseAudio(cleanText, onEndCallback);
+        } else if ('speechSynthesis' in window) {
+          // Dự phòng cuối: set lang vi-VN, hy vọng trình duyệt có voice
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(cleanText);
+          utter.lang = 'vi-VN'; utter.rate = customRate; utter.pitch = 1.0; utter.volume = 1.0;
+          if (onEndCallback) utter.onend = onEndCallback;
+          window.speechSynthesis.speak(utter);
+        }
       }
     };
 
@@ -27246,27 +27262,39 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const soundSynth = this._getAudioSynth();
 
     const speakVN = (text, customRate = 0.88, onEndCallback = null) => {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        let cleanText = String(text || '')
-          .replace(/[➔>]+/g, ', ')
-          .replace(/[-–—]+/g, ', ')
-          .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
-          .trim();
+      let cleanText = String(text || '')
+        .replace(/[➔>]+/g, ', ')
+        .replace(/[-–—]+/g, ', ')
+        .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
+        .trim();
+      if (!cleanText) return;
 
+      const voices = ('speechSynthesis' in window) ? (window.speechSynthesis.getVoices() || []) : [];
+      const viVoice = voices.find(v => {
+        const l = (v.lang || '').toLowerCase().replace('_', '-');
+        return l === 'vi' || l.startsWith('vi-') || l.startsWith('vi_');
+      });
+
+      if (viVoice && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(cleanText);
-        utter.lang = 'vi-VN';
+        utter.voice = viVoice;
+        utter.lang = viVoice.lang || 'vi-VN';
         utter.rate = customRate;
         utter.pitch = 1.0;
         utter.volume = 1.0;
-
-        if (window.speechSynthesis.getVoices) {
-          const voices = window.speechSynthesis.getVoices();
-          const viVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('vi') || (v.name && v.name.toLowerCase().includes('vietnamese')));
-          if (viVoice) utter.voice = viVoice;
-        }
         if (onEndCallback) utter.onend = onEndCallback;
         window.speechSynthesis.speak(utter);
+      } else {
+        if (typeof window._playVietnameseAudio === 'function') {
+          window._playVietnameseAudio(cleanText, onEndCallback);
+        } else if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(cleanText);
+          utter.lang = 'vi-VN'; utter.rate = customRate; utter.pitch = 1.0; utter.volume = 1.0;
+          if (onEndCallback) utter.onend = onEndCallback;
+          window.speechSynthesis.speak(utter);
+        }
       }
     };
 
