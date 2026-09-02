@@ -391,20 +391,26 @@ class LMSDatabase {
         const remoteState = await res.json();
         if (remoteState && typeof remoteState === 'object' && (remoteState.schoolInfo || remoteState.subjects || remoteState.exams || remoteState.teachers)) {
           // Bảo toàn và hợp nhất dữ liệu hai chiều (Two-Way Safe Merge)
-          if (this.state && Array.isArray(this.state.exams) && this.state.exams.length > 0) {
-            if (!Array.isArray(remoteState.exams) || remoteState.exams.length === 0) {
-              remoteState.exams = this.state.exams;
-            } else {
-              const examMap = new Map();
-              remoteState.exams.forEach(e => { if (e && e.id) examMap.set(String(e.id), e); });
-              this.state.exams.forEach(e => {
-                if (e && e.id && !examMap.has(String(e.id))) {
-                  remoteState.exams.push(e);
-                  examMap.set(String(e.id), e);
-                }
-              });
+          const mergeArray = (key) => {
+            if (this.state && Array.isArray(this.state[key]) && this.state[key].length > 0) {
+              if (!Array.isArray(remoteState[key]) || remoteState[key].length === 0) {
+                remoteState[key] = this.state[key];
+              } else {
+                const map = new Map();
+                remoteState[key].forEach(item => { if (item && item.id) map.set(String(item.id), item); });
+                this.state[key].forEach(item => {
+                  if (item && item.id && !map.has(String(item.id))) {
+                    remoteState[key].push(item);
+                    map.set(String(item.id), item);
+                  }
+                });
+              }
+            } else if (!Array.isArray(remoteState[key])) {
+              remoteState[key] = Array.isArray(this.state && this.state[key]) ? this.state[key] : (INITIAL_STATE[key] ? JSON.parse(JSON.stringify(INITIAL_STATE[key])) : []);
             }
-          }
+          };
+
+          ['teachers', 'students', 'parents', 'classesList', 'exams', 'questions', 'assignments', 'submissions', 'lessons', 'uploadedFiles', 'users'].forEach(k => mergeArray(k));
 
           // Đảm bảo không bao giờ bị mất danh mục môn học, năm học, khối lớp
           Object.keys(INITIAL_STATE).forEach(key => {
@@ -416,7 +422,7 @@ class LMSDatabase {
           this.state = remoteState;
           this.initUserGroupsAndPermissions();
           try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
-          console.log('✅ LMS Central Database synchronized from Server across all devices!');
+          console.log('✅ LMS Central Database synchronized safely from Server across all devices!');
         }
       }
     } catch(err) {
@@ -653,7 +659,6 @@ class LMSDatabase {
     }
 
     this.state.users = uniqueUsers;
-    this.save();
     return uniqueUsers;
   }
 
@@ -662,7 +667,6 @@ class LMSDatabase {
   }
 
   init() {
-    this.initUserGroupsAndPermissions();
     const data = localStorage.getItem(DB_KEY);
     if (data) {
       try {
@@ -684,6 +688,8 @@ class LMSDatabase {
     } else {
       this.resetToDefault();
     }
+
+    this.initUserGroupsAndPermissions();
     // Migration: ensure all teachers have username & password saved
     this._migrateTeacherCredentials();
     // Migration: ensure all students have username & password saved
@@ -728,38 +734,6 @@ class LMSDatabase {
     if (!this.state.exams || !Array.isArray(this.state.exams)) {
       this.state.exams = [];
     }
-    if (!this.state.examAttempts || !Array.isArray(this.state.examAttempts)) {
-      this.state.examAttempts = [];
-    }
-
-    // Clean out all legacy and demo exams completely
-    const demoIds = new Set(['exam_tx_1', 'exam_1', 'exam_ck_1', 'exam_demo_1', 'exam_demo_2', 'exam_quizizz_sample', 'asm_1787381537654']);
-    const prevLen = this.state.exams.length;
-    this.state.exams = this.state.exams.filter(e => {
-      if (!e) return false;
-      const id = String(e.id || '').toLowerCase();
-      const title = String(e.title || '').toLowerCase();
-      if (demoIds.has(e.id)) return false;
-      if (id.includes('demo') || id.includes('sample') || title.includes('demo') || title.includes('mẫu') || title.includes('thử nghiệm')) return false;
-      return true;
-    });
-    const validExamIds = new Set(this.state.exams.map(e => e.id));
-    this.state.examAttempts = (this.state.examAttempts || []).filter(a => validExamIds.has(a.examId));
-
-    let changed = (this.state.exams.length !== prevLen);
-    this.state.exams.forEach(e => {
-      if (!e.examCategory) {
-        if (e.targetGradeColumn === 'CK' || (e.title && e.title.toLowerCase().includes('cuối'))) e.examCategory = 'final';
-        else if (e.targetGradeColumn === 'GK' || (e.title && e.title.toLowerCase().includes('giữa')) || e.isOfficial) e.examCategory = 'midterm';
-        else e.examCategory = 'tx';
-        changed = true;
-      }
-      if (!e.examSubType) {
-        e.examSubType = (e.format === 'quizizz' || e.isQuizizz) ? 'quizizz' : 'regular';
-        changed = true;
-      }
-    });
-    if (changed) this.save();
   }
 
   _migrateRemainingDemoData() {
@@ -767,25 +741,6 @@ class LMSDatabase {
     if (!Array.isArray(this.state.questions)) this.state.questions = [];
     if (!Array.isArray(this.state.uploadedFiles)) this.state.uploadedFiles = [];
     if (!Array.isArray(this.state.teachingTools)) this.state.teachingTools = [];
-
-    // Filter out demo questions
-    const demoQIds = new Set(['q1', 'q2', 'q_tf_1', 'q_sa_1', 'q_essay_1', 'q_van_1', 'q_tf_van', 'q_sa_van', 'q_essay_van']);
-    const prevQLen = this.state.questions.length;
-    this.state.questions = this.state.questions.filter(q => !demoQIds.has(q.id) && !String(q.id || '').includes('demo'));
-
-    // Filter out demo uploaded files
-    const demoFileIds = new Set(['khbd_mang_may_tinh', 'khbd_van7_truyen_co_tich', 'khbd_anh8_unit1']);
-    const prevFLen = this.state.uploadedFiles.length;
-    this.state.uploadedFiles = this.state.uploadedFiles.filter(f => !demoFileIds.has(f.id) && !String(f.id || '').includes('demo'));
-
-    // Filter out demo teaching tools (tool_1 to tool_5)
-    const demoToolIds = new Set(['tool_1', 'tool_2', 'tool_3', 'tool_4', 'tool_5']);
-    const prevTLen = this.state.teachingTools.length;
-    this.state.teachingTools = this.state.teachingTools.filter(t => !demoToolIds.has(t.id) && !['Nguyễn Thị Hương', 'Lê Thu Lan', 'Phạm Quốc Cường', 'Trần Hải Nam'].includes(t.creatorName));
-
-    if (this.state.questions.length !== prevQLen || this.state.uploadedFiles.length !== prevFLen || this.state.teachingTools.length !== prevTLen) {
-      if (this.save) this.save();
-    }
   }
 
   _migrateDemoTeachersAndStudents() {
@@ -794,41 +749,7 @@ class LMSDatabase {
     if (!Array.isArray(this.state.students)) this.state.students = [];
     if (!Array.isArray(this.state.parents)) this.state.parents = [];
     if (!Array.isArray(this.state.attendance)) this.state.attendance = [];
-
-    // Filter out mock/demo students (hs_6a_*, hs_demo_*)
-    const prevStuLen = this.state.students.length;
-    this.state.students = this.state.students.filter(s => {
-      if (!s) return false;
-      const id = String(s.id || '').toLowerCase();
-      if (id.startsWith('hs_6a_') || id.startsWith('hs_demo_') || id.includes('sample')) return false;
-      return true;
-    });
-
-    // Filter out mock/demo teachers (gv_huong, gv_nam, gv_lan, gv_cuong)
-    const prevTeaLen = this.state.teachers.length;
-    const demoTeacherIds = new Set(['gv_huong', 'gv_nam', 'gv_lan', 'gv_cuong', 'gv_demo_1', 'gv_demo_2']);
-    this.state.teachers = this.state.teachers.filter(t => {
-      if (!t) return false;
-      if (demoTeacherIds.has(t.id)) return false;
-      const id = String(t.id || '').toLowerCase();
-      if (id.includes('demo') || id.includes('sample')) return false;
-      return true;
-    });
-
-    // Clean mock users
-    if (Array.isArray(this.state.users)) {
-      const demoUserIds = new Set(['usr_1', 'usr_2', 'usr_5', 'usr_6', 'usr_7', 'usr_8']);
-      this.state.users = this.state.users.filter(u => {
-        if (!u) return false;
-        if (demoUserIds.has(u.id)) return false;
-        if (u.groupId === 'giaovien' && (demoTeacherIds.has(u.id) || ['Nguyễn Thị Hương', 'Trần Hải Nam', 'Lê Thu Lan', 'Phạm Quốc Cường'].includes(u.name))) return false;
-        return true;
-      });
-    }
-
-    if (this.state.students.length !== prevStuLen || this.state.teachers.length !== prevTeaLen) {
-      if (this.save) this.save();
-    }
+    if (!Array.isArray(this.state.users)) this.state.users = [];
   }
 
   _migrateAssignmentsAndSubmissions() {
