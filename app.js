@@ -28081,24 +28081,39 @@ if (typeof window !== 'undefined') {
     } catch(e) {}
   };
 
-  // Hàm lấy voice Tiếng Việt GỐC (strict — không bao giờ trả về voice tiếng Anh)
+  // Kiểm tra xem đang chạy ONLINE hay LOCAL
+  window._isOnlineMode = function() {
+    try {
+      var h = window.location.hostname;
+      return h !== 'localhost' && h !== '127.0.0.1' && h !== '' && !h.startsWith('192.168.') && !h.startsWith('10.');
+    } catch(e) { return false; }
+  };
+
+  // Hàm lấy voice Tiếng Việt Nữ GỐC (strict — chỉ female, không bao giờ trả về voice Nam)
   window._getStrictViVoice = function(voices) {
     if (!voices || voices.length === 0) return null;
+    if (window._isOnlineMode()) return null; // ONLINE: luôn dùng /api/tts proxy, không dùng WebSpeech
     var list = Array.prototype.slice.call(voices);
-    // Ưu tiên: Google Tiếng Việt, Microsoft Hoài My Natural
-    var best = list.find(function(v) {
+    // Chỉ lấy GIỌNG NỮ Tiếng Việt (loại bỏ Microsoft An - giọng Nam)
+    var female = list.find(function(v) {
       var n = (v.name || '').toLowerCase();
       var l = (v.lang || '').toLowerCase().replace('_', '-');
-      return (l.startsWith('vi') || n.indexOf('tiếng việt') >= 0 || n.indexOf('hoaimy') >= 0 || n.indexOf('hoài my') >= 0 || n.indexOf('vietnamese') >= 0) &&
-             (n.indexOf('google') >= 0 || n.indexOf('natural') >= 0 || n.indexOf('online') >= 0 || n.indexOf('hoaimy') >= 0 || n.indexOf('linh') >= 0);
+      var isVi = l.startsWith('vi') || n.indexOf('tiếng việt') >= 0 || n.indexOf('vietnamese') >= 0 || n.indexOf('hoaimy') >= 0;
+      var isFemale = n.indexOf('hoaimy') >= 0 || n.indexOf('hoài my') >= 0 || n.indexOf('linh') >= 0 ||
+                     n.indexOf('google tiếng việt') >= 0 || n.indexOf('google vietnamese') >= 0 ||
+                     (n.indexOf('google') >= 0 && isVi);
+      return isVi && isFemale;
     });
-    if (best) return best;
-    // Bất kỳ voice có lang bắt đầu bằng 'vi'
-    var any = list.find(function(v) {
+    if (female) return female;
+    // Bất kỳ voice vi nhưng loại trừ "microsoft an" (giọng Nam)
+    var anyFemale = list.find(function(v) {
+      var n = (v.name || '').toLowerCase();
       var l = (v.lang || '').toLowerCase().replace('_', '-');
-      return l === 'vi' || l.startsWith('vi-') || l.startsWith('vi_');
+      var isVi = l === 'vi' || l.startsWith('vi-') || l.startsWith('vi_');
+      var isMale = n === 'microsoft an (vi-vn)' || n === 'microsoft an' || (n.includes(' an ') && n.includes('vi'));
+      return isVi && !isMale;
     });
-    return any || null;
+    return anyFemale || null; // null → sẽ dùng /api/tts proxy
   };
 
   window.speakStudentName = function(name, lang) {

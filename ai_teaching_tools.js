@@ -24592,36 +24592,29 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       if (!cleanText) return;
       if (!/[.!?]$/.test(cleanText)) cleanText += '.';
 
-      // Kiểm tra voice Tiếng Việt gốc (strict)
-      const voices = ('speechSynthesis' in window) ? (window.speechSynthesis.getVoices() || []) : [];
-      const viVoice = voices.find(v => {
-        const l = (v.lang || '').toLowerCase().replace('_', '-');
-        return l === 'vi' || l.startsWith('vi-') || l.startsWith('vi_');
-      });
+      // ONLINE: luôn dùng /api/tts proxy (Giọng Nữ Tiếng Việt Gốc, tránh giọng Nam)
+      // LOCAL: dùng WebSpeech nếu có voice Nữ Tiếng Việt, không thì dùng proxy
+      const isOnline = typeof window._isOnlineMode === 'function' ? window._isOnlineMode() :
+        (typeof window !== 'undefined' && window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && window.location.hostname !== '');
 
-      if (viVoice && 'speechSynthesis' in window) {
-        // CÓ voice vi-VN gốc → WebSpeech
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(cleanText);
-        utter.voice = viVoice;
-        utter.lang = viVoice.lang || 'vi-VN';
-        utter.rate = customRate;
-        utter.pitch = 1.0;
-        utter.volume = 1.0;
-        if (onEndCallback) utter.onend = onEndCallback;
-        window.speechSynthesis.speak(utter);
-      } else {
-        // KHÔNG có voice vi-VN → Google Audio Stream Nữ Tiếng Việt Gốc (không để giọng Nam đọc nhầm!)
-        if (typeof window._playVietnameseAudio === 'function') {
-          window._playVietnameseAudio(cleanText, onEndCallback);
-        } else if ('speechSynthesis' in window) {
-          // Dự phòng cuối: set lang vi-VN, hy vọng trình duyệt có voice
+      if (!isOnline) {
+        // LOCAL: dùng WebSpeech với voice Nữ nếu có
+        const voices = ('speechSynthesis' in window) ? (window.speechSynthesis.getVoices() || []) : [];
+        const viVoice = typeof window._getStrictViVoice === 'function' ? window._getStrictViVoice(voices) :
+          voices.find(v => { const l = (v.lang||'').toLowerCase().replace('_','-'); return l==='vi'||l.startsWith('vi-'); });
+        if (viVoice && 'speechSynthesis' in window) {
           window.speechSynthesis.cancel();
           const utter = new SpeechSynthesisUtterance(cleanText);
-          utter.lang = 'vi-VN'; utter.rate = customRate; utter.pitch = 1.0; utter.volume = 1.0;
+          utter.voice = viVoice; utter.lang = viVoice.lang || 'vi-VN';
+          utter.rate = customRate; utter.pitch = 1.0; utter.volume = 1.0;
           if (onEndCallback) utter.onend = onEndCallback;
           window.speechSynthesis.speak(utter);
+          return;
         }
+      }
+      // ONLINE hoặc không có voice Nữ → /api/tts proxy
+      if (typeof window._playVietnameseAudio === 'function') {
+        window._playVietnameseAudio(cleanText, onEndCallback);
       }
     };
 
@@ -27269,32 +27262,25 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
         .trim();
       if (!cleanText) return;
 
-      const voices = ('speechSynthesis' in window) ? (window.speechSynthesis.getVoices() || []) : [];
-      const viVoice = voices.find(v => {
-        const l = (v.lang || '').toLowerCase().replace('_', '-');
-        return l === 'vi' || l.startsWith('vi-') || l.startsWith('vi_');
-      });
+      const isOnline = typeof window._isOnlineMode === 'function' ? window._isOnlineMode() :
+        (typeof window !== 'undefined' && window.location && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && window.location.hostname !== '');
 
-      if (viVoice && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(cleanText);
-        utter.voice = viVoice;
-        utter.lang = viVoice.lang || 'vi-VN';
-        utter.rate = customRate;
-        utter.pitch = 1.0;
-        utter.volume = 1.0;
-        if (onEndCallback) utter.onend = onEndCallback;
-        window.speechSynthesis.speak(utter);
-      } else {
-        if (typeof window._playVietnameseAudio === 'function') {
-          window._playVietnameseAudio(cleanText, onEndCallback);
-        } else if ('speechSynthesis' in window) {
+      if (!isOnline) {
+        const voices = ('speechSynthesis' in window) ? (window.speechSynthesis.getVoices() || []) : [];
+        const viVoice = typeof window._getStrictViVoice === 'function' ? window._getStrictViVoice(voices) :
+          voices.find(v => { const l = (v.lang||'').toLowerCase().replace('_','-'); return l==='vi'||l.startsWith('vi-'); });
+        if (viVoice && 'speechSynthesis' in window) {
           window.speechSynthesis.cancel();
           const utter = new SpeechSynthesisUtterance(cleanText);
-          utter.lang = 'vi-VN'; utter.rate = customRate; utter.pitch = 1.0; utter.volume = 1.0;
+          utter.voice = viVoice; utter.lang = viVoice.lang || 'vi-VN';
+          utter.rate = customRate; utter.pitch = 1.0; utter.volume = 1.0;
           if (onEndCallback) utter.onend = onEndCallback;
           window.speechSynthesis.speak(utter);
+          return;
         }
+      }
+      if (typeof window._playVietnameseAudio === 'function') {
+        window._playVietnameseAudio(cleanText, onEndCallback);
       }
     };
 
