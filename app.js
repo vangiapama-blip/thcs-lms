@@ -28090,7 +28090,7 @@ if (typeof window !== 'undefined') {
 
           // 1. Nén động (Compressor) — giọng đanh, dứt khoát, không bị ngắt
           var compressor = ctx.createDynamicsCompressor();
-          compressor.threshold.value = -18;  // Ngưỡng nén (dB)
+          compressor.threshold.value = -24;  // Ngưỡng nén (dB)
           compressor.knee.value = 4;         // Độ mềm ngưỡng
           compressor.ratio.value = 5;        // Tỉ lệ nén 5:1
           compressor.attack.value = 0.003;   // Tấn công nhanh → đanh
@@ -28100,18 +28100,18 @@ if (typeof window !== 'undefined') {
           var highShelf = ctx.createBiquadFilter();
           highShelf.type = 'highshelf';
           highShelf.frequency.value = 3200;  // Tăng từ 3.2kHz trở lên
-          highShelf.gain.value = 5;          // +5dB → rõ âm s, t, ch, nh
+          highShelf.gain.value = 9;          // +9dB → rõ âm s, t, ch, nh
 
           // 3. EQ Presence — tăng dải trung cao → giọng nổi bật, rõ lời
           var presence = ctx.createBiquadFilter();
           presence.type = 'peaking';
           presence.frequency.value = 2000;   // 2kHz (dải thoại tiếng Việt)
           presence.Q.value = 0.8;
-          presence.gain.value = 4;           // +4dB
+          presence.gain.value = 7;           // +7dB
 
           // 4. Gain chính — to hơn
           var gainNode = ctx.createGain();
-          gainNode.gain.value = 1.7;         // Tăng âm lượng 1.7x
+          gainNode.gain.value = 2.5;         // Tăng âm lượng 2.5x
 
           // Kết nối chuỗi xử lý: source → compressor → presence → highShelf → gain → output
           source.connect(compressor);
@@ -28213,7 +28213,7 @@ if (typeof window !== 'undefined') {
             var u = new SpeechSynthesisUtterance(text);
             u.voice = viVoice;
             u.lang = viVoice.lang || 'vi-VN';
-            u.rate = 1.0; u.pitch = 1.05; u.volume = 1.0;
+            u.rate = 1.12; u.pitch = 1.1; u.volume = 1.0;
             window.speechSynthesis.speak(u);
           } else {
             // KHÔNG có voice vi → Google Audio Stream Nữ Tiếng Việt Gốc
