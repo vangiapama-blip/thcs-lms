@@ -19042,23 +19042,37 @@ render_ai_geometry(dom) {
   }
 
   showAddUserModal(parentDom) {
-    const name = prompt('Nhập họ và tên cán bộ/người dùng mới:');
+    const name = prompt('Nhập họ và tên người dùng mới:');
     if (!name) return;
     const username = prompt('Nhập tên đăng nhập (viết liền không dấu):', 'thcsamtl_' + Date.now().toString().slice(-4));
     if (!username) return;
 
+    const groups = db.state.userGroups || [];
+    const groupListStr = groups.map((g, idx) => (idx + 1) + '. ' + g.name + ' (' + g.id + ')').join('\n');
+    const grpChoice = prompt('Chọn nhóm người dùng:\n\n' + groupListStr + '\n\nNhập ID nhóm (admin, bgh, totruong, giaovien, hocsinh, phuhuynh):', 'giaovien') || 'giaovien';
+
     if (!db.state.users) db.state.users = [];
+    const newId = 'usr_' + Date.now();
     const newU = {
-      id: 'usr_' + Date.now(),
+      id: newId,
       name: name,
       username: username,
-      groupId: 'giaovien',
+      groupId: grpChoice,
       status: 'active',
-      phone: '0397800689',
+      phone: '',
       email: username + '@amatranglong.edu.vn'
     };
-    db.state.users.push(newU);
-    db.save();
+
+    if (grpChoice === 'giaovien' || grpChoice === 'totruong' || grpChoice === 'bgh') {
+      db.addTeacher({ id: newId, name: name, username: username, groupId: grpChoice, phone: '', email: newU.email });
+    } else if (grpChoice === 'hocsinh') {
+      db.addStudent({ id: newId, name: name, username: username, classId: '6A', phone: '', email: newU.email });
+    } else if (grpChoice === 'phuhuynh') {
+      db.addParent({ id: newId, name: name, username: username, phone: '', email: newU.email });
+    } else {
+      db.state.users.push(newU);
+      db.save();
+    }
 
     this.showToast('➕ Đã thêm người dùng mới "' + name + '" vào hệ thống!');
     this.render_user_management(parentDom || (document.getElementById('viewport') || document.getElementById('main-viewport')));
@@ -19067,9 +19081,19 @@ render_ai_geometry(dom) {
   showEditUserModal(userId, parentDom) {
     const user = (db.state.users || []).find(u => u.id === userId);
     if (!user) return;
-    const newName = prompt('Chỉnh sửa họ và tên cán bộ:', user.name);
+    const newName = prompt('Chỉnh sửa họ và tên người dùng:', user.name);
     if (newName) {
       user.name = newName;
+      if (user.sourceType === 'teacher' || user.refId) {
+        const t = (db.state.teachers || []).find(t => t.id === user.refId || t.id === userId);
+        if (t) t.name = newName;
+      } else if (user.sourceType === 'student' || user.refId) {
+        const s = (db.state.students || []).find(s => s.id === user.refId || s.id === userId);
+        if (s) s.name = newName;
+      } else if (user.sourceType === 'parent' || user.refId) {
+        const p = (db.state.parents || []).find(p => p.id === user.refId || p.id === userId);
+        if (p) p.name = newName;
+      }
       db.save();
       this.showToast('✏️ Đã cập nhật họ tên người dùng thành công!');
       this.render_user_management(parentDom || (document.getElementById('viewport') || document.getElementById('main-viewport')));
@@ -19081,7 +19105,7 @@ render_ai_geometry(dom) {
     if (!user) return;
     const groups = db.state.userGroups || [];
     const groupListStr = groups.map((g, idx) => (idx + 1) + '. ' + g.name + ' (' + g.id + ')').join('\n');
-    const choice = prompt('Chọn nhóm người dùng mới cho [' + user.name + ']:\n\n' + groupListStr + '\n\nNhập ID nhóm (VD: admin, bgh, giaovien...):', user.groupId);
+    const choice = prompt('Chọn nhóm người dùng mới cho [' + user.name + ']:\n\n' + groupListStr + '\n\nNhập ID nhóm (VD: admin, bgh, giaovien, hocsinh, phuhuynh...):', user.groupId);
     if (choice) {
       user.groupId = choice;
       db.save();
@@ -19094,6 +19118,13 @@ render_ai_geometry(dom) {
     const user = (db.state.users || []).find(u => u.id === userId);
     if (!user) return;
     user.status = user.status === 'locked' ? 'active' : 'locked';
+    if (user.sourceType === 'teacher' || user.refId) {
+      const t = (db.state.teachers || []).find(t => t.id === user.refId || t.id === userId);
+      if (t) t.status = user.status;
+    } else if (user.sourceType === 'student' || user.refId) {
+      const s = (db.state.students || []).find(s => s.id === user.refId || s.id === userId);
+      if (s) s.status = user.status;
+    }
     db.save();
     this.showToast((user.status === 'locked' ? '🔒 Đã khóa' : '🔓 Đã mở khóa') + ' tài khoản [' + user.username + ']!');
     this.render_user_management(parentDom || (document.getElementById('viewport') || document.getElementById('main-viewport')));
@@ -19114,11 +19145,29 @@ render_ai_geometry(dom) {
     }
   }
 
+  deleteSingleUser(userId, parentDom) {
+    const user = (db.state.users || []).find(u => u.id === userId);
+    if (!user) return;
+    if (confirm('Bạn có chắc chắn muốn xóa người dùng [' + user.name + '] (' + user.username + ')?')) {
+      db.state.users = (db.state.users || []).filter(u => u.id !== userId);
+      if (user.sourceType === 'teacher' || user.refId) {
+        db.state.teachers = (db.state.teachers || []).filter(t => t.id !== user.refId && t.id !== userId);
+      } else if (user.sourceType === 'student' || user.refId) {
+        db.state.students = (db.state.students || []).filter(s => s.id !== user.refId && s.id !== userId);
+      } else if (user.sourceType === 'parent' || user.refId) {
+        db.state.parents = (db.state.parents || []).filter(p => p.id !== user.refId && p.id !== userId);
+      }
+      db.save();
+      this.showToast('🗑️ Đã xóa người dùng [' + user.name + '] thành công!');
+      this.render_user_management(parentDom || (document.getElementById('viewport') || document.getElementById('main-viewport')));
+    }
+  }
+
   exportUsersExcel() {
     const users = db.state.users || [];
     const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    const csvText = "STT,Tên cán bộ,Tên đăng nhập,Nhóm người dùng,Trạng thái\n" + 
-      users.map((u, idx) => (idx + 1) + ',"' + u.name + '",' + u.username + ',' + u.groupId + ',' + u.status).join('\n');
+    const csvText = "STT,Tên cán bộ/Người dùng,Tên đăng nhập,Nhóm người dùng,Trạng thái\n" + 
+      users.map((u, idx) => (idx + 1) + ',"' + (u.name || '') + '",' + (u.username || '') + ',' + (u.groupId || '') + ',' + (u.status || 'active')).join('\n');
     
     const blob = new Blob([bom, csvText], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -19141,9 +19190,21 @@ render_ai_geometry(dom) {
     }
     if (confirm('Bạn có chắc chắn muốn xóa ' + checkboxes.length + ' người dùng đã chọn?')) {
       const idsToDelete = Array.from(checkboxes).map(cb => cb.getAttribute('data-user-id'));
+      const usersToDelete = (db.state.users || []).filter(u => idsToDelete.includes(u.id));
+      
+      usersToDelete.forEach(u => {
+        if (u.sourceType === 'teacher' || u.refId) {
+          db.state.teachers = (db.state.teachers || []).filter(t => t.id !== u.refId && t.id !== u.id);
+        } else if (u.sourceType === 'student' || u.refId) {
+          db.state.students = (db.state.students || []).filter(s => s.id !== u.refId && s.id !== u.id);
+        } else if (u.sourceType === 'parent' || u.refId) {
+          db.state.parents = (db.state.parents || []).filter(p => p.id !== u.refId && p.id !== u.id);
+        }
+      });
+
       db.state.users = db.state.users.filter(u => !idsToDelete.includes(u.id));
       db.save();
-      this.showToast('🗑️ Đã xóa người dùng được chọn!');
+      this.showToast('🗑️ Đã xóa ' + checkboxes.length + ' người dùng được chọn!');
       this.render_user_management(parentDom || (document.getElementById('viewport') || document.getElementById('main-viewport')));
     }
   }

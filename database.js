@@ -295,7 +295,11 @@ class LMSDatabase {
     const tId = String(id);
     if (this.state.teachers) {
       this.state.teachers = this.state.teachers.filter(t => String(t.id) !== tId);
+      if (this.state.users) {
+        this.state.users = this.state.users.filter(u => String(u.id) !== tId && String(u.id) !== `t_${tId}` && String(u.refId) !== tId);
+      }
       this.save();
+      this.syncAllUsersFromEntities();
     }
   }
 
@@ -303,7 +307,11 @@ class LMSDatabase {
     const idSet = new Set(ids.map(id => String(id)));
     if (this.state.teachers) {
       this.state.teachers = this.state.teachers.filter(t => !idSet.has(String(t.id)));
+      if (this.state.users) {
+        this.state.users = this.state.users.filter(u => !idSet.has(String(u.id)) && !idSet.has(String(u.refId)));
+      }
       this.save();
+      this.syncAllUsersFromEntities();
     }
   }
 
@@ -549,6 +557,108 @@ class LMSDatabase {
 
       this.state.users = defaultUsers;
     }
+    this.syncAllUsersFromEntities();
+  }
+
+  syncAllUsersFromEntities() {
+    if (!this.state) this.state = {};
+    if (!this.state.users) this.state.users = [];
+
+    const existingUsers = this.state.users;
+    const userMap = new Map();
+
+    // 1. Giữ lại các tài khoản quản trị hệ thống / users hiện có
+    existingUsers.forEach(u => {
+      if (u && (u.id || u.username)) {
+        const key = String(u.id || u.username);
+        userMap.set(key, u);
+        if (u.username) userMap.set(String(u.username), u);
+        if (u.refId) userMap.set(String(u.refId), u);
+      }
+    });
+
+    // 2. Đồng bộ từ Giáo viên (teachers)
+    const teachers = this.state.teachers || [];
+    teachers.forEach((t, idx) => {
+      const uid = t.id ? (String(t.id).startsWith('usr_') || String(t.id).startsWith('t_') ? String(t.id) : `t_${t.id}`) : `t_${t.username || idx}`;
+      const existing = userMap.get(uid) || userMap.get(String(t.id)) || userMap.get(String(t.username));
+      const userObj = {
+        id: existing ? existing.id : uid,
+        name: t.name || 'Giáo viên',
+        username: t.username || `thcsamtl_${t.id || 'gv_' + idx}`,
+        groupId: t.groupId || (t.role === 'bgh' ? 'bgh' : t.role === 'totruong' ? 'totruong' : 'giaovien'),
+        status: existing ? (existing.status || 'active') : (t.status || 'active'),
+        phone: t.phone || '',
+        email: t.email || '',
+        sourceType: 'teacher',
+        refId: t.id
+      };
+      userMap.set(String(userObj.id), userObj);
+      if (t.username) userMap.set(String(t.username), userObj);
+      if (t.id) userMap.set(String(t.id), userObj);
+    });
+
+    // 3. Đồng bộ từ Học sinh (students)
+    const students = this.state.students || [];
+    students.forEach((s, idx) => {
+      const uid = s.id ? (String(s.id).startsWith('usr_') || String(s.id).startsWith('s_') ? String(s.id) : `s_${s.id}`) : `s_${s.username || idx}`;
+      const existing = userMap.get(uid) || userMap.get(String(s.id)) || userMap.get(String(s.username));
+      const userObj = {
+        id: existing ? existing.id : uid,
+        name: s.name || 'Học sinh',
+        username: s.username || `thcsamtl_${s.id || 'hs_' + idx}`,
+        groupId: 'hocsinh',
+        status: existing ? (existing.status || 'active') : (s.status || 'active'),
+        phone: s.phone || '',
+        email: s.email || '',
+        classId: s.classId || '',
+        sourceType: 'student',
+        refId: s.id
+      };
+      userMap.set(String(userObj.id), userObj);
+      if (s.username) userMap.set(String(s.username), userObj);
+      if (s.id) userMap.set(String(s.id), userObj);
+    });
+
+    // 4. Đồng bộ từ Phụ huynh (parents)
+    const parents = this.state.parents || [];
+    parents.forEach((p, idx) => {
+      const uid = p.id ? (String(p.id).startsWith('usr_') || String(p.id).startsWith('p_') ? String(p.id) : `p_${p.id}`) : `p_${p.username || idx}`;
+      const existing = userMap.get(uid) || userMap.get(String(p.id)) || userMap.get(String(p.username));
+      const userObj = {
+        id: existing ? existing.id : uid,
+        name: p.name || 'Phụ huynh',
+        username: p.username || `ph_${p.phone || p.id || 'ph_' + idx}`,
+        groupId: 'phuhuynh',
+        status: existing ? (existing.status || 'active') : (p.status || 'active'),
+        phone: p.phone || '',
+        email: p.email || '',
+        studentId: p.studentId || '',
+        sourceType: 'parent',
+        refId: p.id
+      };
+      userMap.set(String(userObj.id), userObj);
+      if (p.username) userMap.set(String(p.username), userObj);
+      if (p.id) userMap.set(String(p.id), userObj);
+    });
+
+    // Gom danh sách unique theo id
+    const uniqueUsers = [];
+    const seenIds = new Set();
+    for (const u of userMap.values()) {
+      if (u && u.id && !seenIds.has(u.id)) {
+        seenIds.add(u.id);
+        uniqueUsers.push(u);
+      }
+    }
+
+    this.state.users = uniqueUsers;
+    this.save();
+    return uniqueUsers;
+  }
+
+  getAllUsers() {
+    return this.syncAllUsersFromEntities();
   }
 
   init() {
@@ -1188,12 +1298,14 @@ class LMSDatabase {
   addTeacher(teacher) {
     this.state.teachers.push(teacher);
     this.save();
+    this.syncAllUsersFromEntities();
   }
   updateTeacher(id, updatedData) {
     const idx = this.state.teachers.findIndex(t => t.id === id);
     if (idx !== -1) {
       this.state.teachers[idx] = { ...this.state.teachers[idx], ...updatedData };
       this.save();
+      this.syncAllUsersFromEntities();
     }
   }
 
@@ -1201,12 +1313,14 @@ class LMSDatabase {
   addStudent(student) {
     this.state.students.push(student);
     this.save();
+    this.syncAllUsersFromEntities();
   }
   updateStudent(id, updatedData) {
     const idx = this.state.students.findIndex(s => s.id === id);
     if (idx !== -1) {
       this.state.students[idx] = { ...this.state.students[idx], ...updatedData };
       this.save();
+      this.syncAllUsersFromEntities();
     }
   }
 
@@ -1218,7 +1332,11 @@ class LMSDatabase {
     if (this.state.parents) {
       this.state.parents = this.state.parents.filter(p => String(p.studentId) !== sId);
     }
+    if (this.state.users) {
+      this.state.users = this.state.users.filter(u => String(u.id) !== sId && String(u.id) !== `s_${sId}` && String(u.refId) !== sId);
+    }
     this.save();
+    this.syncAllUsersFromEntities();
   }
 
   deleteStudentsBatch(ids) {
@@ -1229,7 +1347,11 @@ class LMSDatabase {
     if (this.state.parents) {
       this.state.parents = this.state.parents.filter(p => !idSet.has(String(p.studentId)));
     }
+    if (this.state.users) {
+      this.state.users = this.state.users.filter(u => !idSet.has(String(u.id)) && !idSet.has(String(u.refId)));
+    }
     this.save();
+    this.syncAllUsersFromEntities();
   }
 
   getParents() { return this.state.parents || []; }
@@ -1237,6 +1359,7 @@ class LMSDatabase {
     if (!this.state.parents) this.state.parents = [];
     this.state.parents.push(parent);
     this.save();
+    this.syncAllUsersFromEntities();
   }
   updateParent(id, updatedData) {
     if (!this.state.parents) this.state.parents = [];
@@ -1244,6 +1367,7 @@ class LMSDatabase {
     if (idx !== -1) {
       this.state.parents[idx] = { ...this.state.parents[idx], ...updatedData };
       this.save();
+      this.syncAllUsersFromEntities();
     }
   }
 

@@ -1015,15 +1015,40 @@ function attachRenderMethods(LMSApp) {
   // 1.4 Quản lý người dùng
   LMSApp.prototype.render_user_management = function(dom) {
     if (db.initUserGroupsAndPermissions) db.initUserGroupsAndPermissions();
-    const users = db.state.users || [];
+    if (db.syncAllUsersFromEntities) db.syncAllUsersFromEntities();
+    const users = (db.getAllUsers ? db.getAllUsers() : (db.state.users || []));
     const groups = db.state.userGroups || [];
+
+    const groupMeta = {
+      admin: { name: 'Quản trị hệ thống (Admin)', color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
+      bgh: { name: 'Ban Giám Hiệu (BGH)', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe' },
+      totruong: { name: 'Tổ trưởng chuyên môn', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
+      giaovien: { name: 'Giáo viên bộ môn', color: '#0d9488', bg: '#f0fdfa', border: '#99f6e4' },
+      nhanvien: { name: 'Nhân viên văn phòng', color: '#4b5563', bg: '#f3f4f6', border: '#e5e7eb' },
+      hocsinh: { name: 'Học sinh', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd' },
+      phuhuynh: { name: 'Phụ huynh học sinh', color: '#d97706', bg: '#fffbeb', border: '#fde68a' }
+    };
 
     const searchQuery = (this.userSearchQuery || '').toLowerCase();
     const selectedGroup = this.userFilterGroup || 'all';
 
     const filteredUsers = users.filter(u => {
-      const matchSearch = !searchQuery || u.name.toLowerCase().includes(searchQuery) || u.username.toLowerCase().includes(searchQuery);
-      const matchGroup = selectedGroup === 'all' || u.groupId === selectedGroup;
+      const uName = String(u.name || '').toLowerCase();
+      const uUsername = String(u.username || '').toLowerCase();
+      const matchSearch = !searchQuery || uName.includes(searchQuery) || uUsername.includes(searchQuery);
+      
+      let matchGroup = false;
+      if (selectedGroup === 'all') {
+        matchGroup = true;
+      } else if (selectedGroup === 'giaovien') {
+        matchGroup = (u.groupId === 'giaovien' || u.sourceType === 'teacher' || u.groupId === 'teacher');
+      } else if (selectedGroup === 'hocsinh') {
+        matchGroup = (u.groupId === 'hocsinh' || u.sourceType === 'student' || u.groupId === 'student');
+      } else if (selectedGroup === 'phuhuynh') {
+        matchGroup = (u.groupId === 'phuhuynh' || u.sourceType === 'parent' || u.groupId === 'parent');
+      } else {
+        matchGroup = (u.groupId === selectedGroup);
+      }
       return matchSearch && matchGroup;
     });
 
@@ -1033,9 +1058,16 @@ function attachRenderMethods(LMSApp) {
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
             <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; flex: 1;">
               <input type="text" id="user-search-input" placeholder="Lọc theo họ và tên, tên đăng nhập..." value="${this.userSearchQuery || ''}" class="form-control" style="height: 38px; border-radius: 8px; width: 280px; font-weight: 600;">
-              <select id="user-group-filter" class="form-control" style="height: 38px; border-radius: 8px; width: 200px; font-weight: 700;">
-                <option value="all">-- Tất cả Nhóm --</option>
-                ${groups.map(g => `<option value="${g.id}" ${selectedGroup === g.id ? 'selected' : ''}>${g.name}</option>`).join('')}
+              <select id="user-group-filter" class="form-control" style="height: 38px; border-radius: 8px; width: 220px; font-weight: 700;">
+                <option value="all">-- Tất cả Nhóm (${users.length}) --</option>
+                ${groups.map(g => {
+                  let count = 0;
+                  if (g.id === 'giaovien') count = users.filter(u => u.groupId === 'giaovien' || u.sourceType === 'teacher' || u.groupId === 'teacher').length;
+                  else if (g.id === 'hocsinh') count = users.filter(u => u.groupId === 'hocsinh' || u.sourceType === 'student' || u.groupId === 'student').length;
+                  else if (g.id === 'phuhuynh') count = users.filter(u => u.groupId === 'phuhuynh' || u.sourceType === 'parent' || u.groupId === 'parent').length;
+                  else count = users.filter(u => u.groupId === g.id).length;
+                  return `<option value="${g.id}" ${selectedGroup === g.id ? 'selected' : ''}>${g.name} (${count})</option>`;
+                }).join('')}
               </select>
               <button id="btn-search-users" class="btn btn-primary" style="height: 38px; font-weight: 800; border-radius: 8px; padding: 0 1.25rem; background: #2563eb;">🔍 Tìm kiếm</button>
             </div>
@@ -1054,30 +1086,45 @@ function attachRenderMethods(LMSApp) {
             <thead>
               <tr style="background: #4b8b8d; color: white; text-align: left; height: 44px;">
                 <th style="padding: 0.65rem 0.85rem; width: 40px; text-align: center;"><input type="checkbox" id="check-all-users" style="transform: scale(1.15); cursor: pointer;"></th>
-                <th style="padding: 0.65rem 1rem; width: 140px; font-weight: 800; text-align: center;">Thao tác</th>
-                <th style="padding: 0.65rem 0.85rem; width: 60px; font-weight: 800; text-align: center;">STT</th>
+                <th style="padding: 0.65rem 1rem; width: 130px; font-weight: 800; text-align: center;">Thao tác</th>
+                <th style="padding: 0.65rem 0.85rem; width: 50px; font-weight: 800; text-align: center;">STT</th>
                 <th style="padding: 0.65rem 1.25rem; font-weight: 800;">Tên đăng nhập</th>
-                <th style="padding: 0.65rem 1.25rem; font-weight: 800;">Họ và tên cán bộ / GV</th>
+                <th style="padding: 0.65rem 1.25rem; font-weight: 800;">Họ và tên</th>
+                <th style="padding: 0.65rem 1rem; font-weight: 800;">Nhóm người dùng</th>
+                <th style="padding: 0.65rem 0.85rem; font-weight: 800; text-align: center;">Trạng thái</th>
               </tr>
             </thead>
             <tbody>
-              ${filteredUsers.length > 0 ? filteredUsers.map((u, idx) => `
+              ${filteredUsers.length > 0 ? filteredUsers.map((u, idx) => {
+                const grpInfo = groupMeta[u.groupId] || { name: u.groupId || 'Người dùng', color: '#475569', bg: '#f1f5f9', border: '#e2e8f0' };
+                const isLocked = u.status === 'locked';
+                return `
                 <tr style="border-bottom: 1px solid #e2e8f0; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
                   <td style="padding: 0.75rem 0.85rem; text-align: center;"><input type="checkbox" class="user-row-cb" data-user-id="${u.id}" style="transform: scale(1.15); cursor: pointer;"></td>
                   <td style="padding: 0.75rem 0.5rem; text-align: center;">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
                       <button title="Sửa tên" onclick="if(window.app) window.app.showEditUserModal('${u.id}');" style="background: transparent; border: none; padding: 0.3rem; cursor: pointer;" class="icon-only-btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                      <button title="Khóa/Mở khóa" onclick="if(window.app) window.app.toggleUserLock('${u.id}');" style="background: transparent; border: none; padding: 0.3rem; cursor: pointer; font-size: 0.95rem;">${u.status === 'locked' ? '🔒' : '🔓'}</button>
+                      <button title="Khóa/Mở khóa" onclick="if(window.app) window.app.toggleUserLock('${u.id}');" style="background: transparent; border: none; padding: 0.3rem; cursor: pointer; font-size: 0.95rem;">${isLocked ? '🔒' : '🔓'}</button>
                       <button title="Reset mật khẩu" onclick="if(window.app) window.app.resetSingleUserPassword('${u.id}');" style="background: transparent; border: none; padding: 0.3rem; cursor: pointer; font-size: 0.95rem;">🔑</button>
-                      <button title="Xóa người dùng" onclick="if(window.app) window.app.deleteUserGroup('${u.id}');" style="background: transparent; border: none; padding: 0.3rem; cursor: pointer;" class="icon-only-btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
+                      <button title="Xóa người dùng" onclick="if(window.app) window.app.deleteSingleUser('${u.id}');" style="background: transparent; border: none; padding: 0.3rem; cursor: pointer;" class="icon-only-btn"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
                     </div>
                   </td>
                   <td style="padding: 0.75rem 0.85rem; text-align: center; font-weight: 700; color: #475569;">${idx + 1}</td>
                   <td style="padding: 0.75rem 1.25rem; font-weight: 800; color: #2563eb;">${u.username}</td>
                   <td style="padding: 0.75rem 1.25rem; font-weight: 800; color: #0f172a;">${u.name}</td>
+                  <td style="padding: 0.75rem 1rem;">
+                    <span style="display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.25rem 0.65rem; border-radius: 999px; font-size: 0.78rem; font-weight: 800; background: ${grpInfo.bg}; color: ${grpInfo.color}; border: 1px solid ${grpInfo.border};">
+                      ${grpInfo.name}
+                    </span>
+                  </td>
+                  <td style="padding: 0.75rem 0.85rem; text-align: center;">
+                    <span style="display: inline-block; padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.78rem; font-weight: 700; background: ${isLocked ? '#fef2f2' : '#f0fdf4'}; color: ${isLocked ? '#dc2626' : '#16a34a'}; border: 1px solid ${isLocked ? '#fecaca' : '#bbf7d0'};">
+                      ${isLocked ? '🔒 Đã khóa' : '🟢 Hoạt động'}
+                    </span>
+                  </td>
                 </tr>
-              `).join('') : `
-                <tr><td colspan="5" style="text-align: center; padding: 3rem; color: #94a3b8; font-weight: 700;">Không tìm thấy người dùng nào.</td></tr>
+              `;}).join('') : `
+                <tr><td colspan="7" style="text-align: center; padding: 3rem; color: #94a3b8; font-weight: 700;">Không tìm thấy người dùng nào trong nhóm này.</td></tr>
               `}
             </tbody>
           </table>
@@ -1088,10 +1135,19 @@ function attachRenderMethods(LMSApp) {
     const inputQuery = dom.querySelector('#user-search-input');
     const inputGroup = dom.querySelector('#user-group-filter');
     const btnSearch = dom.querySelector('#btn-search-users');
+    const checkAll = dom.querySelector('#check-all-users');
 
-    if (inputQuery) inputQuery.oninput = () => { this.userSearchQuery = inputQuery.value; };
+    if (inputQuery) {
+      inputQuery.oninput = () => { this.userSearchQuery = inputQuery.value; };
+      inputQuery.onkeydown = (e) => { if (e.key === 'Enter') { this.userSearchQuery = inputQuery.value; this.render_user_management(dom); } };
+    }
     if (inputGroup) inputGroup.onchange = () => { this.userFilterGroup = inputGroup.value; this.render_user_management(dom); };
     if (btnSearch) btnSearch.onclick = () => { if (inputQuery) this.userSearchQuery = inputQuery.value; this.render_user_management(dom); };
+    if (checkAll) {
+      checkAll.onchange = () => {
+        dom.querySelectorAll('.user-row-cb').forEach(cb => { cb.checked = checkAll.checked; });
+      };
+    }
   };
 
   // 1.5 Lớp học THCS
