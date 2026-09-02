@@ -28104,7 +28104,10 @@ if (typeof window !== 'undefined') {
       var clean = String(text || '').trim();
       if (!clean) return;
 
-      var serverUrl = '/api/tts?lang=vi&text=' + encodeURIComponent(clean);
+      var isFile = typeof window !== 'undefined' && window.location && (window.location.protocol === 'file:' || !window.location.host);
+      var serverUrl = isFile 
+        ? ('https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(clean))
+        : ('/api/tts?lang=vi&text=' + encodeURIComponent(clean));
       var audio = new Audio(serverUrl);
       audio.playbackRate = 1.15; // Tăng 15% tốc độ: dứt câu dứt khoát, không kéo dài ngân bay
       audio.volume = 1.0;

@@ -24516,8 +24516,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     // Kho 29 Chữ Cái Chuẩn GDPT 2018 - Quy Tắc Đánh Vần Chuẩn Bộ GD&ĐT
     const ALPHABET_DATA = [
       { id: 'a', upper: 'A', lower: 'a', letterName: 'Chữ A', phoneme: 'a', characterName: 'Bé A Áo Đỏ', icon: '👕', animIcon: '👚', color: '#ef4444', bg: '#fee2e2', intro: 'Đây là chữ A in hoa và chữ a in thường. Âm đọc là a. Chữ A biến hình thành Bé A Mặc Áo Đỏ xinh tươi!', rhyme: 'Bé A Áo Đỏ tươi cười, chăm ngoan học giỏi mọi người đều khen!', words: [{w:'Cái Áo', icon:'👕', p:'a, sắc, áo, cái áo', displayP:'a - sắc - áo ➔ cái áo'}, {w:'Con Gà', icon:'🐔', p:'gờ, a, ga, ga, huyền, gà, con gà', displayP:'gờ - a - ga, ga - huyền - gà ➔ con gà'}, {w:'Quả Na', icon:'🍈', p:'nờ, a, na, quả na', displayP:'nờ - a - na ➔ quả na'}] },
-      { id: 'aw', upper: 'Ă', lower: 'ă', letterName: 'Chữ Ă', phoneme: 'ă', characterName: 'Chú Ă Trăng Khuyết', icon: '🌙', animIcon: '✨', color: '#f97316', bg: '#ffedd5', intro: 'Đây là chữ Ă in hoa và chữ ă in thường. Âm đọc là ă. Chữ Ă có chiếc mũ trăng khuyết biến hình thành Vầng Trăng Đêm Rằm!', rhyme: 'Chữ Ă có mũ trăng ngà, soi đường chú Cuội bay qua đón chào!', words: [{w:'Mặt Trăng', icon:'🌙', p:'mờ, ăng, măng, măng, nặng, mặt, mặt trăng', displayP:'mờ - ăng - măng, măng - nặng - mặt ➔ mặt trăng'}, {w:'Con Rắn', icon:'🐍', p:'rờ, ăn, răn, răn, sắc, rắn, con rắn', displayP:'rờ - ăn - răn, răn - sắc - rắn ➔ con rắn'}, {w:'Bắp Ngô', icon:'🌽', p:'bờ, ắp, bắp, bắp ngô', displayP:'bờ - ắp - bắp ➔ bắp ngô'}] },
-      { id: 'aa', upper: 'Â', lower: 'â', letterName: 'Chữ Â', phoneme: 'â', characterName: 'Bạn Â Nón Lá', icon: '👒', animIcon: '🍄', color: '#eab308', bg: '#fef9c3', intro: 'Đây là chữ Â in hoa và chữ â in thường. Âm đọc là â. Chữ Â đội nón lá biến hình thành Bạn Nấm Nhỏ che mưa!', rhyme: 'Chữ Â đội nón lá xinh, che mưa che nắng giúp mình đến trường!', words: [{w:'Cây Nấm', icon:'🍄', p:'nờ, âm, nâm, nâm, sắc, nấm, cây nấm', displayP:'nờ - âm - nâm, nâm - sắc - nấm ➔ cây nấm'}, {w:'Bồ Câu', icon:'🕊️', p:'cờ, âu, câu, bồ câu', displayP:'cờ - âu - câu ➔ bồ câu'}, {w:'Cá Mập', icon:'🦈', p:'mờ, ấp, mập, cá mập', displayP:'mờ - ấp - mập ➔ cá mập'}] },
+      { id: 'aw', upper: 'Ă', lower: 'ă', letterName: 'Chữ Á', phoneme: 'á', displayPhoneme: 'ă', characterName: 'Chú Ă Trăng Khuyết', icon: '🌙', animIcon: '✨', color: '#f97316', bg: '#ffedd5', intro: 'Đây là chữ Á in hoa và chữ á in thường. Âm đọc là á. Chữ Á có chiếc mũ trăng khuyết biến hình thành Vầng Trăng Đêm Rằm!', rhyme: 'Chữ Á có mũ trăng ngà, soi đường chú Cuội bay qua đón chào!', words: [{w:'Mặt Trăng', icon:'🌙', p:'mờ, ăng, măng, măng, nặng, mặt, mặt trăng', displayP:'mờ - ăng - măng, măng - nặng - mặt ➔ mặt trăng'}, {w:'Con Rắn', icon:'🐍', p:'rờ, ăn, răn, răn, sắc, rắn, con rắn', displayP:'rờ - ăn - răn, răn - sắc - rắn ➔ con rắn'}, {w:'Bắp Ngô', icon:'🌽', p:'bờ, ắp, bắp, bắp ngô', displayP:'bờ - ắp - bắp ➔ bắp ngô'}] },
+      { id: 'aa', upper: 'Â', lower: 'â', letterName: 'Chữ Ớ', phoneme: 'ớ', displayPhoneme: 'â', characterName: 'Bạn Â Nón Lá', icon: '👒', animIcon: '🍄', color: '#eab308', bg: '#fef9c3', intro: 'Đây là chữ Ớ in hoa và chữ ớ in thường. Âm đọc là ớ. Chữ Ớ đội nón lá biến hình thành Bạn Nấm Nhỏ che mưa!', rhyme: 'Chữ Ớ đội nón lá xinh, che mưa che nắng giúp mình đến trường!', words: [{w:'Cây Nấm', icon:'🍄', p:'nờ, âm, nâm, nâm, sắc, nấm, cây nấm', displayP:'nờ - âm - nâm, nâm - sắc - nấm ➔ cây nấm'}, {w:'Bồ Câu', icon:'🕊️', p:'cờ, âu, câu, bồ câu', displayP:'cờ - âu - câu ➔ bồ câu'}, {w:'Cá Mập', icon:'🦈', p:'mờ, ấp, mập, cá mập', displayP:'mờ - ấp - mập ➔ cá mập'}] },
       { id: 'b', upper: 'B', lower: 'b', letterName: 'Chữ Bê', phoneme: 'bờ', characterName: 'Chú B Bướm Xinh', icon: '🦋', animIcon: '🌸', color: '#3b82f6', bg: '#dbeafe', intro: 'Đây là chữ B in hoa và chữ b in thường. Âm đọc là bờ. Chữ B mọc ra đôi cánh biến hình thành Chú Bướm Xinh dập dờn!', rhyme: 'Chữ B như bướm lượn quanh, dập dờn cánh biếc trên cành hoa tươi!', words: [{w:'Bươm Bướm', icon:'🦋', p:'bờ, ươm, bươm, bươm, sắc, bướm, bươm bướm', displayP:'bờ - ươm - bươm, bươm - sắc - bướm ➔ bươm bướm'}, {w:'Quả Bơ', icon:'🥑', p:'bờ, ơ, bơ, quả bơ', displayP:'bờ - ơ - bơ ➔ quả bơ'}, {w:'Búp Bê', icon:'🪆', p:'bờ, úp, búp, búp bê', displayP:'bờ - úp - búp ➔ búp bê'}] },
       { id: 'c', upper: 'C', lower: 'c', letterName: 'Chữ Xê', phoneme: 'cờ', characterName: 'Chú C Cá Vàng', icon: '🐟', animIcon: '🌊', color: '#06b6d4', bg: '#cffafe', intro: 'Đây là chữ C in hoa và chữ c in thường. Âm đọc là cờ. Nét cong chữ C uốn lượn biến hình thành Chú Cá Vàng quẫy đuôi!', rhyme: 'Chữ C cong cong chú cá vàng, quẫy đuôi bơi lội rộn ràng trong veo!', words: [{w:'Con Cá', icon:'🐟', p:'cờ, a, ca, ca, sắc, cá, con cá', displayP:'cờ - a - ca, ca - sắc - cá ➔ con cá'}, {w:'Cây Cau', icon:'🌴', p:'cờ, au, cau, cây cau', displayP:'cờ - au - cau ➔ cây cau'}, {w:'Con Cú', icon:'🦉', p:'cờ, u, cu, cu, sắc, cú, con cú', displayP:'cờ - u - cu, cu - sắc - cú ➔ con cú'}] },
       { id: 'd', upper: 'D', lower: 'd', letterName: 'Chữ Dê', phoneme: 'dờ', characterName: 'Chú D Dê Con', icon: '🐐', animIcon: '🌿', color: '#10b981', bg: '#d1fae5', intro: 'Đây là chữ D in hoa và chữ d in thường. Âm đọc là dờ. Chữ D biến hình thành Chú Dê Con có đôi sừng xinh!', rhyme: 'Chữ D chú Dê leo đồi, be he gọi mẹ cùng ngồi ăn hoa!', words: [{w:'Con Dê', icon:'🐐', p:'dờ, ê, dê, con dê', displayP:'dờ - ê - dê ➔ con dê'}, {w:'Quả Dưa', icon:'🍈', p:'dờ, ưa, dưa, quả dưa', displayP:'dờ - ưa - dưa ➔ quả dưa'}, {w:'Dòng Sông', icon:'🏞️', p:'dờ, ong, dong, dong, huyền, dòng, dòng sông', displayP:'dờ - ong - dong, dong - huyền - dòng ➔ dòng sông'}] },
@@ -24585,7 +24585,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const speakVN = (text, customRate = 0.85, onEndCallback = null) => {
       let cleanText = String(text || '')
-        .replace(/[➔>]+/g, ', ')
+        .replace(/[➔>]+/g, ', ').replace(/[()[\]\/]/g, ' ')
         .replace(/[-–—]+/g, ', ')
         .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
         .trim();
@@ -24819,7 +24819,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
                 </div>
 
                 <div style="background:${item.bg};color:${item.color};font-size:0.75rem;font-weight:900;padding:0.2rem 0.6rem;border-radius:10px;margin-top:0.2rem;border:1px solid ${item.color}33;">
-                  Âm /${item.phoneme || item.sound}/
+                  Âm /${item.displayPhoneme || item.phoneme || item.sound}/
                 </div>
 
               </div>
@@ -24928,7 +24928,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       let isMorphed = false;
       const mainWord = item.words && item.words[0] ? item.words[0].w : item.characterName;
       const mainIcon = item.words && item.words[0] ? item.words[0].icon : item.icon;
-      const greetingText = `Xin chào! Mình là chữ ${item.upper} (âm /${item.phoneme}/) trong từ ${mainWord} ${mainIcon}!`;
+      const greetingText = `Xin chào! Mình là ${item.letterName}, âm ${item.phoneme}, trong từ ${mainWord}!`;
 
       const m = document.createElement('div');
       m.id = 'letter-theater-modal';
@@ -27254,7 +27254,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const speakVN = (text, customRate = 0.88, onEndCallback = null) => {
       let cleanText = String(text || '')
-        .replace(/[➔>]+/g, ', ')
+        .replace(/[➔>]+/g, ', ').replace(/[()[\]\/]/g, ' ')
         .replace(/[-–—]+/g, ', ')
         .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
         .trim();
