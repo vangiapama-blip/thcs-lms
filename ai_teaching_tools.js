@@ -25257,7 +25257,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       const cx1 = 340;   // Tâm Chữ Hoa
       const cx2 = 820;   // Tâm Chữ Thường
 
-      // HỆ THỐNG PHÂN BIỆT RÕ RÀNG 100% GIỮA CHỮ VIẾT TAY TIỂU HỌC & CHỮ IN CHUẨN
+            // HỆ THỐNG PHÂN BIỆT RÕ RÀNG 100% GIỮA CHỮ VIẾT TAY TIỂU HỌC & CHỮ IN CHUẨN (ĐỦ 29 CHỮ CÁI GDPT 2018)
       const getMultiStrokeLetterData = (letterId, isPrint = false) => {
         const char = String(letterId || 'c').toLowerCase();
         let strokesHoa = [];
@@ -25267,244 +25267,515 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
           const res = [];
           for (let i = 0; i <= count; i++) {
             const t = i / count;
-            res.push({ x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t });
+            res.push({ x: Math.round(x1 + (x2 - x1) * t), y: Math.round(y1 + (y2 - y1) * t) });
           }
           return res;
         };
 
-        if (isPrint) {
-          // ═══════════════════════════════════════════════════════════
-          // 🔤 1. CHẾ ĐỘ CHỮ IN CHUẨN (CÁC NÉT THẲNG, HÌNH HỌC, DỨT KHOÁT)
-          // ═══════════════════════════════════════════════════════════
-          if (char === 'a' || char === 'aw' || char === 'aa') {
-            // A in hoa: 3 nét thẳng góc cạnh
+        const arc = (cx, cy, rx, ry, startAngle, endAngle, count = 30) => {
+          const res = [];
+          for (let i = 0; i <= count; i++) {
+            const a = startAngle + (endAngle - startAngle) * (i / count);
+            res.push({ x: Math.round(cx + Math.cos(a) * rx), y: Math.round(cy + Math.sin(a) * ry) });
+          }
+          return res;
+        };
+
+        // 1. A / Ă / Â
+        if (char === 'a' || char === 'aw' || char === 'aa') {
+          if (isPrint) {
             strokesHoa.push(line(cx1 - 75, baseY, cx1, topY + 15, 30));
             strokesHoa.push(line(cx1, topY + 15, cx1 + 75, baseY, 30));
             strokesHoa.push(line(cx1 - 42, midY + 20, cx1 + 42, midY + 20, 20));
-
-            // a in thường: Nét tròn đều & nét thẳng đứng không móc đuôi
-            const sa = [];
-            for (let i = 0; i <= 35; i++) {
-              const a = (i / 35) * Math.PI * 2 + Math.PI / 2;
-              sa.push({ x: cx2 - 15 - Math.cos(a) * 45, y: (midY + baseY) / 2 - Math.sin(a) * 55 });
+            if (char === 'aw') {
+              const s = [];
+              for (let i = 0; i <= 20; i++) {
+                const t = i / 20;
+                s.push({ x: Math.round(cx1 - 30 + t * 60), y: Math.round(topY - 8 + Math.sin(t * Math.PI) * 14) });
+              }
+              strokesHoa.push(s);
+            } else if (char === 'aa') {
+              strokesHoa.push(line(cx1 - 28, topY - 2, cx1, topY - 22, 14));
+              strokesHoa.push(line(cx1, topY - 22, cx1 + 28, topY - 2, 14));
             }
-            strokesThuong.push(sa);
+
+            strokesThuong.push(arc(cx2 - 15, (midY + baseY) / 2, 45, 55, Math.PI / 2, Math.PI * 2.5, 35));
             strokesThuong.push(line(cx2 + 30, midY + 10, cx2 + 30, baseY, 25));
-          } else if (char === 'b') {
-            // B in hoa: 1 nét đứng + 2 nửa tròn đều
-            strokesHoa.push(line(cx1 - 60, topY + 15, cx1 - 60, baseY, 30));
-            const sb1 = [];
-            for (let i = 0; i <= 25; i++) {
-              const a = (i / 25) * Math.PI - Math.PI / 2;
-              sb1.push({ x: cx1 - 60 + Math.cos(a) * 65, y: topY + 70 + Math.sin(a) * 55 });
+            if (char === 'aw') {
+              const s = [];
+              for (let i = 0; i <= 20; i++) {
+                const t = i / 20;
+                s.push({ x: Math.round(cx2 - 15 - 22 + t * 44), y: Math.round(midY - 22 + Math.sin(t * Math.PI) * 12) });
+              }
+              strokesThuong.push(s);
+            } else if (char === 'aa') {
+              strokesThuong.push(line(cx2 - 15 - 20, midY - 12, cx2 - 15, midY - 28, 12));
+              strokesThuong.push(line(cx2 - 15, midY - 28, cx2 - 15 + 20, midY - 12, 12));
             }
-            strokesHoa.push(sb1);
-            const sb2 = [];
-            for (let i = 0; i <= 25; i++) {
-              const a = (i / 25) * Math.PI - Math.PI / 2;
-              sb2.push({ x: cx1 - 60 + Math.cos(a) * 75, y: midY + 65 + Math.sin(a) * 55 });
-            }
-            strokesHoa.push(sb2);
-
-            // b in thường: 1 nét đứng + 1 bụng tròn
-            strokesThuong.push(line(cx2 - 35, topY + 15, cx2 - 35, baseY, 35));
-            const sb3 = [];
-            for (let i = 0; i <= 30; i++) {
-              const a = (i / 30) * Math.PI * 2 - Math.PI / 2;
-              sb3.push({ x: cx2 + 10 - Math.cos(a) * 45, y: (midY + baseY) / 2 - Math.sin(a) * 55 });
-            }
-            strokesThuong.push(sb3);
-          } else if (char === 'c') {
-            // C in hoa: Hình bán nguyệt tròn đều
-            const sc1 = [];
-            for (let i = 0; i <= 60; i++) {
-              const a = (i / 60) * Math.PI * 1.5 - 0.75;
-              sc1.push({ x: cx1 + Math.cos(a) * 85, y: (topY + baseY) / 2 + Math.sin(a) * 115 });
-            }
-            strokesHoa.push(sc1);
-
-            // c in thường
-            const sc2 = [];
-            for (let i = 0; i <= 50; i++) {
-              const a = (i / 50) * Math.PI * 1.5 - 0.75;
-              sc2.push({ x: cx2 + Math.cos(a) * 55, y: (midY + baseY) / 2 + Math.sin(a) * 55 });
-            }
-            strokesThuong.push(sc2);
-          } else if (char === 'o' || char === 'oo' || char === 'ow') {
-            const so1 = [];
-            for (let i = 0; i <= 70; i++) {
-              const a = (i / 70) * Math.PI * 2 + Math.PI / 2;
-              so1.push({ x: cx1 - Math.cos(a) * 85, y: (topY + baseY) / 2 - Math.sin(a) * 115 });
-            }
-            strokesHoa.push(so1);
-
-            const so2 = [];
-            for (let i = 0; i <= 50; i++) {
-              const a = (i / 50) * Math.PI * 2 + Math.PI / 2;
-              so2.push({ x: cx2 - Math.cos(a) * 55, y: (midY + baseY) / 2 - Math.sin(a) * 55 });
-            }
-            strokesThuong.push(so2);
           } else {
-            // Chữ in mặc định
-            const sdef1 = [];
-            for (let i = 0; i <= 70; i++) {
-              const a = (i / 70) * Math.PI * 1.6 - 0.8;
-              sdef1.push({ x: cx1 + Math.cos(a) * 85, y: (topY + baseY) / 2 + Math.sin(a) * 115 });
-            }
-            strokesHoa.push(sdef1);
-
-            const sdef2 = [];
-            for (let i = 0; i <= 50; i++) {
-              const a = (i / 50) * Math.PI * 1.6 - 0.8;
-              sdef2.push({ x: cx2 + Math.cos(a) * 55, y: (midY + baseY) / 2 + Math.sin(a) * 55 });
-            }
-            strokesThuong.push(sdef2);
-          }
-        } else {
-          // ═══════════════════════════════════════════════════════════
-          // ✒️ 2. CHẾ ĐỘ CHỮ VIẾT TAY TIỂU HỌC (CHUẨN QĐ 31/2002 & GDPT 2018)
-          // ═══════════════════════════════════════════════════════════
-          if (char === 'a' || char === 'aw' || char === 'aa') {
-            // A HOA VIẾT TAY:
-            // Nét 1: Nét móc ngược trái (từ dòng 2 uốn lượn lên đỉnh dòng 5)
+            // Viết tay A / Ă / Â
             const sA1 = [];
             for (let i = 0; i <= 35; i++) {
               const t = i / 35;
               const x = (1-t)*(1-t)*(cx1 - 75) + 2*(1-t)*t*(cx1 - 85) + t*t*cx1;
               const y = (1-t)*(1-t)*(midY + 50) + 2*(1-t)*t*(topY + 30) + t*t*topY;
-              sA1.push({ x, y });
+              sA1.push({ x: Math.round(x), y: Math.round(y) });
             }
             strokesHoa.push(sA1);
 
-            // Nét 2: Nét móc ngược phải (từ đỉnh kéo thẳng xuống đáy và uốn lượn móc lên dòng 2)
             const sA2 = [];
             for (let i = 0; i <= 35; i++) {
               const t = i / 35;
               if (t < 0.75) {
                 const u = t / 0.75;
-                sA2.push({ x: cx1 + u * 75, y: topY + u * 240 });
+                sA2.push({ x: Math.round(cx1 + u * 75), y: Math.round(topY + u * 240) });
               } else {
                 const u = (t - 0.75) / 0.25;
-                sA2.push({ x: cx1 + 75 + u * 25, y: baseY - u * 35 });
+                sA2.push({ x: Math.round(cx1 + 75 + u * 25), y: Math.round(baseY - u * 35) });
               }
             }
             strokesHoa.push(sA2);
 
-            // Nét 3: Nét lượn ngang thân (lượn sóng chữ A hoa)
             const sA3 = [];
             for (let i = 0; i <= 25; i++) {
               const t = i / 25;
-              sA3.push({ x: cx1 - 60 + t * 120, y: midY + 20 - Math.sin(t * Math.PI * 2) * 14 });
+              sA3.push({ x: Math.round(cx1 - 60 + t * 120), y: Math.round(midY + 20 - Math.sin(t * Math.PI * 2) * 14) });
             }
             strokesHoa.push(sA3);
 
-            // a THƯỜNG VIẾT TAY:
-            // Nét 1: Cong kín
-            const sa1 = [];
-            for (let i = 0; i <= 40; i++) {
-              const ang = (i / 40) * Math.PI * 2 + Math.PI / 2;
-              sa1.push({ x: cx2 - 20 - Math.cos(ang) * 45, y: (midY + baseY) / 2 - Math.sin(ang) * 60 });
+            if (char === 'aw') {
+              const s = [];
+              for (let i = 0; i <= 20; i++) {
+                const t = i / 20;
+                s.push({ x: Math.round(cx1 - 30 + t * 60), y: Math.round(topY - 16 + Math.sin(t * Math.PI) * 14) });
+              }
+              strokesHoa.push(s);
+            } else if (char === 'aa') {
+              strokesHoa.push(line(cx1 - 28, topY - 4, cx1, topY - 24, 14));
+              strokesHoa.push(line(cx1, topY - 24, cx1 + 28, topY - 4, 14));
             }
-            strokesThuong.push(sa1);
 
-            // Nét 2: Móc ngược ĐÁ ĐUÔI LÊN CHẠM GIỮA DÒNG 1 VÀ 2
+            strokesThuong.push(arc(cx2 - 20, (midY + baseY) / 2, 45, 60, Math.PI / 2, Math.PI * 2.5, 40));
             const sa2 = [];
             for (let i = 0; i <= 30; i++) {
               const t = i / 30;
               if (t < 0.7) {
-                const u = t / 0.7;
-                sa2.push({ x: cx2 + 25, y: midY + u * 120 });
+                sa2.push({ x: cx2 + 25, y: Math.round(midY + (t / 0.7) * 120) });
               } else {
-                const u = (t - 0.7) / 0.3;
-                sa2.push({ x: cx2 + 25 + u * 30, y: baseY - u * 35 }); // Đá đuôi lên!
+                sa2.push({ x: Math.round(cx2 + 25 + ((t - 0.7) / 0.3) * 30), y: Math.round(baseY - ((t - 0.7) / 0.3) * 35) });
               }
             }
             strokesThuong.push(sa2);
-          } else if (char === 'b') {
-            // B HOA VIẾT TAY: Nét 1 móc ngược trái + Nét 2 thắt nút giữa
+
+            if (char === 'aw') {
+              const s = [];
+              for (let i = 0; i <= 20; i++) {
+                const t = i / 20;
+                s.push({ x: Math.round(cx2 - 15 - 22 + t * 44), y: Math.round(midY - 26 + Math.sin(t * Math.PI) * 12) });
+              }
+              strokesThuong.push(s);
+            } else if (char === 'aa') {
+              strokesThuong.push(line(cx2 - 15 - 20, midY - 14, cx2 - 15, midY - 32, 12));
+              strokesThuong.push(line(cx2 - 15, midY - 32, cx2 - 15 + 20, midY - 14, 12));
+            }
+          }
+        }
+
+        // 2. B
+        else if (char === 'b') {
+          if (isPrint) {
+            strokesHoa.push(line(cx1 - 60, topY + 15, cx1 - 60, baseY, 30));
+            strokesHoa.push(arc(cx1 - 60, topY + 70, 65, 55, -Math.PI / 2, Math.PI / 2, 25));
+            strokesHoa.push(arc(cx1 - 60, midY + 65, 75, 55, -Math.PI / 2, Math.PI / 2, 25));
+
+            strokesThuong.push(line(cx2 - 35, topY + 15, cx2 - 35, baseY, 35));
+            strokesThuong.push(arc(cx2 + 10, (midY + baseY) / 2, 45, 55, -Math.PI / 2, Math.PI * 1.5, 30));
+          } else {
             const sb1 = [];
             for (let i = 0; i <= 35; i++) {
               const t = i / 35;
-              sb1.push({ x: cx1 - 65 + Math.sin(t * Math.PI) * 10, y: topY + 20 + t * 220 });
+              sb1.push({ x: Math.round(cx1 - 65 + Math.sin(t * Math.PI) * 10), y: Math.round(topY + 20 + t * 220) });
             }
             strokesHoa.push(sb1);
 
             const sb2 = [];
-            // Bụng trên
             for (let i = 0; i <= 25; i++) {
               const a = (i / 25) * Math.PI - Math.PI / 2;
-              sb2.push({ x: cx1 - 65 + Math.cos(a) * 75, y: topY + 60 + Math.sin(a) * 55 });
+              sb2.push({ x: Math.round(cx1 - 65 + Math.cos(a) * 75), y: Math.round(topY + 60 + Math.sin(a) * 55) });
             }
-            // Thắt nút ở giữa
             sb2.push({ x: cx1 - 45, y: midY });
-            // Bụng dưới
             for (let i = 0; i <= 25; i++) {
               const a = (i / 25) * Math.PI - Math.PI / 2;
-              sb2.push({ x: cx1 - 65 + Math.cos(a) * 85, y: topY + 175 + Math.sin(a) * 65 });
+              sb2.push({ x: Math.round(cx1 - 65 + Math.cos(a) * 85), y: Math.round(topY + 175 + Math.sin(a) * 65) });
             }
             strokesHoa.push(sb2);
 
-            // b THƯỜNG VIẾT TAY: Nét khuyết trên cao 5 ly + Thắt nút nhỏ ở đỉnh dòng 3
             const sb3 = [];
-            // Nét khuyết trên
             for (let i = 0; i <= 40; i++) {
               const t = i / 40;
-              if (t < 0.5) {
-                const u = t / 0.5;
-                sb3.push({ x: cx2 - 35 + u * 35, y: midY - u * 120 });
-              } else {
-                const u = (t - 0.5) / 0.5;
-                sb3.push({ x: cx2 - u * 35, y: topY + u * 240 });
-              }
+              if (t < 0.5) sb3.push({ x: Math.round(cx2 - 35 + (t / 0.5) * 35), y: Math.round(midY - (t / 0.5) * 120) });
+              else sb3.push({ x: Math.round(cx2 - ((t - 0.5) / 0.5) * 35), y: Math.round(topY + ((t - 0.5) / 0.5) * 240) });
             }
-            // Nét móc thắt
             for (let i = 0; i <= 25; i++) {
               const a = (i / 25) * Math.PI - Math.PI / 2;
-              sb3.push({ x: cx2 - 35 + Math.cos(a) * 55, y: (midY + baseY) / 2 + Math.sin(a) * 60 });
+              sb3.push({ x: Math.round(cx2 - 35 + Math.cos(a) * 55), y: Math.round((midY + baseY) / 2 + Math.sin(a) * 60) });
             }
             strokesThuong.push(sb3);
-          } else if (char === 'c') {
-            // C HOA VIẾT TAY: Cong dưới kết hợp cong trái uốn lượn
+          }
+        }
+
+        // 3. C
+        else if (char === 'c') {
+          if (isPrint) {
+            strokesHoa.push(arc(cx1, (topY + baseY) / 2, 85, 115, 0.75, Math.PI * 1.5 + 0.75, 60));
+            strokesThuong.push(arc(cx2, (midY + baseY) / 2, 55, 55, 0.75, Math.PI * 1.5 + 0.75, 50));
+          } else {
             const s1 = [];
             for (let i = 0; i <= 80; i++) {
               const t = i / 80;
               const x = (1-t)*(1-t)*(1-t)*(cx1 + 80) + 3*(1-t)*(1-t)*t*(cx1 - 20) + 3*(1-t)*t*t*(cx1 - 140) + t*t*t*(cx1 + 90);
               const y = (1-t)*(1-t)*(1-t)*(topY + 50) + 3*(1-t)*(1-t)*t*(topY - 18) + 3*(1-t)*t*t*(baseY + 18) + t*t*t*(baseY - 50);
-              s1.push({ x, y });
+              s1.push({ x: Math.round(x), y: Math.round(y) });
             }
             strokesHoa.push(s1);
 
-            // c THƯỜNG VIẾT TAY: Cong hở phải có đuôi móc lên
             const s2 = [];
             for (let i = 0; i <= 60; i++) {
               const t = i / 60;
               const x = (1-t)*(1-t)*(1-t)*(cx2 + 50) + 3*(1-t)*(1-t)*t*(cx2 - 15) + 3*(1-t)*t*t*(cx2 - 90) + t*t*t*(cx2 + 60);
               const y = (1-t)*(1-t)*(1-t)*(midY + 30) + 3*(1-t)*(1-t)*t*(midY - 12) + 3*(1-t)*t*t*(baseY + 12) + t*t*t*(baseY - 35);
-              s2.push({ x, y });
+              s2.push({ x: Math.round(x), y: Math.round(y) });
             }
             strokesThuong.push(s2);
-          } else {
-            // Mặc định chữ viết tay
-            const sh = [];
-            for (let i = 0; i <= 80; i++) {
-              const ang = (i / 80) * Math.PI * 1.6 - 0.8;
-              sh.push({ x: cx1 + Math.cos(ang) * 90, y: (topY + baseY) / 2 + Math.sin(ang) * 120 });
-            }
-            strokesHoa.push(sh);
-
-            const st = [];
-            for (let i = 0; i <= 60; i++) {
-              const ang = (i / 60) * Math.PI * 1.6 - 0.8;
-              st.push({ x: cx2 + Math.cos(ang) * 55, y: (midY + baseY) / 2 + Math.sin(ang) * 60 });
-            }
-            strokesThuong.push(st);
           }
+        }
+
+        // 4. D / Đ (CHỮ IN HOA CHUẨN 100% - KHÔNG CHỮ NGHỆ THUẬT, TÁCH BẠCH TỪNG NÉT CHUẨN MỰC)
+        else if (char === 'd' || char === 'dd') {
+          // CHỮ D / Đ IN HOA: Nét đứng + Nét cong nửa đường tròn + Nét gạch ngang (cho Đ)
+          strokesHoa.push(line(cx1 - 50, topY + 15, cx1 - 50, baseY, 30));
+          strokesHoa.push(arc(cx1 - 50, (topY + 15 + baseY) / 2, 95, (baseY - topY - 15) / 2, -Math.PI / 2, Math.PI / 2, 40));
+          if (char === 'dd') {
+            // Nét gạch ngang chữ Đ nằm cân đối ở giữa thân
+            strokesHoa.push(line(cx1 - 75, (topY + 15 + baseY) / 2, cx1 - 25, (topY + 15 + baseY) / 2, 15));
+          }
+
+          // CHỮ THƯỜNG:
+          if (isPrint) {
+            strokesThuong.push(arc(cx2 - 15, (midY + baseY) / 2, 45, 55, Math.PI / 2, Math.PI * 2.5, 35));
+            strokesThuong.push(line(cx2 + 30, topY + 15, cx2 + 30, baseY, 35));
+            if (char === 'dd') strokesThuong.push(line(cx2 + 10, 120, cx2 + 50, 120, 15));
+          } else {
+            strokesThuong.push(arc(cx2 - 18, (midY + baseY) / 2, 45, 60, Math.PI / 2, Math.PI * 2.5, 40));
+            const sd2 = [];
+            for (let i = 0; i <= 40; i++) {
+              const t = i / 40;
+              if (t < 0.75) {
+                const u = t / 0.75;
+                sd2.push({ x: cx2 + 27, y: Math.round(topY + 15 + u * (baseY - topY - 15)) });
+              } else {
+                const u = (t - 0.75) / 0.25;
+                sd2.push({ x: Math.round(cx2 + 27 + u * 30), y: Math.round(baseY - u * 45) });
+              }
+            }
+            strokesThuong.push(sd2);
+            if (char === 'dd') strokesThuong.push(line(cx2 + 10, 120, cx2 + 45, 120, 15));
+          }
+        }
+
+        // 5. E / Ê (CHỮ IN HOA CHUẨN 100% - KHÔNG CHỮ NGHỆ THUẬT, TÁCH BẠCH TỪNG NÉT CHUẨN MỰC)
+        else if (char === 'e' || char === 'ee') {
+          // CHỮ E / Ê IN HOA: Nét đứng + 3 nét ngang + 2 nét xiên nón lá (cho Ê)
+          strokesHoa.push(line(cx1 - 50, topY + 15, cx1 - 50, baseY, 30));
+          strokesHoa.push(line(cx1 - 50, topY + 15, cx1 + 45, topY + 15, 20));
+          strokesHoa.push(line(cx1 - 50, (topY + 15 + baseY) / 2, cx1 + 25, (topY + 15 + baseY) / 2, 15));
+          strokesHoa.push(line(cx1 - 50, baseY, cx1 + 45, baseY, 20));
+          if (char === 'ee') {
+            // Dấu nón lá chữ Ê hoa: 2 nét xiên cân đối trên đỉnh
+            strokesHoa.push(line(cx1 - 25, topY - 2, cx1, topY - 22, 14));
+            strokesHoa.push(line(cx1, topY - 22, cx1 + 25, topY - 2, 14));
+          }
+
+          // CHỮ THƯỜNG:
+          if (isPrint) {
+            strokesThuong.push(line(cx2 - 35, (midY + baseY) / 2, cx2 + 35, (midY + baseY) / 2, 20));
+            const sePrint = [];
+            for (let i = 0; i <= 35; i++) {
+              const a = -0.1 + (i / 35) * (Math.PI * 1.5 + 0.3);
+              sePrint.push({ x: Math.round(cx2 + Math.cos(a) * 45), y: Math.round((midY + baseY) / 2 - Math.sin(a) * 55) });
+            }
+            strokesThuong.push(sePrint);
+            if (char === 'ee') {
+              strokesThuong.push(line(cx2 - 20, midY - 12, cx2, midY - 28, 12));
+              strokesThuong.push(line(cx2, midY - 28, cx2 + 20, midY - 12, 12));
+            }
+          } else {
+            const seThuong = [];
+            for (let i = 0; i <= 50; i++) {
+              const t = i / 50;
+              const p0 = { x: cx2 - 45, y: baseY - 30 };
+              const p1 = { x: cx2 + 35, y: midY + 25 };
+              const p2 = { x: cx2 + 15, y: midY - 15 };
+              const p3 = { x: cx2 - 35, y: midY + 25 };
+              const mt = 1 - t;
+              const x = mt*mt*mt*p0.x + 3*mt*mt*t*p1.x + 3*mt*t*t*p2.x + t*t*t*p3.x;
+              const y = mt*mt*mt*p0.y + 3*mt*mt*t*p1.y + 3*mt*t*t*p2.y + t*t*t*p3.y;
+              seThuong.push({ x: Math.round(x), y: Math.round(y) });
+            }
+            for (let i = 1; i <= 40; i++) {
+              const t = i / 40;
+              const p0 = { x: cx2 - 35, y: midY + 25 };
+              const p1 = { x: cx2 - 60, y: midY + 70 };
+              const p2 = { x: cx2 - 20, y: baseY + 8 };
+              const p3 = { x: cx2 + 35, y: baseY - 35 };
+              const mt = 1 - t;
+              const x = mt*mt*mt*p0.x + 3*mt*mt*t*p1.x + 3*mt*t*t*p2.x + t*t*t*p3.x;
+              const y = mt*mt*mt*p0.y + 3*mt*mt*t*p1.y + 3*mt*t*t*p2.y + t*t*t*p3.y;
+              seThuong.push({ x: Math.round(x), y: Math.round(y) });
+            }
+            strokesThuong.push(seThuong);
+            if (char === 'ee') {
+              strokesThuong.push(line(cx2 - 10 - 20, midY - 14, cx2 - 10, midY - 32, 12));
+              strokesThuong.push(line(cx2 - 10, midY - 32, cx2 - 10 + 20, midY - 14, 12));
+            }
+          }
+        }
+
+        // 6. G
+        else if (char === 'g') {
+          strokesHoa.push(arc(cx1, (topY + baseY) / 2, 85, 115, 0.75, Math.PI * 1.5 + 0.75, 50));
+          strokesHoa.push(line(cx1 + 10, midY + 15, cx1 + 75, midY + 15, 15));
+          strokesHoa.push(line(cx1 + 75, midY + 15, cx1 + 75, baseY + 60, 20));
+
+          strokesThuong.push(arc(cx2 - 15, (midY + baseY) / 2, 45, 55, Math.PI / 2, Math.PI * 2.5, 35));
+          const sg2 = [];
+          for (let i = 0; i <= 40; i++) {
+            const t = i / 40;
+            if (t < 0.6) sg2.push({ x: cx2 + 30, y: Math.round(midY + 10 + (t / 0.6) * 170) });
+            else {
+              const a = ((t - 0.6) / 0.4) * Math.PI;
+              sg2.push({ x: Math.round(cx2 + 10 + Math.cos(a) * 20), y: Math.round(baseY + 60 + Math.sin(a) * 25) });
+            }
+          }
+          strokesThuong.push(sg2);
+        }
+
+        // 7. H
+        else if (char === 'h') {
+          strokesHoa.push(line(cx1 - 50, topY + 15, cx1 - 50, baseY, 30));
+          strokesHoa.push(line(cx1 + 50, topY + 15, cx1 + 50, baseY, 30));
+          strokesHoa.push(line(cx1 - 50, midY, cx1 + 50, midY, 20));
+
+          strokesThuong.push(line(cx2 - 30, topY + 15, cx2 - 30, baseY, 35));
+          const sh2 = [];
+          for (let i = 0; i <= 30; i++) {
+            const t = i / 30;
+            if (t < 0.5) sh2.push({ x: Math.round(cx2 - 30 + (t / 0.5) * 55), y: Math.round(midY + 15 - Math.sin((t / 0.5) * Math.PI) * 25) });
+            else sh2.push({ x: cx2 + 25, y: Math.round(midY + 15 + ((t - 0.5) / 0.5) * 105) });
+          }
+          strokesThuong.push(sh2);
+        }
+
+        // 8. I
+        else if (char === 'i') {
+          strokesHoa.push(line(cx1, topY + 15, cx1, baseY, 30));
+          strokesHoa.push(line(cx1 - 35, topY + 15, cx1 + 35, topY + 15, 15));
+          strokesHoa.push(line(cx1 - 35, baseY, cx1 + 35, baseY, 15));
+
+          strokesThuong.push(line(cx2, midY + 15, cx2, baseY, 25));
+          strokesThuong.push([{ x: cx2, y: midY - 15 }, { x: cx2, y: midY - 18 }]);
+        }
+
+        // 9. K
+        else if (char === 'k') {
+          strokesHoa.push(line(cx1 - 45, topY + 15, cx1 - 45, baseY, 30));
+          strokesHoa.push(line(cx1 + 45, topY + 15, cx1 - 45, midY, 25));
+          strokesHoa.push(line(cx1 - 45, midY, cx1 + 45, baseY, 25));
+
+          strokesThuong.push(line(cx2 - 30, topY + 15, cx2 - 30, baseY, 35));
+          strokesThuong.push(line(cx2 + 25, midY + 15, cx2 - 30, midY + 60, 20));
+          strokesThuong.push(line(cx2 - 30, midY + 60, cx2 + 25, baseY, 20));
+        }
+
+        // 10. L
+        else if (char === 'l') {
+          strokesHoa.push(line(cx1 - 40, topY + 15, cx1 - 40, baseY, 30));
+          strokesHoa.push(line(cx1 - 40, baseY, cx1 + 55, baseY, 20));
+
+          strokesThuong.push(line(cx2, topY + 15, cx2, baseY - 20, 30));
+          const sl = [];
+          for (let i = 0; i <= 15; i++) {
+            const a = (i / 15) * Math.PI * 0.5;
+            sl.push({ x: Math.round(cx2 + (1 - Math.cos(a)) * 25), y: Math.round(baseY - 20 + Math.sin(a) * 20) });
+          }
+          strokesThuong.push(sl);
+        }
+
+        // 11. M
+        else if (char === 'm') {
+          strokesHoa.push(line(cx1 - 65, baseY, cx1 - 65, topY + 15, 30));
+          strokesHoa.push(line(cx1 - 65, topY + 15, cx1, midY + 40, 25));
+          strokesHoa.push(line(cx1, midY + 40, cx1 + 65, topY + 15, 25));
+          strokesHoa.push(line(cx1 + 65, topY + 15, cx1 + 65, baseY, 30));
+
+          strokesThuong.push(line(cx2 - 50, midY + 15, cx2 - 50, baseY, 20));
+          strokesThuong.push(arc(cx2 - 25, midY + 45, 25, 30, Math.PI, 0, 15));
+          strokesThuong.push(line(cx2, midY + 45, cx2, baseY, 15));
+          strokesThuong.push(arc(cx2 + 25, midY + 45, 25, 30, Math.PI, 0, 15));
+          strokesThuong.push(line(cx2 + 50, midY + 45, cx2 + 50, baseY, 15));
+        }
+
+        // 12. N
+        else if (char === 'n') {
+          strokesHoa.push(line(cx1 - 55, baseY, cx1 - 55, topY + 15, 30));
+          strokesHoa.push(line(cx1 - 55, topY + 15, cx1 + 55, baseY, 35));
+          strokesHoa.push(line(cx1 + 55, baseY, cx1 + 55, topY + 15, 30));
+
+          strokesThuong.push(line(cx2 - 35, midY + 15, cx2 - 35, baseY, 20));
+          strokesThuong.push(arc(cx2, midY + 45, 35, 30, Math.PI, 0, 20));
+          strokesThuong.push(line(cx2 + 35, midY + 45, cx2 + 35, baseY, 20));
+        }
+
+        // 13. O / Ô / Ơ
+        else if (char === 'o' || char === 'oo' || char === 'ow') {
+          strokesHoa.push(arc(cx1, (topY + baseY) / 2, 85, 115, Math.PI / 2, Math.PI * 2.5, 70));
+          if (char === 'oo') {
+            strokesHoa.push(line(cx1 - 28, topY - 4, cx1, topY - 24, 14));
+            strokesHoa.push(line(cx1, topY - 24, cx1 + 28, topY - 4, 14));
+          } else if (char === 'ow') {
+            const s = [];
+            for (let i = 0; i <= 20; i++) {
+              const t = i / 20;
+              s.push({ x: Math.round(cx1 + 65 + Math.sin(t * Math.PI) * 15), y: Math.round(topY + 30 - t * 45) });
+            }
+            strokesHoa.push(s);
+          }
+
+          strokesThuong.push(arc(cx2, (midY + baseY) / 2, 55, 55, Math.PI / 2, Math.PI * 2.5, 50));
+          if (char === 'oo') {
+            strokesThuong.push(line(cx2 - 20, midY - 14, cx2, midY - 32, 12));
+            strokesThuong.push(line(cx2, midY - 32, cx2 + 20, midY - 14, 12));
+          } else if (char === 'ow') {
+            const s = [];
+            for (let i = 0; i <= 15; i++) {
+              const t = i / 15;
+              s.push({ x: Math.round(cx2 + 45 + Math.sin(t * Math.PI) * 12), y: Math.round(midY + 15 - t * 35) });
+            }
+            strokesThuong.push(s);
+          }
+        }
+
+        // 14. P
+        else if (char === 'p') {
+          strokesHoa.push(line(cx1 - 50, topY + 15, cx1 - 50, baseY, 30));
+          strokesHoa.push(arc(cx1 - 50, (topY + 15 + midY + 15) / 2, 85, (midY - topY) / 2, -Math.PI / 2, Math.PI / 2, 30));
+
+          strokesThuong.push(line(cx2 - 25, midY + 15, cx2 - 25, baseY + 60, 35));
+          strokesThuong.push(arc(cx2 + 5, (midY + baseY) / 2, 35, 45, -Math.PI / 2, Math.PI / 2, 25));
+        }
+
+        // 15. Q
+        else if (char === 'q') {
+          strokesHoa.push(arc(cx1, (topY + baseY) / 2, 85, 115, Math.PI / 2, Math.PI * 2.5, 70));
+          strokesHoa.push(line(cx1 + 10, baseY - 30, cx1 + 75, baseY + 20, 20));
+
+          strokesThuong.push(arc(cx2 - 15, (midY + baseY) / 2, 45, 55, Math.PI / 2, Math.PI * 2.5, 35));
+          strokesThuong.push(line(cx2 + 30, midY + 15, cx2 + 30, baseY + 60, 35));
+        }
+
+        // 16. R
+        else if (char === 'r') {
+          strokesHoa.push(line(cx1 - 50, topY + 15, cx1 - 50, baseY, 30));
+          strokesHoa.push(arc(cx1 - 50, (topY + 15 + midY) / 2, 85, (midY - topY) / 2, -Math.PI / 2, Math.PI / 2, 30));
+          strokesHoa.push(line(cx1 - 10, midY, cx1 + 60, baseY, 25));
+
+          strokesThuong.push(line(cx2 - 25, midY + 15, cx2 - 25, baseY, 25));
+          strokesThuong.push(arc(cx2, midY + 30, 25, 20, Math.PI, 0, 15));
+        }
+
+        // 17. S
+        else if (char === 's') {
+          strokesHoa.push(arc(cx1, topY + 70, 65, 55, 0.2, Math.PI + 0.4, 30));
+          strokesHoa.push(arc(cx1, topY + 175, 75, 65, -Math.PI * 0.8, Math.PI * 0.4, 35));
+
+          strokesThuong.push(arc(cx2, midY + 35, 35, 30, 0.2, Math.PI + 0.4, 25));
+          strokesThuong.push(arc(cx2, midY + 85, 40, 35, -Math.PI * 0.8, Math.PI * 0.4, 25));
+        }
+
+        // 18. T
+        else if (char === 't') {
+          strokesHoa.push(line(cx1 - 65, topY + 15, cx1 + 65, topY + 15, 25));
+          strokesHoa.push(line(cx1, topY + 15, cx1, baseY, 30));
+
+          strokesThuong.push(line(cx2, midY - 30, cx2, baseY, 30));
+          strokesThuong.push(line(cx2 - 25, midY + 15, cx2 + 25, midY + 15, 15));
+        }
+
+        // 19. U / Ư
+        else if (char === 'u' || char === 'uw') {
+          strokesHoa.push(line(cx1 - 55, topY + 15, cx1 - 55, baseY - 40, 25));
+          strokesHoa.push(arc(cx1, baseY - 40, 55, 40, Math.PI, 0, 25));
+          strokesHoa.push(line(cx1 + 55, topY + 15, cx1 + 55, baseY, 30));
+          if (char === 'uw') {
+            const s = [];
+            for (let i = 0; i <= 20; i++) {
+              const t = i / 20;
+              s.push({ x: Math.round(cx1 + 55 + Math.sin(t * Math.PI) * 15), y: Math.round(topY + 25 - t * 40) });
+            }
+            strokesHoa.push(s);
+          }
+
+          strokesThuong.push(line(cx2 - 35, midY + 15, cx2 - 35, baseY - 25, 20));
+          strokesThuong.push(arc(cx2, baseY - 25, 35, 25, Math.PI, 0, 20));
+          strokesThuong.push(line(cx2 + 35, midY + 15, cx2 + 35, baseY, 25));
+          if (char === 'uw') {
+            const s = [];
+            for (let i = 0; i <= 15; i++) {
+              const t = i / 15;
+              s.push({ x: Math.round(cx2 + 35 + Math.sin(t * Math.PI) * 12), y: Math.round(midY + 15 - t * 30) });
+            }
+            strokesThuong.push(s);
+          }
+        }
+
+        // 20. V
+        else if (char === 'v') {
+          strokesHoa.push(line(cx1 - 65, topY + 15, cx1, baseY, 30));
+          strokesHoa.push(line(cx1, baseY, cx1 + 65, topY + 15, 30));
+
+          strokesThuong.push(line(cx2 - 35, midY + 15, cx2, baseY, 25));
+          strokesThuong.push(line(cx2, baseY, cx2 + 35, midY + 15, 25));
+        }
+
+        // 21. X
+        else if (char === 'x') {
+          strokesHoa.push(line(cx1 - 60, topY + 15, cx1 + 60, baseY, 30));
+          strokesHoa.push(line(cx1 + 60, topY + 15, cx1 - 60, baseY, 30));
+
+          strokesThuong.push(line(cx2 - 35, midY + 15, cx2 + 35, baseY, 25));
+          strokesThuong.push(line(cx2 + 35, midY + 15, cx2 - 35, baseY, 25));
+        }
+
+        // 22. Y
+        else if (char === 'y') {
+          strokesHoa.push(line(cx1 - 55, topY + 15, cx1, midY + 20, 25));
+          strokesHoa.push(line(cx1 + 55, topY + 15, cx1, midY + 20, 25));
+          strokesHoa.push(line(cx1, midY + 20, cx1, baseY + 60, 30));
+
+          strokesThuong.push(line(cx2 - 30, midY + 15, cx2, (midY + baseY) / 2, 20));
+          strokesThuong.push(line(cx2 + 30, midY + 15, cx2 - 30, baseY + 60, 35));
+        }
+
+        // Default fallback
+        else {
+          strokesHoa.push(arc(cx1, (topY + baseY) / 2, 80, 110, 0, Math.PI * 2, 50));
+          strokesThuong.push(arc(cx2, (midY + baseY) / 2, 45, 55, 0, Math.PI * 2, 40));
         }
 
         return { strokesHoa, strokesThuong };
       };
 
-            // VẼ VỞ Ô LY & VẼ HÌNH MẪU ĐỒNG BỘ 100% THEO CHẾ ĐỘ ĐANG CHỌN
+      // VẼ VỞ Ô LY & VẼ HÌNH MẪU ĐỒNG BỘ 100% THEO CHẾ ĐỘ ĐANG CHỌN
       const drawCanvasContent = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
@@ -28159,29 +28430,61 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
           // Nét thẳng đứng
           strokes.push(line(centerX + 20, topY + 40, centerX + 20, baseY, 30));
         } else if (numVal === 5) {
-          // Nét thẳng đứng
-          strokes.push(line(centerX - 40, topY + 20, centerX - 40, midY, 20));
-          // Nét cong bụng
-          const s5 = [];
-          for (let i = 0; i <= 35; i++) {
-            const a = (i / 35) * Math.PI * 1.5 - Math.PI / 2;
-            s5.push({ x: centerX - 40 + Math.cos(a) * 70, y: midY + 60 + Math.sin(a) * 60 });
-          }
-          strokes.push(s5);
-          // Nét ngang trên
-          strokes.push(line(centerX - 40, topY + 20, centerX + 45, topY + 20, 20));
-        } else if (numVal === 6) {
-          const s6 = [];
-          // Cong từ trên xuống
+          // SỐ 5 CHUẨN MỰC TOÁN 1 GDPT 2018 (3 NÉT CHUẨN: THẲNG ĐỨNG -> BỤNG CONG TRÒN -> GẠCH NGANG TRÊN)
+          const leftX = centerX - 35;
+          const rightX = centerX + 35;
+
+          // Nét 1: Nét thẳng đứng từ dòng 5 xuống dòng 3
+          strokes.push(line(leftX, topY + 15, leftX, midY, 20));
+
+          // Nét 2: Nét cong bụng tròn đầy đặn (từ dòng 3 lượn sang phải, chạm đáy dòng 1 uốn lên nhẹ)
+          const sBelly = [];
+          const cy = (midY + baseY) / 2;
+          const rx = 52;
+          const ry = (baseY - midY) / 2;
           for (let i = 0; i <= 40; i++) {
             const t = i / 40;
-            s6.push({ x: centerX + 40 - t * 80, y: topY + 20 + t * 160 });
+            const a = -Math.PI / 2 + t * (Math.PI * 1.25);
+            sBelly.push({
+              x: Math.round((centerX - 5) + Math.cos(a) * rx),
+              y: Math.round(cy + Math.sin(a) * ry)
+            });
           }
-          // Vòng tròn dưới
+          strokes.push(sBelly);
+
+          // Nét 3: Nét gạch ngang trên đỉnh dòng 5
+          strokes.push(line(leftX, topY + 15, rightX + 5, topY + 15, 20));
+        } else if (numVal === 6) {
+          // SỐ 6 ĐẸP HOÀN MỸ (ĐỐI XỨNG CÂN ĐỐI TUYỆT ĐẸP NHƯ SỐ 9)
+          const s6 = [];
+          const cxBot = centerX;
+          const cyBot = (midY + baseY) / 2; // 240
+          const rxBot = 50;
+          const ryBot = (baseY - midY) / 2; // 60
+
+          // 1. Nét lượn từ đỉnh mềm mại tiếp tuyến vào má trái bụng
           for (let i = 0; i <= 40; i++) {
-            const a = (i / 40) * Math.PI * 2;
-            s6.push({ x: centerX + Math.sin(a) * 55, y: (midY + baseY) / 2 + Math.cos(a) * 60 });
+            const t = i / 40;
+            const p0 = { x: centerX + 35, y: topY + 15 };
+            const p1 = { x: centerX - 10, y: topY + 40 };
+            const p2 = { x: cxBot - rxBot - 5, y: midY + 30 };
+            const p3 = { x: cxBot - rxBot, y: cyBot };
+            const mt = 1 - t;
+            const x = mt*mt*mt*p0.x + 3*mt*mt*t*p1.x + 3*mt*t*t*p2.x + t*t*t*p3.x;
+            const y = mt*mt*mt*p0.y + 3*mt*mt*t*p1.y + 3*mt*t*t*p2.y + t*t*t*p3.y;
+            s6.push({ x: Math.round(x), y: Math.round(y) });
           }
+
+          // 2. Vòng tròn bụng dưới căng tròn tròn xoe (khép kín hoàn hảo như vòng tròn số 9)
+          for (let i = 1; i <= 50; i++) {
+            const t = i / 50;
+            const a = Math.PI - t * (Math.PI * 2);
+            s6.push({
+              x: Math.round(cxBot + Math.cos(a) * rxBot),
+              y: Math.round(cyBot + Math.sin(a) * ryBot)
+            });
+          }
+
           strokes.push(s6);
         } else if (numVal === 7) {
           // Nét ngang trên
@@ -28191,23 +28494,86 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
           // Nét gạch ngang giữa
           strokes.push(line(centerX - 35, midY + 15, centerX + 35, midY + 15, 15));
         } else if (numVal === 8) {
+          // SỐ 8 CHUẨN MỰC TOÁN 1 GDPT 2018 (HÌNH SỐ 8 GỒM 2 VÒNG TRÒN TIẾP XÚC TẠI EO DÒNG 3)
           const s8 = [];
-          for (let i = 0; i <= 80; i++) {
-            const t = i / 80;
-            s8.push({ x: centerX + Math.sin(t * Math.PI * 2) * 60, y: (topY + baseY) / 2 - Math.cos(t * Math.PI * 4) * 110 });
+          const cxTop = centerX;
+          const cyTop = (topY + 15 + midY) / 2; // 127.5
+          const rxTop = 50;
+          const ryTop = (midY - (topY + 15)) / 2; // 52.5
+
+          const cxBot = centerX;
+          const cyBot = (midY + baseY) / 2; // 240
+          const rxBot = 62;
+          const ryBot = (baseY - midY) / 2; // 60
+
+          // 1. Vòng trên bên trái (từ đỉnh xuống eo giữa midY)
+          for (let i = 0; i <= 30; i++) {
+            const t = i / 30;
+            const a = -Math.PI / 2 - t * Math.PI;
+            s8.push({
+              x: Math.round(cxTop + Math.cos(a) * rxTop),
+              y: Math.round(cyTop + Math.sin(a) * ryTop)
+            });
           }
+
+          // 2. Chéo qua eo sang vòng dưới bên phải xuống đáy (từ midY xuống baseY)
+          for (let i = 1; i <= 30; i++) {
+            const t = i / 30;
+            const a = -Math.PI / 2 + t * Math.PI;
+            s8.push({
+              x: Math.round(cxBot + Math.cos(a) * rxBot),
+              y: Math.round(cyBot + Math.sin(a) * ryBot)
+            });
+          }
+
+          // 3. Từ đáy vòng dưới bên trái lượn lên eo midY
+          for (let i = 1; i <= 30; i++) {
+            const t = i / 30;
+            const a = Math.PI / 2 + t * Math.PI;
+            s8.push({
+              x: Math.round(cxBot + Math.cos(a) * rxBot),
+              y: Math.round(cyBot + Math.sin(a) * ryBot)
+            });
+          }
+
+          // 4. Chéo qua eo sang vòng trên bên phải lên đỉnh (nối khép kín hoàn hảo số 8)
+          for (let i = 1; i <= 30; i++) {
+            const t = i / 30;
+            const a = Math.PI / 2 - t * Math.PI;
+            s8.push({
+              x: Math.round(cxTop + Math.cos(a) * rxTop),
+              y: Math.round(cyTop + Math.sin(a) * ryTop)
+            });
+          }
+
           strokes.push(s8);
         } else if (numVal === 9) {
+          // SỐ 9 CHUẨN MỰC TOÁN 1 GDPT 2018: 1 NÉT LIỀN DUY NHẤT (Vòng tròn kín trên nối liền thân lượn cong xuống móc chân trái)
           const s9 = [];
-          // Vòng tròn trên
-          for (let i = 0; i <= 40; i++) {
-            const a = (i / 40) * Math.PI * 2;
-            s9.push({ x: centerX + Math.sin(a) * 55, y: topY + 70 + Math.cos(a) * 50 });
+          const cxTop = centerX;
+          const cyTop = (topY + 15 + midY) / 2;
+          const rxTop = 50;
+          const ryTop = (midY - (topY + 15)) / 2;
+
+          for (let i = 0; i <= 50; i++) {
+            const t = i / 50;
+            const a = -t * Math.PI * 2;
+            s9.push({
+              x: Math.round(cxTop + Math.cos(a) * rxTop),
+              y: Math.round(cyTop + Math.sin(a) * ryTop)
+            });
           }
-          // Nét lượn xuống đáy
-          for (let i = 0; i <= 35; i++) {
-            const t = i / 35;
-            s9.push({ x: centerX + 55 - t * 75, y: topY + 70 + t * 170 });
+
+          for (let i = 1; i <= 40; i++) {
+            const t = i / 40;
+            const p0 = { x: cxTop + rxTop, y: cyTop };
+            const p1 = { x: cxTop + rxTop + 5, y: midY + 40 };
+            const p2 = { x: cxTop + 10, y: baseY + 5 };
+            const p3 = { x: cxTop - 35, y: baseY - 15 };
+            const mt = 1 - t;
+            const x = mt*mt*mt*p0.x + 3*mt*mt*t*p1.x + 3*mt*t*t*p2.x + t*t*t*p3.x;
+            const y = mt*mt*mt*p0.y + 3*mt*mt*t*p1.y + 3*mt*t*t*p2.y + t*t*t*p3.y;
+            s9.push({ x: Math.round(x), y: Math.round(y) });
           }
           strokes.push(s9);
         } else {
