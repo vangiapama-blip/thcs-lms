@@ -24584,15 +24584,28 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const soundSynth = this._getAudioSynth();
 
     const speakVN = (text, customRate = 0.85, onEndCallback = null) => {
-      if (typeof window.speakAI === 'function') {
-        window.speakAI(text, 'vi-VN', { rate: 1.04, pitch: 0.97, onEnd: onEndCallback });
-      } else if ('speechSynthesis' in window) {
+      if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'vi-VN';
-        u.rate = customRate;
-        if (onEndCallback) u.onend = onEndCallback;
-        window.speechSynthesis.speak(u);
+        let cleanText = String(text || '')
+          .replace(/[➔>]+/g, ', ')
+          .replace(/[-–—]+/g, ', ')
+          .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
+          .trim();
+        if (!/[.!?]$/.test(cleanText)) cleanText += '.';
+
+        const utter = new SpeechSynthesisUtterance(cleanText);
+        utter.lang = 'vi-VN';
+        utter.rate = customRate;
+        utter.pitch = 1.0;
+        utter.volume = 1.0;
+
+        if (window.speechSynthesis.getVoices) {
+          const voices = window.speechSynthesis.getVoices();
+          const viVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('vi') || (v.name && v.name.toLowerCase().includes('vietnamese')));
+          if (viVoice) utter.voice = viVoice;
+        }
+        if (onEndCallback) utter.onend = onEndCallback;
+        window.speechSynthesis.speak(utter);
       }
     };
 
@@ -27233,15 +27246,27 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const soundSynth = this._getAudioSynth();
 
     const speakVN = (text, customRate = 0.88, onEndCallback = null) => {
-      if (typeof window.speakAI === 'function') {
-        window.speakAI(text, 'vi-VN', { rate: 1.04, pitch: 0.97, onEnd: onEndCallback });
-      } else if ('speechSynthesis' in window) {
+      if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'vi-VN';
-        u.rate = customRate;
-        if (onEndCallback) u.onend = onEndCallback;
-        window.speechSynthesis.speak(u);
+        let cleanText = String(text || '')
+          .replace(/[➔>]+/g, ', ')
+          .replace(/[-–—]+/g, ', ')
+          .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
+          .trim();
+
+        const utter = new SpeechSynthesisUtterance(cleanText);
+        utter.lang = 'vi-VN';
+        utter.rate = customRate;
+        utter.pitch = 1.0;
+        utter.volume = 1.0;
+
+        if (window.speechSynthesis.getVoices) {
+          const voices = window.speechSynthesis.getVoices();
+          const viVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('vi') || (v.name && v.name.toLowerCase().includes('vietnamese')));
+          if (viVoice) utter.voice = viVoice;
+        }
+        if (onEndCallback) utter.onend = onEndCallback;
+        window.speechSynthesis.speak(utter);
       }
     };
 

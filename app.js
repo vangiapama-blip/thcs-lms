@@ -28044,11 +28044,6 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
 };
 
 if (typeof window !== 'undefined') {
-  
-    // Global AI Voice Reader for Lucky Wheel, Gold Miner & Teaching Tools (vi-VN, en-US, en-GB)
-  
-  // Helper to remove Vietnamese diacritics for English TTS pronunciation of proper nouns
-    // Helper to remove Vietnamese diacritics for English TTS pronunciation
   const stripVietnameseDiacritics = (str) => {
     if (!str) return '';
     return str
@@ -28058,231 +28053,113 @@ if (typeof window !== 'undefined') {
       .replace(/Đ/g, 'D');
   };
 
-  // Bulletproof Multi-Language Voice Reader matching Tab 3 (Male US / Female UK)
-  // =========================================================================
-// 🎙️ MASTER AI VOICE ENGINE (100% ĐẢM BẢO CHUẨN TIẾNG VIỆT - TUYỆT ĐỐI KHÔNG BỊ TIẾNG ANH ĐỌC NHẦM)
-// =========================================================================
-if (typeof window !== 'undefined') {
-  window._currentAIAudio = null;
+  window.speakStudentName = function(name, lang) {
+    try {
+      if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+      var cleanName = (name || 'student').trim();
+      var selectedLang = lang || 'vi-VN';
+      var text;
 
-  // Lọc và chỉ chấp nhận Voice Tiếng Việt THẬT SỰ
-  window.getStrictVietnameseVoice = function(voices) {
-    if (!voices || !Array.isArray(voices) || voices.length === 0) return null;
-    
-    // 1. Ưu tiên: Microsoft Hoài My Natural
-    var v1 = voices.find(function(v) {
-      var n = (v.name || '').toLowerCase();
-      var l = (v.lang || '').toLowerCase().replace('_', '-');
-      return (n.includes('hoaimy') || n.includes('hoài my')) && (n.includes('natural') || n.includes('online'));
-    });
-    if (v1) return v1;
+      if (selectedLang === 'en-US' || selectedLang === 'en-GB') {
+        var stripped = cleanName.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+        text = 'Student ' + stripped + ', please come to the board!';
+      } else {
+        text = 'Mời em ' + cleanName + ' lên bảng';
+      }
 
-    // 2. Ưu tiên: Google Tiếng Việt
-    var v2 = voices.find(function(v) {
-      var n = (v.name || '').toLowerCase();
-      var l = (v.lang || '').toLowerCase().replace('_', '-');
-      return (l.startsWith('vi') || n.includes('vietnamese') || n.includes('tiếng việt')) && (n.includes('google') || n.includes('linh'));
-    });
-    if (v2) return v2;
+      var doSpeak = function(voices) {
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = selectedLang;
+        u.rate = 0.90;
+        u.volume = 1.0;
+        u.pitch = 1.0;
 
-    // 3. Ưu tiên: Hoài My / An khác
-    var v3 = voices.find(function(v) {
-      var n = (v.name || '').toLowerCase();
-      return n.includes('hoaimy') || n.includes('hoài my') || n.includes('an');
-    });
-    if (v3) return v3;
+        if (voices && voices.length > 0) {
+          var matched = null;
+          if (selectedLang === 'vi-VN' || selectedLang === 'vi') {
+            matched = voices.find(function(v) {
+              var l = (v.lang || '').toLowerCase().replace('_', '-');
+              var n = (v.name || '').toLowerCase();
+              return l.startsWith('vi') || n.indexOf('vietnamese') >= 0 || n.indexOf('việt') >= 0;
+            });
+          } else if (selectedLang === 'en-US') {
+            matched = voices.find(function(v) {
+              var n = (v.name || '').toLowerCase();
+              var l = (v.lang || '').toLowerCase().replace('_', '-');
+              return l.startsWith('en') && (n.indexOf('david') >= 0 || n.indexOf('mark') >= 0 || n.indexOf('guy') >= 0 || n.indexOf('george') >= 0);
+            });
+            u.pitch = 0.90;
+          } else if (selectedLang === 'en-GB') {
+            matched = voices.find(function(v) {
+              var n = (v.name || '').toLowerCase();
+              var l = (v.lang || '').toLowerCase().replace('_', '-');
+              return (l.indexOf('en-gb') >= 0 || l.startsWith('en')) && (n.indexOf('hazel') >= 0 || n.indexOf('susan') >= 0 || n.indexOf('victoria') >= 0 || n.indexOf('zira') >= 0);
+            });
+            u.pitch = 1.15;
+          }
+          if (matched) u.voice = matched;
+        }
+        window.speechSynthesis.speak(u);
+      };
 
-    // 4. Bất kỳ voice nào có mã ngôn ngữ vi hoặc vi-VN THẬT SỰ
-    var v4 = voices.find(function(v) {
-      var l = (v.lang || '').toLowerCase().replace('_', '-');
-      var n = (v.name || '').toLowerCase();
-      return l === 'vi' || l.startsWith('vi-') || l.startsWith('vi_') || n.includes('vietnamese') || n.includes('tiếng việt');
-    });
-    return v4 || null;
+      var voices = window.speechSynthesis.getVoices();
+      if (voices && voices.length > 0) {
+        doSpeak(voices);
+      } else {
+        var spoke = false;
+        var fallbackTimer = setTimeout(function() {
+          if (!spoke) { spoke = true; doSpeak(window.speechSynthesis.getVoices() || []); }
+        }, 1200);
+        var prevHandler = window.speechSynthesis.onvoiceschanged;
+        window.speechSynthesis.onvoiceschanged = function() {
+          if (!spoke) {
+            spoke = true;
+            clearTimeout(fallbackTimer);
+            doSpeak(window.speechSynthesis.getVoices() || []);
+          }
+          if (prevHandler) prevHandler();
+        };
+      }
+    } catch(e) {
+      console.error('speakStudentName error:', e);
+    }
   };
 
-  window.speakAI = function(rawText, lang, options) {
+  window.speakAI = function(text, lang, options) {
     try {
-      if (!rawText) return;
-      options = options || {};
-      var selectedLang = lang || 'vi-VN';
-      var isVietnamese = (selectedLang === 'vi-VN' || selectedLang === 'vi' || !selectedLang.startsWith('en'));
-      
-      var cleanText = String(rawText)
-        .replace(/[➔>]+/g, ', ')
-        .replace(/[-–—]+/g, ', ')
-        .replace(/\/([a-zà-ỹA-ZÀ-Ỹ]+)\//g, '$1')
-        .replace(/\s+/g, ' ')
-        .trim();
+      if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      var cleanText = String(text || '').trim();
       if (!cleanText) return;
 
-      // Đảm bảo dấu cảm thán ngắt câu dứt khoát
-      if (!/[.!?]$/.test(cleanText)) {
-        cleanText += '!';
+      var selectedLang = lang || 'vi-VN';
+      var utter = new SpeechSynthesisUtterance(cleanText);
+      utter.lang = selectedLang;
+      utter.rate = (options && options.rate) || 0.92;
+      utter.pitch = (options && options.pitch) || 1.0;
+      utter.volume = 1.0;
+
+      if (options && typeof options.onEnd === 'function') {
+        utter.onend = options.onEnd;
       }
 
-      // Dừng mọi âm thanh cũ
-      if (window._currentAIAudio) {
-        try {
-          window._currentAIAudio.pause();
-          window._currentAIAudio.currentTime = 0;
-        } catch(e) {}
-      }
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        try {
-          if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-          window.speechSynthesis.cancel();
-        } catch(e) {}
+      var voices = window.speechSynthesis.getVoices() || [];
+      if (voices.length > 0) {
+        var prefix = selectedLang.split('-')[0].toLowerCase();
+        var matchingVoice = voices.find(function(v) {
+          var l = (v.lang || '').toLowerCase().replace('_', '-');
+          var n = (v.name || '').toLowerCase();
+          return l.startsWith(prefix) || n.indexOf('vietnamese') >= 0 || n.indexOf('việt') >= 0;
+        });
+        if (matchingVoice) utter.voice = matchingVoice;
       }
 
-      // 🎙️ PHÁT ÂM THANH TIẾNG VIỆT CHUẨN GOOGLE AUDIO STREAM (HOẠT ĐỘNG 100% TRÊN MỌI THIẾT BỊ/HOSTING)
-      var playDirectCloudAudio = function() {
-        try {
-          var targetLang = isVietnamese ? 'vi' : (selectedLang === 'en-GB' ? 'en-GB' : 'en');
-          var cloudUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=' + encodeURIComponent(targetLang) + '&client=dict-chrome-ex&q=' + encodeURIComponent(cleanText);
-          var audio = new Audio(cloudUrl);
-          audio.volume = 1.0;
-          window._currentAIAudio = audio;
-          if (typeof options.onEnd === 'function') audio.onended = options.onEnd;
-          
-          var p = audio.play();
-          if (p !== undefined) {
-            p.catch(function() {
-              // Thử lại qua server proxy nếu bị chặn
-              try {
-                var backupUrl = '/api/tts?text=' + encodeURIComponent(cleanText) + '&lang=' + encodeURIComponent(targetLang);
-                var backupAudio = new Audio(backupUrl);
-                backupAudio.volume = 1.0;
-                window._currentAIAudio = backupAudio;
-                if (typeof options.onEnd === 'function') backupAudio.onended = options.onEnd;
-                backupAudio.play().catch(function(e) {
-                  console.warn('Audio play failed:', e);
-                });
-              } catch(e2) {}
-            });
-          }
-        } catch(err) {}
-      };
-
-      // 🔊 XỬ LÝ PHÁT ÂM
-      var executeSpeech = function(voices) {
-        if (isVietnamese) {
-          var strictViVoice = window.getStrictVietnameseVoice(voices);
-
-          // NẾU CÓ VOICE TIẾNG VIỆT THẬT -> Phát ngay giọng Neural WebSpeech
-          if (strictViVoice && typeof window !== 'undefined' && window.speechSynthesis) {
-            var u = new SpeechSynthesisUtterance(cleanText);
-            u.voice = strictViVoice;
-            u.lang = strictViVoice.lang || 'vi-VN';
-            u.rate = options.rate || 1.0;
-            u.pitch = options.pitch || 1.0;
-            u.volume = 1.0;
-            window._activeUtterance = u;
-            u.onend = function() {
-              window._activeUtterance = null;
-              if (typeof options.onEnd === 'function') options.onEnd();
-            };
-            u.onerror = function() {
-              window._activeUtterance = null;
-              playDirectCloudAudio();
-            };
-
-            setTimeout(function() {
-              try {
-                window.speechSynthesis.speak(u);
-              } catch(e) {
-                playDirectCloudAudio();
-              }
-            }, 40);
-            return;
-          }
-
-          // ⚠️ NẾU KHÔNG CÓ VOICE TIẾNG VIỆT -> TUYỆT ĐỐI KHÔNG GỌI speechSynthesis.speak() ĐỂ TRÁNH GIỌNG NAM TIẾNG ANH ĐỌC NHẦM
-          // Thay vào đó phát ngay qua Audio Stream chuẩn tiếng Việt 100%
-          playDirectCloudAudio();
-
-        } else if (selectedLang === 'en-US') {
-          var uUS = new SpeechSynthesisUtterance(cleanText);
-          var usVoice = (voices || []).find(function(v) {
-            var n = (v.name || '').toLowerCase();
-            var l = (v.lang || '').toLowerCase().replace('_', '-');
-            return l.startsWith('en') && (n.includes('natural') || n.includes('david') || n.includes('mark') || n.includes('guy') || n.includes('us'));
-          });
-          if (usVoice) uUS.voice = usVoice;
-          uUS.lang = 'en-US';
-          uUS.rate = options.rate || 0.95;
-          uUS.pitch = 1.0;
-          uUS.volume = 1.0;
-          window._activeUtterance = uUS;
-          uUS.onend = function() {
-            window._activeUtterance = null;
-            if (typeof options.onEnd === 'function') options.onEnd();
-          };
-          setTimeout(function() { window.speechSynthesis.speak(uUS); }, 40);
-
-        } else if (selectedLang === 'en-GB') {
-          var uGB = new SpeechSynthesisUtterance(cleanText);
-          var gbVoice = (voices || []).find(function(v) {
-            var n = (v.name || '').toLowerCase();
-            var l = (v.lang || '').toLowerCase().replace('_', '-');
-            return (l.includes('en-gb') || l.startsWith('en')) && (n.includes('natural') || n.includes('hazel') || n.includes('susan') || n.includes('victoria') || n.includes('gb') || n.includes('uk'));
-          });
-          if (gbVoice) uGB.voice = gbVoice;
-          uGB.lang = 'en-GB';
-          uGB.rate = options.rate || 0.95;
-          uGB.pitch = 1.05;
-          uGB.volume = 1.0;
-          window._activeUtterance = uGB;
-          uGB.onend = function() {
-            window._activeUtterance = null;
-            if (typeof options.onEnd === 'function') options.onEnd();
-          };
-          setTimeout(function() { window.speechSynthesis.speak(uGB); }, 40);
-        }
-      };
-
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        var existingVoices = window.speechSynthesis.getVoices() || [];
-        if (existingVoices.length > 0) {
-          executeSpeech(existingVoices);
-        } else {
-          var executed = false;
-          var timer = setTimeout(function() {
-            if (!executed) {
-              executed = true;
-              executeSpeech(window.speechSynthesis.getVoices() || []);
-            }
-          }, 300);
-          window.speechSynthesis.onvoiceschanged = function() {
-            if (!executed) {
-              executed = true;
-              clearTimeout(timer);
-              executeSpeech(window.speechSynthesis.getVoices() || []);
-            }
-          };
-        }
-      } else {
-        playDirectCloudAudio();
-      }
-    } catch(errGlobal) {
-      console.error('speakAI error:', errGlobal);
+      window.speechSynthesis.speak(utter);
+    } catch(e) {
+      console.error('speakAI error:', e);
     }
   };
-
-  window.speakStudentName = function(name, lang) {
-    var cleanName = (name || 'student').trim();
-    var selectedLang = lang || 'vi-VN';
-    var isVietnamese = (selectedLang === 'vi-VN' || selectedLang === 'vi' || !selectedLang.startsWith('en'));
-    var text;
-    if (!isVietnamese) {
-      var stripped = cleanName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
-      text = 'Student ' + stripped + ', please come to the board!';
-    } else {
-      text = 'Mời em ' + cleanName + ' lên bảng!';
-    }
-    window.speakAI(text, selectedLang);
-  };
-}
   function fallbackMultiLangSpeechSynthesis(text, lang) {
     try {
       if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;

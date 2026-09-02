@@ -169,40 +169,6 @@ const server = http.createServer(async (req, res) => {
   }
 
   // =========================================================================
-  // 🎙️ API: TTS Speech Proxy (Standard Hanoi Female Voice via Google Cloud)
-  // =========================================================================
-  if (reqPath === '/api/tts' && req.method === 'GET') {
-    try {
-      const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-      const text = parsedUrl.searchParams.get('text') || 'Mời em lên bảng';
-      const lang = parsedUrl.searchParams.get('lang') || 'vi';
-      const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(lang)}&client=tw-ob&q=${encodeURIComponent(text)}`;
-      
-      const https = require('https');
-      https.get(googleTtsUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-      }, (proxyRes) => {
-        res.writeHead(proxyRes.statusCode || 200, {
-          'Content-Type': 'audio/mpeg',
-          'Cache-Control': 'public, max-age=86400',
-          'Access-Control-Allow-Origin': '*'
-        });
-        proxyRes.pipe(res);
-      }).on('error', () => {
-        res.writeHead(500);
-        res.end();
-      });
-      return;
-    } catch(e) {
-      res.writeHead(500);
-      res.end();
-      return;
-    }
-  }
-
-  // =========================================================================
   // API: Wireless Mobile Camera Streaming & QR Code Endpoint
   // =========================================================================
       if (reqPath === '/api/server-ip' && req.method === 'GET') {
