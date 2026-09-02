@@ -169,6 +169,45 @@ const server = http.createServer(async (req, res) => {
   }
 
   // =========================================================================
+  // 🎙️ API: TTS PROXY — Giọng Nữ Tiếng Việt Gốc (Bypass CORS cho Render)
+  // Trình duyệt online không thể gọi translate.google.com trực tiếp (CORS)
+  // Server làm proxy: fetch Google TTS → pipe audio về trình duyệt
+  // =========================================================================
+  if (reqPath === '/api/tts' && req.method === 'GET') {
+    const urlParams = new URLSearchParams(parsedUrl.query || '');
+    const text = urlParams.get('text') || '';
+    const lang = urlParams.get('lang') || 'vi';
+    if (!text.trim()) {
+      res.writeHead(400); res.end('Missing text'); return;
+    }
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(lang)}&client=tw-ob&q=${encodeURIComponent(text.slice(0, 200))}`;
+    const https = require('https');
+    const ttsReq = https.get(ttsUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer': 'https://translate.google.com/',
+        'Accept': 'audio/mpeg,audio/*;q=0.9,*/*;q=0.8'
+      }
+    }, (ttsRes) => {
+      res.writeHead(ttsRes.statusCode || 200, {
+        'Content-Type': ttsRes.headers['content-type'] || 'audio/mpeg',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-cache'
+      });
+      ttsRes.pipe(res);
+    });
+    ttsReq.on('error', (err) => {
+      console.error('TTS proxy error:', err.message);
+      if (!res.headersSent) { res.writeHead(502); res.end('TTS proxy error'); }
+    });
+    ttsReq.setTimeout(8000, () => {
+      ttsReq.destroy();
+      if (!res.headersSent) { res.writeHead(504); res.end('TTS timeout'); }
+    });
+    return;
+  }
+
+  // =========================================================================
   // API: Wireless Mobile Camera Streaming & QR Code Endpoint
   // =========================================================================
       if (reqPath === '/api/server-ip' && req.method === 'GET') {

@@ -28049,9 +28049,9 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
 if (typeof window !== 'undefined') {
 
   // =========================================================
-  // 🎙️ HÀM PHÁT GIỌNG NỮ TIẾNG VIỆT GỐC QUA GOOGLE AUDIO STREAM
-  // Dùng khi máy KHÔNG có gói ngôn ngữ vi-VN offline
-  // → TUYỆT ĐỐI ngăn giọng Nam tiếng Anh đọc nhầm tiếng Việt
+  // 🎙️ HÀM PHÁT GIỌNG NỮ TIẾNG VIỆT GỐC QUA SERVER PROXY
+  // → Gọi /api/tts trên Render server (bypass CORS hoàn toàn)
+  // → Không bao giờ để giọng Nam tiếng Anh đọc nhầm tiếng Việt
   // =========================================================
   window._playVietnameseAudio = function(text, onEnd) {
     try {
@@ -28060,12 +28060,24 @@ if (typeof window !== 'undefined') {
       }
       var clean = String(text || '').trim();
       if (!clean) return;
-      var url = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(clean);
-      var audio = new Audio(url);
+
+      // Dùng /api/tts server proxy (Render) — bypass CORS hoàn toàn
+      var serverUrl = '/api/tts?lang=vi&text=' + encodeURIComponent(clean);
+      var audio = new Audio(serverUrl);
       audio.volume = 1.0;
       window._currentViAudio = audio;
       if (typeof onEnd === 'function') audio.onended = onEnd;
-      audio.play().catch(function(err) { console.warn('VI audio stream error:', err); });
+      audio.play().catch(function() {
+        // Nếu server proxy thất bại (localhost/file://), thử direct Google TTS
+        try {
+          var directUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=' + encodeURIComponent(clean);
+          var audio2 = new Audio(directUrl);
+          audio2.volume = 1.0;
+          window._currentViAudio = audio2;
+          if (typeof onEnd === 'function') audio2.onended = onEnd;
+          audio2.play().catch(function(e) { console.warn('VI TTS failed:', e); });
+        } catch(e2) {}
+      });
     } catch(e) {}
   };
 
