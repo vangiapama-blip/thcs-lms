@@ -935,16 +935,46 @@ class LMSDatabase {
   }
 
   getSelectedSchoolYear() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const localSaved = localStorage.getItem('THCS_LMS_SELECTED_YEAR');
+        if (localSaved) return localSaved;
+      }
+    } catch (e) {}
+
     if (!this.state) this.state = {};
     if (!this.state.selectedSchoolYear) {
-      this.state.selectedSchoolYear = '2025-2026';
+      if (Array.isArray(this.state.academicYears)) {
+        const active = this.state.academicYears.find(y => y.current || y.isCurrent);
+        if (active && active.id) {
+          this.state.selectedSchoolYear = active.id.replace('year_', '').replace('_', '-');
+        }
+      }
+      if (!this.state.selectedSchoolYear) {
+        this.state.selectedSchoolYear = '2025-2026';
+      }
     }
     return this.state.selectedSchoolYear;
   }
 
   setSelectedSchoolYear(yearId) {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('THCS_LMS_SELECTED_YEAR', yearId);
+      }
+    } catch (e) {}
+
     if (!this.state) this.state = {};
     this.state.selectedSchoolYear = yearId;
+
+    if (Array.isArray(this.state.academicYears)) {
+      this.state.academicYears.forEach(y => {
+        const cleanId = (y.id || '').replace('year_', '').replace('_', '-');
+        const isMatch = (y.id === yearId || cleanId === yearId || (y.name && y.name.includes(yearId)));
+        y.current = isMatch;
+        y.isCurrent = isMatch;
+      });
+    }
     if (this.save) this.save();
   }
 

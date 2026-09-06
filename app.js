@@ -406,6 +406,7 @@ class LMSApp {
 
     const startApp = () => {
       try { this.bindGlobalEvents(); } catch (e) {}
+      try { this.initSchoolYearSwitcher(); } catch (e) {}
       try { this.updateHeaderSchoolInfo(); } catch (e) {}
 
       // Ensure window.app is always set
@@ -1927,6 +1928,7 @@ class LMSApp {
     if (this.questionSearchKeyword === undefined) this.questionSearchKeyword = '';
     if (this.selectedQuestionType === undefined) this.selectedQuestionType = 'all';
     if (this.selectedDifficulty === undefined) this.selectedDifficulty = 'all';
+    if (this.selectedQuestionGrade === undefined) this.selectedQuestionGrade = 'all';
 
     const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
     const allQuestions = (typeof db !== 'undefined' && db.getQuestions) ? db.getQuestions() : [];
@@ -1963,13 +1965,26 @@ class LMSApp {
 
             <!-- Top Action Bar: Add New Subject Button -->
             <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
-              <div style="position:relative; width:240px;">
+              <div style="position:relative; width:220px;">
                 <input type="text" id="subject-q-search" placeholder="🔍 Tìm kiếm môn học..." value="${this.questionSearchKeyword}" style="width:100%; padding:0.55rem 0.85rem 0.55rem 2.2rem; border-radius:10px; border:none; background:rgba(255,255,255,0.15); color:#fff; font-size:0.88rem; outline:none; backdrop-filter:blur(5px);">
                 <span style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); font-size:0.9rem; color:#cbd5e1;">🔍</span>
               </div>
 
+              <!-- Bộ chọn Khối Lớp Level 1 -->
+              <select id="subject-q-grade-filter" style="padding:0.55rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; background:#ffffff; color:#0f172a; font-size:0.88rem; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.06); outline:none;">
+                <option value="all" ${this.selectedQuestionGrade === 'all' ? 'selected' : ''}>🎓 Tất cả các khối</option>
+                <option value="6" ${this.selectedQuestionGrade === '6' ? 'selected' : ''}>🎓 Khối 6</option>
+                <option value="7" ${this.selectedQuestionGrade === '7' ? 'selected' : ''}>🎓 Khối 7</option>
+                <option value="8" ${this.selectedQuestionGrade === '8' ? 'selected' : ''}>🎓 Khối 8</option>
+                <option value="9" ${this.selectedQuestionGrade === '9' ? 'selected' : ''}>🎓 Khối 9</option>
+              </select>
+
               <button id="btn-add-new-subject" class="btn" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#ffffff; ; font-weight: 400; font-family:var(--font-title); padding:0.6rem 1.15rem; border-radius:12px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(16,185,129,0.35); display:flex; align-items:center; gap:0.4rem; font-size:0.9rem;">
                 <span>➕</span> Thêm Môn Học Mới
+              </button>
+
+              <button id="btn-import-questions-from-file-top" class="btn" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#ffffff; ; font-weight: 400; font-family:var(--font-title); padding:0.6rem 1.15rem; border-radius:12px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(2,132,199,0.35); display:flex; align-items:center; gap:0.4rem; font-size:0.9rem;">
+                <span>📂</span> Nhập Câu Hỏi Từ File
               </button>
 
               <button id="btn-generate-ai-question-top" class="btn" style="background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color:#ffffff; ; font-weight: 400; font-family:var(--font-title); padding:0.6rem 1.15rem; border-radius:12px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(124,58,237,0.35); display:flex; align-items:center; gap:0.4rem; font-size:0.9rem;">
@@ -1981,7 +1996,11 @@ class LMSApp {
           <!-- Subject Folders Grid -->
           <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:1.25rem;">
             ${filteredSubjects.map(sub => {
-              const qCount = allQuestions.filter(q => q.subjectId === sub.id).length;
+              const subQs = allQuestions.filter(q => q.subjectId === sub.id);
+              const qCount = (this.selectedQuestionGrade === 'all') 
+                ? subQs.length 
+                : subQs.filter(q => String(q.grade || '6') === String(this.selectedQuestionGrade)).length;
+              const gradeSuffix = (this.selectedQuestionGrade === 'all') ? '' : ` (Khối ${this.selectedQuestionGrade})`;
               return `
                 <div class="subject-folder-card glass-card" data-sub-id="${sub.id}" style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:16px; padding:1.25rem; transition:all 0.25s cubic-bezier(0.16, 1, 0.3, 1); cursor:pointer; position:relative; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 4px 15px rgba(0,0,0,0.04);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 25px rgba(37,99,235,0.12)'; this.style.borderColor='#3b82f6';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.04)'; this.style.borderColor='#e2e8f0';">
                   
@@ -1992,7 +2011,7 @@ class LMSApp {
                       </div>
 
                       <span style="background:#f1f5f9; color:#0369a1; font-weight: 500; font-size:0.78rem; padding:0.25rem 0.65rem; border-radius:20px; border:1px solid #e2e8f0;">
-                        ❓ ${qCount} câu hỏi
+                        ❓ ${qCount} câu hỏi${gradeSuffix}
                       </span>
                     </div>
 
@@ -2046,9 +2065,22 @@ class LMSApp {
         };
       }
 
+      const gradeFilterL1 = dom.querySelector('#subject-q-grade-filter');
+      if (gradeFilterL1) {
+        gradeFilterL1.onchange = (e) => {
+          this.selectedQuestionGrade = e.target.value;
+          this.render_questions(dom);
+        };
+      }
+
       dom.querySelector('#btn-add-new-subject').onclick = () => {
         this.showAddSubjectModal(dom);
       };
+
+      const importFileTopBtn = dom.querySelector('#btn-import-questions-from-file-top');
+      if (importFileTopBtn) {
+        importFileTopBtn.onclick = () => this.showImportQuestionsFromFileModal(null, dom);
+      }
 
       const aiTopBtn = dom.querySelector('#btn-generate-ai-question-top');
       if (aiTopBtn) {
@@ -2105,6 +2137,11 @@ class LMSApp {
 
     if (this.selectedQuestionChapter === undefined) this.selectedQuestionChapter = 'all';
     if (this.selectedQuestionLesson === undefined) this.selectedQuestionLesson = 'all';
+
+    // Apply Grade Filter
+    if (this.selectedQuestionGrade !== 'all') {
+      subjectQuestions = subjectQuestions.filter(q => String(q.grade || '6') === String(this.selectedQuestionGrade));
+    }
 
     const chapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters().filter(c => c.subjectId === this.currentQuestionSubject) : [];
     const lessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons().filter(l => l.subjectId === this.currentQuestionSubject || chapters.some(c => c.id === l.chapterId)) : [];
@@ -2167,6 +2204,10 @@ class LMSApp {
           <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
             <button id="btn-add-new-question" class="btn" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#ffffff; ; font-weight: 400; font-family:var(--font-title); padding:0.6rem 1.15rem; border-radius:12px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(16,185,129,0.35); display:flex; align-items:center; gap:0.4rem;">
               <span>➕</span> Thêm Câu Hỏi Mới
+            </button>
+
+            <button id="btn-import-questions-from-file" class="btn" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#ffffff; ; font-weight: 400; font-family:var(--font-title); padding:0.6rem 1.15rem; border-radius:12px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(2,132,199,0.35); display:flex; align-items:center; gap:0.4rem;">
+              <span>📂</span> Nhập Câu Hỏi Từ File
             </button>
 
             <button id="btn-generate-ai-question" class="btn" style="background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color:#ffffff; ; font-weight: 400; font-family:var(--font-title); padding:0.6rem 1.15rem; border-radius:12px; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(124,58,237,0.35); display:flex; align-items:center; gap:0.4rem;">
@@ -2290,9 +2331,18 @@ class LMSApp {
                 </button>
               </div>
 
-              <!-- Difficulty / Cognitive Filter -->
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <select id="select-q-difficulty" style="padding:0.45rem 0.75rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.82rem; font-weight: 400;">
+              <!-- Grade & Difficulty Filters -->
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <!-- Bộ lọc Khối Lớp Level 2 -->
+                <select id="select-q-grade" style="padding:0.45rem 0.75rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.82rem; font-weight: 700; background:#fff; color:#1e293b;">
+                  <option value="all" ${this.selectedQuestionGrade === 'all' ? 'selected' : ''}>🎓 Khối: Tất cả</option>
+                  <option value="6" ${this.selectedQuestionGrade === '6' ? 'selected' : ''}>🎓 Khối 6</option>
+                  <option value="7" ${this.selectedQuestionGrade === '7' ? 'selected' : ''}>🎓 Khối 7</option>
+                  <option value="8" ${this.selectedQuestionGrade === '8' ? 'selected' : ''}>🎓 Khối 8</option>
+                  <option value="9" ${this.selectedQuestionGrade === '9' ? 'selected' : ''}>🎓 Khối 9</option>
+                </select>
+
+                <select id="select-q-difficulty" style="padding:0.45rem 0.75rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.82rem; font-weight: 400; background:#fff;">
                   <option value="all" ${this.selectedDifficulty === 'all' ? 'selected' : ''}>Mức độ: Tất cả</option>
                   <option value="nhan_biet" ${this.selectedDifficulty === 'nhan_biet' ? 'selected' : ''}>🟢 Nhận biết (Biết)</option>
                   <option value="thong_hieu" ${this.selectedDifficulty === 'thong_hieu' ? 'selected' : ''}>🟡 Thông hiểu (Hiểu)</option>
@@ -2325,6 +2375,7 @@ class LMSApp {
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; border-bottom:1px solid #f1f5f9; padding-bottom:0.5rem;">
                       <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
                         <span style="font-weight: 500; color:#1e293b; font-size:0.95rem;">Câu ${idx + 1}:</span>
+                        <span style="background:#ede9fe; color:#6d28d9; border:1px solid #ddd6fe; padding:0.18rem 0.55rem; border-radius:6px; font-weight: 700; font-size:0.75rem;">🎓 Khối ${q.grade || 6}</span>
                         ${typeBadge}
                         ${diffBadge}
                         ${q.chapterId ? `<span style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; padding:0.18rem 0.55rem; border-radius:6px; font-weight: 500; font-size:0.75rem;">📂 ${(chapters.find(c => c.id === q.chapterId) || {}).title || q.chapterId}</span>` : (q.topic ? `<span style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1; padding:0.18rem 0.55rem; border-radius:6px; font-weight: 500; font-size:0.75rem;">📂 ${q.topic}</span>` : '')}
@@ -2507,6 +2558,13 @@ class LMSApp {
       this.showAddQuestionModal(this.currentQuestionSubject, dom);
     };
 
+    const importQuestionsFileBtn = dom.querySelector('#btn-import-questions-from-file');
+    if (importQuestionsFileBtn) {
+      importQuestionsFileBtn.onclick = () => {
+        this.showImportQuestionsFromFileModal(this.currentQuestionSubject, dom);
+      };
+    }
+
     const aiGenBtn = dom.querySelector('#btn-generate-ai-question');
     if (aiGenBtn) {
       aiGenBtn.onclick = () => {
@@ -2520,6 +2578,14 @@ class LMSApp {
         this.render_questions(dom);
       };
     });
+
+    const gradeSelect = dom.querySelector('#select-q-grade');
+    if (gradeSelect) {
+      gradeSelect.onchange = (e) => {
+        this.selectedQuestionGrade = e.target.value;
+        this.render_questions(dom);
+      };
+    }
 
     const diffSelect = dom.querySelector('#select-q-difficulty');
     if (diffSelect) {
@@ -3957,6 +4023,872 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
     document.body.appendChild(modal);
   }
 
+  // =========================================================================
+  // 🌟 BỘ TẢI FILE MẪU & NHẬP CÂU HỎI TỪ FILE (WORD .DOCX, EXCEL .XLSX, .TXT)
+  // CHUẨN GDPT 2018 — SGK KẾT NỐI TRI THỨC VỚI CUỘC SỐNG & CV 7991
+  // =========================================================================
+
+  downloadQuestionExcelTemplate() {
+    if (typeof XLSX === 'undefined') {
+      this.showToast('⚠️ Thư viện XLSX đang được khởi tạo, vui lòng thử lại sau vài giây!');
+      return;
+    }
+    const headers = ['STT', 'Nội dung câu hỏi', 'Loại câu hỏi', 'Khối', 'Mức độ', 'Đáp án A', 'Đáp án B', 'Đáp án C', 'Đáp án D', 'Đáp án đúng', 'Lời giải / Hướng dẫn'];
+    const sampleData = [
+      [1, 'Căn bậc hai số học của 16 là bao nhiêu?', 'trac_nghiem', 9, 'nhan_biet', '4', '-4', '±4', '256', 'A', 'Vì 4 >= 0 và 4^2 = 16 nên căn bậc hai số học của 16 là 4.'],
+      [2, 'Trong các số tự nhiên sau, số nào là số nguyên tố?', 'trac_nghiem', 6, 'nhan_biet', '2', '4', '6', '9', 'A', 'Số 2 là số chẵn duy nhất là số nguyên tố.'],
+      [3, 'Cho biểu thức A = x^2 - 4. Xét tính đúng sai của các mệnh đề sau:', 'dung_sai', 8, 'thong_hieu', 'A = (x-2)(x+2)', 'Khi x = 2 thì A = 0', 'Khi x = 0 thì A = 4', 'A luôn nhận giá trị dương với mọi x', 'Đ/Đ/S/S', 'Lời giải: A=(x-2)(x+2) đúng; x=2 => A=0 đúng; x=0 => A=-4 nên sai; x=1 => A=-3 nên luôn dương là sai.'],
+      [4, 'Tìm giá trị của x biết: 2x + 10 = 20', 'tra_loi_ngan', 7, 'nhan_biet', '', '', '', '', '5', '2x = 20 - 10 = 10 => x = 5.'],
+      [5, 'Nêu các tính chất nhiệt của nước và vai trò đối với sự sống.', 'tu_luan', 7, 'van_dung', '', '', '', '', '', 'Yêu cầu nêu được: tính liên kết hiđrô, nhiệt dung cao, dung môi hòa tan tốt và ứng dụng sinh học trong cơ thể sống.']
+    ];
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...sampleData]);
+    ws['!cols'] = [
+      { wch: 6 },  // STT
+      { wch: 46 }, // Nội dung câu hỏi
+      { wch: 15 }, // Loại câu hỏi
+      { wch: 8 },  // Khối
+      { wch: 14 }, // Mức độ
+      { wch: 22 }, // Đáp án A
+      { wch: 22 }, // Đáp án B
+      { wch: 22 }, // Đáp án C
+      { wch: 22 }, // Đáp án D
+      { wch: 14 }, // Đáp án đúng
+      { wch: 42 }  // Lời giải
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'NganHangCauHoi');
+    XLSX.writeFile(wb, 'Mau_Ngan_Hang_Cau_Hoi_THCS.xlsx');
+    this.showToast('✅ Đã tải file mẫu Excel (.xlsx) thành công!');
+  }
+
+  downloadQuestionWordTemplate() {
+    const content = `MẪU SOẠN THẢO CÂU HỎI THCS — CHUẨN KẾT NỐI TRI THỨC & CV 7991
+(Hỗ trợ định dạng Word .docx và Text .txt — Tự động nhận diện Khối, Mức độ, 4 Dạng câu hỏi & Lời giải)
+------------------------------------------------------------------------------------------------------
+
+Câu 1: Căn bậc hai số học của 16 là bao nhiêu? (Khối 9, Nhận biết)
+*A. 4
+B. -4
+C. ±4
+D. 256
+Lời giải: Vì 4 >= 0 và 4^2 = 16 nên căn bậc hai số học của 16 là 4.
+
+Câu 2: Cho các khẳng định sau về số nguyên tố. Xét tính đúng sai của mỗi ý: (Khối 6, Thông hiểu)
+a) Số 2 là số nguyên tố chẵn duy nhất (Đ)
+b) Mọi số nguyên tố đều là số lẻ (S)
+c) Hợp số là số tự nhiên lớn hơn 1 có nhiều hơn 2 ước (Đ)
+d) Số 0 và số 1 là số nguyên tố (S)
+Lời giải: Số 2 là số chẵn duy nhất nguyên tố. Số 0 và 1 không phải là số nguyên tố cũng không phải là hợp số.
+
+Câu 3: Tìm số tự nhiên x biết 2x + 10 = 20 (Khối 7, Nhận biết)
+Đáp án: 5
+Lời giải: 2x = 20 - 10 = 10 => x = 5.
+
+Câu 4: Nêu vai trò của nước đối với tế bào và cơ thể sinh vật (Khối 7, Vận dụng)
+Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, là dung môi hòa tan nhiều chất, tham gia vào các phản ứng chuyển hóa và điều hòa thân nhiệt.
+`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Mau_Soan_Thao_Cau_Hoi_THCS.txt';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    this.showToast('✅ Đã tải file mẫu soạn thảo câu hỏi (.docx / .txt)!');
+  }
+
+  parseQuestionsFromText(rawText, defaultGrade = 6, defaultSubjectId = 'toan') {
+    if (!rawText || !rawText.trim()) return [];
+    const text = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+    // Tách theo Câu 1:, Bài 1:, [Câu 1]
+    const pattern = /(?:^|\n)(?=(?:Câu|Bài)\s+\d+[:.]?|\[Câu\s+\d+\])/i;
+    let rawBlocks = text.split(pattern).map(b => b.trim()).filter(b => b.length > 5);
+
+    if (rawBlocks.length <= 1 && text.length > 80) {
+      const doubleNewlineBlocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(b => b.length > 5);
+      if (doubleNewlineBlocks.length > 1) {
+        rawBlocks = doubleNewlineBlocks;
+      }
+    }
+
+    const parsedList = [];
+
+    rawBlocks.forEach((block, idx) => {
+      // 1. Nhận diện Khối lớp: (Khối 6), (Lớp 7), [Khối 8]
+      let grade = defaultGrade;
+      const gradeMatch = block.match(/(?:Khối|Lớp)\s*([6-9])/i);
+      if (gradeMatch) grade = parseInt(gradeMatch[1], 10);
+
+      // 2. Nhận diện Mức độ
+      let difficulty = 'nhan_biet';
+      if (/thông\s*hiểu/i.test(block)) difficulty = 'thong_hieu';
+      else if (/vận\s*dụng\s*cao/i.test(block)) difficulty = 'van_dung_cao';
+      else if (/vận\s*dụng/i.test(block)) difficulty = 'van_dung';
+      else if (/nhận\s*biết|biết/i.test(block)) difficulty = 'nhan_biet';
+
+      // 3. Tách Lời giải / Hướng dẫn giải nếu có
+      let explanation = '';
+      const expMatch = block.match(/(?:Lời\s*giải|Hướng\s*dẫn\s*giải|Giải\s*thích|HDG)[:\s]*([\s\S]*?)$/i);
+      let mainContent = block;
+      if (expMatch) {
+        explanation = expMatch[1].trim();
+        mainContent = block.substring(0, expMatch.index).trim();
+      }
+
+      // 4. Tách dòng Đáp án: ... nếu có
+      let explicitAns = null;
+      const ansLineMatch = mainContent.match(/(?:Đáp\s*án|Đ\/A)[:\s]*([^\n]+)/i);
+      if (ansLineMatch) {
+        explicitAns = ansLineMatch[1].trim();
+        mainContent = mainContent.substring(0, ansLineMatch.index).trim();
+      }
+
+      const cleanQText = (str) => {
+        return (str || '')
+          .replace(/^[.:\s]+/, '')
+          .replace(/^(?:Câu|Bài)\s*\d+[:.]?\s*/i, '')
+          .replace(/\((?:Khối|Lớp)\s*[6-9][^)]*\)/gi, '')
+          .replace(/\[(?:Khối|Lớp)\s*[6-9][^\]]*\]/gi, '')
+          .trim();
+      };
+
+      // 5. Kiểm tra dạng Đúng - Sai (có a), b), c), d) và (Đ)/(S))
+      const dsMatches = [...mainContent.matchAll(/(?:^|\n)\s*([a-d])\)[.:\s]*([\s\S]*?)(?=(?:\n\s*[a-d]\))|\n\s*(?:Đáp\s*án|Lời\s*giải)|$)/gi)];
+      const hasDSFormat = dsMatches.length >= 2 && dsMatches.some(m => /\((?:Đ|S|Đúng|Sai)\)/i.test(m[0]));
+
+      if (hasDSFormat) {
+        const qTextMatch = mainContent.match(/^(?:(?:Câu|Bài)\s*\d+[:.]?\s*)?([\s\S]*?)(?=\n\s*[a-d]\))/i);
+        const questionText = (qTextMatch ? qTextMatch[1] : mainContent.split('\n')[0]).trim();
+        const items = dsMatches.slice(0, 4).map(m => {
+          let itText = m[2].trim();
+          let isCorrect = true;
+          if (/\((?:S|Sai)\)/i.test(itText)) {
+            isCorrect = false;
+            itText = itText.replace(/\((?:S|Sai)\)/i, '').trim();
+          } else if (/\((?:Đ|Đúng)\)/i.test(itText)) {
+            isCorrect = true;
+            itText = itText.replace(/\((?:Đ|Đúng)\)/i, '').trim();
+          }
+          return { text: itText, isCorrect };
+        });
+
+        parsedList.push({
+          id: 'q_import_' + Date.now() + '_' + idx,
+          subjectId: defaultSubjectId,
+          grade,
+          type: 'dung_sai',
+          difficulty,
+          questionText: cleanQText(questionText),
+          items,
+          explanation,
+          checked: true
+        });
+        return;
+      }
+
+      // 6. Kiểm tra dạng Trắc nghiệm nhiều lựa chọn (A., B., C., D. hoặc *A., *B.)
+      const optMatches = [...mainContent.matchAll(/(?:^|\n)\s*([*]?)\s*([A-D])\s*[.:)]\s*([^\n]+)/g)];
+      if (optMatches.length >= 2) {
+        const qTextMatch = mainContent.match(/^(?:(?:Câu|Bài)\s*\d+[:.]?\s*)?([\s\S]*?)(?=\n\s*[*]?\s*[A-D]\s*[.:)])/i);
+        const questionText = (qTextMatch ? qTextMatch[1] : mainContent.split('\n')[0]).trim();
+
+        const options = [];
+        let correctAnswer = 0;
+
+        optMatches.forEach((m, oIdx) => {
+          const isStarred = m[1] === '*';
+          const letter = m[2].toUpperCase();
+          const optText = m[3].trim();
+          options.push(optText);
+          if (isStarred) {
+            correctAnswer = oIdx;
+          } else if (explicitAns) {
+            if (explicitAns.toUpperCase().startsWith(letter)) {
+              correctAnswer = oIdx;
+            }
+          }
+        });
+
+        while (options.length < 4) {
+          options.push(`Lựa chọn ${String.fromCharCode(65 + options.length)}`);
+        }
+
+        parsedList.push({
+          id: 'q_import_' + Date.now() + '_' + idx,
+          subjectId: defaultSubjectId,
+          grade,
+          type: 'trac_nghiem',
+          difficulty,
+          questionText: cleanQText(questionText),
+          options: options.slice(0, 4),
+          correctAnswer,
+          explanation,
+          checked: true
+        });
+        return;
+      }
+
+      // 7. Kiểm tra dạng Trả lời ngắn hoặc Tự luận
+      const lines = mainContent.split('\n').map(l => l.trim()).filter(l => l);
+      let questionText = lines[0] || '';
+      questionText = questionText.replace(/^(?:Câu|Bài)\s*\d+[:.]?\s*/i, '').trim();
+      if (lines.length > 1 && !explicitAns) {
+        questionText += '\n' + lines.slice(1).join('\n');
+      }
+
+      if (explicitAns) {
+        parsedList.push({
+          id: 'q_import_' + Date.now() + '_' + idx,
+          subjectId: defaultSubjectId,
+          grade,
+          type: 'tra_loi_ngan',
+          difficulty,
+          questionText: cleanQText(questionText),
+          correctAnswer: explicitAns,
+          explanation,
+          checked: true
+        });
+      } else {
+        parsedList.push({
+          id: 'q_import_' + Date.now() + '_' + idx,
+          subjectId: defaultSubjectId,
+          grade,
+          type: 'tu_luan',
+          difficulty,
+          questionText: cleanQText(questionText),
+          explanation: explanation || 'Hướng dẫn chấm bài tự luận',
+          checked: true
+        });
+      }
+    });
+
+    return parsedList;
+  }
+
+  parseQuestionsFromExcel(rows, defaultGrade = 6, defaultSubjectId = 'toan') {
+    if (!Array.isArray(rows) || rows.length === 0) return [];
+    const parsedList = [];
+
+    rows.forEach((row, idx) => {
+      const qText = row['Nội dung câu hỏi'] || row['Câu hỏi'] || row['Nội dung'] || row['Question'] || row['noi_dung'] || '';
+      if (!qText || String(qText).trim() === '') return;
+
+      // Khối
+      let grade = defaultGrade;
+      const rawGrade = row['Khối'] || row['Lớp'] || row['Grade'] || row['khoi'];
+      if (rawGrade) {
+        const gMatch = String(rawGrade).match(/([6-9])/);
+        if (gMatch) grade = parseInt(gMatch[1], 10);
+      }
+
+      // Mức độ
+      let difficulty = 'nhan_biet';
+      const rawDiff = String(row['Mức độ'] || row['Độ khó'] || row['muc_do'] || '').toLowerCase();
+      if (rawDiff.includes('thông hiểu') || rawDiff.includes('hiểu') || rawDiff === 'thong_hieu') difficulty = 'thong_hieu';
+      else if (rawDiff.includes('vận dụng cao') || rawDiff === 'van_dung_cao') difficulty = 'van_dung_cao';
+      else if (rawDiff.includes('vận dụng') || rawDiff === 'van_dung') difficulty = 'van_dung';
+
+      // Loại câu hỏi
+      const rawType = String(row['Loại câu hỏi'] || row['Loại'] || row['Dạng'] || row['type'] || '').toLowerCase();
+      let type = 'trac_nghiem';
+      if (rawType.includes('đúng sai') || rawType.includes('dung_sai')) type = 'dung_sai';
+      else if (rawType.includes('ngắn') || rawType.includes('tra_loi_ngan')) type = 'tra_loi_ngan';
+      else if (rawType.includes('tự luận') || rawType.includes('tu_luan')) type = 'tu_luan';
+
+      const optA = row['Đáp án A'] || row['A'] || '';
+      const optB = row['Đáp án B'] || row['B'] || '';
+      const optC = row['Đáp án C'] || row['C'] || '';
+      const optD = row['Đáp án D'] || row['D'] || '';
+
+      const rawCorrect = String(row['Đáp án đúng'] || row['Đáp án'] || row['Correct'] || row['dap_an_dung'] || '').trim();
+      const explanation = String(row['Lời giải'] || row['Hướng dẫn giải'] || row['Giải thích'] || row['Gợi ý'] || row['loi_giai'] || '').trim();
+
+      if (type === 'dung_sai') {
+        let subItems = [
+          { text: optA || 'Ý a', isCorrect: true },
+          { text: optB || 'Ý b', isCorrect: false },
+          { text: optC || 'Ý c', isCorrect: true },
+          { text: optD || 'Ý d', isCorrect: false }
+        ];
+        if (rawCorrect.includes('/') || rawCorrect.includes(',')) {
+          const parts = rawCorrect.split(/[/,]/).map(p => p.trim().toUpperCase());
+          parts.forEach((p, pIdx) => {
+            if (subItems[pIdx]) {
+              subItems[pIdx].isCorrect = (p === 'Đ' || p === 'D' || p === 'TRUE' || p === '1');
+            }
+          });
+        }
+        parsedList.push({
+          id: 'q_import_' + Date.now() + '_' + idx,
+          subjectId: defaultSubjectId,
+          grade,
+          type: 'dung_sai',
+          difficulty,
+          questionText: String(qText).trim(),
+          items: subItems,
+          explanation,
+          checked: true
+        });
+      } else if (type === 'tra_loi_ngan') {
+        parsedList.push({
+          id: 'q_import_' + Date.now() + '_' + idx,
+          subjectId: defaultSubjectId,
+          grade,
+          type: 'tra_loi_ngan',
+          difficulty,
+          questionText: String(qText).trim(),
+          correctAnswer: rawCorrect || optA || 'Đáp án ngắn',
+          explanation,
+          checked: true
+        });
+      } else if (type === 'tu_luan') {
+        parsedList.push({
+          id: 'q_import_' + Date.now() + '_' + idx,
+          subjectId: defaultSubjectId,
+          grade,
+          type: 'tu_luan',
+          difficulty,
+          questionText: String(qText).trim(),
+          explanation: explanation || rawCorrect || 'Hướng dẫn chấm bài tự luận',
+          checked: true
+        });
+      } else {
+        let correctIdx = 0;
+        const upperCorrect = rawCorrect.toUpperCase();
+        if (upperCorrect.startsWith('B') || upperCorrect === '1') correctIdx = 1;
+        else if (upperCorrect.startsWith('C') || upperCorrect === '2') correctIdx = 2;
+        else if (upperCorrect.startsWith('D') || upperCorrect === '3') correctIdx = 3;
+
+        const options = [
+          String(optA || 'Lựa chọn A').trim(),
+          String(optB || 'Lựa chọn B').trim(),
+          String(optC || 'Lựa chọn C').trim(),
+          String(optD || 'Lựa chọn D').trim()
+        ];
+
+        parsedList.push({
+          id: 'q_import_' + Date.now() + '_' + idx,
+          subjectId: defaultSubjectId,
+          grade,
+          type: 'trac_nghiem',
+          difficulty,
+          questionText: String(qText).trim(),
+          options,
+          correctAnswer: correctIdx,
+          explanation,
+          checked: true
+        });
+      }
+    });
+
+    return parsedList;
+  }
+
+  showImportQuestionsFromFileModal(subjectId, parentDom) {
+    const oldModal = document.getElementById('import-questions-from-file-modal');
+    if (oldModal) oldModal.remove();
+
+    const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
+    const chapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
+    const lessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons() : [];
+
+    const curSubId = subjectId || (subjects[0] ? subjects[0].id : 'toan');
+    const initialGrade = (this.selectedQuestionGrade && this.selectedQuestionGrade !== 'all') ? this.selectedQuestionGrade : '6';
+
+    const modal = document.createElement('div');
+    modal.id = 'import-questions-from-file-modal';
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(15,23,42,0.78); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1.25rem; animation:fadeIn 0.2s ease-out;';
+
+    modal.innerHTML = `
+      <div class="glass-card" style="width:100%; max-width:920px; padding:1.85rem; border-radius:20px; background:#ffffff; box-shadow:0 25px 70px rgba(0,0,0,0.45); font-family:var(--font-body); max-height:94vh; display:flex; flex-direction:column; border:2px solid #0284c7;">
+        
+        <!-- Header Banner -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.1rem; border-bottom:2px solid #e2e8f0; padding-bottom:0.85rem;">
+          <div>
+            <div style="display:inline-flex; align-items:center; gap:0.4rem; background:#e0f2fe; border:1px solid #bae6fd; color:#0369a1; padding:0.22rem 0.7rem; border-radius:20px; font-size:0.78rem; font-weight:700; margin-bottom:0.35rem;">
+              📘 CHUẨN GDPT 2018 — SGK KẾT NỐI TRI THỨC VỚI CUỘC SỐNG & CV 7991
+            </div>
+            <h3 style="margin:0; color:#0369a1; font-family:var(--font-title); font-weight:800; font-size:1.35rem; display:flex; align-items:center; gap:0.5rem;">
+              <span>📂</span> NHẬP CÂU HỎI TỪ FILE (WORD .DOCX, EXCEL .XLSX, .TXT)
+            </h3>
+          </div>
+          <button id="close-import-q-modal" style="background:#f1f5f9; border:1px solid #cbd5e1; width:34px; height:34px; border-radius:50%; font-size:1.25rem; cursor:pointer; color:#475569; display:flex; align-items:center; justify-content:center; transition:all 0.15s;">&times;</button>
+        </div>
+
+        <!-- Controls: Subject, Grade, Chapter, Lesson -->
+        <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:0.9rem 1.1rem; margin-bottom:1rem; display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:0.75rem; align-items:center;">
+          <div>
+            <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:0.25rem;">📚 Môn Học Đích:</label>
+            <select id="import-q-subject" style="width:100%; padding:0.45rem 0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:600; background:#fff; outline:none;">
+              ${subjects.map(s => `<option value="${s.id}" ${s.id === curSubId ? 'selected' : ''}>${s.icon || '📚'} ${s.name}</option>`).join('')}
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:0.25rem;">🎓 Khối Lớp Đích:</label>
+            <select id="import-q-grade" style="width:100%; padding:0.45rem 0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:700; background:#fff; outline:none;">
+              <option value="6" ${initialGrade === '6' ? 'selected' : ''}>🎓 Khối 6</option>
+              <option value="7" ${initialGrade === '7' ? 'selected' : ''}>🎓 Khối 7</option>
+              <option value="8" ${initialGrade === '8' ? 'selected' : ''}>🎓 Khối 8</option>
+              <option value="9" ${initialGrade === '9' ? 'selected' : ''}>🎓 Khối 9</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:0.25rem;">📂 Chương (Tùy chọn):</label>
+            <select id="import-q-chapter" style="width:100%; padding:0.45rem 0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; background:#fff; outline:none;">
+              <option value="">-- Mặc định --</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:0.25rem;">📖 Bài học (Tùy chọn):</label>
+            <select id="import-q-lesson" style="width:100%; padding:0.45rem 0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; background:#fff; outline:none;">
+              <option value="">-- Mặc định --</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Download Sample Templates & Guide Bar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; margin-bottom:1rem; background:#f0fdf4; border:1.5px solid #bbf7d0; padding:0.65rem 1rem; border-radius:12px;">
+          <div style="font-size:0.83rem; color:#166534; font-weight:600; display:flex; align-items:center; gap:0.4rem;">
+            <span>💡</span> Bạn chưa có file chuẩn? Tải file mẫu tại đây:
+          </div>
+          <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+            <button type="button" id="btn-import-dl-excel" class="btn" style="background:#16a34a; color:#fff; padding:0.35rem 0.75rem; border-radius:8px; font-size:0.8rem; font-weight:700; border:none; cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+              <span>📊</span> Tải Mẫu Excel (.xlsx)
+            </button>
+            <button type="button" id="btn-import-dl-word" class="btn" style="background:#2563eb; color:#fff; padding:0.35rem 0.75rem; border-radius:8px; font-size:0.8rem; font-weight:700; border:none; cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+              <span>📝</span> Tải Mẫu Soạn Thảo (.txt/.docx)
+            </button>
+            <button type="button" id="btn-import-toggle-guide" style="background:#ffffff; color:#0f766e; border:1px solid #99f6e4; padding:0.35rem 0.65rem; border-radius:8px; font-size:0.8rem; font-weight:700; cursor:pointer;">
+              ℹ️ Hướng dẫn
+            </button>
+          </div>
+        </div>
+
+        <!-- Guide Panel (Collapsible) -->
+        <div id="import-guide-panel" style="display:none; background:#ecfeff; border:1px solid #a5f3fc; border-radius:10px; padding:0.8rem 1rem; margin-bottom:1rem; font-size:0.82rem; color:#0e7490; line-height:1.5;">
+          <strong>📌 Quy tắc nhận diện tự động từ file Word/Text:</strong><br/>
+          • Bắt đầu mỗi câu bằng: <code>Câu 1:</code>, <code>Câu 2:</code> hoặc <code>[Câu 1]</code><br/>
+          • Đính kèm Khối và Mức độ trong ngoặc đơn: <code>(Khối 7, Thông hiểu)</code><br/>
+          • <strong>Nhiều lựa chọn:</strong> Các dòng <code>A. ...</code>, <code>B. ...</code> (Đánh dấu đáp án đúng bằng dấu sao trước chữ cái, vd: <code>*A.</code> hoặc ghi dòng <code>Đáp án: A</code> ở cuối câu).<br/>
+          • <strong>Đúng - Sai:</strong> Các dòng <code>a) ... (Đ)</code>, <code>b) ... (S)</code>, <code>c) ... (Đ)</code>, <code>d) ... (S)</code>.<br/>
+          • <strong>Trả lời ngắn:</strong> Ghi dòng <code>Đáp án: [nội dung đáp án]</code>.<br/>
+          • <strong>Lời giải chi tiết:</strong> Ghi dòng <code>Lời giải: [nội dung giải thích]</code>.
+        </div>
+
+        <!-- Drag & Drop Upload Zone -->
+        <div id="import-drop-area" style="border:2px dashed #0284c7; background:#f0f9ff; border-radius:14px; padding:1.25rem 1.5rem; text-align:center; cursor:pointer; transition:all 0.2s; margin-bottom:1rem; position:relative;">
+          <input type="file" id="import-file-input" accept=".docx,.xlsx,.xls,.txt" style="display:none;" />
+          <div style="font-size:2.5rem; margin-bottom:0.35rem;">📂</div>
+          <div style="font-size:0.95rem; font-weight:700; color:#0369a1; margin-bottom:0.25rem;">
+            Kéo thả file Word (.docx), Excel (.xlsx/.xls), hoặc Text (.txt) vào đây
+          </div>
+          <div style="font-size:0.82rem; color:#64748b;">
+            hoặc <span style="color:#0284c7; text-decoration:underline; font-weight:700;">bấm vào đây để chọn file từ máy tính</span>
+          </div>
+          <div id="import-file-info" style="display:none; margin-top:0.75rem; background:#fff; border:1px solid #bae6fd; padding:0.4rem 0.8rem; border-radius:8px; font-size:0.83rem; font-weight:700; color:#0369a1; display:inline-flex; align-items:center; gap:0.4rem;"></div>
+        </div>
+
+        <!-- Preview Container -->
+        <div id="import-preview-container" style="flex:1; overflow-y:auto; min-height:180px; max-height:42vh; padding-right:0.35rem; display:flex; flex-direction:column; gap:0.75rem;">
+          <div style="text-align:center; padding:2.5rem 1rem; color:#94a3b8; font-size:0.9rem; border:1px dashed #cbd5e1; border-radius:12px;">
+            <div style="font-size:2rem; margin-bottom:0.35rem;">📋</div>
+            Chưa có file nào được tải lên. Hãy chọn file Word hoặc Excel ở trên để xem trước câu hỏi.
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.1rem; border-top:1.5px solid #e2e8f0; padding-top:0.85rem; flex-wrap:wrap; gap:0.6rem;">
+          <div id="import-selected-count-badge" style="font-size:0.88rem; font-weight:700; color:#475569;">
+            Đã chọn 0 câu hỏi
+          </div>
+          <div style="display:flex; align-items:center; gap:0.75rem;">
+            <button type="button" id="btn-cancel-import-q" class="btn" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:0.55rem 1.1rem; border-radius:10px; font-weight:600; cursor:pointer;">
+              Hủy bỏ
+            </button>
+            <button type="button" id="btn-confirm-save-import-q" class="btn" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#ffffff; padding:0.55rem 1.35rem; border-radius:10px; font-weight:700; border:none; cursor:pointer; box-shadow:0 4px 14px rgba(2,132,199,0.35); display:flex; align-items:center; gap:0.4rem;">
+              <span>💾</span> Lưu Câu Hỏi Vào Ngân Hàng
+            </button>
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Dynamic chapters & lessons updater
+    const subSel = modal.querySelector('#import-q-subject');
+    const chapSel = modal.querySelector('#import-q-chapter');
+    const lesSel = modal.querySelector('#import-q-lesson');
+
+    const updateChapsLessons = () => {
+      const selectedSub = subSel.value;
+      const filteredChaps = chapters.filter(c => c.subjectId === selectedSub);
+      chapSel.innerHTML = '<option value="">-- Tất cả các Chương --</option>' + filteredChaps.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+      
+      const filteredLessed = lessons.filter(l => l.subjectId === selectedSub || filteredChaps.some(c => c.id === l.chapterId));
+      lesSel.innerHTML = '<option value="">-- Tất cả các Bài học --</option>' + filteredLessed.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+    };
+    subSel.onchange = updateChapsLessons;
+    updateChapsLessons();
+
+    // Close buttons
+    modal.querySelector('#close-import-q-modal').onclick = () => modal.remove();
+    modal.querySelector('#btn-cancel-import-q').onclick = () => modal.remove();
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        modal.remove();
+        window.removeEventListener('keydown', escHandler);
+      }
+    };
+    window.addEventListener('keydown', escHandler);
+
+    // Template downloads
+    modal.querySelector('#btn-import-dl-excel').onclick = () => this.downloadQuestionExcelTemplate();
+    modal.querySelector('#btn-import-dl-word').onclick = () => this.downloadQuestionWordTemplate();
+
+    // Toggle guide
+    const guideBtn = modal.querySelector('#btn-import-toggle-guide');
+    const guidePanel = modal.querySelector('#import-guide-panel');
+    guideBtn.onclick = () => {
+      guidePanel.style.display = guidePanel.style.display === 'none' ? 'block' : 'none';
+    };
+
+    // State of parsed questions
+    let parsedQuestions = [];
+
+    const updatePreviewUI = () => {
+      const previewArea = modal.querySelector('#import-preview-container');
+      const countBadge = modal.querySelector('#import-selected-count-badge');
+
+      if (parsedQuestions.length === 0) {
+        previewArea.innerHTML = `
+          <div style="text-align:center; padding:2.5rem 1rem; color:#94a3b8; font-size:0.9rem; border:1px dashed #cbd5e1; border-radius:12px;">
+            <div style="font-size:2rem; margin-bottom:0.35rem;">📋</div>
+            Chưa có câu hỏi nào được trích xuất từ file.
+          </div>
+        `;
+        countBadge.textContent = 'Đã chọn 0 câu hỏi';
+        return;
+      }
+
+      const selectedCount = parsedQuestions.filter(q => q.checked).length;
+      countBadge.innerHTML = `Đã chọn <span style="color:#0284c7; font-weight:800;">${selectedCount}</span> / ${parsedQuestions.length} câu hỏi`;
+
+      previewArea.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#e0f2fe; padding:0.65rem 1rem; border-radius:10px; border:1px solid #bae6fd; position:sticky; top:0; z-index:5;">
+          <div style="font-weight:700; color:#0369a1; font-size:0.88rem; display:flex; align-items:center; gap:0.4rem;">
+            <span>🎉</span> Đã phân tích thành công ${parsedQuestions.length} câu hỏi từ file!
+          </div>
+          <label style="font-size:0.82rem; font-weight:700; color:#0284c7; display:flex; align-items:center; gap:0.35rem; cursor:pointer;">
+            <input type="checkbox" id="chk-import-select-all" ${selectedCount === parsedQuestions.length ? 'checked' : ''} style="width:16px; height:16px; accent-color:#0284c7;">
+            <span>Chọn tất cả</span>
+          </label>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          ${parsedQuestions.map((q, idx) => {
+            const isTN = q.type === 'trac_nghiem';
+            const isDS = q.type === 'dung_sai';
+            const isTLN = q.type === 'tra_loi_ngan';
+            const isTL = q.type === 'tu_luan';
+
+            let typeBadge = '<span style="background:#e0f2fe; color:#0369a1; padding:0.18rem 0.5rem; border-radius:6px; font-weight:600; font-size:0.75rem;">📝 Nhiều lựa chọn</span>';
+            if (isDS) typeBadge = '<span style="background:#fef3c7; color:#b45309; padding:0.18rem 0.5rem; border-radius:6px; font-weight:600; font-size:0.75rem;">⚖️ Đúng - Sai</span>';
+            if (isTLN) typeBadge = '<span style="background:#f3e8ff; color:#6b21a8; padding:0.18rem 0.5rem; border-radius:6px; font-weight:600; font-size:0.75rem;">✍️ Trả lời ngắn</span>';
+            if (isTL) typeBadge = '<span style="background:#dcfce7; color:#15803d; padding:0.18rem 0.5rem; border-radius:6px; font-weight:600; font-size:0.75rem;">📖 Tự luận</span>';
+
+            return `
+              <div class="glass-card" style="background:#ffffff; border:1.5px solid ${q.checked ? '#38bdf8' : '#e2e8f0'}; border-radius:12px; padding:0.85rem 1rem; box-shadow:0 2px 8px rgba(0,0,0,0.03); transition:all 0.15s;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; border-bottom:1px solid #f1f5f9; padding-bottom:0.4rem; flex-wrap:wrap; gap:0.4rem;">
+                  <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <input type="checkbox" class="chk-q-item" data-idx="${idx}" ${q.checked ? 'checked' : ''} style="width:17px; height:17px; accent-color:#0284c7; cursor:pointer;">
+                    <span style="font-weight:700; color:#1e293b; font-size:0.9rem;">Câu ${idx + 1}:</span>
+                    <span style="background:#ede9fe; color:#6d28d9; border:1px solid #ddd6fe; padding:0.15rem 0.45rem; border-radius:6px; font-weight:700; font-size:0.75rem;">Khối ${q.grade || 6}</span>
+                    ${typeBadge}
+                  </div>
+
+                  <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <select class="sel-q-diff" data-idx="${idx}" style="font-size:0.78rem; padding:0.2rem 0.45rem; border-radius:6px; border:1px solid #cbd5e1; background:#fff;">
+                      <option value="nhan_biet" ${q.difficulty === 'nhan_biet' ? 'selected' : ''}>🟢 Nhận biết</option>
+                      <option value="thong_hieu" ${q.difficulty === 'thong_hieu' ? 'selected' : ''}>🟡 Thông hiểu</option>
+                      <option value="van_dung" ${q.difficulty === 'van_dung' ? 'selected' : ''}>🔴 Vận dụng</option>
+                      <option value="van_dung_cao" ${q.difficulty === 'van_dung_cao' ? 'selected' : ''}>🔥 Vận dụng cao</option>
+                    </select>
+
+                    <button type="button" class="btn-remove-imp-q" data-idx="${idx}" style="background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; border-radius:6px; padding:0.2rem 0.45rem; font-size:0.75rem; font-weight:700; cursor:pointer;" title="Xóa câu này">🗑️</button>
+                  </div>
+                </div>
+
+                <div style="font-size:0.88rem; color:#1e293b; font-weight:600; margin-bottom:0.5rem; line-height:1.45;">
+                  ${q.questionText}
+                </div>
+
+                ${isTN && q.options ? `
+                  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:0.4rem; margin-bottom:0.4rem;">
+                    ${q.options.map((opt, oIdx) => {
+                      const isCorrect = q.correctAnswer === oIdx;
+                      const letter = String.fromCharCode(65 + oIdx);
+                      return `
+                        <div style="padding:0.35rem 0.6rem; border-radius:6px; font-size:0.82rem; border:1px solid ${isCorrect ? '#86efac' : '#e2e8f0'}; background:${isCorrect ? '#f0fdf4' : '#f8fafc'}; color:${isCorrect ? '#166534' : '#334155'}; font-weight:${isCorrect ? '700' : '400'}; display:flex; align-items:center; gap:0.35rem;">
+                          <strong>${letter}.</strong> ${opt} ${isCorrect ? '✅' : ''}
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                ` : ''}
+
+                ${isDS && q.items ? `
+                  <div style="display:flex; flex-direction:column; gap:0.3rem; margin-bottom:0.4rem;">
+                    ${q.items.map((it, itIdx) => {
+                      const letter = String.fromCharCode(97 + itIdx);
+                      return `
+                        <div style="padding:0.3rem 0.55rem; border-radius:6px; font-size:0.82rem; border:1px solid #e2e8f0; background:#f8fafc; display:flex; justify-content:space-between; align-items:center;">
+                          <span><strong>${letter})</strong> ${it.text}</span>
+                          <span style="font-size:0.75rem; font-weight:700; padding:0.15rem 0.45rem; border-radius:4px; background:${it.isCorrect ? '#dcfce7' : '#fee2e2'}; color:${it.isCorrect ? '#15803d' : '#b91c1c'};">
+                            ${it.isCorrect ? '✅ Đúng' : '❌ Sai'}
+                          </span>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                ` : ''}
+
+                ${isTLN ? `
+                  <div style="background:#f3e8ff; border:1px solid #d8b4fe; padding:0.35rem 0.6rem; border-radius:6px; font-size:0.82rem; color:#6b21a8; font-weight:600; margin-bottom:0.4rem;">
+                    🎯 Đáp án: ${q.correctAnswer}
+                  </div>
+                ` : ''}
+
+                ${q.explanation ? `
+                  <div style="background:#f1f5f9; border:1px solid #e2e8f0; padding:0.35rem 0.6rem; border-radius:6px; font-size:0.8rem; color:#475569;">
+                    💡 Lời giải: ${q.explanation}
+                  </div>
+                ` : ''}
+
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      // Select all handler
+      const chkAll = previewArea.querySelector('#chk-import-select-all');
+      if (chkAll) {
+        chkAll.onchange = (e) => {
+          const checked = e.target.checked;
+          parsedQuestions.forEach(q => q.checked = checked);
+          updatePreviewUI();
+        };
+      }
+
+      // Individual checkboxes
+      previewArea.querySelectorAll('.chk-q-item').forEach(chk => {
+        chk.onchange = (e) => {
+          const idx = parseInt(chk.getAttribute('data-idx'), 10);
+          if (parsedQuestions[idx]) {
+            parsedQuestions[idx].checked = e.target.checked;
+            updatePreviewUI();
+          }
+        };
+      });
+
+      // Difficulty select
+      previewArea.querySelectorAll('.sel-q-diff').forEach(sel => {
+        sel.onchange = (e) => {
+          const idx = parseInt(sel.getAttribute('data-idx'), 10);
+          if (parsedQuestions[idx]) {
+            parsedQuestions[idx].difficulty = e.target.value;
+          }
+        };
+      });
+
+      // Remove button
+      previewArea.querySelectorAll('.btn-remove-imp-q').forEach(btn => {
+        btn.onclick = () => {
+          const idx = parseInt(btn.getAttribute('data-idx'), 10);
+          if (parsedQuestions[idx]) {
+            parsedQuestions.splice(idx, 1);
+            updatePreviewUI();
+          }
+        };
+      });
+    };
+
+    // File processing handler
+    const processFile = (file) => {
+      if (!file) return;
+      const fileName = file.name || '';
+      const ext = fileName.split('.').pop().toLowerCase();
+
+      const fileInfo = modal.querySelector('#import-file-info');
+      fileInfo.style.display = 'inline-flex';
+      fileInfo.innerHTML = `📄 ${fileName} (${(file.size / 1024).toFixed(1)} KB)`;
+
+      const targetGrade = parseInt(modal.querySelector('#import-q-grade')?.value || '6', 10) || 6;
+      const targetSub = modal.querySelector('#import-q-subject')?.value || curSubId;
+
+      const previewArea = modal.querySelector('#import-preview-container');
+      previewArea.innerHTML = `
+        <div style="text-align:center; padding:3rem 1rem;">
+          <div style="font-size:2.5rem; animation:spin 1s infinite linear; display:inline-block; margin-bottom:0.6rem;">🔄</div>
+          <div style="font-weight:700; color:#0284c7; font-size:1.05rem;">Đang đọc và phân tích cấu trúc file: ${fileName}...</div>
+          <div style="font-size:0.83rem; color:#64748b; margin-top:0.35rem;">Tự động nhận dạng 4 dạng câu hỏi, khối lớp, độ khó và đáp án chuẩn GDPT 2018...</div>
+        </div>
+      `;
+
+      if (ext === 'xlsx' || ext === 'xls') {
+        if (typeof XLSX === 'undefined') {
+          alert('⚠️ Thư viện XLSX chưa sẵn sàng. Vui lòng kiểm tra kết nối mạng hoặc thử lại!');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const wb = XLSX.read(data, { type: 'array' });
+            const sheetName = wb.SheetNames[0];
+            const ws = wb.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(ws);
+            parsedQuestions = this.parseQuestionsFromExcel(rows, targetGrade, targetSub);
+            updatePreviewUI();
+            this.showToast(`✅ Đã phân tích được ${parsedQuestions.length} câu hỏi từ file Excel!`);
+          } catch (err) {
+            console.error('Excel parse error:', err);
+            alert('⚠️ Lỗi khi đọc file Excel: ' + err.message);
+            updatePreviewUI();
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else if (ext === 'docx') {
+        if (typeof window.mammoth === 'undefined') {
+          alert('⚠️ Thư viện Mammoth đọc Word (.docx) chưa sẵn sàng. Vui lòng thử lại sau vài giây!');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const arrayBuffer = e.target.result;
+          window.mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+            .then(res => {
+              const rawText = res.value || '';
+              parsedQuestions = this.parseQuestionsFromText(rawText, targetGrade, targetSub);
+              updatePreviewUI();
+              this.showToast(`✅ Đã phân tích được ${parsedQuestions.length} câu hỏi từ file Word!`);
+            })
+            .catch(err => {
+              console.error('Mammoth docx parse error:', err);
+              alert('⚠️ Lỗi khi đọc file Word: ' + err.message);
+              updatePreviewUI();
+            });
+        };
+        reader.readAsArrayBuffer(file);
+      } else if (ext === 'txt') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const rawText = e.target.result || '';
+          parsedQuestions = this.parseQuestionsFromText(rawText, targetGrade, targetSub);
+          updatePreviewUI();
+          this.showToast(`✅ Đã phân tích được ${parsedQuestions.length} câu hỏi từ file Text!`);
+        };
+        reader.readAsText(file, 'UTF-8');
+      } else {
+        alert('⚠️ Định dạng file không được hỗ trợ! Vui lòng chọn file .docx, .xlsx, .xls, hoặc .txt');
+        updatePreviewUI();
+      }
+    };
+
+    // Drag and Drop listeners
+    const dropArea = modal.querySelector('#import-drop-area');
+    const fileInput = modal.querySelector('#import-file-input');
+
+    dropArea.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => {
+      if (e.target.files && e.target.files[0]) {
+        processFile(e.target.files[0]);
+      }
+    };
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.style.borderColor = '#2563eb';
+        dropArea.style.background = '#e0f2fe';
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.style.borderColor = '#0284c7';
+        dropArea.style.background = '#f0f9ff';
+      }, false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      if (dt && dt.files && dt.files[0]) {
+        processFile(dt.files[0]);
+      }
+    }, false);
+
+    // Confirm and Save into Question Bank
+    modal.querySelector('#btn-confirm-save-import-q').onclick = () => {
+      const selected = parsedQuestions.filter(q => q.checked);
+      if (selected.length === 0) {
+        alert('⚠️ Vui lòng đánh dấu chọn ít nhất một câu hỏi để lưu vào Ngân hàng!');
+        return;
+      }
+
+      const targetSub = modal.querySelector('#import-q-subject').value;
+      const targetGrade = parseInt(modal.querySelector('#import-q-grade').value, 10) || 6;
+      const targetChap = modal.querySelector('#import-q-chapter').value || null;
+      const targetLes = modal.querySelector('#import-q-lesson').value || null;
+
+      let savedCount = 0;
+      selected.forEach((q, i) => {
+        const newQ = {
+          id: 'q_' + Date.now() + '_' + i + '_' + Math.random().toString(36).substr(2, 5),
+          subjectId: targetSub,
+          chapterId: targetChap || q.chapterId || null,
+          lessonId: targetLes || q.lessonId || null,
+          grade: q.grade || targetGrade,
+          type: q.type || 'trac_nghiem',
+          difficulty: q.difficulty || 'nhan_biet',
+          questionText: q.questionText || '',
+          imageUrl: '',
+          options: q.options || ['Lựa chọn A', 'Lựa chọn B', 'Lựa chọn C', 'Lựa chọn D'],
+          optionImages: ['', '', '', ''],
+          correctAnswer: q.correctAnswer !== undefined ? q.correctAnswer : 0,
+          items: q.items || null,
+          explanation: q.explanation || '',
+          approved: true
+        };
+
+        if (typeof db !== 'undefined' && db.addQuestion) {
+          db.addQuestion(newQ);
+          savedCount++;
+        }
+      });
+
+      if (typeof db !== 'undefined' && db.save) {
+        db.save();
+      }
+
+      this.showToast(`✅ Đã nhập thành công ${savedCount} câu hỏi từ file vào Ngân hàng câu hỏi!`);
+      modal.remove();
+
+      if (typeof this.render_questions === 'function') {
+        this.render_questions(parentDom);
+      }
+    };
+  }
+
   showAddQuestionModal(subjectId, parentDom) {
     const oldModal = document.getElementById('add-question-modal');
     if (oldModal) oldModal.remove();
@@ -3978,7 +4910,17 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
         </div>
 
         <form id="form-add-q" style="display:flex; flex-direction:column; gap:1rem;">
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+          <div style="display:grid; grid-template-columns: 1fr 1.5fr 1.5fr; gap:0.75rem;">
+            <div>
+              <label style="font-weight: 700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">🎓 Khối Lớp:</label>
+              <select id="new-q-grade" style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 600; background:#fff;">
+                <option value="6" ${(this.selectedQuestionGrade === '6' || this.selectedQuestionGrade === 'all') ? 'selected' : ''}>Khối 6</option>
+                <option value="7" ${this.selectedQuestionGrade === '7' ? 'selected' : ''}>Khối 7</option>
+                <option value="8" ${this.selectedQuestionGrade === '8' ? 'selected' : ''}>Khối 8</option>
+                <option value="9" ${this.selectedQuestionGrade === '9' ? 'selected' : ''}>Khối 9</option>
+              </select>
+            </div>
+
             <div>
               <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Chủ Đề / Chương:</label>
               <select id="new-q-chapter" style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400;">
@@ -4170,6 +5112,7 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
 
     modal.querySelector('#form-add-q').onsubmit = (e) => {
       e.preventDefault();
+      const grade = parseInt(modal.querySelector('#new-q-grade')?.value || '6', 10) || 6;
       const chapterId = modal.querySelector('#new-q-chapter').value || null;
       const lessonId = modal.querySelector('#new-q-lesson').value || null;
       const type = modal.querySelector('#new-q-type').value;
@@ -4196,6 +5139,7 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
         subjectId,
         chapterId,
         lessonId,
+        grade,
         type,
         difficulty,
         questionText,
@@ -4250,7 +5194,17 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
         </div>
 
         <form id="form-edit-q" style="display:flex; flex-direction:column; gap:1rem;">
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+          <div style="display:grid; grid-template-columns: 1fr 1.5fr 1.5fr; gap:0.75rem;">
+            <div>
+              <label style="font-weight: 700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">🎓 Khối Lớp:</label>
+              <select id="edit-q-grade" style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 600; background:#fff;">
+                <option value="6" ${String(q.grade || '6') === '6' ? 'selected' : ''}>Khối 6</option>
+                <option value="7" ${String(q.grade || '6') === '7' ? 'selected' : ''}>Khối 7</option>
+                <option value="8" ${String(q.grade || '6') === '8' ? 'selected' : ''}>Khối 8</option>
+                <option value="9" ${String(q.grade || '6') === '9' ? 'selected' : ''}>Khối 9</option>
+              </select>
+            </div>
+
             <div>
               <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Chủ Đề / Chương:</label>
               <select id="edit-q-chapter" style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400;">
@@ -4542,6 +5496,7 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
 
     modal.querySelector('#form-edit-q').onsubmit = (e) => {
       e.preventDefault();
+      const grade = parseInt(modal.querySelector('#edit-q-grade')?.value || '6', 10) || 6;
       const chapterId = modal.querySelector('#edit-q-chapter').value || null;
       const lessonId = modal.querySelector('#edit-q-lesson').value || null;
       const type = typeSelect.value;
@@ -4581,6 +5536,7 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
         db.updateQuestion(questionId, {
           chapterId,
           lessonId,
+          grade,
           type,
           difficulty,
           questionText,
@@ -4612,9 +5568,14 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
     modal.innerHTML = `
       <div class="glass-card" style="width:100%; max-width:600px; padding:1.75rem; border-radius:16px; background:#fff; box-shadow:0 25px 50px rgba(0,0,0,0.3); font-family:var(--font-title);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.75rem;">
-          <h3 style="margin:0; color:#0f172a; ; font-weight: 400; font-size:1.15rem;">
-            🔍 Chi Tiết Câu Hỏi CV 7991
-          </h3>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <h3 style="margin:0; color:#0f172a; font-weight: 600; font-size:1.15rem;">
+              🔍 Chi Tiết Câu Hỏi CV 7991
+            </h3>
+            <span style="background:#ede9fe; color:#6d28d9; border:1px solid #ddd6fe; padding:0.18rem 0.55rem; border-radius:6px; font-weight: 700; font-size:0.75rem;">
+              🎓 Khối ${q.grade || 6}
+            </span>
+          </div>
           <button id="close-view-q-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#475569; font-weight:400; font-size:0.88rem;">&times;</button>
         </div>
 
@@ -19695,11 +20656,19 @@ render_ai_geometry(dom) {
   }
 
   setCurrentAcademicYear(yearId, parentDom) {
+    const cleanId = (yearId || '').replace('year_', '').replace('_', '-');
+    if (typeof db !== 'undefined' && db.setSelectedSchoolYear) {
+      db.setSelectedSchoolYear(cleanId);
+    }
     (db.state.academicYears || []).forEach(y => {
-      y.isCurrent = (y.id === yearId);
+      const yClean = (y.id || '').replace('year_', '').replace('_', '-');
+      const isMatch = (y.id === yearId || yClean === cleanId);
+      y.isCurrent = isMatch;
+      y.current = isMatch;
     });
     db.save();
-    this.showToast('⭐ Đã đặt làm năm học hiện tại!');
+    this.initSchoolYearSwitcher();
+    this.showToast('⭐ Đã đặt ' + cleanId + ' làm năm học hiện tại!');
     this.render_years(parentDom || (document.getElementById('viewport') || document.getElementById('main-viewport')));
   }
 
@@ -20509,6 +21478,7 @@ render_ai_geometry(dom) {
     }
     const adminTopBar = document.getElementById('admin-top-role-switcher');
     if (adminTopBar) adminTopBar.style.display = (role === 'admin') ? 'flex' : 'none';
+    this.initSchoolYearSwitcher();
   }
 
 
@@ -26784,29 +27754,24 @@ LMSApp.prototype.render_ai_picker = function(dom) {
 LMSApp.prototype.initSchoolYearSwitcher = function() {
     if (typeof document === 'undefined') return;
 
+    const currentYear = (typeof db !== 'undefined' && db.getSelectedSchoolYear)
+      ? db.getSelectedSchoolYear()
+      : ((typeof localStorage !== 'undefined' && localStorage.getItem('THCS_LMS_SELECTED_YEAR')) || '2025-2026');
+
+    // 1. Cập nhật thẻ hiển thị Năm học tùy chỉnh trên Header / Sidebar
+    const textEl = document.getElementById('school-year-current-text');
+    if (textEl) {
+      textEl.textContent = currentYear;
+    }
+
+    // 2. Cập nhật thẻ select nếu có
     const sel = document.getElementById('sel-top-school-year');
-    if (!sel) return;
-
-    const yearsList = (typeof db !== 'undefined' && db.getAcademicYearsList) ? db.getAcademicYearsList() : [
-      { id: '2025-2026', name: 'Năm học 2025-2026' },
-      { id: '2026-2027', name: 'Năm học 2026-2027' }
-    ];
-
-    const currentYear = (typeof db !== 'undefined' && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2025-2026';
-    sel.value = currentYear;
-
-    sel.onchange = () => {
-      const selected = sel.value;
-      if (typeof db !== 'undefined' && db.setSelectedSchoolYear) {
-        db.setSelectedSchoolYear(selected);
-      }
-      if (selected !== '2025-2026') {
-        this.showToast('📜 Đã chuyển sang xem Dữ liệu lịch sử Năm học ' + selected + '!');
-      } else {
-        this.showToast('📅 Đã trở về Năm học hiện tại 2025-2026!');
-      }
-      this.switchView(this.currentView || 'info');
-    };
+    if (sel) {
+      sel.value = currentYear;
+      sel.onchange = () => {
+        this.selectYearCustom(sel.value);
+      };
+    }
 };
 
 LMSApp.prototype.render_years = function(dom) {
@@ -26841,6 +27806,13 @@ LMSApp.prototype.selectYearCustom = function(yearId) {
     if (textEl) textEl.textContent = yearId;
     const menu = document.getElementById('custom-year-menu');
     if (menu) menu.style.display = 'none';
+
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('THCS_LMS_SELECTED_YEAR', yearId);
+      }
+    } catch (e) {}
+
     if (typeof db !== 'undefined' && db.setSelectedSchoolYear) {
       db.setSelectedSchoolYear(yearId);
     }
