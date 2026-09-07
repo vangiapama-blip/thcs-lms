@@ -9142,7 +9142,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     }
 
     const openLoader = () => {
-      this._openQuestionLoaderModal(gameKey, gameTitle, defaultQs);
+      const selectedSubId = area.querySelector('#dash-sub')?.value || subKey;
+      const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+      this._openQuestionLoaderModal(gameKey, gameTitle, defaultQs, selectedSubId, selectedGrade);
     };
 
     // Save directly to Library
@@ -9450,44 +9452,87 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
   
   _getTopicsList(grade, subject) {
-    const defaultTopics = [
-      { id: 'ch1', name: 'Chương 1: Tập hợp & Số tự nhiên / Kiến thức nền tảng' },
-      { id: 'ch2', name: 'Chương 2: Tính chia hết / Cấu trúc cú pháp' },
-      { id: 'ch3', name: 'Chương 3: Số nguyên & Hình học phẳng' },
-      { id: 'ch4', name: 'Chương 4: Thống kê, Xác suất & Bài tập tổng hợp' }
-    ];
-    if (window.DB && window.DB.CHAPTERS && Array.isArray(window.DB.CHAPTERS)) {
-      const filtered = window.DB.CHAPTERS.filter(c => {
-        if (grade !== 'all' && String(c.grade) !== String(grade)) return false;
-        if (subject !== 'all' && (c.subjectId || c.subject) !== subject) return false;
+    const allChaps = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : ((typeof window !== 'undefined' && window.db && window.db.getChapters) ? window.db.getChapters() : []);
+    if (Array.isArray(allChaps) && allChaps.length > 0) {
+      const filtered = allChaps.filter(c => {
+        if (grade && grade !== 'all' && String(c.grade) !== String(grade)) return false;
+        if (subject && subject !== 'all' && (c.subjectId || c.subject) !== subject) return false;
         return true;
       });
       if (filtered.length > 0) {
-        return filtered.map((c, i) => ({ id: c.id || ('ch_' + i), name: c.name || c.title || ('Chương ' + (i+1)) }));
+        return filtered.map((c, i) => ({
+          id: c.id || ('ch_' + i),
+          name: c.title || c.name || ('Chương ' + (i + 1))
+        }));
       }
     }
-    return defaultTopics;
+    const fallbackTopicsBySubject = {
+      nghethuat: [
+        { id: 'nt_c1', name: 'Chủ đề 1: Âm nhạc & Lý thuyết âm thanh cơ bản' },
+        { id: 'nt_c2', name: 'Chủ đề 2: Nhạc cụ & Thực hành hòa âm' },
+        { id: 'nt_c3', name: 'Chủ đề 3: Mỹ thuật tạo hình & Màu sắc' },
+        { id: 'nt_c4', name: 'Chủ đề 4: Thiết kế đồ họa & Ứng dụng đời sống' }
+      ],
+      gdtc: [
+        { id: 'gdtc_c1', name: 'Chủ đề 1: Đội hình đội ngũ & Khởi động chuẩn' },
+        { id: 'gdtc_c2', name: 'Chủ đề 2: Chạy cự ly ngắn & Tăng tốc độ' },
+        { id: 'gdtc_c3', name: 'Chủ đề 3: Bài tập rèn luyện thể lực & Sức bền' },
+        { id: 'gdtc_c4', name: 'Chủ đề 4: Môn thể thao tự chọn (Bóng đá, Bóng rổ)' }
+      ],
+      hn_trainghiem: [
+        { id: 'hndn_c1', name: 'Chủ đề 1: Rèn luyện bản thân & Xây dựng thói quen tốt' },
+        { id: 'hndn_c2', name: 'Chủ đề 2: Kỹ năng giao tiếp & Thích ứng môi trường' },
+        { id: 'hndn_c3', name: 'Chủ đề 3: Trách nhiệm với gia đình & Quản lý tài chính' },
+        { id: 'hndn_c4', name: 'Chủ đề 4: Tìm hiểu thế giới nghề nghiệp tương lai' }
+      ]
+    };
+    if (subject && fallbackTopicsBySubject[subject]) {
+      return fallbackTopicsBySubject[subject];
+    }
+    return [
+      { id: 'gen_c1', name: 'Chủ đề 1: Khái niệm & Kiến thức trọng tâm' },
+      { id: 'gen_c2', name: 'Chủ đề 2: Kỹ năng vận dụng & Thực hành' },
+      { id: 'gen_c3', name: 'Chủ đề 3: Mở rộng, Liên hệ thực tiễn' },
+      { id: 'gen_c4', name: 'Chủ đề 4: Ôn tập tổng hợp & Kiểm tra' }
+    ];
   },
 
   _getLessonsList(grade, subject, topic) {
-    const defaultLessons = [
-      { id: 'les1', name: 'Bài 1: Khái niệm trọng tâm & Nhận biết' },
-      { id: 'les2', name: 'Bài 2: Thông hiểu & Ví dụ minh họa' },
-      { id: 'les3', name: 'Bài 3: Vận dụng & Giải bài tập' },
-      { id: 'les4', name: 'Bài 4: Ôn tập tổng hợp & Luyện tập' }
-    ];
-    if (window.DB && window.DB.LESSONS && Array.isArray(window.DB.LESSONS)) {
-      const filtered = window.DB.LESSONS.filter(l => {
-        if (topic !== 'all' && (l.chapterId || l.topicId) !== topic) return false;
-        if (grade !== 'all' && String(l.grade) !== String(grade)) return false;
-        if (subject !== 'all' && (l.subjectId || l.subject) !== subject) return false;
+    const allLessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons() : ((typeof window !== 'undefined' && window.db && window.db.getLessons) ? window.db.getLessons() : []);
+    const allChaps = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : ((typeof window !== 'undefined' && window.db && window.db.getChapters) ? window.db.getChapters() : []);
+
+    if (Array.isArray(allLessons) && allLessons.length > 0) {
+      const filtered = allLessons.filter(l => {
+        if (topic && topic !== 'all') {
+          if ((l.chapterId || l.topicId) !== topic) return false;
+        } else {
+          if (subject && subject !== 'all') {
+            const chap = allChaps.find(c => c.id === l.chapterId);
+            const matchSub = (l.subjectId || l.subject) === subject || (chap && (chap.subjectId || chap.subject) === subject);
+            if (!matchSub) return false;
+          }
+          if (grade && grade !== 'all') {
+            const chap = allChaps.find(c => c.id === l.chapterId);
+            const matchGrade = String(l.grade) === String(grade) || (chap && String(chap.grade) === String(grade));
+            if (!matchGrade) return false;
+          }
+        }
+        if (subject && subject !== 'all' && (l.subjectId || l.subject) && (l.subjectId || l.subject) !== subject) return false;
+        if (grade && grade !== 'all' && l.grade && String(l.grade) !== String(grade)) return false;
         return true;
       });
       if (filtered.length > 0) {
-        return filtered.map((l, i) => ({ id: l.id || ('les_' + i), name: l.name || l.title || ('Bài ' + (i+1)) }));
+        return filtered.map((l, i) => ({
+          id: l.id || ('les_' + i),
+          name: l.title || l.name || ('Bài ' + (i + 1))
+        }));
       }
     }
-    return defaultLessons;
+    return [
+      { id: 'gen_les1', name: 'Bài 1: Khái niệm cốt lõi & Nhận biết kiến thức' },
+      { id: 'gen_les2', name: 'Bài 2: Phương pháp thực hành & Kỹ năng giải quyết vấn đề' },
+      { id: 'gen_les3', name: 'Bài 3: Luyện tập chuyên đề & Ứng dụng thực tế' }
+    ];
   },
 
 
@@ -9500,7 +9545,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
   // =========================================================================
   // UNIVERSAL AI & CRUD QUESTION GENERATOR STUDIO (BULLETPROOF 3 TABS)
   // =========================================================================
-  _openQuestionLoaderModal(gameKey, gameTitle, defaultData) {
+  _openQuestionLoaderModal(gameKey, gameTitle, defaultData, currentSubKey, currentGradeKey) {
     let currentQuestions = this._getLoadedQuestions(gameKey) || this._convertDefaultDataToQuestions(gameKey, defaultData);
     let activeTab = 'crud';
     let editingIndex = -1;
@@ -9512,16 +9557,26 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const synth = this._getAudioSynth();
 
+    const defaultSub = currentSubKey || this.icebreaker.subjectId || this.slides.subjectId || 'toan';
+    const defaultGrade = currentGradeKey || this.icebreaker.grade || this.slides.grade || '6';
+
     // AI Form State
     const aiState = {
-      subject: this.icebreaker.subjectId || this.slides.subjectId || 'toan',
-      grade: this.slides.grade || '6',
-      lesson: this.slides.lessonName || 'Hình có trục đối xứng',
+      subject: defaultSub,
+      grade: defaultGrade,
+      lesson: this.slides.lessonName || 'Bài 1: Khái quát bài học',
       qCount: 6,
       level: 'all',
       teacherPrompt: '',
       docContent: '',
       docFileName: ''
+    };
+
+    const bankFilterState = {
+      grade: defaultGrade,
+      subject: defaultSub,
+      topic: 'all',
+      lesson: 'all'
     };
 
     const modal = document.createElement('div');
@@ -9965,6 +10020,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     // =======================================================================
     const renderBankTab = () => {
       const subs = this._getSubjectsList();
+      const currentBankSub = bankFilterState.subject || defaultSub;
+      const currentBankGrade = bankFilterState.grade || defaultGrade;
 
       return `
 <div style="max-width:1450px;width:100%;margin:0 auto;background:#ffffff;border:1.5px solid #38bdf8;border-radius:20px;padding:1.6rem 2rem;box-shadow:0 4px 20px rgba(2,132,199,0.06);">
@@ -9977,18 +10034,18 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     <div>
       <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">1. Khối Lớp:</label>
       <select id="bank-grade" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
-        <option value="all">Tất cả các Khối (6, 7, 8, 9)</option>
-        <option value="6">Khối 6</option>
-        <option value="7">Khối 7</option>
-        <option value="8">Khối 8</option>
-        <option value="9">Khối 9</option>
+        <option value="all" ${currentBankGrade==='all'?'selected':''}>Tất cả các Khối (6, 7, 8, 9)</option>
+        <option value="6" ${String(currentBankGrade)==='6'?'selected':''}>Khối 6</option>
+        <option value="7" ${String(currentBankGrade)==='7'?'selected':''}>Khối 7</option>
+        <option value="8" ${String(currentBankGrade)==='8'?'selected':''}>Khối 8</option>
+        <option value="9" ${String(currentBankGrade)==='9'?'selected':''}>Khối 9</option>
       </select>
     </div>
     <div>
       <label style="display:block;font-size:0.88rem;font-weight:600;color:#1e293b;margin-bottom:0.4rem;">2. Môn Học:</label>
       <select id="bank-sub" class="ait-select" style="width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;color:#0f172a;font-weight:500;font-size:0.92rem;border-radius:10px;padding:0.6rem 0.85rem;">
-        <option value="all">Tất cả Môn Học</option>
-        ${subs.map(s => `<option value="${s.id}">${s.name}</option>`).join('')}
+        <option value="all" ${currentBankSub==='all'?'selected':''}>Tất cả Môn Học</option>
+        ${subs.map(s => `<option value="${s.id}" ${currentBankSub===s.id?'selected':''}>${s.icon || '📚'} ${s.name}</option>`).join('')}
       </select>
     </div>
     <div>
@@ -10037,10 +10094,20 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       const updateTopics = () => {
         const g = gradeSelect ? gradeSelect.value : 'all';
         const s = subSelect ? subSelect.value : 'all';
+        bankFilterState.grade = g;
+        bankFilterState.subject = s;
         const topics = this._getTopicsList(g, s);
         if (topicSelect) {
+          const prevTopic = bankFilterState.topic || topicSelect.value || 'all';
           topicSelect.innerHTML = '<option value="all">Tất cả Chủ Đề / Chương</option>' + 
-            topics.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+            topics.map(t => `<option value="${t.id}" ${t.id === prevTopic ? 'selected' : ''}>${t.name}</option>`).join('');
+          if (topics.some(t => t.id === prevTopic)) {
+            topicSelect.value = prevTopic;
+            bankFilterState.topic = prevTopic;
+          } else {
+            topicSelect.value = 'all';
+            bankFilterState.topic = 'all';
+          }
         }
         updateLessons();
       };
@@ -10049,16 +10116,26 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
         const g = gradeSelect ? gradeSelect.value : 'all';
         const s = subSelect ? subSelect.value : 'all';
         const t = topicSelect ? topicSelect.value : 'all';
+        bankFilterState.topic = t;
         const lessons = this._getLessonsList(g, s, t);
         if (lessonSelect) {
+          const prevLesson = bankFilterState.lesson || lessonSelect.value || 'all';
           lessonSelect.innerHTML = '<option value="all">Tất cả Bài Học</option>' + 
-            lessons.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+            lessons.map(l => `<option value="${l.id}" ${l.id === prevLesson ? 'selected' : ''}>${l.name}</option>`).join('');
+          if (lessons.some(l => l.id === prevLesson)) {
+            lessonSelect.value = prevLesson;
+            bankFilterState.lesson = prevLesson;
+          } else {
+            lessonSelect.value = 'all';
+            bankFilterState.lesson = 'all';
+          }
         }
       };
 
       if (gradeSelect) gradeSelect.onchange = updateTopics;
       if (subSelect) subSelect.onchange = updateTopics;
       if (topicSelect) topicSelect.onchange = updateLessons;
+      if (lessonSelect) lessonSelect.onchange = (e) => { bankFilterState.lesson = e.target.value; };
 
       updateTopics();
 
@@ -10596,8 +10673,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
   },
 
   _extractQuestionsFromBank(grade, subject, topic, lesson, type, count) {
-    const questions = [];
-    const allBankQs = (window.DB && window.DB.QUESTIONS) ? window.DB.QUESTIONS : [];
+    const allBankQs = (typeof db !== 'undefined' && db.getQuestions) ? db.getQuestions() : ((typeof window !== 'undefined' && window.DB && window.DB.QUESTIONS) ? window.DB.QUESTIONS : []);
 
     let filtered = allBankQs.filter(q => {
       if (grade !== 'all' && String(q.grade) !== String(grade)) return false;
@@ -10608,67 +10684,39 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       return true;
     });
 
-    // Realistic curriculum questions pool for GDPT 2018
-    const sampleSubjectNames = {
-      toan:'Toán học',van:'Ngữ văn',anh:'Tiếng Anh',khtn:'Khoa học Tự nhiên',
-      ly:'Vật lý',hoa:'Hóa học',sinh:'Sinh học',lsdl:'Lịch sử & Địa lý',
-      su:'Lịch sử',dia:'Địa lý',tin:'Tin học',gdcd:'GDCD'
-    };
-    const subName = sampleSubjectNames[subject] || 'Kiến thức chung';
+    const allLessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons() : [];
+    const allChaps = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
+    const lesObj = lesson !== 'all' ? allLessons.find(l => l.id === lesson) : null;
+    const chapObj = topic !== 'all' ? allChaps.find(c => c.id === topic) : null;
+    const lessonTitle = lesObj ? (lesObj.title || lesObj.name) : '';
+    const chapterTitle = chapObj ? (chapObj.title || chapObj.name) : '';
 
-    const curLessons = [
-      'Số nguyên & Phép tính tập hợp số', 'Hình có trục đối xứng & Tâm đối xứng',
-      'Cấu tạo tế bào & Đơn vị sự sống', 'Thành phần không khí & Sự biến đổi chất',
-      'Các cuộc khởi nghĩa giành độc lập', 'Đặc điểm tự nhiên & Địa hình Việt Nam',
-      'Đại từ, quan hệ từ & Biện pháp tu từ', 'Present Simple & Vocabulary Topics',
-      'Bảo vệ môi trường & Di sản văn hóa'
-    ];
-
-    if (filtered.length === 0) {
-      for (let i = 1; i <= count; i++) {
-        const curLes = curLessons[(i - 1) % curLessons.length];
-        const isTF = (type === 'true_false' || (type === 'all' && i % 2 === 0));
-        if (isTF) {
-          filtered.push({
-            id: 'bank_sample_' + Date.now() + '_' + i,
-            type: 'true_false',
-            questionText: `Về chủ đề "${curLes}", khẳng định này Đúng hay Sai?`,
-            stmt: `Về chủ đề "${curLes}", khẳng định này Đúng hay Sai?`,
-            q: `Về chủ đề "${curLes}", khẳng định này Đúng hay Sai?`,
-            options: ['Đúng (True)', 'Sai (False)'],
-            correctAnswer: 0,
-            left: 'Đúng (True)',
-            right: 'Sai (False)',
-            correct: 'left',
-            a: 'Đúng (True)',
-            ans: true,
-            explanation: `Khẳng định chính xác theo chuẩn kiến thức ${subName} bài ${curLes}.`,
-            exp: `Khẳng định chính xác theo chuẩn kiến thức ${subName} bài ${curLes}.`,
-            points: 10
-          });
-        } else {
-          filtered.push({
-            id: 'bank_sample_' + Date.now() + '_' + i,
-            type: 'multiple_choice',
-            questionText: `Về kiến thức "${curLes}", lựa chọn nào đúng?`,
-            q: `Về kiến thức "${curLes}", lựa chọn nào đúng?`,
-            stmt: `Về kiến thức "${curLes}", lựa chọn nào đúng?`,
-            options: [
-              `Phương án A: Khái niệm & quy tắc chuẩn của bài ${curLes} (Đúng)`,
-              `Phương án B: Nhận định chưa đầy đủ về ${curLes}`,
-              `Phương án C: Khái niệm nhầm lẫn số 1`,
-              `Phương án D: Khái niệm nhầm lẫn số 2`
-            ],
-            correctAnswer: 0,
-            left: `Phương án A (Đúng)`,
-            right: `Phương án B`,
-            correct: 'left',
-            a: `Phương án A: Khái niệm & quy tắc chuẩn của bài ${curLes} (Đúng)`,
-            explanation: `Phương án A định nghĩa chính xác nội dung bài ${curLes}.`,
-            exp: `Phương án A định nghĩa chính xác nội dung bài ${curLes}.`,
-            points: 10
-          });
+    if (filtered.length < count) {
+      let aiPool = [];
+      if (typeof window !== 'undefined' && window.app && typeof window.app.generateAIQuestionsList === 'function') {
+        try {
+          aiPool = window.app.generateAIQuestionsList(
+            subject !== 'all' ? subject : 'toan',
+            grade !== 'all' ? grade : '6',
+            lessonTitle || chapterTitle || '',
+            type !== 'all' ? type : 'multiple_choice',
+            'all',
+            count - filtered.length,
+            topic !== 'all' ? topic : null,
+            lesson !== 'all' ? lesson : null
+          ) || [];
+        } catch(e) {
+          console.warn('generateAIQuestionsList error:', e);
         }
+      }
+
+      if (aiPool.length === 0 && this._getDefaultQuestionsForGame) {
+        aiPool = this._getDefaultQuestionsForGame('generic', subject !== 'all' ? subject : 'toan', grade !== 'all' ? grade : '6') || [];
+      }
+
+      for (const item of aiPool) {
+        if (filtered.length >= count) break;
+        filtered.push(item);
       }
     }
 
@@ -10914,7 +10962,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     }
 
     area.querySelector('#tab7-manage-qs').onclick = () => {
-      this._openQuestionLoaderModal('headtilt', 'Nghiêng Đầu Chọn Đáp Án', loadedQs);
+      const selectedSubId = area.querySelector('#tab7-sub')?.value || subKey;
+      const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+      this._openQuestionLoaderModal('headtilt', 'Nghiêng Đầu Chọn Đáp Án', loadedQs, selectedSubId, selectedGrade);
     };
 
     area.querySelectorAll('.tab7-mode-box').forEach(b => {
@@ -15113,7 +15163,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     }
 
     const openLoader = () => {
-      this._openQuestionLoaderModal('plickers', '15. QUÉT THẺ PLICKERS AI', defaultQs);
+      const selectedSubId = area.querySelector('#dash-sub')?.value || subKey;
+      const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+      this._openQuestionLoaderModal('plickers', '15. QUÉT THẺ PLICKERS AI', defaultQs, selectedSubId, selectedGrade);
     };
 
     const btnManage = area.querySelector('#btn-manage-dash-qs');
@@ -16445,7 +16497,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const btnManageMpQs = area.querySelector('#btn-mp-manage-qs');
     if (btnManageMpQs) {
       btnManageMpQs.onclick = () => {
-        this._openQuestionLoaderModal('mysterypuzzle', 'Lật Mảnh Ghép Bí Ẩn', loadedQs);
+        const selectedSubId = area.querySelector('#dash-sub')?.value || subKey;
+        const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+        this._openQuestionLoaderModal('mysterypuzzle', 'Lật Mảnh Ghép Bí Ẩn', loadedQs, selectedSubId, selectedGrade);
       };
     }
 
@@ -17512,7 +17566,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const btnManageCwQs = area.querySelector('#btn-cw-manage-qs');
     if (btnManageCwQs) {
       btnManageCwQs.onclick = () => {
-        this._openQuestionLoaderModal('crossword', 'Ô Chữ Khóa Bí Mật', loadedQs);
+        const selectedSubId = area.querySelector('#dash-crossword-sub')?.value || subKey;
+        const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+        this._openQuestionLoaderModal('crossword', 'Ô Chữ Khóa Bí Mật', loadedQs, selectedSubId, selectedGrade);
       };
     }
 
@@ -17922,7 +17978,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const btnManageWhQs = area.querySelector('#btn-wh-manage-qs');
     if (btnManageWhQs) {
       btnManageWhQs.onclick = () => {
-        this._openQuestionLoaderModal('wordhunt', 'Đuổi Hình Bắt Chữ', loadedQs);
+        const selectedSubId = area.querySelector('#dash-sub')?.value || subKey;
+        const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+        this._openQuestionLoaderModal('wordhunt', 'Đuổi Hình Bắt Chữ', loadedQs, selectedSubId, selectedGrade);
       };
     }
 
@@ -20730,7 +20788,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     // Handlers
     const openLoader = () => {
-      this._openQuestionLoaderModal('challengewheel', 'Vòng Quay Thử Thách AI', loadedQs);
+      const selectedSubId = area.querySelector('#dash-sub')?.value || subKey;
+      const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+      this._openQuestionLoaderModal('challengewheel', 'Vòng Quay Thử Thách AI', loadedQs, selectedSubId, selectedGrade);
     };
 
     const btnManageTop = area.querySelector('#btn-cw-manage-qs-top');
@@ -21530,7 +21590,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     // Handlers
     const openLoader = () => {
-      this._openQuestionLoaderModal('spacejourney', 'Du Hành Vũ Trụ Kiến Thức', loadedQs);
+      const selectedSubId = area.querySelector('#dash-sub')?.value || subKey;
+      const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+      this._openQuestionLoaderModal('spacejourney', 'Du Hành Vũ Trụ Kiến Thức', loadedQs, selectedSubId, selectedGrade);
     };
 
     const btnManageTop = area.querySelector('#btn-space-manage-qs-top');
@@ -22163,7 +22225,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     // Handlers
     const openLoader = () => {
-      this._openQuestionLoaderModal('knowledgearena', 'Đấu Trường Kiến Thức 2 Đội', loadedQs);
+      const selectedSubId = area.querySelector('#dash-sub')?.value || subKey;
+      const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+      this._openQuestionLoaderModal('knowledgearena', 'Đấu Trường Kiến Thức 2 Đội', loadedQs, selectedSubId, selectedGrade);
     };
 
     const btnManageTop = area.querySelector('#btn-arena-manage-qs-top');
@@ -22844,7 +22908,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     // Handlers
     const openLoader = () => {
-      this._openQuestionLoaderModal('stations7', 'Hành Trình 7 Trạm AI', loadedQs);
+      const selectedSubId = area.querySelector('#dash-stations-sub')?.value || subKey;
+      const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+      this._openQuestionLoaderModal('stations7', 'Hành Trình 7 Trạm AI', loadedQs, selectedSubId, selectedGrade);
     };
 
     const btnManageTop = area.querySelector('#btn-st7-manage-qs-top');
@@ -23599,7 +23665,9 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     // Handlers
     const openLoader = () => {
-      this._openQuestionLoaderModal('starrace', 'Cuộc Đua Ngôi Sao (AI Gesture)', loadedQs);
+      const selectedSubId = area.querySelector('#dash-sub')?.value || subKey;
+      const selectedGrade = area.querySelector('#dash-grade')?.value || gradeKey;
+      this._openQuestionLoaderModal('starrace', 'Cuộc Đua Ngôi Sao (AI Gesture)', loadedQs, selectedSubId, selectedGrade);
     };
 
     const btnManageTop = area.querySelector('#btn-starrace-manage-qs-top');
