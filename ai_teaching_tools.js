@@ -9058,12 +9058,6 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
                 <option value="all" ${gradeKey==='all'?'selected':''}>Toàn trường</option>
               </select>
             </div>
-            <div style="display:flex;align-items:center;gap:.4rem;">
-              <span style="font-size:.92rem;font-weight:900;color:#0369a1;">📚 Môn Học:</span>
-              <select id="dash-crossword-sub" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #0284c7;color:#0369a1;outline:none;cursor:pointer;">
-                ${subs.map(s => `<option value="${s.id}" ${subKey===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('')}
-              </select>
-            </div>
             <div>
               <label style="font-weight:700;font-size:.8rem;color:#334155;display:block;margin-bottom:.3rem;">📚 Môn Học:</label>
               <select id="dash-sub" class="ait-select" style="font-weight:700;">
