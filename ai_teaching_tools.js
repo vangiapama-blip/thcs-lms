@@ -8852,25 +8852,131 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
   },
 
   // ═══════════════════════════════════════════════════════════════
-  // QUESTIONS RETRIEVAL HELPERS FOR ALL GAMES & GRADES
+    // ═══════════════════════════════════════════════════════════════
+  // ĐỒNG BỘ TOÀN BỘ DANH MỤC MÔN HỌC TỪ "KHAI BÁO MÔN HỌC" VÀO KHO GAME
   // ═══════════════════════════════════════════════════════════════
+  _getSubjectsList() {
+    const fallback = [
+      { id: 'toan', name: 'Toán học', icon: '📐' },
+      { id: 'van', name: 'Ngữ văn', icon: '📖' },
+      { id: 'anh', name: 'Tiếng Anh', icon: '🇬🇧' },
+      { id: 'khtn', name: 'Khoa học Tự nhiên', icon: '🔬' },
+      { id: 'lsdl', name: 'Lịch sử và Địa lý', icon: '🌍' },
+      { id: 'tin', name: 'Tin học', icon: '💻' },
+      { id: 'gdcd', name: 'Giáo dục Công dân', icon: '⚖️' },
+      { id: 'congnghe', name: 'Công nghệ', icon: '🛠️' },
+      { id: 'nghethuat', name: 'Nghệ thuật (Âm nhạc / Mỹ thuật)', icon: '🎨' },
+      { id: 'gdtc', name: 'Giáo dục Thể chất', icon: '⚽' },
+      { id: 'hn_trainghiem', name: 'HĐ Trải nghiệm, Hướng nghiệp', icon: '🧭' }
+    ];
+
+    if (typeof db !== 'undefined' && typeof db.getSubjects === 'function') {
+      try {
+        const dbSubs = db.getSubjects();
+        if (Array.isArray(dbSubs) && dbSubs.length > 0) {
+          return dbSubs.map(s => {
+            const matched = fallback.find(f => f.id === s.id);
+            return {
+              id: s.id,
+              name: s.name,
+              icon: s.icon || (matched ? matched.icon : '📚')
+            };
+          });
+        }
+      } catch(e) {}
+    }
+    return fallback;
+  },
+
+  _getDefaultQuestionsForGame(gameKey, subjectId = 'toan', grade = '6') {
+    const subKey = String(subjectId || 'toan').toLowerCase();
+    
+    // Ngân hàng câu hỏi khởi tạo mặc định phong phú cho từng môn học
+    const bank = {
+      toan: [
+        { q: 'Số nguyên tố chẵn DUY NHẤT trong toán học là số nào?', options: ['Số 2', 'Số 0', 'Số 4', 'Số 6'], left: 'Số 2', right: 'Số 0', correctAnswer: 0, points: 10, exp: 'Số 2 là số nguyên tố chẵn duy nhất.' },
+        { q: 'Tổng ba góc trong một tam giác luôn bằng bao nhiêu độ?', options: ['180°', '360°', '90°', '270°'], left: '180°', right: '360°', correctAnswer: 0, points: 10, exp: 'Tổng 3 góc tam giác luôn bằng 180°.' },
+        { q: 'Số 0 có phải là số nguyên dương không?', options: ['Không phải số nguyên dương cũng không âm', 'Là số nguyên dương', 'Là số nguyên âm', 'Là số vô tỉ'], left: 'Không phải', right: 'Phải', correctAnswer: 0, points: 10, exp: 'Số 0 không âm không dương.' },
+        { q: 'Hình chữ nhật có 2 đường chéo vuông góc với nhau là hình gì?', options: ['Hình vuông', 'Hình thoi', 'Hình thang', 'Hình bình hành'], left: 'Hình vuông', right: 'Hình thoi', correctAnswer: 0, points: 10, exp: 'Hình chữ nhật có 2 đường chéo vuông góc là hình vuông.' },
+        { q: 'Số nào sau đây chia hết cho cả 2 và 5?', options: ['Số có tận cùng là 0', 'Số có tận cùng là 5', 'Số có tận cùng là 2', 'Số có tận cùng là 8'], left: 'Tận cùng là 0', right: 'Tận cùng là 5', correctAnswer: 0, points: 10, exp: 'Chữ số tận cùng phải bằng 0.' }
+      ],
+      van: [
+        { q: 'Tác giả của kiệt tác "Truyện Kiều" trong văn học Việt Nam là ai?', options: ['Đại thi hào Nguyễn Du', 'Nhà văn Tô Hoài', 'Bà Huyện Thanh Quan', 'Chủ tịch Hồ Chí Minh'], left: 'Nguyễn Du', right: 'Tô Hoài', correctAnswer: 0, points: 10, exp: 'Nguyễn Du là Đại thi hào dân tộc sáng tác Truyện Kiều.' },
+        { q: 'Trong tác phẩm "Dế Mèn phiêu lưu ký", người bạn thân thiết cùng Dế Mèn chu du thiên hạ là ai?', options: ['Dế Trũi', 'Dế Choắt', 'Bọ Ngựa', 'Chị Cốc'], left: 'Dế Trũi', right: 'Dế Choắt', correctAnswer: 0, points: 10, exp: 'Dế Trũi kết nghĩa anh em cùng Dế Mèn chu du thiên hạ.' },
+        { q: 'Biện pháp tu từ nào so sánh đối chiếu hai sự vật có nét tương đồng?', options: ['So sánh', 'Ẩn dụ', 'Hoán dụ', 'Nói quá'], left: 'So sánh', right: 'Hoán dụ', correctAnswer: 0, points: 10, exp: 'So sánh đối chiếu 2 sự vật có nét tương đồng qua từ so sánh.' },
+        { q: 'Từ ngữ nào sau đây là từ láy tượng hình gợi cảm?', options: ['Thoang thoảng', 'Bàn ghế', 'Học tập', 'Mặt trời'], left: 'Thoang thoảng', right: 'Bàn ghế', correctAnswer: 0, points: 10, exp: 'Thoang thoảng là từ láy mô tả hương thơm dịu nhẹ.' },
+        { q: 'Câu tục ngữ "Ăn quả nhớ kẻ trồng cây" khuyên răn con người về đạo lý nào?', options: ['Lòng biết ơn và đạo lý uống nước nhớ nguồn', 'Tinh thần tiết kiệm', 'Tính trung thực', 'Lòng dũng cảm'], left: 'Lòng biết ơn', right: 'Tính trung thực', correctAnswer: 0, points: 10, exp: 'Câu tục ngữ nhắc nhở truyền thống đạo lý biết ơn tổ tiên, cội nguồn.' }
+      ],
+      anh: [
+        { q: 'What is the opposite of the adjective "noisy"?', options: ['quiet', 'loud', 'busy', 'crowded'], left: 'quiet', right: 'loud', correctAnswer: 0, points: 10, exp: 'Quiet (yên tĩnh) trái nghĩa với noisy (ồn ào).' },
+        { q: 'Which auxiliary verb is used with "She" in the Present Simple tense for questions?', options: ['Does', 'Do', 'Are', 'Have'], left: 'Does', right: 'Do', correctAnswer: 0, points: 10, exp: 'Ngôi thứ ba số ít (She/He/It) dùng trợ động từ "Does".' },
+        { q: 'Choose the correct preposition: "I usually go to school _____ bus."', options: ['by', 'on', 'in', 'at'], left: 'by', right: 'on', correctAnswer: 0, points: 10, exp: 'Đi bằng phương tiện giao thông công cộng dùng "by bus".' },
+        { q: 'What is the past simple form of the verb "go"?', options: ['went', 'gone', 'goed', 'going'], left: 'went', right: 'gone', correctAnswer: 0, points: 10, exp: 'Quá khứ đơn của go là went.' },
+        { q: 'Which word means a person who teaches students in a school?', options: ['teacher', 'doctor', 'engineer', 'driver'], left: 'teacher', right: 'doctor', correctAnswer: 0, points: 10, exp: 'Teacher là giáo viên giảng dạy học sinh.' }
+      ],
+      khtn: [
+        { q: 'Khí nào chiếm thể tích lớn nhất trong thành phần của không khí quyển?', options: ['Khí Nitơ (khoảng 78%)', 'Khí Oxi (khoảng 21%)', 'Khí Cacbonic', 'Hơi nước'], left: 'Khí Nitơ', right: 'Khí Oxi', correctAnswer: 0, points: 10, exp: 'Khí Nitơ chiếm khoảng 78% thể tích không khí.' },
+        { q: 'Đơn vị chuẩn đo lực trong Hệ đo lường quốc tế (SI) là gì?', options: ['Niutơn (N)', 'Jun (J)', 'Oát (W)', 'Pascal (Pa)'], left: 'Niutơn (N)', right: 'Jun (J)', correctAnswer: 0, points: 10, exp: 'Đơn vị đo lực là Niutơn, kí hiệu N.' },
+        { q: 'Quá trình thực vật hấp thụ khí CO2 và nhả khí Oxi dưới ánh sáng gọi là gì?', options: ['Quang hợp', 'Hô hấp', 'Thoát hơi nước', 'Lên men'], left: 'Quang hợp', right: 'Hô hấp', correctAnswer: 0, points: 10, exp: 'Quá trình quang hợp của cây xanh tạo ra chất hữu cơ và nhả khí Oxi.' },
+        { q: 'Nước nguyên chất sôi ở nhiệt độ bao nhiêu độ C ở áp suất chuẩn?', options: ['100°C', '0°C', '50°C', '120°C'], left: '100°C', right: '0°C', correctAnswer: 0, points: 10, exp: 'Nước nguyên chất sôi ở 100°C ở điều kiện 1 atm.' },
+        { q: 'Hạt nhân nguyên tử được cấu tạo từ các hạt nào sau đây?', options: ['Proton và nơtron', 'Chỉ có electron', 'Electron và proton', 'Chỉ có nơtron'], left: 'Proton & Nơtron', right: 'Electron & Proton', correctAnswer: 0, points: 10, exp: 'Hạt nhân gồm hạt proton mang điện tích dương và nơtron không mang điện.' }
+      ],
+      lsdl: [
+        { q: 'Chiến dịch lịch sử Điện Biên Phủ "lừng lẫy năm châu" giành thắng lợi vào năm nào?', options: ['Năm 1954', 'Năm 1945', 'Năm 1975', 'Năm 1930'], left: 'Năm 1954', right: 'Năm 1975', correctAnswer: 0, points: 10, exp: 'Chiến dịch Điện Biên Phủ đại thắng ngày 7/5/1954.' },
+        { q: 'Đường xích đạo chia Trái Đất thành hai bán cầu nào?', options: ['Bán cầu Bắc và Bán cầu Nam', 'Bán cầu Đông và Bán cầu Tây', 'Bán cầu Trái và Bán cầu Phải', 'Bán cầu Giữa'], left: 'Bắc và Nam', right: 'Đông và Tây', correctAnswer: 0, points: 10, exp: 'Xích đạo (vĩ tuyến 0°) phân chia Bán cầu Bắc và Bán cầu Nam.' },
+        { q: 'Nhà nước đầu tiên trong lịch sử dân tộc Việt Nam có tên gọi là gì?', options: ['Văn Lang', 'Âu Lạc', 'Đại Cồ Việt', 'Đại Việt'], left: 'Văn Lang', right: 'Âu Lạc', correctAnswer: 0, points: 10, exp: 'Nhà nước Văn Lang thời các Vua Hùng là nhà nước đầu tiên.' },
+        { q: 'Con sông có chiều dài lớn nhất thế giới chảy qua châu Phi là sông nào?', options: ['Sông Nin', 'Sông Amazon', 'Sông Mê Kông', 'Sông Hồng'], left: 'Sông Nin', right: 'Sông Amazon', correctAnswer: 0, points: 10, exp: 'Sông Nin (Nile) ở châu Phi là dòng sông dài nhất thế giới.' },
+        { q: 'Vị anh hùng áo vải cờ đào lãnh đạo cuộc khởi nghĩa Tây Sơn đại phá quân Thanh là ai?', options: ['Quang Trung - Nguyễn Huệ', 'Lê Lợi', 'Trần Hưng Đạo', 'Ngô Quyền'], left: 'Quang Trung', right: 'Lê Lợi', correctAnswer: 0, points: 10, exp: 'Hoàng đế Quang Trung (Nguyễn Huệ) đại phá 29 vạn quân Thanh năm Kỷ Dậu 1789.' }
+      ],
+      tin: [
+        { q: 'Bộ phận đóng vai trò là "bộ não" điều khiển và xử lý thông tin trong thiết bị thông minh là gì?', options: ['Bộ vi xử lý (Microprocessor)', 'Màn hình cảm ứng', 'Dây nguồn sạc điện', 'Vỏ máy nhựa'], left: 'Bộ vi xử lý', right: 'Màn hình', correctAnswer: 0, points: 10, exp: 'Bộ vi xử lý tích hợp vi mạch điều khiển mọi hoạt động tính toán số.' },
+        { q: 'Mạng lưới kết nối các thiết bị thông minh để tự động thu thập và chia sẻ dữ liệu viết tắt là gì?', options: ['IoT (Internet of Things)', 'RAM', 'CPU', 'ROM'], left: 'IoT', right: 'RAM', correctAnswer: 0, points: 10, exp: 'IoT là Internet vạn vật kết nối các thiết bị thông minh.' },
+        { q: 'Hành động nào sau đây là đúng đắn và an toàn nhất khi hoạt động trên môi trường Internet?', options: ['Đặt mật khẩu mạnh và không chia sẻ tài khoản cá nhân cho người lạ', 'Mở các liên kết lạ đính kèm trong thư rác', 'Tải và cài đặt phần mềm không rõ nguồn gốc', 'Tắt toàn bộ tường lửa của máy tính'], left: 'Bảo mật mật khẩu', right: 'Mở liên kết lạ', correctAnswer: 0, points: 10, exp: 'Bảo mật thông tin tài khoản là nguyên tắc cơ bản trên không gian mạng.' },
+        { q: 'Trong các thiết bị sau, thiết bị nào vừa là thiết bị vào vừa là thiết bị ra?', options: ['Màn hình cảm ứng (Touchscreen)', 'Chuột máy tính', 'Bàn phím cơ', 'Máy in laser'], left: 'Màn hình cảm ứng', right: 'Bàn phím', correctAnswer: 0, points: 10, exp: 'Màn hình cảm ứng tiếp nhận thao tác chạm (vào) và hiển thị hình ảnh (ra).' },
+        { q: 'Trong ngôn ngữ lập trình Python, câu lệnh nào dùng để xuất dữ liệu ra màn hình?', options: ['print()', 'input()', 'open()', 'save()'], left: 'print()', right: 'input()', correctAnswer: 0, points: 10, exp: 'Hàm print() dùng để hiển thị dữ liệu ra màn hình console.' }
+      ],
+      gdcd: [
+        { q: 'Hành vi nào sau đây thể hiện tinh thần tôn trọng sự thật và tính trung thực?', options: ['Dũng cảm nhận lỗi khi mình làm sai và nói đúng sự thật khách quan', 'Bao che khuyết điểm cho bạn bè khi bạn vi phạm kỷ luật', 'Đổ lỗi cho người khác để tránh bị phạt', 'Nói sai lệch thông tin để có lợi cho bản thân'], left: 'Dũng cảm nhận lỗi', right: 'Bao che khuyết điểm', correctAnswer: 0, points: 10, exp: 'Dũng cảm nhận khuyết điểm và tôn trọng sự thật là phẩm chất trung thực.' },
+        { q: 'Truyền thống tốt đẹp nào của dân tộc ta thể hiện qua câu "Lá lành đùm lá rách"?', options: ['Lòng nhân ái, tương thân tương ái giúp đỡ người hoạn nạn', 'Lòng hiếu học', 'Tinh thần cần cù', 'Lòng tự tôn dân tộc'], left: 'Tương thân tương ái', right: 'Lòng hiếu học', correctAnswer: 0, points: 10, exp: 'Lá lành đùm lá rách ca ngợi tinh thần đùm bọc, tương thân tương ái.' },
+        { q: 'Học sinh thể hiện trách nhiệm bảo vệ môi trường học đường bằng việc làm nào?', options: ['Vứt rác đúng nơi quy định và tích cực chăm sóc cây xanh của trường', 'Khắc tên vẽ bậy lên bàn ghế lớp học', 'Xả rác bừa bãi xuống sân trường', 'Bẻ cành hái hoa trong khuôn viên'], left: 'Vứt rác đúng nơi', right: 'Vẽ bậy lên bàn', correctAnswer: 0, points: 10, exp: 'Giữ gìn vệ sinh và chăm sóc bồn hoa cây cảnh là trách nhiệm của mỗi học sinh.' },
+        { q: 'Hành vi phòng chống bạo lực học đường đúng đắn nhất của học sinh là gì?', options: ['Báo ngay cho thầy cô giáo, cha mẹ khi phát hiện nguy cơ bạo lực', 'Tụ tập đứng xem và cổ vũ đánh nhau', 'Quay clip bạo lực rồi phát tán lên mạng xã hội', 'Tự giải quyết mâu thuẫn bằng bạo lực'], left: 'Báo cho thầy cô', right: 'Cổ vũ đánh nhau', correctAnswer: 0, points: 10, exp: 'Kịp thời thông báo cho người lớn có thẩm quyền để can thiệp an toàn.' },
+        { q: 'Lý tưởng sống cao đẹp của thanh thiếu niên Việt Nam thời kì đổi mới là gì?', options: ['Học tập tốt, rèn luyện đạo đức, cống hiến xây dựng đất nước giàu mạnh', 'Chỉ quan tâm đến lợi ích vật chất cá nhân', 'Tránh xa mọi hoạt động tình nguyện xã hội', 'Ỷ lại và phụ thuộc hoàn toàn vào gia đình'], left: 'Học tập & Cống hiến', right: 'Ỷ lại gia đình', correctAnswer: 0, points: 10, exp: 'Thanh thiếu niên cần nuôi dưỡng ước mơ, nỗ lực học tập để cống hiến cho Tổ quốc.' }
+      ],
+      congnghe: [
+        { q: 'Đặc điểm tiêu biểu nhất của ngôi nhà thông minh (Smart Home) là gì?', options: ['Hệ thống thiết bị điện được cài đặt tự động hoặc điều khiển từ xa', 'Nhà xây bằng vật liệu đất sét nung truyền thống', 'Toàn bộ cửa ra vào phải mở thủ công bằng ổ khóa cơ', 'Không sử dụng bất kì thiết bị điện tử nào'], left: 'Tự động & Từ xa', right: 'Khóa cơ thủ công', correctAnswer: 0, points: 10, exp: 'Smart Home tích hợp tự động hóa điều khiển chiếu sáng, an ninh và nhiệt độ từ xa.' },
+        { q: 'Hình chiếu đứng của một vật thể trong bản vẽ kĩ thuật thu được từ hướng chiếu nào?', options: ['Từ trước tới', 'Từ trên xuống', 'Từ trái sang', 'Từ dưới lên'], left: 'Từ trước tới', right: 'Từ trên xuống', correctAnswer: 0, points: 10, exp: 'Hình chiếu đứng có hướng chiếu nhìn từ trước tới.' },
+        { q: 'Khi sửa chữa mạch điện gia đình, quy tắc an toàn bắt buộc đầu tiên là gì?', options: ['Cắt cầu dao điện tổng (Aptomat) và kiểm tra bằng bút thử điện', 'Dùng tay trần chạm trực tiếp vào dây dẫn', 'Đứng trên nền nhà ẩm ướt để thao tác', 'Bật nguồn điện để kiểm tra độ sáng'], left: 'Cắt cầu dao điện', right: 'Chạm tay trần', correctAnswer: 0, points: 10, exp: 'Luôn ngắt nguồn điện và thử bút điện trước khi tiến hành sửa chữa.' },
+        { q: 'Phương pháp nào sau đây là biện pháp canh tác nông nghiệp hữu cơ an toàn?', options: ['Sử dụng phân hữu cơ ủ hoai và quản lý dịch hại sinh học', 'Lạm dụng thuốc trừ sâu hóa học nồng độ cao', 'Bón phân hóa học quá liều lượng quy định', 'Đốt sạch tàn dư thực vật làm ô nhiễm không khí'], left: 'Phân hữu cơ vi sinh', right: 'Lạm dụng hóa học', correctAnswer: 0, points: 10, exp: 'Nông nghiệp hữu cơ ưu tiên phân sinh học và cân bằng hệ sinh thái.' },
+        { q: 'Thiết bị nào dùng để đóng - cắt mạch điện tự động khi xảy ra sự cố quá tải hoặc ngắn mạch?', options: ['Aptomat (Cầu dao tự động)', 'Bóng đèn huỳnh quang', 'Công tắc đơn một chiều', 'Ổ cắm điện đôi'], left: 'Aptomat', right: 'Bóng đèn', correctAnswer: 0, points: 10, exp: 'Aptomat tự động ngắt mạch khi quá tải hoặc chập mạch để bảo vệ đường dây.' }
+      ],
+      nghethuat: [
+        { q: 'Trong âm nhạc cơ bản có bao nhiêu nốt nhạc chính?', options: ['7 nốt nhạc (Đô, Rê, Mi, Fa, Son, La, Si)', '5 nốt nhạc', '10 nốt nhạc', '12 nốt nhạc'], left: '7 nốt nhạc', right: '5 nốt nhạc', correctAnswer: 0, points: 10, exp: 'Có 7 nốt nhạc cơ bản tạo nên các giai điệu âm nhạc.' },
+        { q: 'Trong hội họa, nhóm màu nào sau đây thuộc nhóm màu nóng gợi cảm giác ấm áp?', options: ['Đỏ, vàng, cam', 'Xanh lam, xanh lục, tím', 'Trắng, đen, xám', 'Xanh da trời, lục nhạt'], left: 'Đỏ, vàng, cam', right: 'Xanh lam, lục', correctAnswer: 0, points: 10, exp: 'Màu đỏ, vàng, cam là các gam màu nóng rực rỡ.' }
+      ],
+      gdtc: [
+        { q: 'Tác dụng quan trọng nhất của phần khởi động trước khi tập luyện thể dục thể thao là gì?', options: ['Làm nóng cơ thể, bôi trơn khớp và phòng tránh chấn thương', 'Làm cho cơ thể mệt mỏi nhanh chóng', 'Giảm khả năng vận động của cơ bắp', 'Để kết thúc buổi tập nhanh hơn'], left: 'Phòng tránh chấn thương', right: 'Làm mệt mỏi', correctAnswer: 0, points: 10, exp: 'Khởi động giúp tim mạch và cơ khớp thích nghi, tránh chấn thương.' },
+        { q: 'Mỗi ngày học sinh nên dành tối thiểu bao nhiêu thời gian vận động thể chất để có sức khỏe tốt?', options: ['Ít nhất 60 phút', 'Chỉ cần 5 phút', 'Không cần vận động', 'Tập luyện 5 tiếng liên tục'], left: 'Ít nhất 60 phút', right: 'Chỉ cần 5 phút', correctAnswer: 0, points: 10, exp: 'Bộ Y tế khuyến nghị trẻ em vận động thể lực tối thiểu 60 phút mỗi ngày.' }
+      ],
+      hn_trainghiem: [
+        { q: 'Kĩ năng nào sau đây là yếu tố quan trọng giúp làm việc nhóm hiệu quả?', options: ['Lắng nghe tích cực, tôn trọng ý kiến đồng đội và có trách nhiệm với nhiệm vụ', 'Áp đặt ý kiến cá nhân lên tất cả mọi người', 'Đùn đẩy công việc khó cho bạn khác', 'Không tham gia thảo luận cùng nhóm'], left: 'Lắng nghe & Tôn trọng', right: 'Áp đặt cá nhân', correctAnswer: 0, points: 10, exp: 'Lắng nghe và hợp tác là chìa khóa thành công trong hoạt động trải nghiệm nhóm.' },
+        { q: 'Khi lập kế hoạch chi tiêu cá nhân hợp lý, học sinh nên ưu tiên điều gì?', options: ['Phân biệt rõ giữa nhu cầu thiết yếu và sở thích nhất thời', 'Mua sắm tùy hứng mọi thứ mình thích', 'Không cần ghi chép theo dõi các khoản chi', 'Vay mượn tiền để mua đồ xa xỉ'], left: 'Thiết yếu trước', right: 'Mua tùy hứng', correctAnswer: 0, points: 10, exp: 'Quản lý tài chính cá nhân thông minh bắt đầu từ việc ưu tiên nhu cầu thiết yếu.' }
+      ]
+    };
+
+    if (bank[subKey]) return bank[subKey];
+    for (const k of Object.keys(bank)) {
+      if (subKey.includes(k) || k.includes(subKey)) return bank[k];
+    }
+    return bank.toan;
+  },
+
   _getQuestionsForSubjectAndGrade(gameKey, subjectId, grade) {
     if (this._activeQuestionsByGame && this._activeQuestionsByGame[gameKey]) {
       return this._activeQuestionsByGame[gameKey];
     }
     const stored = this._getLoadedQuestions(gameKey);
     if (stored && Array.isArray(stored) && stored.length > 0) return stored;
-    return this._getDefaultQuestionsForGame(gameKey);
-  },
-
-  _getDefaultQuestionsForGame(gameKey) {
-    return [
-      { q: 'Số nguyên tố chẵn DUY NHẤT trong toán học là số nào?', options: ['Số 2', 'Số 0', 'Số 4', 'Số 6'], left: 'Số 2', right: 'Số 0', correctAnswer: 0, points: 10, exp: 'Số 2 là số nguyên tố chẵn duy nhất.' },
-      { q: 'Tổng ba góc trong một tam giác luôn bằng bao nhiêu độ?', options: ['180°', '360°', '90°', '270°'], left: '180°', right: '360°', correctAnswer: 0, points: 10, exp: 'Tổng 3 góc tam giác luôn bằng 180°.' },
-      { q: 'Số 0 có phải là số nguyên dương không?', options: ['Không phải số nguyên dương cũng không âm', 'Là số nguyên dương', 'Là số nguyên âm', 'Là số vô tỉ'], left: 'Không phải', right: 'Phải', correctAnswer: 0, points: 10, exp: 'Số 0 không âm không dương.' },
-      { q: 'Hình chữ nhật có 2 đường chéo vuông góc với nhau là hình gì?', options: ['Hình vuông', 'Hình thoi', 'Hình thang', 'Hình bình hành'], left: 'Hình vuông', right: 'Hình thoi', correctAnswer: 0, points: 10, exp: 'Hình chữ nhật có 2 đường chéo vuông góc là hình vuông.' },
-      { q: 'Số nào sau đây chia hết cho cả 2 và 5?', options: ['Số có tận cùng là 0', 'Số có tận cùng là 5', 'Số có tận cùng là 2', 'Số có tận cùng là 8'], left: 'Tận cùng là 0', right: 'Tận cùng là 5', correctAnswer: 0, points: 10, exp: 'Chữ số tận cùng phải bằng 0.' }
-    ];
+    return this._getDefaultQuestionsForGame(gameKey, subjectId, grade);
   },
 
   // ═══════════════════════════════════════════════════════════════
@@ -8880,20 +8986,13 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const area = this._area();
     if (!area) return;
 
-    const subs = [
-      {id:'toan', name:'Toán học', icon:'📐'},
-      {id:'van',  name:'Ngữ văn',  icon:'📖'},
-      {id:'anh',  name:'Tiếng Anh',icon:'🇬🇧'},
-      {id:'khtn', name:'Khoa học Tự nhiên', icon:'🔬'},
-      {id:'lsdl', name:'Lịch sử & Địa lý',  icon:'🌍'},
-      {id:'tin',  name:'Tin học',  icon:'💻'},
-      {id:'gdcd', name:'GDCD',     icon:'⚖️'}
-    ];
+    const subs = this._getSubjectsList();
 
     const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
-    const subName = subs.find(s=>s.id===subKey)?.name || 'Toán học';
+    const subObj = subs.find(s=>s.id===subKey) || subs[0] || {id:'toan', name:'Toán học'};
+    const subName = subObj.name;
     const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
-    const defaultQs = this._getDefaultQuestionsForGame(gameKey);
+    const defaultQs = this._getDefaultQuestionsForGame(gameKey, subKey, gradeKey);
     const loadedQs = this._getLoadedQuestions(gameKey) || defaultQs;
     const defaultLessonTitle = `Bài 1: Ôn tập kiến thức ${subName} Khối ${gradeKey}`;
     const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === gameKey).length : 0;
@@ -8957,6 +9056,12 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
                 <option value="8" ${gradeKey==='8'?'selected':''}>Khối 8</option>
                 <option value="9" ${gradeKey==='9'?'selected':''}>Khối 9</option>
                 <option value="all" ${gradeKey==='all'?'selected':''}>Toàn trường</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.92rem;font-weight:900;color:#0369a1;">📚 Môn Học:</span>
+              <select id="dash-crossword-sub" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #0284c7;color:#0369a1;outline:none;cursor:pointer;">
+                ${subs.map(s => `<option value="${s.id}" ${subKey===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('')}
               </select>
             </div>
             <div>
@@ -9026,15 +9131,21 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     `;
 
     // Handlers
-    area.querySelector('#dash-sub').onchange = (e) => {
-      this.icebreaker.subjectId = e.target.value;
-      this._renderGenericGameDashboard(gameKey, gameTitle, icon, themeColor, borderGradient, buttonColor, onStartFn);
-    };
+    const dashSubEl = area.querySelector('#dash-sub');
+    if (dashSubEl) {
+      dashSubEl.onchange = (e) => {
+        this.icebreaker.subjectId = e.target.value;
+        this._renderGenericGameDashboard(gameKey, gameTitle, icon, themeColor, borderGradient, buttonColor, onStartFn);
+      };
+    }
 
-    area.querySelector('#dash-grade').onchange = (e) => {
-      this.icebreaker.grade = e.target.value;
-      this._renderGenericGameDashboard(gameKey, gameTitle, icon, themeColor, borderGradient, buttonColor, onStartFn);
-    };
+    const dashGradeEl = area.querySelector('#dash-grade');
+    if (dashGradeEl) {
+      dashGradeEl.onchange = (e) => {
+        this.icebreaker.grade = e.target.value;
+        this._renderGenericGameDashboard(gameKey, gameTitle, icon, themeColor, borderGradient, buttonColor, onStartFn);
+      };
+    }
 
     const openLoader = () => {
       this._openQuestionLoaderModal(gameKey, gameTitle, defaultQs);
@@ -9535,17 +9646,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     // TAB 1: SINH CÂU HỎI BẰNG AI & TÀI LIỆU
     // =======================================================================
     const renderAITab = () => {
-      const subs = [
-        {id:'toan', name:'Toán học', icon:'📐'},
-        {id:'van',  name:'Ngữ văn',  icon:'📖'},
-        {id:'anh',  name:'Tiếng Anh',icon:'🇬🇧'},
-        {id:'khtn', name:'Khoa học Tự nhiên', icon:'🔬'},
-        {id:'lsdl', name:'Lịch sử & Địa lý',  icon:'🌍'},
-        {id:'tin',  name:'Tin học',  icon:'💻'},
-        {id:'gdcd', name:'GDCD',     icon:'⚖️'},
-        {id:'congnghe', name:'Công nghệ', icon:'🛠️'},
-        {id:'nghethuat', name:'Nghệ thuật', icon:'🎨'}
-      ];
+      const subs = this._getSubjectsList();
 
       return `
 <div style="max-width:1450px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:1.35rem;">
@@ -9869,11 +9970,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     // TAB 2: RÚT TỪ NGÂN HÀNG ĐỀ TRƯỜNG
     // =======================================================================
     const renderBankTab = () => {
-      const subs = window.DB && window.DB.SUBJECTS ? window.DB.SUBJECTS : [
-        {id:'toan',name:'Toán học'},{id:'van',name:'Ngữ văn'},{id:'anh',name:'Tiếng Anh'},
-        {id:'khtn',name:'Khoa học Tự nhiên'},{id:'ly',name:'Vật lý'},{id:'hoa',name:'Hóa học'},{id:'sinh',name:'Sinh học'},
-        {id:'lsdl',name:'Lịch sử & Địa lý'},{id:'su',name:'Lịch sử'},{id:'dia',name:'Địa lý'},{id:'tin',name:'Tin học'},{id:'gdcd',name:'GDCD'}
-      ];
+      const subs = this._getSubjectsList();
 
       return `
 <div style="max-width:1450px;width:100%;margin:0 auto;background:#ffffff;border:1.5px solid #38bdf8;border-radius:20px;padding:1.6rem 2rem;box-shadow:0 4px 20px rgba(2,132,199,0.06);">
@@ -10637,15 +10734,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
-    const subs = [
-      {id:'toan', name:'Toán học', icon:'📐'},
-      {id:'van',  name:'Ngữ văn',  icon:'📖'},
-      {id:'anh',  name:'Tiếng Anh',icon:'🇬🇧'},
-      {id:'khtn', name:'Khoa học Tự nhiên', icon:'🔬'},
-      {id:'lsdl', name:'Lịch sử & Địa lý',  icon:'🌍'},
-      {id:'tin',  name:'Tin học',  icon:'💻'},
-      {id:'gdcd', name:'GDCD',     icon:'⚖️'}
-    ];
+    const subs = this._getSubjectsList();
 
     const subKey = (this.icebreaker && this.icebreaker.subjectId) || (this.slides && this.slides.subjectId) || 'toan';
     const subName = subs.find(s=>s.id===subKey)?.name || 'Toán học';
@@ -14847,18 +14936,10 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
   },
 
   _renderPlickersDashboard() {
-    const area = this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area');
+    const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
-    const subs = [
-      {id:'toan', name:'Toán học', icon:'📐'},
-      {id:'van',  name:'Ngữ văn',  icon:'📖'},
-      {id:'anh',  name:'Tiếng Anh',icon:'🇬🇧'},
-      {id:'khtn', name:'Khoa học Tự nhiên', icon:'🔬'},
-      {id:'lsdl', name:'Lịch sử & Địa lý',  icon:'🌍'},
-      {id:'tin',  name:'Tin học',  icon:'💻'},
-      {id:'gdcd', name:'GDCD',     icon:'⚖️'}
-    ];
+    const subs = this._getSubjectsList();
 
     const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
     const subName = subs.find(s=>s.id===subKey)?.name || 'Toán học';
@@ -17262,12 +17343,14 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
   _crosswordSecretWord: 'NHIET',
 
   _renderCrosswordDashboard() {
-    const area = this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area');
+    const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
+    const subs = this._getSubjectsList();
     const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
     const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
-    const subName = (subKey === 'toan' ? 'Toán học' : (subKey === 'van' ? 'Ngữ văn' : 'Môn học'));
+    const subObj = subs.find(s => s.id === subKey) || subs[0] || { id: 'toan', name: 'Toán học', icon: '🔤' };
+    const subName = subObj.name;
     const defaultLessonTitle = `Bài 1: Ô chữ bí mật môn ${subName} Khối ${gradeKey}`;
     const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'crossword').length : 0;
     const loadedQs = this._getLoadedQuestions('crossword') || this._getQuestionsForSubjectAndGrade('crossword', subKey, gradeKey) || this._getDefaultQuestionsForGame('crossword');
@@ -17290,6 +17373,13 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
               <span style="font-size:.92rem;font-weight:900;color:#0369a1;">🎓 Khối Lớp:</span>
               <select id="dash-grade" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #0284c7;color:#0369a1;outline:none;cursor:pointer;">
                 ${['6','7','8','9'].map(g => `<option value="${g}" ${String(gradeKey)===g?'selected':''}>Khối ${g}</option>`).join('')}
+              </select>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.92rem;font-weight:900;color:#0369a1;">📚 Môn Học:</span>
+              <select id="dash-crossword-sub" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #0284c7;color:#0369a1;outline:none;cursor:pointer;">
+                ${subs.map(s => `<option value="${s.id}" ${subKey===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('')}
               </select>
             </div>
 
@@ -17402,6 +17492,20 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       selGrade17.onchange = (e) => {
         this.icebreaker.grade = e.target.value;
         const newQs = this._getQuestionsForSubjectAndGrade('crossword', subKey, e.target.value);
+        if (newQs && newQs.length > 0) {
+          if (!this._activeQuestionsByGame) this._activeQuestionsByGame = {};
+          this._activeQuestionsByGame['crossword'] = newQs;
+          window._activeGameQuestions = newQs;
+        }
+        this._renderCrosswordDashboard();
+      };
+    }
+
+    const selSubCw = area.querySelector('#dash-crossword-sub');
+    if (selSubCw) {
+      selSubCw.onchange = (e) => {
+        this.icebreaker.subjectId = e.target.value;
+        const newQs = this._getQuestionsForSubjectAndGrade('crossword', e.target.value, gradeKey);
         if (newQs && newQs.length > 0) {
           if (!this._activeQuestionsByGame) this._activeQuestionsByGame = {};
           this._activeQuestionsByGame['crossword'] = newQs;
@@ -21315,9 +21419,11 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
+    const subs = this._getSubjectsList();
     const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
     const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
-    const subName = (subKey === 'toan' ? 'Toán học' : (subKey === 'van' ? 'Ngữ văn' : (subKey === 'khtn' ? 'KHTN' : 'Môn học')));
+    const subObj = subs.find(s => s.id === subKey) || subs[0] || { id: 'toan', name: 'Toán học', icon: '🚩' };
+    const subName = subObj.name;
     const defaultLessonTitle = `Bài 1: Du hành vũ trụ môn ${subName} Khối ${gradeKey}`;
     const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'spacejourney').length : 0;
     const loadedQs = this._getLoadedQuestions('spacejourney') || this._getSpaceJourneyStations();
@@ -22617,9 +22723,11 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const area = this._area ? this._area() : (this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area'));
     if (!area) return;
 
+    const subs = this._getSubjectsList();
     const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
     const subKey = this.icebreaker.subjectId || this.slides.subjectId || 'toan';
-    const subName = (subKey === 'toan' ? 'Toán học' : (subKey === 'van' ? 'Ngữ văn' : (subKey === 'khtn' ? 'KHTN' : 'Môn học')));
+    const subObj = subs.find(s => s.id === subKey) || subs[0] || { id: 'toan', name: 'Toán học', icon: '🚩' };
+    const subName = subObj.name;
     const defaultLessonTitle = `Bài 1: Hành trình 7 trạm môn ${subName} Khối ${gradeKey}`;
     const savedCount = (typeof db !== 'undefined' && db.getTeachingTools) ? db.getTeachingTools().filter(t => t.toolKey === 'stations7').length : 0;
     const loadedQs = this._getLoadedQuestions('stations7') || this._getStations7Questions();
@@ -22642,6 +22750,12 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
               <span style="font-size:.92rem;font-weight:900;color:#059669;">🎓 Khối Lớp:</span>
               <select id="dash-grade" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #059669;color:#047857;outline:none;cursor:pointer;">
                 ${['6','7','8','9'].map(g => `<option value="${g}" ${String(gradeKey)===g?'selected':''}>Khối ${g}</option>`).join('')}
+              </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:.4rem;">
+              <span style="font-size:.92rem;font-weight:900;color:#059669;">📚 Môn Học:</span>
+              <select id="dash-stations-sub" class="ait-select" style="padding:.6rem 1rem;border-radius:12px;font-weight:900;font-size:.95rem;border:2.5px solid #059669;color:#047857;outline:none;cursor:pointer;">
+                ${subs.map(s => `<option value="${s.id}" ${subKey===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('')}
               </select>
             </div>
 
