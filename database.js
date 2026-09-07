@@ -97,21 +97,1643 @@ const DEFAULT_TEACHERS = [];
 const DEFAULT_STUDENTS = [];
 
 const DEFAULT_CHAPTERS = [
-  { id: 'toan_c1', subjectId: 'toan', title: 'Chủ đề 1: Số tự nhiên & Các phép tính' },
-  { id: 'toan_c2', subjectId: 'toan', title: 'Chủ đề 2: Tính chia hết trong tập hợp N' },
-  { id: 'toan_c3', subjectId: 'toan', title: 'Chủ đề 3: Phân số và Số thập phân' },
-  { id: 'van_c1', subjectId: 'van', title: 'Chủ đề 1: Truyện dân gian (Truyền thuyết & Cổ tích)' },
-  { id: 'van_c2', subjectId: 'van', title: 'Chủ đề 2: Thơ và Thơ trữ tình' },
-  { id: 'anh_c1', subjectId: 'anh', title: 'Unit 1: My New School' },
-  { id: 'anh_c2', subjectId: 'anh', title: 'Unit 2: My House' },
-  { id: 'tin_c1', subjectId: 'tin', title: 'Chủ đề A: Máy tính và Cộng đồng' },
-  { id: 'tin_c2', subjectId: 'tin', title: 'Chủ đề B: Mạng máy tính và Internet' },
-  { id: 'khtn_c1', subjectId: 'khtn', title: 'Chủ đề 1: Các phép đo & Tế bào - Đơn vị của sự sống' },
-  { id: 'lsdl_c1', subjectId: 'lsdl', title: 'Chủ đề 1: Lịch sử và Địa lý THCS' },
-  { id: 'gdcd_c1', subjectId: 'gdcd', title: 'Chủ đề 1: Tự hào về truyền thống gia đình' }
+  {
+    "id": "tin_6_c1",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Chủ đề 1: Máy tính và cộng đồng"
+  },
+  {
+    "id": "tin_6_c2",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Chủ đề 2: Mạng máy tính và Internet"
+  },
+  {
+    "id": "tin_6_c3",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Chủ đề 3: Tổ chức lưu trữ, tìm kiếm và trao đổi thông tin"
+  },
+  {
+    "id": "tin_6_c4",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Chủ đề 4: Đạo đức, pháp luật và văn hóa trong môi trường số"
+  },
+  {
+    "id": "tin_6_c5",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Chủ đề 5: Ứng dụng tin học (Soạn thảo & Trình chiếu)"
+  },
+  {
+    "id": "tin_6_c6",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Chủ đề 6: Giải quyết vấn đề với sự trợ giúp của máy tính"
+  },
+  {
+    "id": "tin_7_c1",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Chủ đề 1: Máy tính và cộng đồng (Thiết bị vào - ra)"
+  },
+  {
+    "id": "tin_7_c2",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Chủ đề 2: Tổ chức lưu trữ, tìm kiếm và trao đổi thông tin"
+  },
+  {
+    "id": "tin_7_c4",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Chủ đề 4: Ứng dụng tin học (Bảng tính điện tử Excel)"
+  },
+  {
+    "id": "tin_7_c5",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Chủ đề 5: Giải quyết vấn đề với sự trợ giúp của máy tính (Thuật toán)"
+  },
+  {
+    "id": "tin_8_c1",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Chủ đề 1: Máy tính và cộng đồng (Lịch sử máy tính)"
+  },
+  {
+    "id": "tin_8_c4",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Chủ đề 4: Khai thác bảng tính nâng cao"
+  },
+  {
+    "id": "tin_8_c5",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Chủ đề 5: Giải quyết vấn đề với sự trợ giúp của máy tính (Lập trình trực quan)"
+  },
+  {
+    "id": "tin_9_c1",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Chủ đề 1: Máy tính và cộng đồng"
+  },
+  {
+    "id": "tin_9_c2",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Chủ đề 2: Tổ chức lưu trữ, tìm kiếm và trao đổi thông tin"
+  },
+  {
+    "id": "tin_9_c3",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Chủ đề 3: Đạo đức, pháp luật và văn hóa trong môi trường số"
+  },
+  {
+    "id": "tin_9_c4",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Chủ đề 4: Ứng dụng tin học"
+  },
+  {
+    "id": "tin_9_c5",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Chủ đề 5: Hướng nghiệp với tin học"
+  },
+  {
+    "id": "toan_6_c1",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Chương I: Tập hợp các số tự nhiên"
+  },
+  {
+    "id": "toan_6_c2",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Chương II: Tính chia hết trong tập hợp các số tự nhiên"
+  },
+  {
+    "id": "toan_6_c3",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Chương III: Số nguyên (Z)"
+  },
+  {
+    "id": "toan_6_c4",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Chương IV: Một số hình phẳng trong thực tiễn"
+  },
+  {
+    "id": "toan_6_c5",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Chương V: Tính đối xứng của hình phẳng trong tự nhiên"
+  },
+  {
+    "id": "toan_6_c6",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Chương VI: Phân số & Số thập phân"
+  },
+  {
+    "id": "toan_7_c1",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Chương I: Số hữu tỉ (Q)"
+  },
+  {
+    "id": "toan_7_c2",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Chương II: Số thực (R) & Căn bậc hai số học"
+  },
+  {
+    "id": "toan_7_c3",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Chương III: Góc và đường thẳng song song"
+  },
+  {
+    "id": "toan_7_c4",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Chương IV: Tam giác bằng nhau & Định lí Py-ta-go"
+  },
+  {
+    "id": "toan_7_c6",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Chương VI: Tỉ lệ thức và Đại lượng tỉ lệ"
+  },
+  {
+    "id": "toan_7_c7",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Chương VII: Biểu thức đại số và Đa thức một biến"
+  },
+  {
+    "id": "toan_8_c1",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Chương I: Đa thức nhiều biến"
+  },
+  {
+    "id": "toan_8_c2",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Chương II: Hằng đẳng thức đáng nhớ & Phân tích đa thức"
+  },
+  {
+    "id": "toan_8_c3",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Chương III: Tứ giác (Hình thang, HBH, HCN, Thoi, Vuông)"
+  },
+  {
+    "id": "toan_8_c4",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Chương IV: Định lí Thalès trong tam giác"
+  },
+  {
+    "id": "toan_8_c6",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Chương VI: Phân thức đại số"
+  },
+  {
+    "id": "toan_8_c7",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Chương VII: Phương trình bậc nhất & Hàm số bậc nhất"
+  },
+  {
+    "id": "toan_9_c1",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Chương I: Phương trình và Hệ phương trình bậc nhất hai ẩn"
+  },
+  {
+    "id": "toan_9_c3",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Chương III: Căn bậc hai & Căn bậc ba"
+  },
+  {
+    "id": "toan_9_c4",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Chương IV: Hệ thức lượng trong tam giác vuông & Tỉ số lượng giác"
+  },
+  {
+    "id": "toan_9_c5",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Chương V: Đường tròn & Góc với đường tròn"
+  },
+  {
+    "id": "toan_9_c6",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Chương VI: Hàm số y = ax² & Phương trình bậc hai (Vi-ét)"
+  },
+  {
+    "id": "van_6_c1",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Bài 1: Tôi và các bạn (Truyện đồng thoại)"
+  },
+  {
+    "id": "van_6_c2",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Bài 2: Gõ cửa trái tim (Thơ)"
+  },
+  {
+    "id": "van_6_c3",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Bài 3: Yêu thương và chia sẻ (Truyện cổ tích & truyện ngắn)"
+  },
+  {
+    "id": "van_6_c4",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Bài 4: Quê hương yêu dấu (Thơ lục bát)"
+  },
+  {
+    "id": "van_6_c5",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Bài 5: Những nẻo đường xứ sở (Văn bản kí)"
+  },
+  {
+    "id": "van_7_c1",
+    "subjectId": "van",
+    "grade": 7,
+    "title": "Bài 1: Bầu trời tuổi thơ (Truyện ngắn)"
+  },
+  {
+    "id": "van_7_c2",
+    "subjectId": "van",
+    "grade": 7,
+    "title": "Bài 2: Khúc nhạc tâm hồn (Thơ bốn chữ, năm chữ)"
+  },
+  {
+    "id": "van_7_c3",
+    "subjectId": "van",
+    "grade": 7,
+    "title": "Bài 3: Cội nguồn yêu thương (Nghị luận xã hội & Tản văn)"
+  },
+  {
+    "id": "van_8_c1",
+    "subjectId": "van",
+    "grade": 8,
+    "title": "Bài 1: Câu chuyện của lịch sử (Truyện lịch sử)"
+  },
+  {
+    "id": "van_8_c2",
+    "subjectId": "van",
+    "grade": 8,
+    "title": "Bài 2: Vẻ đẹp cổ điển (Thơ Đường luật)"
+  },
+  {
+    "id": "van_8_c3",
+    "subjectId": "van",
+    "grade": 8,
+    "title": "Bài 3: Lời sông núi (Văn bản nghị luận trung đại)"
+  },
+  {
+    "id": "van_9_c1",
+    "subjectId": "van",
+    "grade": 9,
+    "title": "Bài 1: Thế giới kì ảo (Truyện truyền kì)"
+  },
+  {
+    "id": "van_9_c2",
+    "subjectId": "van",
+    "grade": 9,
+    "title": "Bài 2: Khát vọng cống hiến (Thơ và truyện hiện đại)"
+  },
+  {
+    "id": "anh_6_c1",
+    "subjectId": "anh",
+    "grade": 6,
+    "title": "Unit 1: My New School"
+  },
+  {
+    "id": "anh_6_c2",
+    "subjectId": "anh",
+    "grade": 6,
+    "title": "Unit 2: My House"
+  },
+  {
+    "id": "anh_6_c3",
+    "subjectId": "anh",
+    "grade": 6,
+    "title": "Unit 3: My Friends"
+  },
+  {
+    "id": "anh_6_c4",
+    "subjectId": "anh",
+    "grade": 6,
+    "title": "Unit 4: My Neighbourhood"
+  },
+  {
+    "id": "anh_7_c1",
+    "subjectId": "anh",
+    "grade": 7,
+    "title": "Unit 1: Hobbies"
+  },
+  {
+    "id": "anh_7_c2",
+    "subjectId": "anh",
+    "grade": 7,
+    "title": "Unit 2: Healthy Living"
+  },
+  {
+    "id": "anh_7_c3",
+    "subjectId": "anh",
+    "grade": 7,
+    "title": "Unit 3: Community Service"
+  },
+  {
+    "id": "anh_8_c1",
+    "subjectId": "anh",
+    "grade": 8,
+    "title": "Unit 1: Leisure Time"
+  },
+  {
+    "id": "anh_8_c2",
+    "subjectId": "anh",
+    "grade": 8,
+    "title": "Unit 2: Life in the Countryside"
+  },
+  {
+    "id": "anh_9_c1",
+    "subjectId": "anh",
+    "grade": 9,
+    "title": "Unit 1: Local Community"
+  },
+  {
+    "id": "anh_9_c2",
+    "subjectId": "anh",
+    "grade": 9,
+    "title": "Unit 2: City Life"
+  },
+  {
+    "id": "khtn_6_c1",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Chủ đề 1: Các phép đo (Độ dài, khối lượng, thời gian, nhiệt độ)"
+  },
+  {
+    "id": "khtn_6_c2",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Chủ đề 2: Các thể của chất và Sự chuyển thể"
+  },
+  {
+    "id": "khtn_6_c3",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Chủ đề 3: Tế bào - Đơn vị cơ bản của sự sống"
+  },
+  {
+    "id": "khtn_6_c4",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Chủ đề 4: Lực và Chuyển động"
+  },
+  {
+    "id": "khtn_7_c1",
+    "subjectId": "khtn",
+    "grade": 7,
+    "title": "Chủ đề 1: Nguyên tử - Nguyên tố hóa học & Bảng tuần hoàn"
+  },
+  {
+    "id": "khtn_7_c2",
+    "subjectId": "khtn",
+    "grade": 7,
+    "title": "Chủ đề 2: Tốc độ chuyển động (v = s/t)"
+  },
+  {
+    "id": "khtn_7_c3",
+    "subjectId": "khtn",
+    "grade": 7,
+    "title": "Chủ đề 3: Âm thanh & Ánh sáng (Phản xạ ánh sáng)"
+  },
+  {
+    "id": "khtn_7_c4",
+    "subjectId": "khtn",
+    "grade": 7,
+    "title": "Chủ đề 4: Trao đổi chất và chuyển hóa năng lượng (Quang hợp)"
+  },
+  {
+    "id": "khtn_8_c1",
+    "subjectId": "khtn",
+    "grade": 8,
+    "title": "Chủ đề 1: Phản ứng hóa học & Định luật bảo toàn khối lượng"
+  },
+  {
+    "id": "khtn_8_c2",
+    "subjectId": "khtn",
+    "grade": 8,
+    "title": "Chủ đề 2: Khối lượng riêng, Áp suất và Lực đẩy Ác-si-mét"
+  },
+  {
+    "id": "khtn_8_c3",
+    "subjectId": "khtn",
+    "grade": 8,
+    "title": "Chủ đề 3: Tác dụng của dòng điện & Định luật Ôm"
+  },
+  {
+    "id": "khtn_9_c1",
+    "subjectId": "khtn",
+    "grade": 9,
+    "title": "Chủ đề 1: Hóa học hữu cơ (Hiđrocacbon Metan, Etilen)"
+  },
+  {
+    "id": "khtn_9_c2",
+    "subjectId": "khtn",
+    "grade": 9,
+    "title": "Chủ đề 2: Di truyền học Men-đen & Cấu trúc ADN"
+  },
+  {
+    "id": "lsdl_6_c1",
+    "subjectId": "lsdl",
+    "grade": 6,
+    "title": "Chủ đề 1: Nguồn gốc loài người & Xã hội nguyên thủy"
+  },
+  {
+    "id": "lsdl_6_c2",
+    "subjectId": "lsdl",
+    "grade": 6,
+    "title": "Chủ đề 2: Các quốc gia cổ đại & Nước Văn Lang - Âu Lạc"
+  },
+  {
+    "id": "lsdl_6_c3",
+    "subjectId": "lsdl",
+    "grade": 6,
+    "title": "Chủ đề 3: Trái Đất - Hành tinh của Hệ Mặt Trời"
+  },
+  {
+    "id": "lsdl_7_c1",
+    "subjectId": "lsdl",
+    "grade": 7,
+    "title": "Chủ đề 1: Tây Âu thời Trung đại"
+  },
+  {
+    "id": "lsdl_7_c2",
+    "subjectId": "lsdl",
+    "grade": 7,
+    "title": "Chủ đề 2: Đại Việt thời Lý - Trần"
+  },
+  {
+    "id": "lsdl_8_c1",
+    "subjectId": "lsdl",
+    "grade": 8,
+    "title": "Chủ đề 1: Cách mạng tư sản và sự phát triển của chủ nghĩa tư bản"
+  },
+  {
+    "id": "lsdl_8_c2",
+    "subjectId": "lsdl",
+    "grade": 8,
+    "title": "Chủ đề 2: Phong trào Tây Sơn & Thống nhất đất nước"
+  },
+  {
+    "id": "lsdl_9_c1",
+    "subjectId": "lsdl",
+    "grade": 9,
+    "title": "Chủ đề 1: Thế giới từ sau năm 1945 đến nay"
+  },
+  {
+    "id": "lsdl_9_c2",
+    "subjectId": "lsdl",
+    "grade": 9,
+    "title": "Chủ đề 2: Việt Nam trong thời kì kháng chiến chống Pháp và Mĩ"
+  },
+  {
+    "id": "gdcd_6_c1",
+    "subjectId": "gdcd",
+    "grade": 6,
+    "title": "Chủ đề 1: Tự hào về truyền thống gia đình, dòng họ"
+  },
+  {
+    "id": "gdcd_6_c2",
+    "subjectId": "gdcd",
+    "grade": 6,
+    "title": "Chủ đề 2: Yêu thương con người & Siêng năng, kiên trì"
+  },
+  {
+    "id": "gdcd_7_c1",
+    "subjectId": "gdcd",
+    "grade": 7,
+    "title": "Chủ đề 1: Tự hào về truyền thống quê hương"
+  },
+  {
+    "id": "gdcd_7_c2",
+    "subjectId": "gdcd",
+    "grade": 7,
+    "title": "Chủ đề 2: Bảo tồn di sản văn hóa"
+  },
+  {
+    "id": "gdcd_8_c1",
+    "subjectId": "gdcd",
+    "grade": 8,
+    "title": "Chủ đề 1: Tự hào về truyền thống dân tộc Việt Nam"
+  },
+  {
+    "id": "gdcd_8_c2",
+    "subjectId": "gdcd",
+    "grade": 8,
+    "title": "Chủ đề 2: Phòng, chống bạo lực học đường"
+  },
+  {
+    "id": "gdcd_9_c1",
+    "subjectId": "gdcd",
+    "grade": 9,
+    "title": "Chủ đề 1: Sống có lý tưởng & Trách nhiệm của thanh niên"
+  },
+  {
+    "id": "gdcd_9_c2",
+    "subjectId": "gdcd",
+    "grade": 9,
+    "title": "Chủ đề 2: Bảo vệ hòa bình và Hợp tác quốc tế"
+  },
+  {
+    "id": "congnghe_6_c1",
+    "subjectId": "congnghe",
+    "grade": 6,
+    "title": "Chương 1: Nhà ở & Ngôi nhà thông minh"
+  },
+  {
+    "id": "congnghe_6_c2",
+    "subjectId": "congnghe",
+    "grade": 6,
+    "title": "Chương 2: Bảo quản và chế biến thực phẩm"
+  },
+  {
+    "id": "congnghe_7_c1",
+    "subjectId": "congnghe",
+    "grade": 7,
+    "title": "Chương 1: Trồng trọt và Bảo vệ cây trồng"
+  },
+  {
+    "id": "congnghe_7_c2",
+    "subjectId": "congnghe",
+    "grade": 7,
+    "title": "Chương 2: Chăn nuôi và Thủy sản"
+  },
+  {
+    "id": "congnghe_8_c1",
+    "subjectId": "congnghe",
+    "grade": 8,
+    "title": "Chương 1: Vẽ kĩ thuật cơ bản"
+  },
+  {
+    "id": "congnghe_8_c2",
+    "subjectId": "congnghe",
+    "grade": 8,
+    "title": "Chương 2: Cơ khí và Gia công cơ khí"
+  },
+  {
+    "id": "congnghe_9_c1",
+    "subjectId": "congnghe",
+    "grade": 9,
+    "title": "Chương 1: Mạng điện trong nhà & An toàn điện"
+  },
+  {
+    "id": "congnghe_9_c2",
+    "subjectId": "congnghe",
+    "grade": 9,
+    "title": "Chương 2: Định hướng nghề nghiệp công nghệ"
+  }
 ];
 
-const DEFAULT_LESSONS = [];
+const DEFAULT_LESSONS = [
+  {
+    "id": "tin_6_b1",
+    "chapterId": "tin_6_c1",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 1: Thông tin và dữ liệu (Thông tin, Dữ liệu, Vật mang tin)"
+  },
+  {
+    "id": "tin_6_b2",
+    "chapterId": "tin_6_c1",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 2: Lưu trữ và trao đổi thông tin (Bit, Byte, KB, MB, GB, TB)"
+  },
+  {
+    "id": "tin_6_b3",
+    "chapterId": "tin_6_c1",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 3: Máy tính trong hoạt động thông tin (Thiết bị vào - ra, CPU, RAM)"
+  },
+  {
+    "id": "tin_6_b4",
+    "chapterId": "tin_6_c2",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 4: Mạng máy tính (Khái niệm mạng, Dây cáp, Switch, Wi-Fi Router)"
+  },
+  {
+    "id": "tin_6_b5",
+    "chapterId": "tin_6_c2",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 5: Internet (World Wide Web, Trình duyệt web, Tìm kiếm)"
+  },
+  {
+    "id": "tin_6_b6",
+    "chapterId": "tin_6_c3",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 6: Thư điện tử (Email) (Địa chỉ email, Gửi nhận thư điện tử)"
+  },
+  {
+    "id": "tin_6_b7",
+    "chapterId": "tin_6_c3",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 7: Tìm kiếm thông tin trên Internet (Từ khóa tìm kiếm)"
+  },
+  {
+    "id": "tin_6_b8",
+    "chapterId": "tin_6_c4",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 8: An toàn thông tin và văn hóa ứng xử trên mạng (Mật khẩu mạnh, Bản quyền)"
+  },
+  {
+    "id": "tin_6_b9",
+    "chapterId": "tin_6_c5",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 9: Soạn thảo văn bản cơ bản (Định dạng ký tự, đoạn văn, hình ảnh)"
+  },
+  {
+    "id": "tin_6_b10",
+    "chapterId": "tin_6_c5",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 10: Sơ đồ tư duy và Trình chiếu cơ bản"
+  },
+  {
+    "id": "tin_6_b11",
+    "chapterId": "tin_6_c6",
+    "subjectId": "tin",
+    "grade": 6,
+    "title": "Bài 11: Thuật toán và mô tả thuật toán (Sơ đồ khối: Elip, Chữ nhật, Thoi)"
+  },
+  {
+    "id": "tin_7_b1",
+    "chapterId": "tin_7_c1",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 1: Thiết bị vào và thiết bị ra (Bàn phím, chuột, màn hình, máy in)"
+  },
+  {
+    "id": "tin_7_b2",
+    "chapterId": "tin_7_c1",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 2: Phần mềm ứng dụng và hệ điều hành (Windows, Android, iOS)"
+  },
+  {
+    "id": "tin_7_b3",
+    "chapterId": "tin_7_c2",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 3: Quản lý dữ liệu trong máy tính (Tệp tin và thư mục)"
+  },
+  {
+    "id": "tin_7_b4",
+    "chapterId": "tin_7_c2",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 4: Mạng xã hội và giao tiếp trên Internet"
+  },
+  {
+    "id": "tin_7_b5",
+    "chapterId": "tin_7_c4",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 5: Làm quen với bảng tính điện tử (Ô tính, hàng, cột)"
+  },
+  {
+    "id": "tin_7_b6",
+    "chapterId": "tin_7_c4",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 6: Các hàm cơ bản trong bảng tính (SUM, AVERAGE, MIN, MAX, COUNT)"
+  },
+  {
+    "id": "tin_7_b7",
+    "chapterId": "tin_7_c4",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 7: Trình bày và định dạng bảng tính"
+  },
+  {
+    "id": "tin_7_b8",
+    "chapterId": "tin_7_c4",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 8: Tạo biểu đồ trong bảng tính (Biểu đồ cột, hình quạt tròn)"
+  },
+  {
+    "id": "tin_7_b9",
+    "chapterId": "tin_7_c5",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 9: Thuật toán tìm kiếm tuần tự (Linear Search)"
+  },
+  {
+    "id": "tin_7_b10",
+    "chapterId": "tin_7_c5",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 10: Thuật toán tìm kiếm nhị phân (Binary Search)"
+  },
+  {
+    "id": "tin_7_b11",
+    "chapterId": "tin_7_c5",
+    "subjectId": "tin",
+    "grade": 7,
+    "title": "Bài 11: Thuật toán sắp xếp nổi bọt (Bubble Sort)"
+  },
+  {
+    "id": "tin_8_b1",
+    "chapterId": "tin_8_c1",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Bài 1: Lịch sử phát triển máy tính (Các thế hệ máy tính)"
+  },
+  {
+    "id": "tin_8_b2",
+    "chapterId": "tin_8_c1",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Bài 2: Thông tin trong môi trường số & Đạo đức, bản quyền"
+  },
+  {
+    "id": "tin_8_b3",
+    "chapterId": "tin_8_c4",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Bài 3: Hàm điều kiện IF và Lọc dữ liệu Filter trong Excel"
+  },
+  {
+    "id": "tin_8_b4",
+    "chapterId": "tin_8_c4",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Bài 4: Trình bày và liên kết dữ liệu Hyperlink"
+  },
+  {
+    "id": "tin_8_b5",
+    "chapterId": "tin_8_c5",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Bài 5: Biến và kiểu dữ liệu trong lập trình trực quan"
+  },
+  {
+    "id": "tin_8_b6",
+    "chapterId": "tin_8_c5",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Bài 6: Cấu trúc rẽ nhánh trong lập trình (IF, IF-ELSE)"
+  },
+  {
+    "id": "tin_8_b7",
+    "chapterId": "tin_8_c5",
+    "subjectId": "tin",
+    "grade": 8,
+    "title": "Bài 7: Cấu trúc lặp trong lập trình (FOR, WHILE)"
+  },
+  {
+    "id": "tin_9_b1",
+    "chapterId": "tin_9_c1",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 1: Thế giới kĩ thuật số"
+  },
+  {
+    "id": "tin_9_b2",
+    "chapterId": "tin_9_c1",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 2: Thông tin trong giải quyết vấn đề"
+  },
+  {
+    "id": "tin_9_b3",
+    "chapterId": "tin_9_c1",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 3: Thực hành: Đánh giá chất lượng thông tin"
+  },
+  {
+    "id": "tin_9_b4",
+    "chapterId": "tin_9_c1",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 4: Một số vấn đề pháp lí về sử dụng dịch vụ Internet"
+  },
+  {
+    "id": "tin_9_b5",
+    "chapterId": "tin_9_c2",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 5: Tìm hiểu phần mềm mô phỏng"
+  },
+  {
+    "id": "tin_9_b6",
+    "chapterId": "tin_9_c2",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 6: Thực hành phần mềm mô phỏng"
+  },
+  {
+    "id": "tin_9_b7",
+    "chapterId": "tin_9_c3",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 7: Trình bày thông tin trong trao đổi và hợp tác"
+  },
+  {
+    "id": "tin_9_b8",
+    "chapterId": "tin_9_c3",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 8: Thực hành sử dụng công cụ trực quan"
+  },
+  {
+    "id": "tin_9_b9",
+    "chapterId": "tin_9_c4",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 9: Sử dụng công cụ xác thực dữ liệu"
+  },
+  {
+    "id": "tin_9_b10",
+    "chapterId": "tin_9_c4",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 10: Sử dụng hàm COUNTIF"
+  },
+  {
+    "id": "tin_9_b11",
+    "chapterId": "tin_9_c4",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 11: Dịch vụ lưu trữ đám mây"
+  },
+  {
+    "id": "tin_9_b12",
+    "chapterId": "tin_9_c4",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 12: Đạo đức trong môi trường số"
+  },
+  {
+    "id": "tin_9_b13",
+    "chapterId": "tin_9_c4",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 13: Lập trình với ngôn ngữ Python"
+  },
+  {
+    "id": "tin_9_b14",
+    "chapterId": "tin_9_c4",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 14: Cấu trúc điều khiển và kiểu dữ liệu mảng"
+  },
+  {
+    "id": "tin_9_b15",
+    "chapterId": "tin_9_c5",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 15: Nghề nghiệp trong lĩnh vực công nghệ thông tin"
+  },
+  {
+    "id": "tin_9_b16",
+    "chapterId": "tin_9_c5",
+    "subjectId": "tin",
+    "grade": 9,
+    "title": "Bài 16: Dự án nghề nghiệp số"
+  },
+  {
+    "id": "toan_6_b1",
+    "chapterId": "toan_6_c1",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 1: Tập hợp các số tự nhiên & Thứ tự thực hiện phép tính"
+  },
+  {
+    "id": "toan_6_b2",
+    "chapterId": "toan_6_c1",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 2: Lũy thừa với số mũ tự nhiên"
+  },
+  {
+    "id": "toan_6_b3",
+    "chapterId": "toan_6_c1",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 3: Dấu hiệu chia hết cho 2, 5, 3, 9"
+  },
+  {
+    "id": "toan_6_b4",
+    "chapterId": "toan_6_c2",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 4: Ước và Bội, Số nguyên tố"
+  },
+  {
+    "id": "toan_6_b5",
+    "chapterId": "toan_6_c2",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 5: Ước chung lớn nhất & Bội chung nhỏ nhất"
+  },
+  {
+    "id": "toan_6_b6",
+    "chapterId": "toan_6_c3",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 6: Số nguyên âm & Tập hợp các số nguyên Z"
+  },
+  {
+    "id": "toan_6_b7",
+    "chapterId": "toan_6_c3",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 7: Phép cộng, trừ, nhân hai số nguyên"
+  },
+  {
+    "id": "toan_6_b8",
+    "chapterId": "toan_6_c3",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 8: Quy tắc dấu ngoặc và Chuyển vế"
+  },
+  {
+    "id": "toan_6_b9",
+    "chapterId": "toan_6_c4",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 9: Tam giác đều, hình vuông, lục giác đều"
+  },
+  {
+    "id": "toan_6_b10",
+    "chapterId": "toan_6_c4",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 10: Hình chữ nhật, hình thoi, hình bình hành, hình thang cân"
+  },
+  {
+    "id": "toan_6_b11",
+    "chapterId": "toan_6_c4",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 11: Chu vi và diện tích các hình phẳng trong thực tế"
+  },
+  {
+    "id": "toan_6_b12",
+    "chapterId": "toan_6_c5",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 12: Trục đối xứng và Tâm đối xứng"
+  },
+  {
+    "id": "toan_6_b13",
+    "chapterId": "toan_6_c6",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 13: Phân số bằng nhau, Rút gọn phân số"
+  },
+  {
+    "id": "toan_6_b14",
+    "chapterId": "toan_6_c6",
+    "subjectId": "toan",
+    "grade": 6,
+    "title": "Bài 14: Các phép tính với phân số và số thập phân"
+  },
+  {
+    "id": "toan_7_b1",
+    "chapterId": "toan_7_c1",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Bài 1: Tập hợp các số hữu tỉ và Phép tính số hữu tỉ Q"
+  },
+  {
+    "id": "toan_7_b2",
+    "chapterId": "toan_7_c1",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Bài 2: Lũy thừa với số mũ tự nhiên của số hữu tỉ"
+  },
+  {
+    "id": "toan_7_b3",
+    "chapterId": "toan_7_c2",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Bài 3: Số vô tỉ và Căn bậc hai số học"
+  },
+  {
+    "id": "toan_7_b4",
+    "chapterId": "toan_7_c2",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Bài 4: Tập hợp số thực R và Làm tròn số"
+  },
+  {
+    "id": "toan_7_b5",
+    "chapterId": "toan_7_c3",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Bài 5: Góc kề bù, đối đỉnh, so le trong, đồng vị"
+  },
+  {
+    "id": "toan_7_b6",
+    "chapterId": "toan_7_c3",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Bài 6: Định lí và chứng minh định lí song song"
+  },
+  {
+    "id": "toan_7_b7",
+    "chapterId": "toan_7_c4",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Bài 7: Tổng ba góc trong một tam giác"
+  },
+  {
+    "id": "toan_7_b8",
+    "chapterId": "toan_7_c4",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Bài 8: Các trường hợp bằng nhau của tam giác"
+  },
+  {
+    "id": "toan_7_b9",
+    "chapterId": "toan_7_c4",
+    "subjectId": "toan",
+    "grade": 7,
+    "title": "Bài 9: Tam giác cân và Định lí Py-ta-go"
+  },
+  {
+    "id": "toan_8_b1",
+    "chapterId": "toan_8_c1",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Bài 1: Đơn thức và đa thức nhiều biến"
+  },
+  {
+    "id": "toan_8_b2",
+    "chapterId": "toan_8_c1",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Bài 2: Các phép tính cộng trừ nhân chia đa thức"
+  },
+  {
+    "id": "toan_8_b3",
+    "chapterId": "toan_8_c2",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Bài 3: 7 Hằng đẳng thức đáng nhớ"
+  },
+  {
+    "id": "toan_8_b4",
+    "chapterId": "toan_8_c2",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Bài 4: Phân tích đa thức thành nhân tử"
+  },
+  {
+    "id": "toan_8_b5",
+    "chapterId": "toan_8_c3",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Bài 5: Tứ giác (Hình thang cân, Hình bình hành, Hình chữ nhật)"
+  },
+  {
+    "id": "toan_8_b6",
+    "chapterId": "toan_8_c3",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Bài 6: Hình thoi và Hình vuông"
+  },
+  {
+    "id": "toan_8_b7",
+    "chapterId": "toan_8_c4",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Bài 7: Định lí Thalès trong tam giác"
+  },
+  {
+    "id": "toan_8_b8",
+    "chapterId": "toan_8_c4",
+    "subjectId": "toan",
+    "grade": 8,
+    "title": "Bài 8: Tam giác đồng dạng"
+  },
+  {
+    "id": "toan_9_b1",
+    "chapterId": "toan_9_c1",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Bài 1: Phương trình bậc nhất hai ẩn & Hệ phương trình"
+  },
+  {
+    "id": "toan_9_b2",
+    "chapterId": "toan_9_c1",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Bài 2: Giải hệ phương trình (Phương pháp thế & Cộng đại số)"
+  },
+  {
+    "id": "toan_9_b3",
+    "chapterId": "toan_9_c3",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Bài 3: Căn bậc hai & Căn thức bậc hai"
+  },
+  {
+    "id": "toan_9_b4",
+    "chapterId": "toan_9_c3",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Bài 4: Các phép biến đổi biểu thức chứa căn"
+  },
+  {
+    "id": "toan_9_b5",
+    "chapterId": "toan_9_c4",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Bài 5: Tỉ số lượng giác góc nhọn (sin, cos, tan, cot)"
+  },
+  {
+    "id": "toan_9_b6",
+    "chapterId": "toan_9_c4",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Bài 6: Hệ thức lượng trong tam giác vuông"
+  },
+  {
+    "id": "toan_9_b7",
+    "chapterId": "toan_9_c6",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Bài 7: Phương trình bậc hai một ẩn ax² + bx + c = 0"
+  },
+  {
+    "id": "toan_9_b8",
+    "chapterId": "toan_9_c6",
+    "subjectId": "toan",
+    "grade": 9,
+    "title": "Bài 8: Định lí Vi-ét và Ứng dụng tính nhẩm nghiệm"
+  },
+  {
+    "id": "van_6_b1",
+    "chapterId": "van_6_c1",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Đọc hiểu: Bài học đường đời đầu tiên (Dế Mèn - Tô Hoài)"
+  },
+  {
+    "id": "van_6_b2",
+    "chapterId": "van_6_c1",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Thực hành Tiếng Việt: Từ đơn, từ phức, từ láy"
+  },
+  {
+    "id": "van_6_b3",
+    "chapterId": "van_6_c2",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Đọc hiểu: Chuyện cổ tích về loài người (Xuân Quỳnh)"
+  },
+  {
+    "id": "van_6_b4",
+    "chapterId": "van_6_c2",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Thực hành Tiếng Việt: Biện pháp tu từ so sánh, điệp từ"
+  },
+  {
+    "id": "van_6_b5",
+    "chapterId": "van_6_c3",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Đọc hiểu: Cô bé bán diêm (An-đéc-xen)"
+  },
+  {
+    "id": "van_6_b6",
+    "chapterId": "van_6_c3",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Thực hành Tiếng Việt: Cụm danh từ, cụm động từ"
+  },
+  {
+    "id": "van_6_b7",
+    "chapterId": "van_6_c4",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Đọc hiểu: Hoa bìm & Ca dao quê hương"
+  },
+  {
+    "id": "van_6_b8",
+    "chapterId": "van_6_c4",
+    "subjectId": "van",
+    "grade": 6,
+    "title": "Thực hành Tiếng Việt: Thơ lục bát, vần chân, vần lưng"
+  },
+  {
+    "id": "van_7_b1",
+    "chapterId": "van_7_c1",
+    "subjectId": "van",
+    "grade": 7,
+    "title": "Đọc hiểu: Bầy chim chìa vôi (Nguyễn Quang Thiều)"
+  },
+  {
+    "id": "van_7_b2",
+    "chapterId": "van_7_c1",
+    "subjectId": "van",
+    "grade": 7,
+    "title": "Thực hành Tiếng Việt: Mở rộng trạng ngữ trong câu"
+  },
+  {
+    "id": "van_7_b3",
+    "chapterId": "van_7_c2",
+    "subjectId": "van",
+    "grade": 7,
+    "title": "Đọc hiểu: Đồng dao mùa xuân (Nguyễn Khoa Điềm)"
+  },
+  {
+    "id": "van_7_b4",
+    "chapterId": "van_7_c2",
+    "subjectId": "van",
+    "grade": 7,
+    "title": "Thực hành Tiếng Việt: Thơ bốn chữ, năm chữ & Ngắt nhịp"
+  },
+  {
+    "id": "van_8_b1",
+    "chapterId": "van_8_c1",
+    "subjectId": "van",
+    "grade": 8,
+    "title": "Đọc hiểu: Lá cờ thêu sáu chữ vàng (Nguyễn Huy Tưởng)"
+  },
+  {
+    "id": "van_8_b2",
+    "chapterId": "van_8_c2",
+    "subjectId": "van",
+    "grade": 8,
+    "title": "Đọc hiểu: Thu điếu (Nguyễn Khuyến)"
+  },
+  {
+    "id": "van_8_b3",
+    "chapterId": "van_8_c3",
+    "subjectId": "van",
+    "grade": 8,
+    "title": "Đọc hiểu: Chiếu dời đô (Lý Công Uẩn)"
+  },
+  {
+    "id": "van_9_b1",
+    "chapterId": "van_9_c1",
+    "subjectId": "van",
+    "grade": 9,
+    "title": "Đọc hiểu: Chuyện người con gái Nam Xương (Nguyễn Dữ)"
+  },
+  {
+    "id": "van_9_b2",
+    "chapterId": "van_9_c2",
+    "subjectId": "van",
+    "grade": 9,
+    "title": "Đọc hiểu: Mùa xuân nho nhỏ (Thanh Hải)"
+  },
+  {
+    "id": "anh_6_b1",
+    "chapterId": "anh_6_c1",
+    "subjectId": "anh",
+    "grade": 6,
+    "title": "Unit 1: My New School - Present Simple & Adverbs of frequency"
+  },
+  {
+    "id": "anh_6_b2",
+    "chapterId": "anh_6_c2",
+    "subjectId": "anh",
+    "grade": 6,
+    "title": "Unit 2: My House - Prepositions of place & Rooms"
+  },
+  {
+    "id": "anh_6_b3",
+    "chapterId": "anh_6_c3",
+    "subjectId": "anh",
+    "grade": 6,
+    "title": "Unit 3: My Friends - Personality adjectives & Appearances"
+  },
+  {
+    "id": "anh_6_b4",
+    "chapterId": "anh_6_c4",
+    "subjectId": "anh",
+    "grade": 6,
+    "title": "Unit 4: My Neighbourhood - Comparative adjectives"
+  },
+  {
+    "id": "anh_7_b1",
+    "chapterId": "anh_7_c1",
+    "subjectId": "anh",
+    "grade": 7,
+    "title": "Unit 1: Hobbies - Verbs of liking & Present Simple"
+  },
+  {
+    "id": "anh_7_b2",
+    "chapterId": "anh_7_c2",
+    "subjectId": "anh",
+    "grade": 7,
+    "title": "Unit 2: Healthy Living - Simple sentences & Health advice"
+  },
+  {
+    "id": "anh_7_b3",
+    "chapterId": "anh_7_c3",
+    "subjectId": "anh",
+    "grade": 7,
+    "title": "Unit 3: Community Service - Past Simple & Volunteer activities"
+  },
+  {
+    "id": "anh_8_b1",
+    "chapterId": "anh_8_c1",
+    "subjectId": "anh",
+    "grade": 8,
+    "title": "Unit 1: Leisure Time - Verbs of preference + Gerunds / To-infinitives"
+  },
+  {
+    "id": "anh_8_b2",
+    "chapterId": "anh_8_c2",
+    "subjectId": "anh",
+    "grade": 8,
+    "title": "Unit 2: Life in the Countryside - Comparative forms of adverbs"
+  },
+  {
+    "id": "anh_9_b1",
+    "chapterId": "anh_9_c1",
+    "subjectId": "anh",
+    "grade": 9,
+    "title": "Unit 1: Local Community - Question words before to-infinitives & Phrasal verbs"
+  },
+  {
+    "id": "anh_9_b2",
+    "chapterId": "anh_9_c2",
+    "subjectId": "anh",
+    "grade": 9,
+    "title": "Unit 2: City Life - Double comparatives (The more... the more...)"
+  },
+  {
+    "id": "khtn_6_b1",
+    "chapterId": "khtn_6_c1",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Bài 1: Các phép đo (Dụng cụ đo, GHĐ, ĐCNN, Độ dài, Khối lượng)"
+  },
+  {
+    "id": "khtn_6_b2",
+    "chapterId": "khtn_6_c2",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Bài 2: Các thể của chất (Rắn, Lỏng, Khí & Nóng chảy, Bay hơi)"
+  },
+  {
+    "id": "khtn_6_b3",
+    "chapterId": "khtn_6_c3",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Bài 3: Tế bào - Đơn vị cơ bản của sự sống (Màng sinh chất, nhân)"
+  },
+  {
+    "id": "khtn_6_b4",
+    "chapterId": "khtn_6_c3",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Bài 4: Tế bào nhân thực & nhân sơ; Tế bào thực vật & động vật"
+  },
+  {
+    "id": "khtn_6_b5",
+    "chapterId": "khtn_6_c4",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Bài 5: Lực và tác dụng của lực (Lực tiếp xúc, Lực không tiếp xúc, Trọng lực)"
+  },
+  {
+    "id": "khtn_6_b6",
+    "chapterId": "khtn_6_c4",
+    "subjectId": "khtn",
+    "grade": 6,
+    "title": "Bài 6: Lực ma sát và lực cản trong đời sống"
+  },
+  {
+    "id": "khtn_7_b1",
+    "chapterId": "khtn_7_c1",
+    "subjectId": "khtn",
+    "grade": 7,
+    "title": "Bài 1: Nguyên tử và cấu tạo nguyên tử (Proton, nơtron, electron)"
+  },
+  {
+    "id": "khtn_7_b2",
+    "chapterId": "khtn_7_c2",
+    "subjectId": "khtn",
+    "grade": 7,
+    "title": "Bài 2: Tốc độ chuyển động (Công thức v = s/t)"
+  },
+  {
+    "id": "khtn_7_b3",
+    "chapterId": "khtn_7_c3",
+    "subjectId": "khtn",
+    "grade": 7,
+    "title": "Bài 3: Phản xạ ánh sáng và Định luật phản xạ ánh sáng"
+  },
+  {
+    "id": "khtn_7_b4",
+    "chapterId": "khtn_7_c4",
+    "subjectId": "khtn",
+    "grade": 7,
+    "title": "Bài 4: Quang hợp ở thực vật (Phương trình quang hợp & các yếu tố)"
+  },
+  {
+    "id": "khtn_8_b1",
+    "chapterId": "khtn_8_c1",
+    "subjectId": "khtn",
+    "grade": 8,
+    "title": "Bài 1: Phản ứng hóa học và Định luật bảo toàn khối lượng"
+  },
+  {
+    "id": "khtn_8_b2",
+    "chapterId": "khtn_8_c2",
+    "subjectId": "khtn",
+    "grade": 8,
+    "title": "Bài 2: Khối lượng riêng và Áp suất chất lỏng"
+  },
+  {
+    "id": "khtn_8_b3",
+    "chapterId": "khtn_8_c3",
+    "subjectId": "khtn",
+    "grade": 8,
+    "title": "Bài 3: Dòng điện, nguồn điện và Mạch điện cơ bản"
+  },
+  {
+    "id": "khtn_9_b1",
+    "chapterId": "khtn_9_c1",
+    "subjectId": "khtn",
+    "grade": 9,
+    "title": "Bài 1: Hiđrocacbon: Metan (CH4) và Etilen (C2H4)"
+  },
+  {
+    "id": "khtn_9_b2",
+    "chapterId": "khtn_9_c2",
+    "subjectId": "khtn",
+    "grade": 9,
+    "title": "Bài 2: Các thí nghiệm của Men-đen và Cấu trúc phân tử ADN"
+  },
+  {
+    "id": "lsdl_6_b1",
+    "chapterId": "lsdl_6_c1",
+    "subjectId": "lsdl",
+    "grade": 6,
+    "title": "Bài 1: Lịch sử và cuộc sống (Ý nghĩa của việc học lịch sử)"
+  },
+  {
+    "id": "lsdl_6_b2",
+    "chapterId": "lsdl_6_c1",
+    "subjectId": "lsdl",
+    "grade": 6,
+    "title": "Bài 2: Nguồn gốc loài người (Quá trình tiến hóa vượn người thành người)"
+  },
+  {
+    "id": "lsdl_6_b3",
+    "chapterId": "lsdl_6_c2",
+    "subjectId": "lsdl",
+    "grade": 6,
+    "title": "Bài 3: Nhà nước Văn Lang - Âu Lạc (Thời đại Hùng Vương & An Dương Vương)"
+  },
+  {
+    "id": "lsdl_6_b4",
+    "chapterId": "lsdl_6_c3",
+    "subjectId": "lsdl",
+    "grade": 6,
+    "title": "Bài 4: Trái Đất trong hệ Mặt Trời & Kinh độ, Vĩ độ, Bản đồ địa lý"
+  },
+  {
+    "id": "lsdl_7_b1",
+    "chapterId": "lsdl_7_c1",
+    "subjectId": "lsdl",
+    "grade": 7,
+    "title": "Bài 1: Quá trình hình thành và phát triển của chế độ phong kiến Tây Âu"
+  },
+  {
+    "id": "lsdl_7_b2",
+    "chapterId": "lsdl_7_c2",
+    "subjectId": "lsdl",
+    "grade": 7,
+    "title": "Bài 2: Ba lần kháng chiến chống quân xâm lược Mông - Nguyên thời Trần"
+  },
+  {
+    "id": "lsdl_8_b1",
+    "chapterId": "lsdl_8_c2",
+    "subjectId": "lsdl",
+    "grade": 8,
+    "title": "Bài 1: Khởi nghĩa Tây Sơn và đại thắng quân Thanh năm 1789"
+  },
+  {
+    "id": "lsdl_9_b1",
+    "chapterId": "lsdl_9_c2",
+    "subjectId": "lsdl",
+    "grade": 9,
+    "title": "Bài 1: Chiến dịch Điện Biên Phủ 1954 lừng lẫy năm châu"
+  },
+  {
+    "id": "gdcd_6_b1",
+    "chapterId": "gdcd_6_c1",
+    "subjectId": "gdcd",
+    "grade": 6,
+    "title": "Bài 1: Tự hào về truyền thống gia đình, dòng họ"
+  },
+  {
+    "id": "gdcd_6_b2",
+    "chapterId": "gdcd_6_c2",
+    "subjectId": "gdcd",
+    "grade": 6,
+    "title": "Bài 2: Yêu thương con người và Tôn trọng sự thật"
+  },
+  {
+    "id": "gdcd_7_b1",
+    "chapterId": "gdcd_7_c1",
+    "subjectId": "gdcd",
+    "grade": 7,
+    "title": "Bài 1: Tự hào về truyền thống quê hương và Di sản văn hóa"
+  },
+  {
+    "id": "gdcd_8_b1",
+    "chapterId": "gdcd_8_c2",
+    "subjectId": "gdcd",
+    "grade": 8,
+    "title": "Bài 1: Phòng, chống bạo lực học đường và Tuân thủ pháp luật"
+  },
+  {
+    "id": "gdcd_9_b1",
+    "chapterId": "gdcd_9_c1",
+    "subjectId": "gdcd",
+    "grade": 9,
+    "title": "Bài 1: Lý tưởng sống của thanh niên và Trách nhiệm công dân"
+  },
+  {
+    "id": "congnghe_6_b1",
+    "chapterId": "congnghe_6_c1",
+    "subjectId": "congnghe",
+    "grade": 6,
+    "title": "Bài 1: Khái quát về nhà ở và Ngôi nhà thông minh (Smart Home)"
+  },
+  {
+    "id": "congnghe_6_b2",
+    "chapterId": "congnghe_6_c2",
+    "subjectId": "congnghe",
+    "grade": 6,
+    "title": "Bài 2: Sử dụng và bảo quản thực phẩm an toàn trong gia đình"
+  },
+  {
+    "id": "congnghe_7_b1",
+    "chapterId": "congnghe_7_c1",
+    "subjectId": "congnghe",
+    "grade": 7,
+    "title": "Bài 1: Giới thiệu về trồng trọt và Đất trồng cây nông nghiệp"
+  },
+  {
+    "id": "congnghe_8_b1",
+    "chapterId": "congnghe_8_c1",
+    "subjectId": "congnghe",
+    "grade": 8,
+    "title": "Bài 1: Tiêu chuẩn bản vẽ kĩ thuật và Hình chiếu vuông góc"
+  },
+  {
+    "id": "congnghe_9_b1",
+    "chapterId": "congnghe_9_c1",
+    "subjectId": "congnghe",
+    "grade": 9,
+    "title": "Bài 1: Dụng cụ đo kiểm điện và Lắp đặt mạch điện gia đình cơ bản"
+  }
+];
 
 const DEFAULT_QUESTIONS = [];
 
@@ -1322,42 +2944,166 @@ class LMSDatabase {
     }
   }
 
-  getChapters() { return this.state.chapters || []; }
+  getDeletedChapterIds() {
+    if (!this.state.deletedChapterIds) this.state.deletedChapterIds = [];
+    return new Set(this.state.deletedChapterIds);
+  }
+
+  getDeletedLessonIds() {
+    if (!this.state.deletedLessonIds) this.state.deletedLessonIds = [];
+    return new Set(this.state.deletedLessonIds);
+  }
+
+  getChapters() {
+    if (!this.state.chapters) {
+      const defChaps = (typeof DEFAULT_CHAPTERS !== 'undefined') ? DEFAULT_CHAPTERS : [];
+      this.state.chapters = JSON.parse(JSON.stringify(defChaps));
+    }
+        const deleted = this.getDeletedChapterIds();
+    const defChaps = (typeof DEFAULT_CHAPTERS !== 'undefined') ? DEFAULT_CHAPTERS : [];
+    const defChapsMap = new Map(defChaps.map(dc => [dc.id, dc]));
+    const existingIds = new Set(this.state.chapters.map(c => c.id));
+    defChaps.forEach(dc => {
+      if (!existingIds.has(dc.id) && !deleted.has(dc.id)) {
+        this.state.chapters.push(dc);
+        existingIds.add(dc.id);
+      }
+    });
+
+    // Tự động đồng bộ chuẩn hóa tên chương mặc định KNTT
+    this.state.chapters.forEach(c => {
+      if (defChapsMap.has(c.id)) {
+        const standard = defChapsMap.get(c.id);
+        if (standard.title && c.title !== standard.title && !c.customUserEdited) {
+          c.title = standard.title;
+          c.grade = standard.grade;
+        }
+      }
+    });
+
+    return this.state.chapters
+      .filter(c => !deleted.has(c.id))
+      .map(c => {
+        const g = c.grade ? parseInt(c.grade, 10) : 6;
+        return { ...c, grade: g };
+      });
+  }
+
   addChapter(chapter) {
     if (!this.state.chapters) this.state.chapters = [];
+    if (!this.state.deletedChapterIds) this.state.deletedChapterIds = [];
+    this.state.deletedChapterIds = this.state.deletedChapterIds.filter(id => id !== chapter.id);
+    chapter.grade = parseInt(chapter.grade || 6, 10);
     this.state.chapters.push(chapter);
     this.save();
   }
+
   updateChapter(id, updatedData) {
     if (!this.state.chapters) return;
     const idx = this.state.chapters.findIndex(c => c.id === id);
     if (idx !== -1) {
+      if (updatedData.grade) updatedData.grade = parseInt(updatedData.grade, 10) || 6;
       this.state.chapters[idx] = { ...this.state.chapters[idx], ...updatedData };
       this.save();
     }
   }
+
   deleteChapter(id) {
-    if (!this.state.chapters) return;
+    if (!this.state.chapters) this.state.chapters = [];
+    if (!this.state.deletedChapterIds) this.state.deletedChapterIds = [];
+    if (!this.state.deletedChapterIds.includes(id)) {
+      this.state.deletedChapterIds.push(id);
+    }
     this.state.chapters = this.state.chapters.filter(c => c.id !== id);
+
+    // Cascade delete: xóa kèm tất cả các bài học thuộc chương này
+    if (!this.state.lessons) {
+      const defLess = (typeof DEFAULT_LESSONS !== 'undefined') ? DEFAULT_LESSONS : [];
+      this.state.lessons = JSON.parse(JSON.stringify(defLess));
+    }
+    if (!this.state.deletedLessonIds) this.state.deletedLessonIds = [];
+    
+    const lessonsInChap = this.state.lessons.filter(l => l.chapterId === id);
+    lessonsInChap.forEach(l => {
+      if (!this.state.deletedLessonIds.includes(l.id)) {
+        this.state.deletedLessonIds.push(l.id);
+      }
+    });
+    this.state.lessons = this.state.lessons.filter(l => l.chapterId !== id);
+
     this.save();
   }
 
-  getLessons() { return this.state.lessons || []; }
+  getLessons() {
+    const chaps = this.getChapters();
+    const chapGradeMap = {};
+    chaps.forEach(c => { chapGradeMap[c.id] = parseInt(c.grade || 6, 10); });
+
+    if (!this.state.lessons) {
+      const defLess = (typeof DEFAULT_LESSONS !== 'undefined') ? DEFAULT_LESSONS : [];
+      this.state.lessons = JSON.parse(JSON.stringify(defLess));
+    }
+        const deleted = this.getDeletedLessonIds();
+    const defLess = (typeof DEFAULT_LESSONS !== 'undefined') ? DEFAULT_LESSONS : [];
+    const defLessMap = new Map(defLess.map(dl => [dl.id, dl]));
+    const existingIds = new Set(this.state.lessons.map(l => l.id));
+    defLess.forEach(dl => {
+      if (!existingIds.has(dl.id) && !deleted.has(dl.id)) {
+        this.state.lessons.push(dl);
+        existingIds.add(dl.id);
+      }
+    });
+
+    // Tự động đồng bộ chuẩn hóa tên bài học mặc định KNTT nếu phiên bản cũ lưu sai
+    this.state.lessons.forEach(l => {
+      if (defLessMap.has(l.id)) {
+        const standard = defLessMap.get(l.id);
+        if (standard.title && l.title !== standard.title && !l.customUserEdited) {
+          l.title = standard.title;
+          l.chapterId = standard.chapterId;
+          l.grade = standard.grade;
+        }
+      }
+    });
+
+    return this.state.lessons
+      .filter(l => !deleted.has(l.id))
+      .map(l => {
+        const g = l.grade ? parseInt(l.grade, 10) : (chapGradeMap[l.chapterId] || 6);
+        return { ...l, grade: g };
+      });
+  }
+
   addLesson(lesson) {
     if (!this.state.lessons) this.state.lessons = [];
+    if (!this.state.deletedLessonIds) this.state.deletedLessonIds = [];
+    this.state.deletedLessonIds = this.state.deletedLessonIds.filter(id => id !== lesson.id);
+    if (!lesson.grade && lesson.chapterId) {
+      const chaps = this.getChapters();
+      const ch = chaps.find(c => c.id === lesson.chapterId);
+      lesson.grade = ch ? (ch.grade || 6) : 6;
+    }
+    lesson.grade = parseInt(lesson.grade || 6, 10);
     this.state.lessons.push(lesson);
     this.save();
   }
+
   updateLesson(id, updatedData) {
     if (!this.state.lessons) return;
     const idx = this.state.lessons.findIndex(l => l.id === id);
     if (idx !== -1) {
+      if (updatedData.grade) updatedData.grade = parseInt(updatedData.grade, 10) || 6;
       this.state.lessons[idx] = { ...this.state.lessons[idx], ...updatedData };
       this.save();
     }
   }
+
   deleteLesson(id) {
-    if (!this.state.lessons) return;
+    if (!this.state.lessons) this.state.lessons = [];
+    if (!this.state.deletedLessonIds) this.state.deletedLessonIds = [];
+    if (!this.state.deletedLessonIds.includes(id)) {
+      this.state.deletedLessonIds.push(id);
+    }
     this.state.lessons = this.state.lessons.filter(l => l.id !== id);
     this.save();
   }

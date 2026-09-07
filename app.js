@@ -2138,13 +2138,30 @@ class LMSApp {
     if (this.selectedQuestionChapter === undefined) this.selectedQuestionChapter = 'all';
     if (this.selectedQuestionLesson === undefined) this.selectedQuestionLesson = 'all';
 
-    // Apply Grade Filter
+    // Filter chapters & lessons by Grade
+    const allSubjectChapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters().filter(c => c.subjectId === this.currentQuestionSubject) : [];
+    let chapters = allSubjectChapters;
+    if (this.selectedQuestionGrade !== 'all') {
+      chapters = allSubjectChapters.filter(c => String(c.grade || '6') === String(this.selectedQuestionGrade));
+    }
+
+    // Auto-reset active chapter/lesson if it does not belong to the selected Grade
+    if (this.selectedQuestionChapter !== 'all' && !chapters.some(c => c.id === this.selectedQuestionChapter)) {
+      this.selectedQuestionChapter = 'all';
+      this.selectedQuestionLesson = 'all';
+    }
+
+    const allSubjectLessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons().filter(l => l.subjectId === this.currentQuestionSubject || allSubjectChapters.some(c => c.id === l.chapterId)) : [];
+    let lessons = allSubjectLessons.filter(l => chapters.some(c => c.id === l.chapterId) || (this.selectedQuestionGrade !== 'all' && String(l.grade || '6') === String(this.selectedQuestionGrade)));
+
+    if (this.selectedQuestionLesson !== 'all' && !lessons.some(l => l.id === this.selectedQuestionLesson)) {
+      this.selectedQuestionLesson = 'all';
+    }
+
+    // Apply Grade Filter on questions
     if (this.selectedQuestionGrade !== 'all') {
       subjectQuestions = subjectQuestions.filter(q => String(q.grade || '6') === String(this.selectedQuestionGrade));
     }
-
-    const chapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters().filter(c => c.subjectId === this.currentQuestionSubject) : [];
-    const lessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons().filter(l => l.subjectId === this.currentQuestionSubject || chapters.some(c => c.id === l.chapterId)) : [];
 
     // Apply search filter
     if (this.questionSearchKeyword.trim()) {
@@ -2186,7 +2203,7 @@ class LMSApp {
       <div style="padding: 1.25rem; font-family: var(--font-body); animation: fadeIn 0.25s ease-out;">
         
         <!-- Header Controls & Breadcrumb -->
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem; border-bottom:2px solid #e2e8f0; padding-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem; border-bottom:2px solid #e2e8f0; padding-bottom:1rem;">
           <div>
             <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
               <button id="btn-back-to-subjects" class="btn btn-sm" style="background:#f1f5f9; color:#475569; ; font-weight: 400; border:1px solid #cbd5e1; border-radius:8px; cursor:pointer; padding:0.3rem 0.75rem; display:flex; align-items:center; gap:0.35rem;">
@@ -2196,9 +2213,24 @@ class LMSApp {
               <span style="color:#0284c7; font-weight: 500; font-size:0.9rem;">${currentSubjectObj.name}</span>
             </div>
 
-            <h2 style="margin:0.25rem 0 0 0; font-family:var(--font-title); ; font-weight: 400; color:#0f172a; font-size:1.4rem; display:flex; align-items:center; gap:0.5rem;">
+            <h2 style="margin:0.25rem 0 0 0; font-family:var(--font-title); ; font-weight: 700; color:#0f172a; font-size:1.35rem; display:flex; align-items:center; gap:0.5rem;">
               <span>${currentSubjectObj.icon || '📚'}</span> NGÂN HÀNG CÂU HỎI MÔN ${currentSubjectObj.name.toUpperCase()}
             </h2>
+
+            <!-- Segmented Grade Switcher Pills directly in Header -->
+            <div style="display:flex; align-items:center; gap:0.4rem; margin-top:0.6rem; flex-wrap:wrap;">
+              <span style="font-weight:700; font-size:0.82rem; color:#475569; display:flex; align-items:center; gap:0.3rem; margin-right:0.2rem;">
+                <span>🎓</span> Khối Lớp:
+              </span>
+              <button class="btn-level2-grade ${this.selectedQuestionGrade === 'all' ? 'active-grade-btn' : ''}" data-grade="all" style="padding:0.32rem 0.75rem; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border:1.5px solid ${this.selectedQuestionGrade === 'all' ? '#0284c7' : '#cbd5e1'}; background:${this.selectedQuestionGrade === 'all' ? '#0284c7' : '#ffffff'}; color:${this.selectedQuestionGrade === 'all' ? '#ffffff' : '#334155'}; transition:all 0.15s; box-shadow:${this.selectedQuestionGrade === 'all' ? '0 2px 8px rgba(2,132,199,0.3)' : 'none'};">
+                🌐 Tất cả các khối
+              </button>
+              ${[6, 7, 8, 9].map(g => `
+                <button class="btn-level2-grade ${String(this.selectedQuestionGrade) === String(g) ? 'active-grade-btn' : ''}" data-grade="${g}" style="padding:0.32rem 0.75rem; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; border:1.5px solid ${String(this.selectedQuestionGrade) === String(g) ? '#0284c7' : '#cbd5e1'}; background:${String(this.selectedQuestionGrade) === String(g) ? '#0284c7' : '#ffffff'}; color:${String(this.selectedQuestionGrade) === String(g) ? '#ffffff' : '#334155'}; transition:all 0.15s; box-shadow:${String(this.selectedQuestionGrade) === String(g) ? '0 2px 8px rgba(2,132,199,0.3)' : 'none'};">
+                  🎓 Khối ${g}
+                </button>
+              `).join('')}
+            </div>
           </div>
 
           <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
@@ -2221,36 +2253,53 @@ class LMSApp {
           
           <!-- LEFT SIDEBAR: TREE OF CHAPTERS & LESSONS -->
           <div style="width:310px; flex-shrink:0; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:16px; padding:1.1rem; box-shadow:0 4px 14px rgba(0,0,0,0.03);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem; border-bottom:1.5px solid #f1f5f9; padding-bottom:0.6rem;">
-              <h3 style="margin:0; font-family:var(--font-title); ; font-weight: 400; font-size:0.95rem; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
-                📂 CHƯƠNG & BÀI HỌC
-              </h3>
-              <span style="font-size:0.75rem; background:#e0f2fe; color:#0369a1; padding:0.15rem 0.5rem; border-radius:6px; font-weight: 400;">
-                ${chapters.length} chương
-              </span>
+            <div style="margin-bottom:0.85rem; border-bottom:1.5px solid #f1f5f9; padding-bottom:0.75rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.45rem;">
+                <h3 style="margin:0; font-family:var(--font-title); font-weight: 700; font-size:0.95rem; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
+                  📂 CHƯƠNG & BÀI HỌC
+                </h3>
+                <span style="font-size:0.75rem; background:#e0f2fe; color:#0369a1; padding:0.15rem 0.5rem; border-radius:6px; font-weight: 600;">
+                  ${chapters.length} chương
+                </span>
+              </div>
+
+              <!-- Grade filter inside sidebar for direct context switching -->
+              <div>
+                <label style="font-size:0.72rem; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.4px; display:block; margin-bottom:0.25rem;">
+                  🎓 Khối Lớp xem Chủ Đề:
+                </label>
+                <select id="sidebar-filter-grade" style="width:100%; padding:0.45rem 0.65rem; border-radius:8px; border:1.5px solid #0284c7; font-size:0.85rem; font-weight:700; background:#f0f9ff; color:#0369a1; outline:none; cursor:pointer;">
+                  <option value="all" ${this.selectedQuestionGrade === 'all' ? 'selected' : ''}>🌐 Xem tất cả các khối (6 - 9)</option>
+                  <option value="6" ${this.selectedQuestionGrade === '6' ? 'selected' : ''}>🎓 Khối 6</option>
+                  <option value="7" ${this.selectedQuestionGrade === '7' ? 'selected' : ''}>🎓 Khối 7</option>
+                  <option value="8" ${this.selectedQuestionGrade === '8' ? 'selected' : ''}>🎓 Khối 8</option>
+                  <option value="9" ${this.selectedQuestionGrade === '9' ? 'selected' : ''}>🎓 Khối 9</option>
+                </select>
+              </div>
             </div>
 
             <!-- Tree View Items -->
-            <div style="display:flex; flex-direction:column; gap:0.35rem; max-height:62vh; overflow-y:auto; padding-right:0.2rem;">
+            <div style="display:flex; flex-direction:column; gap:0.35rem; max-height:58vh; overflow-y:auto; padding-right:0.2rem;">
               
               <!-- Option: Tất cả -->
               <div class="tree-filter-item ${this.selectedQuestionChapter === 'all' && this.selectedQuestionLesson === 'all' ? 'active-tree' : ''}" data-chap="all" data-les="all" style="padding:0.55rem 0.75rem; border-radius:10px; cursor:pointer; font-weight: 500; font-size:0.85rem; display:flex; justify-content:space-between; align-items:center; background:${this.selectedQuestionChapter === 'all' && this.selectedQuestionLesson === 'all' ? '#eff6ff' : '#f8fafc'}; color:${this.selectedQuestionChapter === 'all' && this.selectedQuestionLesson === 'all' ? '#2563eb' : '#334155'}; border:1.5px solid ${this.selectedQuestionChapter === 'all' && this.selectedQuestionLesson === 'all' ? '#2563eb' : '#e2e8f0'}; transition:all 0.15s ease;">
                 <span>🌐 Tất cả Bài học & Chương</span>
                 <span style="font-size:0.75rem; background:${this.selectedQuestionChapter === 'all' && this.selectedQuestionLesson === 'all' ? '#2563eb' : '#cbd5e1'}; color:#fff; padding:0.1rem 0.45rem; border-radius:10px;">
-                  ${allQuestions.filter(q => q.subjectId === this.currentQuestionSubject).length}
+                  ${allQuestions.filter(q => q.subjectId === this.currentQuestionSubject && (this.selectedQuestionGrade === 'all' || String(q.grade || '6') === String(this.selectedQuestionGrade))).length}
                 </span>
               </div>
 
               ${chapters.map(c => {
-                const chapQCount = allQuestions.filter(q => q.subjectId === this.currentQuestionSubject && (q.chapterId === c.id || (q.topic && q.topic.includes(c.id)))).length;
+                const chapQCount = allQuestions.filter(q => q.subjectId === this.currentQuestionSubject && (q.chapterId === c.id || (q.topic && q.topic.includes(c.id))) && (this.selectedQuestionGrade === 'all' || String(q.grade || '6') === String(this.selectedQuestionGrade))).length;
                 const chapLessons = lessons.filter(l => l.chapterId === c.id || (l.topic && l.topic.includes(c.id)));
                 const isChapActive = (this.selectedQuestionChapter === c.id && this.selectedQuestionLesson === 'all');
+                const gradeTag = (this.selectedQuestionGrade === 'all') ? `<span style="font-size:0.68rem; background:#ede9fe; color:#6d28d9; border:1px solid #ddd6fe; padding:0.08rem 0.35rem; border-radius:4px; font-weight:700; margin-right:0.3rem;">K${c.grade || 6}</span>` : '';
 
                 return `
                   <div style="margin-top:0.35rem;">
                     <!-- Chapter Item -->
                     <div class="tree-filter-item ${isChapActive ? 'active-tree' : ''}" data-chap="${c.id}" data-les="all" style="padding:0.45rem 0.6rem; border-radius:8px; cursor:pointer; font-weight: 500; font-size:0.83rem; display:flex; justify-content:space-between; align-items:center; background:${isChapActive ? '#0284c7' : '#f1f5f9'}; color:${isChapActive ? '#ffffff' : '#0f172a'}; border:1px solid ${isChapActive ? '#0284c7' : '#cbd5e1'};">
-                      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; margin-right:0.3rem;" title="${c.title}">📂 ${c.title}</span>
+                      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; margin-right:0.3rem;" title="${c.title}">📂 ${gradeTag}${c.title}</span>
                       <div style="display:flex; align-items:center; gap:0.2rem; flex-shrink:0;">
                         <span style="font-size:0.72rem; background:${isChapActive ? '#ffffff' : '#e2e8f0'}; color:${isChapActive ? '#0284c7' : '#475569'}; padding:0.1rem 0.35rem; border-radius:8px; font-weight: 500;">${chapQCount}</span>
                         <button class="btn-edit-chap" data-chap-id="${c.id}" title="Sửa tên chương" style="background:none; border:none; cursor:pointer; padding:0.1rem 0.2rem; font-size:0.75rem; color:${isChapActive ? '#fff' : '#0284c7'}; font-weight: 400;">✏️</button>
@@ -2298,8 +2347,11 @@ class LMSApp {
             
             <!-- Breadcrumb Header showing active filter -->
             <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:0.75rem 1rem; border-radius:12px; border:1.5px solid #e2e8f0; margin-bottom:1rem;">
-              <div style="font-weight: 500; font-size:0.88rem; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
+              <div style="font-weight: 500; font-size:0.88rem; color:#0f172a; display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
                 <span style="color:#475569; font-weight:400; font-size:0.88rem;">Đang lọc câu hỏi:</span>
+                <span style="background:#ede9fe; color:#6d28d9; border:1px solid #ddd6fe; padding:0.18rem 0.55rem; border-radius:6px; font-weight:700; font-size:0.8rem;">
+                  🎓 ${this.selectedQuestionGrade === 'all' ? 'Tất cả các khối' : `Khối ${this.selectedQuestionGrade}`}
+                </span>
                 ${activeLessonObj ? `<span style="background:#dcfce7; color:#15803d; padding:0.18rem 0.55rem; border-radius:6px;">📖 ${activeLessonObj.title}</span>` : (activeChapterObj ? `<span style="background:#e0f2fe; color:#0369a1; padding:0.18rem 0.55rem; border-radius:6px;">📂 ${activeChapterObj.title}</span>` : `<span style="background:#eff6ff; color:#2563eb; padding:0.18rem 0.55rem; border-radius:6px;">🌐 Tất cả Bài học & Chương</span>`)}
                 <span style="color:#475569; font-weight:400; font-size:0.88rem; font-size:0.8rem;">(${subjectQuestions.length} câu hỏi)</span>
               </div>
@@ -2331,18 +2383,9 @@ class LMSApp {
                 </button>
               </div>
 
-              <!-- Grade & Difficulty Filters -->
+              <!-- Difficulty Filter -->
               <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-                <!-- Bộ lọc Khối Lớp Level 2 -->
-                <select id="select-q-grade" style="padding:0.45rem 0.75rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.82rem; font-weight: 700; background:#fff; color:#1e293b;">
-                  <option value="all" ${this.selectedQuestionGrade === 'all' ? 'selected' : ''}>🎓 Khối: Tất cả</option>
-                  <option value="6" ${this.selectedQuestionGrade === '6' ? 'selected' : ''}>🎓 Khối 6</option>
-                  <option value="7" ${this.selectedQuestionGrade === '7' ? 'selected' : ''}>🎓 Khối 7</option>
-                  <option value="8" ${this.selectedQuestionGrade === '8' ? 'selected' : ''}>🎓 Khối 8</option>
-                  <option value="9" ${this.selectedQuestionGrade === '9' ? 'selected' : ''}>🎓 Khối 9</option>
-                </select>
-
-                <select id="select-q-difficulty" style="padding:0.45rem 0.75rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.82rem; font-weight: 400; background:#fff;">
+                <select id="select-q-difficulty" style="padding:0.45rem 0.75rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.82rem; font-weight: 400; background:#fff; outline:none; cursor:pointer;">
                   <option value="all" ${this.selectedDifficulty === 'all' ? 'selected' : ''}>Mức độ: Tất cả</option>
                   <option value="nhan_biet" ${this.selectedDifficulty === 'nhan_biet' ? 'selected' : ''}>🟢 Nhận biết (Biết)</option>
                   <option value="thong_hieu" ${this.selectedDifficulty === 'thong_hieu' ? 'selected' : ''}>🟡 Thông hiểu (Hiểu)</option>
@@ -2414,9 +2457,10 @@ class LMSApp {
                       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.6rem; margin-bottom:0.6rem;">
                         ${q.options.map((opt, optIdx) => {
                           const optImg = (q.optionImages && q.optionImages[optIdx]) ? q.optionImages[optIdx] : '';
+                          const cleanOpt = String(opt || '').replace(/^[A-Da-d][\.\)]\s*/, '').trim();
                           return `
                           <div style="padding:0.6rem 0.85rem; border-radius:10px; border:1.5px solid ${optIdx === q.correctAnswer ? '#10b981' : '#e2e8f0'}; background:${optIdx === q.correctAnswer ? '#ecfdf5' : '#f8fafc'}; font-size:0.9rem; color:${optIdx === q.correctAnswer ? '#047857' : '#334155'}; font-weight:${optIdx === q.correctAnswer ? '800' : '500'};">
-                            <div><strong>${String.fromCharCode(65 + optIdx)}.</strong> ${opt} ${optIdx === q.correctAnswer ? '✅' : ''}</div>
+                            <div><strong>${String.fromCharCode(65 + optIdx)}.</strong> ${cleanOpt} ${optIdx === q.correctAnswer ? '✅' : ''}</div>
                             ${optImg ? `
                               <div style="margin-top:0.5rem; text-align:center; background:#fff; padding:0.4rem; border-radius:8px; border:1px solid #cbd5e1;">
                                 <img src="${optImg}" style="max-height:180px; max-width:100%; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="window.LMSAppInstance && window.LMSAppInstance._zoomImage('${optImg}')" title="Bấm để xem ảnh đáp án" />
@@ -2437,7 +2481,8 @@ class LMSApp {
                         <div style="display:flex; flex-direction:column; gap:0.45rem; margin-bottom:0.65rem;">
                           ${rawItems.map((it, itIdx) => {
                             const label = String.fromCharCode(97 + itIdx);
-                            const itemText = typeof it === 'string' ? it : (it.text || it.title || `Ý ${label}`);
+                            const rawText = typeof it === 'string' ? it : (it.text || it.title || `Ý ${label}`);
+                            const itemText = String(rawText || '').replace(/^[a-dA-D][\.\)]\s*/, '').trim();
                             const isTrue = it.isCorrect === true;
                             return `
                               <div style="display:flex; justify-content:space-between; align-items:center; padding:0.45rem 0.8rem; border-radius:8px; background:#f8fafc; border:1px solid #e2e8f0; font-size:0.88rem;">
@@ -2498,13 +2543,17 @@ class LMSApp {
     dom.querySelectorAll('.btn-delete-chap').forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
+        e.preventDefault();
         const chapId = btn.getAttribute('data-chap-id');
-        const chapObj = chapters.find(c => c.id === chapId);
-        if (confirm(`⚠️ Bạn có chắc chắn muốn xóa Chương "${chapObj ? chapObj.title : chapId}" không?`)) {
+        const chaptersList = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
+        const chapObj = chaptersList.find(c => c.id === chapId);
+        const title = chapObj ? chapObj.title : chapId;
+        if (confirm(`⚠️ Bạn có chắc chắn muốn xóa Chương/Chủ đề "${title}" không?\n(Lưu ý: Các bài học thuộc chương này cũng sẽ được xóa theo)`)) {
           if (typeof db !== 'undefined' && db.deleteChapter) {
             db.deleteChapter(chapId);
-            this.showToast('✅ Đã xóa chương thành công!');
+            this.showToast(`✅ Đã xóa chương "${title}" thành công!`);
             if (this.selectedQuestionChapter === chapId) this.selectedQuestionChapter = 'all';
+            this.selectedQuestionLesson = 'all';
             this.render_questions(dom);
           }
         }
@@ -2514,6 +2563,7 @@ class LMSApp {
     dom.querySelectorAll('.btn-edit-les').forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
+        e.preventDefault();
         const lesId = btn.getAttribute('data-les-id');
         this.showEditLessonModal(lesId, dom);
       };
@@ -2522,12 +2572,15 @@ class LMSApp {
     dom.querySelectorAll('.btn-delete-les').forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
+        e.preventDefault();
         const lesId = btn.getAttribute('data-les-id');
-        const lesObj = lessons.find(l => l.id === lesId);
-        if (confirm(`⚠️ Bạn có chắc chắn muốn xóa Bài học "${lesObj ? lesObj.title : lesId}" không?`)) {
+        const lessonsList = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons() : [];
+        const lesObj = lessonsList.find(l => l.id === lesId);
+        const title = lesObj ? lesObj.title : lesId;
+        if (confirm(`⚠️ Bạn có chắc chắn muốn xóa Bài học "${title}" không?`)) {
           if (typeof db !== 'undefined' && db.deleteLesson) {
             db.deleteLesson(lesId);
-            this.showToast('✅ Đã xóa bài học thành công!');
+            this.showToast(`✅ Đã xóa bài học "${title}" thành công!`);
             if (this.selectedQuestionLesson === lesId) this.selectedQuestionLesson = 'all';
             this.render_questions(dom);
           }
@@ -2579,10 +2632,24 @@ class LMSApp {
       };
     });
 
-    const gradeSelect = dom.querySelector('#select-q-grade');
-    if (gradeSelect) {
-      gradeSelect.onchange = (e) => {
+    // Grade switcher pills in Level 2 Header
+    dom.querySelectorAll('.btn-level2-grade').forEach(btn => {
+      btn.onclick = () => {
+        const gr = btn.getAttribute('data-grade');
+        this.selectedQuestionGrade = gr;
+        this.selectedQuestionChapter = 'all';
+        this.selectedQuestionLesson = 'all';
+        this.render_questions(dom);
+      };
+    });
+
+    // Grade dropdown in Level 2 Sidebar
+    const sidebarGradeSelect = dom.querySelector('#sidebar-filter-grade');
+    if (sidebarGradeSelect) {
+      sidebarGradeSelect.onchange = (e) => {
         this.selectedQuestionGrade = e.target.value;
+        this.selectedQuestionChapter = 'all';
+        this.selectedQuestionLesson = 'all';
         this.render_questions(dom);
       };
     }
@@ -2737,32 +2804,56 @@ class LMSApp {
     };
   }
 
+  // =========================================================================
+  // 🌟 MODAL THÊM CHỦ ĐỀ / CHƯƠNG MỚI (ĐỒNG BỘ 100% VỚI KHỐI LỚP ĐANG CHỌN)
+  // =========================================================================
   showAddChapterModal(subjectId, parentDom) {
     const oldModal = document.getElementById('add-chapter-modal');
     if (oldModal) oldModal.remove();
+
+    const targetSubjectId = subjectId || this.currentQuestionSubject || 'tin';
+    const activeGradeNum = (this.selectedQuestionGrade && this.selectedQuestionGrade !== 'all')
+      ? (parseInt(this.selectedQuestionGrade, 10) || 6)
+      : 6;
 
     const modal = document.createElement('div');
     modal.id = 'add-chapter-modal';
     modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1rem; animation:fadeIn 0.2s ease-out;';
 
     modal.innerHTML = `
-      <div class="glass-card" style="width:100%; max-width:480px; padding:1.5rem; border-radius:16px; background:#fff; box-shadow:0 25px 50px rgba(0,0,0,0.3); font-family:var(--font-title);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.5rem;">
-          <h3 style="margin:0; color:#0284c7; ; font-weight: 400; font-size:1.1rem; display:flex; align-items:center; gap:0.4rem;">
-            ➕ Thêm Chương / Chủ Đề Mới
-          </h3>
-          <button id="close-add-chap-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#475569; font-weight:400; font-size:0.88rem;">&times;</button>
+      <div class="glass-card" style="width:100%; max-width:500px; padding:1.75rem; border-radius:18px; background:#fff; box-shadow:0 25px 60px rgba(0,0,0,0.3); font-family:var(--font-body); border:2px solid #0284c7;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.6rem;">
+          <div>
+            <div style="font-size:0.75rem; font-weight:700; color:#0284c7; text-transform:uppercase; letter-spacing:0.5px;">QUẢN LÝ NGÂN HÀNG CÂU HỎI</div>
+            <h3 style="margin:0; color:#0f172a; font-family:var(--font-title); font-weight:800; font-size:1.2rem; display:flex; align-items:center; gap:0.4rem;">
+              ➕ Thêm Chương / Chủ Đề Mới
+            </h3>
+          </div>
+          <button id="close-add-chap-modal" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:50%; font-size:1.2rem; cursor:pointer; color:#475569; display:flex; align-items:center; justify-content:center;">&times;</button>
         </div>
 
-        <form id="form-add-chap" style="display:flex; flex-direction:column; gap:1rem;">
+        <form id="form-add-chap" style="display:flex; flex-direction:column; gap:1.1rem;">
           <div>
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Tên Chương / Chủ Đề:</label>
-            <input type="text" id="input-chap-title" placeholder="Ví dụ: Chương I: Số tự nhiên, Unit 3: My Friends..." required style="width:100%; padding:0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400;">
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">🎓 Khối Lớp Cần Thêm:</label>
+            <select id="input-chap-grade" style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:2px solid #0284c7; font-weight:700; font-size:0.92rem; background:#f0f9ff; color:#0369a1; cursor:pointer;">
+              <option value="6" ${activeGradeNum === 6 ? 'selected' : ''}>🎓 Khối 6</option>
+              <option value="7" ${activeGradeNum === 7 ? 'selected' : ''}>🎓 Khối 7</option>
+              <option value="8" ${activeGradeNum === 8 ? 'selected' : ''}>🎓 Khối 8</option>
+              <option value="9" ${activeGradeNum === 9 ? 'selected' : ''}>🎓 Khối 9</option>
+            </select>
+            <span style="font-size:0.78rem; color:#64748b; margin-top:0.25rem; display:block;">Chương/Chủ đề mới sẽ được xếp chính xác vào khối lớp này.</span>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem;">
-            <button type="button" id="btn-cancel-add-chap" class="btn btn-secondary" style="font-weight: 400;">Hủy</button>
-            <button type="submit" class="btn btn-primary" style="; font-weight: 400; background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:none; padding:0.6rem 1.25rem; border-radius:8px;">💾 Lưu Chương Mới</button>
+          <div>
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">📂 Tên Chương / Chủ Đề:</label>
+            <input type="text" id="input-chap-title" placeholder="Ví dụ: Chương I: Máy tính và cộng đồng, Chủ đề 2: Đại số..." required style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.92rem; outline:none;">
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; border-top:1px solid #f1f5f9; padding-top:0.75rem;">
+            <button type="button" id="btn-cancel-add-chap" class="btn btn-secondary" style="font-weight:600; padding:0.6rem 1.25rem;">Hủy</button>
+            <button type="submit" class="btn btn-primary" style="font-weight:800; font-family:var(--font-title); background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:none; padding:0.65rem 1.5rem; border-radius:10px; box-shadow:0 4px 14px rgba(2,132,199,0.35); cursor:pointer;">
+              💾 Lưu Chương Mới
+            </button>
           </div>
         </form>
       </div>
@@ -2775,28 +2866,47 @@ class LMSApp {
     modal.querySelector('#form-add-chap').onsubmit = (e) => {
       e.preventDefault();
       const title = modal.querySelector('#input-chap-title').value.trim();
+      const grade = parseInt(modal.querySelector('#input-chap-grade').value, 10) || activeGradeNum;
       if (title && typeof db !== 'undefined' && db.addChapter) {
+        const newChapId = 'c_' + Date.now();
         db.addChapter({
-          id: 'c_' + Date.now(),
-          subjectId,
-          title
+          id: newChapId,
+          subjectId: targetSubjectId,
+          title,
+          grade
         });
-        this.showToast(`✅ Đã thêm "${title}" thành công!`);
+        this.showToast(`✅ Đã thêm Chủ đề "${title}" vào Khối ${grade} thành công!`);
         modal.remove();
+        // Cập nhật chế độ xem sang đúng khối lớp và mở chương mới tạo
+        this.selectedQuestionGrade = String(grade);
+        this.selectedQuestionChapter = newChapId;
+        this.selectedQuestionLesson = 'all';
         this.render_questions(parentDom);
       }
     };
   }
 
+  // =========================================================================
+  // 🌟 MODAL THÊM BÀI HỌC MỚI (ĐỒNG BỘ 100% VỚI KHỐI LỚP VÀ CHỦ ĐỀ ĐANG CHỌN)
+  // =========================================================================
   showAddLessonModal(subjectId, parentDom) {
     const oldModal = document.getElementById('add-lesson-modal');
     if (oldModal) oldModal.remove();
 
-    const targetSubjectId = subjectId || this.currentQuestionSubject;
-    let chapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
-    if (targetSubjectId) {
-      const filtered = chapters.filter(c => c.subjectId === targetSubjectId || !c.subjectId);
-      if (filtered.length > 0) chapters = filtered;
+    const targetSubjectId = subjectId || this.currentQuestionSubject || 'tin';
+    const allChaps = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
+
+    // Xác định khối lớp mặc định: nếu đang chọn khối cụ thể thì dùng khối đó
+    let defaultGrade = (this.selectedQuestionGrade && this.selectedQuestionGrade !== 'all')
+      ? (parseInt(this.selectedQuestionGrade, 10) || 6)
+      : 6;
+
+    // Nếu đang chọn một chương cụ thể, lấy khối lớp của chương đó
+    if (this.selectedQuestionChapter && this.selectedQuestionChapter !== 'all') {
+      const activeChap = allChaps.find(c => c.id === this.selectedQuestionChapter);
+      if (activeChap && activeChap.grade) {
+        defaultGrade = parseInt(activeChap.grade, 10) || defaultGrade;
+      }
     }
 
     const modal = document.createElement('div');
@@ -2804,30 +2914,47 @@ class LMSApp {
     modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1rem; animation:fadeIn 0.2s ease-out;';
 
     modal.innerHTML = `
-      <div class="glass-card" style="width:100%; max-width:480px; padding:1.5rem; border-radius:16px; background:#fff; box-shadow:0 25px 50px rgba(0,0,0,0.3); font-family:var(--font-title);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.5rem;">
-          <h3 style="margin:0; color:#15803d; ; font-weight: 400; font-size:1.1rem; display:flex; align-items:center; gap:0.4rem;">
-            📖 Thêm Bài Học Mới
-          </h3>
-          <button id="close-add-les-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#475569; font-weight:400; font-size:0.88rem;">&times;</button>
+      <div class="glass-card" style="width:100%; max-width:520px; padding:1.75rem; border-radius:18px; background:#fff; box-shadow:0 25px 60px rgba(0,0,0,0.3); font-family:var(--font-body); border:2px solid #10b981;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.6rem;">
+          <div>
+            <div style="font-size:0.75rem; font-weight:700; color:#10b981; text-transform:uppercase; letter-spacing:0.5px;">QUẢN LÝ NGÂN HÀNG CÂU HỎI</div>
+            <h3 style="margin:0; color:#0f172a; font-family:var(--font-title); font-weight:800; font-size:1.2rem; display:flex; align-items:center; gap:0.4rem;">
+              📖 Thêm Bài Học Mới
+            </h3>
+          </div>
+          <button id="close-add-les-modal" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:50%; font-size:1.2rem; cursor:pointer; color:#475569; display:flex; align-items:center; justify-content:center;">&times;</button>
         </div>
 
-        <form id="form-add-les" style="display:flex; flex-direction:column; gap:1rem;">
+        <form id="form-add-les" style="display:flex; flex-direction:column; gap:1.1rem;">
+          <!-- Khối Lớp -->
           <div>
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Thuộc Chương / Chủ Đề:</label>
-            <select id="input-les-chap" style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400;">
-              ${chapters.map(c => `<option value="${c.id}">${c.title}</option>`).join('')}
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">🎓 Khối Lớp:</label>
+            <select id="input-les-grade" style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:2px solid #10b981; font-weight:700; font-size:0.92rem; background:#f0fdf4; color:#047857; cursor:pointer;">
+              <option value="6" ${defaultGrade === 6 ? 'selected' : ''}>🎓 Khối 6</option>
+              <option value="7" ${defaultGrade === 7 ? 'selected' : ''}>🎓 Khối 7</option>
+              <option value="8" ${defaultGrade === 8 ? 'selected' : ''}>🎓 Khối 8</option>
+              <option value="9" ${defaultGrade === 9 ? 'selected' : ''}>🎓 Khối 9</option>
             </select>
           </div>
 
+          <!-- Chương / Chủ đề lọc theo khối -->
           <div>
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Tên Bài Học:</label>
-            <input type="text" id="input-les-title" placeholder="Ví dụ: Bài 1: Tập hợp. Phần tử của tập hợp..." required style="width:100%; padding:0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400;">
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">📂 Thuộc Chương / Chủ Đề (Theo Khối Lớp):</label>
+            <select id="input-les-chap" style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:600; font-size:0.9rem; background:#fff;">
+            </select>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem;">
-            <button type="button" id="btn-cancel-add-les" class="btn btn-secondary" style="font-weight: 400;">Hủy</button>
-            <button type="submit" class="btn btn-primary" style="; font-weight: 400; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; padding:0.6rem 1.25rem; border-radius:8px;">💾 Lưu Bài Học Mới</button>
+          <!-- Tên bài học -->
+          <div>
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">📖 Tên Bài Học:</label>
+            <input type="text" id="input-les-title" placeholder="Ví dụ: Bài 1: Thông tin và dữ liệu, Bài 4: Mạng máy tính..." required style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.92rem; outline:none;">
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; border-top:1px solid #f1f5f9; padding-top:0.75rem;">
+            <button type="button" id="btn-cancel-add-les" class="btn btn-secondary" style="font-weight:600; padding:0.6rem 1.25rem;">Hủy</button>
+            <button type="submit" class="btn btn-primary" style="font-weight:800; font-family:var(--font-title); background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; padding:0.65rem 1.5rem; border-radius:10px; box-shadow:0 4px 14px rgba(16,185,129,0.35); cursor:pointer;">
+              💾 Lưu Bài Học Mới
+            </button>
           </div>
         </form>
       </div>
@@ -2837,24 +2964,71 @@ class LMSApp {
     modal.querySelector('#close-add-les-modal').onclick = () => modal.remove();
     modal.querySelector('#btn-cancel-add-les').onclick = () => modal.remove();
 
+    const gradeSelect = modal.querySelector('#input-les-grade');
+    const chapSelect = modal.querySelector('#input-les-chap');
+
+    // Hàm cập nhật danh sách chương thuộc đúng khối lớp được chọn
+    const updateChapsForGrade = () => {
+      const chosenGrade = parseInt(gradeSelect.value, 10);
+      const chapsOfGrade = allChaps.filter(c => 
+        (c.subjectId === targetSubjectId || !c.subjectId) && 
+        (parseInt(c.grade || 6, 10) === chosenGrade)
+      );
+
+      if (chapsOfGrade.length > 0) {
+        chapSelect.innerHTML = chapsOfGrade.map(c => `
+          <option value="${c.id}" ${(c.id === this.selectedQuestionChapter) ? 'selected' : ''}>${c.title}</option>
+        `).join('');
+      } else {
+        chapSelect.innerHTML = `<option value="">📂 (Chưa có chương cho Khối ${chosenGrade} - Hệ thống sẽ tự tạo chương)</option>`;
+      }
+    };
+
+    gradeSelect.onchange = updateChapsForGrade;
+    updateChapsForGrade(); // Khởi tạo ngay khi mở modal
+
     modal.querySelector('#form-add-les').onsubmit = (e) => {
       e.preventDefault();
-      const chapterId = modal.querySelector('#input-les-chap').value;
+      const selectedGrade = parseInt(gradeSelect.value, 10) || defaultGrade;
+      let chapterId = chapSelect.value;
       const title = modal.querySelector('#input-les-title').value.trim();
+
+      // Nếu chưa có chương nào, tự động tạo chương chung cho khối đó
+      if (!chapterId) {
+        chapterId = 'c_' + targetSubjectId + '_' + selectedGrade + '_' + Date.now();
+        if (typeof db !== 'undefined' && db.addChapter) {
+          db.addChapter({
+            id: chapterId,
+            subjectId: targetSubjectId,
+            title: `Chương trình Khối ${selectedGrade}`,
+            grade: selectedGrade
+          });
+        }
+      }
+
       if (title && typeof db !== 'undefined' && db.addLesson) {
+        const newLessonId = 'l_' + Date.now();
         db.addLesson({
-          id: 'l_' + Date.now(),
+          id: newLessonId,
           chapterId,
           subjectId: targetSubjectId,
+          grade: selectedGrade,
           title
         });
-        this.showToast(`✅ Đã thêm bài học "${title}" thành công!`);
+        this.showToast(`✅ Đã thêm bài học "${title}" vào Khối ${selectedGrade} thành công!`);
         modal.remove();
+        // Chuyển view ngay đến đúng Khối lớp và Bài học mới tạo
+        this.selectedQuestionGrade = String(selectedGrade);
+        this.selectedQuestionChapter = chapterId;
+        this.selectedQuestionLesson = newLessonId;
         this.render_questions(parentDom);
       }
     };
   }
 
+  // =========================================================================
+  // 🌟 MODAL SỬA TÊN CHỦ ĐỀ / CHƯƠNG (CÓ CHỌN KHỐI LỚP)
+  // =========================================================================
   showEditChapterModal(chapterId, parentDom) {
     const chapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
     const chap = chapters.find(c => c.id === chapterId);
@@ -2863,28 +3037,40 @@ class LMSApp {
     const oldModal = document.getElementById('edit-chapter-modal');
     if (oldModal) oldModal.remove();
 
+    const chapGrade = parseInt(chap.grade || 6, 10);
+
     const modal = document.createElement('div');
     modal.id = 'edit-chapter-modal';
     modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1rem; animation:fadeIn 0.2s ease-out;';
 
     modal.innerHTML = `
-      <div class="glass-card" style="width:100%; max-width:480px; padding:1.5rem; border-radius:16px; background:#fff; box-shadow:0 25px 50px rgba(0,0,0,0.3); font-family:var(--font-title);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.5rem;">
-          <h3 style="margin:0; color:#0284c7; ; font-weight: 400; font-size:1.1rem; display:flex; align-items:center; gap:0.4rem;">
+      <div class="glass-card" style="width:100%; max-width:480px; padding:1.75rem; border-radius:18px; background:#fff; box-shadow:0 25px 60px rgba(0,0,0,0.3); font-family:var(--font-body); border:2px solid #0284c7;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.6rem;">
+          <h3 style="margin:0; color:#0284c7; font-family:var(--font-title); font-weight:800; font-size:1.15rem; display:flex; align-items:center; gap:0.4rem;">
             ✏️ Sửa Tên Chương / Chủ Đề
           </h3>
-          <button id="close-edit-chap-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#475569; font-weight:400; font-size:0.88rem;">&times;</button>
+          <button id="close-edit-chap-modal" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:50%; font-size:1.2rem; cursor:pointer; color:#475569; display:flex; align-items:center; justify-content:center;">&times;</button>
         </div>
 
-        <form id="form-edit-chap" style="display:flex; flex-direction:column; gap:1rem;">
+        <form id="form-edit-chap" style="display:flex; flex-direction:column; gap:1.1rem;">
           <div>
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Tên Chương / Chủ Đề:</label>
-            <input type="text" id="input-edit-chap-title" value="${chap.title}" required style="width:100%; padding:0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400;">
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">🎓 Khối Lớp:</label>
+            <select id="input-edit-chap-grade" style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:2px solid #0284c7; font-weight:700; font-size:0.92rem; background:#f0f9ff; color:#0369a1; cursor:pointer;">
+              <option value="6" ${chapGrade === 6 ? 'selected' : ''}>🎓 Khối 6</option>
+              <option value="7" ${chapGrade === 7 ? 'selected' : ''}>🎓 Khối 7</option>
+              <option value="8" ${chapGrade === 8 ? 'selected' : ''}>🎓 Khối 8</option>
+              <option value="9" ${chapGrade === 9 ? 'selected' : ''}>🎓 Khối 9</option>
+            </select>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem;">
-            <button type="button" id="btn-cancel-edit-chap" class="btn btn-secondary" style="font-weight: 400;">Hủy</button>
-            <button type="submit" class="btn btn-primary" style="; font-weight: 400; background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:none; padding:0.6rem 1.25rem; border-radius:8px;">💾 Lưu Cập Nhật</button>
+          <div>
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">📂 Tên Chương / Chủ Đề:</label>
+            <input type="text" id="input-edit-chap-title" value="${chap.title}" required style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.92rem; outline:none;">
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; border-top:1px solid #f1f5f9; padding-top:0.75rem;">
+            <button type="button" id="btn-cancel-edit-chap" class="btn btn-secondary" style="font-weight:600; padding:0.6rem 1.25rem;">Hủy</button>
+            <button type="submit" class="btn btn-primary" style="font-weight:800; font-family:var(--font-title); background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#fff; border:none; padding:0.65rem 1.5rem; border-radius:10px; box-shadow:0 4px 14px rgba(2,132,199,0.35); cursor:pointer;">💾 Lưu Cập Nhật</button>
           </div>
         </form>
       </div>
@@ -2897,26 +3083,30 @@ class LMSApp {
     modal.querySelector('#form-edit-chap').onsubmit = (e) => {
       e.preventDefault();
       const title = modal.querySelector('#input-edit-chap-title').value.trim();
+      const grade = parseInt(modal.querySelector('#input-edit-chap-grade').value, 10) || 6;
       if (title && typeof db !== 'undefined' && db.updateChapter) {
-        db.updateChapter(chapterId, { title });
-        this.showToast(`✅ Đã cập nhật tên chương thành công!`);
+        db.updateChapter(chapterId, { title, grade });
+        this.showToast(`✅ Đã cập nhật chương (Khối ${grade}) thành công!`);
         modal.remove();
+        this.selectedQuestionGrade = String(grade);
+        this.selectedQuestionChapter = chapterId;
         this.render_questions(parentDom);
       }
     };
   }
 
+  // =========================================================================
+  // 🌟 MODAL SỬA TÊN BÀI HỌC (CÓ ĐỒNG BỘ KHỐI LỚP VÀ CHƯƠNG)
+  // =========================================================================
   showEditLessonModal(lessonId, parentDom) {
     const lessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons() : [];
     const les = lessons.find(l => l.id === lessonId);
     if (!les) return;
 
-    const targetSubjectId = les.subjectId || (typeof db !== 'undefined' && db.getChapters && db.getChapters().find(c => c.id === les.chapterId)?.subjectId) || this.currentQuestionSubject;
-    let chapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
-    if (targetSubjectId) {
-      const filtered = chapters.filter(c => c.subjectId === targetSubjectId || !c.subjectId);
-      if (filtered.length > 0) chapters = filtered;
-    }
+    const allChaps = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
+    const targetSubjectId = les.subjectId || allChaps.find(c => c.id === les.chapterId)?.subjectId || this.currentQuestionSubject;
+
+    const currentLesGrade = parseInt(les.grade || allChaps.find(c => c.id === les.chapterId)?.grade || 6, 10);
 
     const oldModal = document.getElementById('edit-lesson-modal');
     if (oldModal) oldModal.remove();
@@ -2926,30 +3116,39 @@ class LMSApp {
     modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.6); backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1rem; animation:fadeIn 0.2s ease-out;';
 
     modal.innerHTML = `
-      <div class="glass-card" style="width:100%; max-width:480px; padding:1.5rem; border-radius:16px; background:#fff; box-shadow:0 25px 50px rgba(0,0,0,0.3); font-family:var(--font-title);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.5rem;">
-          <h3 style="margin:0; color:#15803d; ; font-weight: 400; font-size:1.1rem; display:flex; align-items:center; gap:0.4rem;">
+      <div class="glass-card" style="width:100%; max-width:500px; padding:1.75rem; border-radius:18px; background:#fff; box-shadow:0 25px 60px rgba(0,0,0,0.3); font-family:var(--font-body); border:2px solid #10b981;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; border-bottom:1.5px solid #e2e8f0; padding-bottom:0.6rem;">
+          <h3 style="margin:0; color:#15803d; font-family:var(--font-title); font-weight:800; font-size:1.15rem; display:flex; align-items:center; gap:0.4rem;">
             ✏️ Sửa Tên Bài Học
           </h3>
-          <button id="close-edit-les-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#475569; font-weight:400; font-size:0.88rem;">&times;</button>
+          <button id="close-edit-les-modal" style="background:#f1f5f9; border:none; width:32px; height:32px; border-radius:50%; font-size:1.2rem; cursor:pointer; color:#475569; display:flex; align-items:center; justify-content:center;">&times;</button>
         </div>
 
-        <form id="form-edit-les" style="display:flex; flex-direction:column; gap:1rem;">
+        <form id="form-edit-les" style="display:flex; flex-direction:column; gap:1.1rem;">
           <div>
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Thuộc Chương / Chủ Đề:</label>
-            <select id="input-edit-les-chap" style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400;">
-              ${chapters.map(c => `<option value="${c.id}" ${les.chapterId === c.id ? 'selected' : ''}>${c.title}</option>`).join('')}
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">🎓 Khối Lớp:</label>
+            <select id="input-edit-les-grade" style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:2px solid #10b981; font-weight:700; font-size:0.92rem; background:#f0fdf4; color:#047857; cursor:pointer;">
+              <option value="6" ${currentLesGrade === 6 ? 'selected' : ''}>🎓 Khối 6</option>
+              <option value="7" ${currentLesGrade === 7 ? 'selected' : ''}>🎓 Khối 7</option>
+              <option value="8" ${currentLesGrade === 8 ? 'selected' : ''}>🎓 Khối 8</option>
+              <option value="9" ${currentLesGrade === 9 ? 'selected' : ''}>🎓 Khối 9</option>
             </select>
           </div>
 
           <div>
-            <label style="font-weight: 500; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">Tên Bài Học:</label>
-            <input type="text" id="input-edit-les-title" value="${les.title}" required style="width:100%; padding:0.65rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 400;">
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">📂 Thuộc Chương / Chủ Đề:</label>
+            <select id="input-edit-les-chap" style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:600; font-size:0.9rem; background:#fff;">
+            </select>
           </div>
 
-          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem;">
-            <button type="button" id="btn-cancel-edit-les" class="btn btn-secondary" style="font-weight: 400;">Hủy</button>
-            <button type="submit" class="btn btn-primary" style="; font-weight: 400; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; padding:0.6rem 1.25rem; border-radius:8px;">💾 Lưu Cập Nhật</button>
+          <div>
+            <label style="font-weight:700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">📖 Tên Bài Học:</label>
+            <input type="text" id="input-edit-les-title" value="${les.title}" required style="width:100%; padding:0.65rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.92rem; outline:none;">
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; border-top:1px solid #f1f5f9; padding-top:0.75rem;">
+            <button type="button" id="btn-cancel-edit-les" class="btn btn-secondary" style="font-weight:600; padding:0.6rem 1.25rem;">Hủy</button>
+            <button type="submit" class="btn btn-primary" style="font-weight:800; font-family:var(--font-title); background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#fff; border:none; padding:0.65rem 1.5rem; border-radius:10px; box-shadow:0 4px 14px rgba(16,185,129,0.35); cursor:pointer;">💾 Lưu Cập Nhật</button>
           </div>
         </form>
       </div>
@@ -2959,21 +3158,51 @@ class LMSApp {
     modal.querySelector('#close-edit-les-modal').onclick = () => modal.remove();
     modal.querySelector('#btn-cancel-edit-les').onclick = () => modal.remove();
 
+    const editGradeSelect = modal.querySelector('#input-edit-les-grade');
+    const editChapSelect = modal.querySelector('#input-edit-les-chap');
+
+    const updateEditChaps = () => {
+      const chosenGrade = parseInt(editGradeSelect.value, 10);
+      const chapsOfGrade = allChaps.filter(c => 
+        (c.subjectId === targetSubjectId || !c.subjectId) && 
+        (parseInt(c.grade || 6, 10) === chosenGrade)
+      );
+
+      if (chapsOfGrade.length > 0) {
+        editChapSelect.innerHTML = chapsOfGrade.map(c => `
+          <option value="${c.id}" ${c.id === les.chapterId ? 'selected' : ''}>${c.title}</option>
+        `).join('');
+      } else {
+        editChapSelect.innerHTML = `<option value="">📂 (Chưa có chương cho Khối ${chosenGrade})</option>`;
+      }
+    };
+
+    editGradeSelect.onchange = updateEditChaps;
+    updateEditChaps();
+
     modal.querySelector('#form-edit-les').onsubmit = (e) => {
       e.preventDefault();
-      const chapterId = modal.querySelector('#input-edit-les-chap').value;
+      const selectedGrade = parseInt(editGradeSelect.value, 10) || currentLesGrade;
+      const chapterId = editChapSelect.value;
       const title = modal.querySelector('#input-edit-les-title').value.trim();
       if (title && typeof db !== 'undefined' && db.updateLesson) {
-        db.updateLesson(lessonId, { chapterId, title });
-        this.showToast(`✅ Đã cập nhật bài học thành công!`);
+        db.updateLesson(lessonId, { chapterId, title, grade: selectedGrade });
+        this.showToast(`✅ Đã cập nhật bài học (Khối ${selectedGrade}) thành công!`);
         modal.remove();
+        this.selectedQuestionGrade = String(selectedGrade);
+        this.selectedQuestionLesson = lessonId;
         this.render_questions(parentDom);
       }
     };
   }
 
-// =========================================================================
-  // 🌟 HỆ THỐNG SINH CÂU HỎI AI CHUẨN GDPT 2018 & SGK KẾT NỐI TRI THỨC (CV 7991)
+  // =========================================================================
+  // 🌟 BỘ SINH CÂU HỎI AI BÁM SÁT 100% CHỦ ĐỀ, BÀI, KHỐI LỚP SGK KẾT NỐI TRI THỨC
+  // Chuẩn Thông tư 22/2021/TT-BGDĐT, Công văn 7991 và Chương trình GDPT 2018
+  // =========================================================================
+  // =========================================================================
+  // 🌟 BỘ SINH CÂU HỎI AI BÁM SÁT 100% CHỦ ĐỀ, BÀI, KHỐI LỚP SGK KẾT NỐI TRI THỨC
+  // Chuẩn Thông tư 22/2021/TT-BGDĐT, Công văn 7991 và Chương trình GDPT 2018
   // =========================================================================
   generateAIQuestionsList(subjectId, grade, topic, qType, difficulty, count, chapterId = null, lessonId = null, teacherPrompt = '') {
     const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
@@ -2992,525 +3221,1118 @@ class LMSApp {
     const lessonTitle = lesObj ? lesObj.title : '';
 
     const cleanPrompt = (teacherPrompt || '').trim();
-    let cleanTopic = topic ? topic.trim() : (lessonTitle || chapterTitle || cleanPrompt || `Chương trình Kết Nối Tri Thức Khối ${gNum}`);
+    const cleanTopic = (topic || '').trim() || lessonTitle || chapterTitle || `Chương trình Kết Nối Tri Thức Khối ${gNum}`;
 
-    const generated = [];
-    const diffList = (difficulty === 'all' || !difficulty)
-      ? ['nhan_biet', 'thong_hieu', 'van_dung', 'van_dung_cao']
-      : [difficulty];
-    const typeList = (qType === 'all' || !qType)
-      ? ['trac_nghiem', 'dung_sai', 'tra_loi_ngan', 'tu_luan']
-      : [qType];
+    const cleanOptPrefix = (str) => String(str || '').replace(/^[A-Da-d][\.\)]\s*/, '').trim();
+    const cleanItemPrefix = (str) => String(str || '').replace(/^[a-dA-D][\.\)]\s*/, '').trim();
 
-    // Kho tri thức SGK Kết Nối Tri Thức Với Cuộc Sống theo môn & khối lớp
-    const knttKnowledgeBase = {
-      toan: {
-        6: [
-          { topic: 'Tập hợp các số tự nhiên & Phép tính', sampleNum: 15, rule: 'Thứ tự thực hiện phép tính, Lũy thừa, Tính chất chia hết' },
-          { topic: 'Số nguyên (Số nguyên âm, Số đối, Phép cộng trừ nhân chia)', sampleNum: -18, rule: 'Quy tắc dấu ngoặc, Quy tắc chuyển vế trong tập hợp Z' },
-          { topic: 'Phân số & Số thập phân', sampleNum: '3/4', rule: 'Phân số bằng nhau, Rút gọn phân số, Phép tính phân số và tỉ số phần trăm' },
-          { topic: 'Hình học trực quan (Hình tam giác đều, Hình vuông, Lục giác đều, Hình thoi, Hình bình hành, Hình thang cân)', rule: 'Chu vi và diện tích các hình phẳng trong thực tiễn' },
-          { topic: 'Tính đối xứng của hình phẳng & Thu thập dữ liệu thống kê', rule: 'Trục đối xứng, Tâm đối xứng, Biểu đồ cột kép' }
+    // Helper: chuẩn hóa chuỗi tìm kiếm từ khóa
+    const normText = (str) => String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    // =========================================================================
+    // KHO NGÂN HÀNG CÂU HỎI MẪU CHUẨN SGK KẾT NỐI TRI THỨC VỚI CUỘC SỐNG
+    // Được gán trực tiếp lessonId, chapterId, grade, type, difficulty
+    // =========================================================================
+    const KNTT_QUESTIONS_POOL = [
+      // -------------------------------------------------------------
+      // 1. TIN HỌC 6 (SGK KNTT)
+      // -------------------------------------------------------------
+      // Bài 1: Thông tin và dữ liệu
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c1', lessonId: 'tin_6_b1',
+        topic: 'Thông tin và Dữ liệu', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Thông tin là gì?',
+        options: [
+          'Những hiểu biết của con người về thế giới xung quanh và về chính bản thân mình',
+          'Tất cả các con số và văn bản được lưu trữ trong máy tính',
+          'Các hình ảnh và âm thanh thu nhận được từ màn hình máy tính',
+          'Tín hiệu điện truyền đi trong dây cáp mạng viễn thông'
         ],
-        7: [
-          { topic: 'Số hữu tỉ & Các phép tính trong tập hợp Q', sampleNum: '2.5', rule: 'Cộng trừ nhân chia số hữu tỉ, Lũy thừa với số mũ tự nhiên' },
-          { topic: 'Số thực & Căn bậc hai số học', sampleNum: 7, rule: 'Số vô tỉ, Số thực, Làm tròn số và ước lượng kết quả' },
-          { topic: 'Góc và đường thẳng song song', rule: 'Hai góc kề bù, so le trong, đồng vị, Định lí và chứng minh định lí' },
-          { topic: 'Tam giác bằng nhau (c-c-c, c-g-c, g-c-g) & Tam giác cân', rule: 'Định lí tổng 3 góc trong tam giác, Định lí Py-ta-go' },
-          { topic: 'Biểu thức đại số & Đa thức một biến', rule: 'Nghiệm của đa thức, Cộng trừ đa thức một biến' }
-        ],
-        8: [
-          { topic: 'Đa thức nhiều biến & Hằng đẳng thức đáng nhớ', rule: '7 Hằng đẳng thức đáng nhớ, Phân tích đa thức thành nhân tử' },
-          { topic: 'Phân thức đại số & Phép tính', rule: 'Điều kiện xác định của phân thức, Quy đồng mẫu thức' },
-          { topic: 'Tứ giác (Hình thang cân, Hình bình hành, Hình chữ nhật, Hình thoi, Hình vuông)', rule: 'Tính chất và dấu hiệu nhận biết các tứ giác đặc biệt' },
-          { topic: 'Định lí Thalès trong tam giác & Tam giác đồng dạng', rule: 'Tỉ số đoạn thẳng, Các trường hợp đồng dạng của tam giác' },
-          { topic: 'Hàm số bậc nhất y = ax + b', rule: 'Đồ thị hàm số bậc nhất, Hệ số góc của đường thẳng' }
-        ],
-        9: [
-          { topic: 'Phương trình và hệ phương trình bậc nhất hai ẩn', rule: 'Phương pháp thế, Phương pháp cộng đại số' },
-          { topic: 'Phương trình bậc hai một ẩn & Định lí Vi-ét', rule: 'Công thức nghiệm, Ứng dụng định lí Vi-ét tính nhẩm nghiệm' },
-          { topic: 'Hệ thức lượng trong tam giác vuông & Tỉ số lượng giác', rule: 'Sin, Cos, Tan, Cot và bài toán thực tế đo chiều cao' },
-          { topic: 'Đường tròn & Góc với đường tròn', rule: 'Góc ở tâm, Góc nội tiếp, Tứ giác nội tiếp đường tròn' }
-        ]
+        correctAnswer: 0,
+        explanation: 'Theo SGK Tin học 6 (KNTT), thông tin là những hiểu biết của con người về thế giới xung quanh và về chính bản thân mình.'
       },
-      van: {
-        6: [
-          { topic: 'Bài 1: Tôi và các bạn (Truyện đồng thoại)', textSample: 'Dế Mèn phiêu lưu ký - Tô Hoài', focus: 'Người kể chuyện ngôi thứ nhất, Người kể chuyện ngôi thứ ba, Nhân hóa, So sánh' },
-          { topic: 'Bài 2: Gõ cửa trái tim (Thơ)', textSample: 'Chuyện cổ tích về loài người - Xuân Quỳnh', focus: 'Thể thơ, Vần, Nhịp, Yếu tố tự sự và miêu tả trong thơ' },
-          { topic: 'Bài 3: Yêu thương và chia sẻ (Truyện cổ tích & Truyện ngắn)', textSample: 'Cô bé bán diêm - An-đéc-xen', focus: 'Chi tiết nghệ thuật, Chủ đề và thông điệp nhân văn' },
-          { topic: 'Bài 4: Quê hương yêu dấu (Thơ lục bát)', textSample: 'Hoa bìm - Nguyễn Đức Mậu', focus: 'Vần chân, Vần lưng, Nhịp lục bát 2/2/2, 4/4' },
-          { topic: 'Thực hành Tiếng Việt: Từ đơn, Từ phức (Từ ghép, Từ láy), Biện pháp tu từ', focus: 'Nghĩa của từ, Thành phần chính của câu' }
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c1', lessonId: 'tin_6_b1',
+        topic: 'Thông tin và Dữ liệu', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Vật mang tin là gì?',
+        options: [
+          'Phương tiện, vật thể được dùng để lưu trữ và truyền đạt thông tin',
+          'Bộ phận duy nhất trong máy vi tính phát ra âm thanh',
+          'Màn hình hiển thị hình ảnh đồ họa của máy tính',
+          'Dây dẫn kết nối máy tính với nguồn điện xoay chiều'
         ],
-        7: [
-          { topic: 'Bài 1: Bầu trời tuổi thơ (Truyện ngắn & Tản văn)', textSample: 'Bầy chim chìa vôi - Nguyễn Quang Thiều', focus: 'Tính cách nhân vật, Không gian, Thời gian nghệ thuật' },
-          { topic: 'Bài 2: Khúc nhạc tâm hồn (Thơ bốn chữ, năm chữ)', textSample: 'Đồng dao mùa xuân - Nguyễn Khoa Điềm', focus: 'Hình ảnh thơ, Cảm xúc trữ tình, Biện pháp điệp từ ngữ' },
-          { topic: 'Bài 3: Cội nguồn yêu thương (Nghị luận xã hội)', textSample: 'Vừa nhắm mắt vừa mở cửa sổ', focus: 'Ý kiến, Lí lẽ, Bằng chứng' },
-          { topic: 'Thực hành Tiếng Việt: Mở rộng trạng ngữ, Biện pháp nói giảm nói tránh, Nói quá', focus: 'Thuật ngữ, Nghĩa của từ trong ngữ cảnh' }
-        ],
-        8: [
-          { topic: 'Bài 1: Câu chuyện của lịch sử (Truyện lịch sử)', textSample: 'Lá cờ thêu sáu chữ vàng - Nguyễn Huy Tưởng', focus: 'Cốt truyện, Bối cảnh lịch sử, Lòng yêu nước' },
-          { topic: 'Bài 2: Vẻ đẹp cổ điển (Thơ Đường luật)', textSample: 'Thu điếu - Nguyễn Khuyến', focus: 'Bố cục Đề - Thực - Luận - Kết, Niêm, Luật, Đối' },
-          { topic: 'Bài 3: Lời của sông núi (Văn bản nghị luận trung đại)', textSample: 'Hịch tướng sĩ - Trần Quốc Tuấn', focus: 'Luận điểm, Lí lẽ đanh thép, Tình cảm sục sôi' },
-          { topic: 'Thực hành Tiếng Việt: Từ Hán Việt, Sắc thái nghĩa của từ, Đoạn văn diễn dịch - quy nạp', focus: 'Liên kết câu và đoạn văn' }
-        ],
-        9: [
-          { topic: 'Bài 1: Thế giới kì ảo (Chuyện người con gái Nam Xương - Nguyễn Dữ)', focus: 'Yếu tố kì ảo, Số phận người phụ nữ trong xã hội phong kiến' },
-          { topic: 'Bài 2: Khát vọng cống hiến (Lặng lẽ Sa Pa - Nguyễn Thành Long, Mùa xuân nho nhỏ)', focus: 'Vẻ đẹp người lao động, Lẽ sống cao đẹp' },
-          { topic: 'Bài 3: Tiếng nói của tình yêu thương (Bếp lửa - Bằng Việt, Ánh trăng)', focus: 'Tình cảm gia đình, Đạo lí Uống nước nhớ nguồn' }
-        ]
+        correctAnswer: 0,
+        explanation: 'Vật mang tin là vật, phương tiện mang hoặc chứa thông tin (như sách, báo, thẻ nhớ, USB, đĩa CD...).'
       },
-      anh: {
-        6: [
-          { unit: 'Unit 1: My New School', grammar: 'Present Simple, Adverbs of frequency', voc: 'school things, subjects, activities' },
-          { unit: 'Unit 2: My House', grammar: 'Prepositions of place, Possessive case', voc: 'types of house, rooms, furniture' },
-          { unit: 'Unit 3: My Friends', grammar: 'Present Continuous for future, Personality adjectives', voc: 'body parts, appearances, character' },
-          { unit: 'Unit 4: My Neighbourhood', grammar: 'Comparative adjectives', voc: 'places in town, directions' },
-          { unit: 'Unit 5: Natural Wonders of Viet Nam', grammar: 'Countable / Uncountable nouns, Modal verb Must / Mustn\'t', voc: 'travel items, nature' }
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c1', lessonId: 'tin_6_b1',
+        topic: 'Thông tin và Dữ liệu', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Dữ liệu trong máy tính là gì?',
+        options: [
+          'Thông tin dưới dạng chữ viết, chữ số, hình ảnh, âm thanh được máy tính tiếp nhận và xử lý',
+          'Ý nghĩ nảy sinh trong bộ não con người khi quan sát sự vật',
+          'Tốc độ hoạt động của bộ vi xử lý trung tâm CPU',
+          'Năng lượng điện giúp máy tính duy trì hoạt động liên tục'
         ],
-        7: [
-          { unit: 'Unit 1: Hobbies', grammar: 'Present Simple for hobbies, Verbs of liking / disliking + V-ing', voc: 'hobbies, outdoor activities' },
-          { unit: 'Unit 2: Healthy Living', grammar: 'Simple sentences (Compound sentences with and, but, or, so)', voc: 'health problems, healthy habits' },
-          { unit: 'Unit 3: Community Service', grammar: 'Past Simple tense with regular and irregular verbs', voc: 'volunteer activities, donating' },
-          { unit: 'Unit 4: Music and Arts', grammar: 'Comparisons: as... as, different from, the same as', voc: 'musical instruments, art forms' },
-          { unit: 'Unit 5: Food and Drink', grammar: 'Nouns of quantity, How much / How many, Some / Any', voc: 'dishes, ingredients, recipes' }
-        ],
-        8: [
-          { unit: 'Unit 1: Leisure Time', grammar: 'Verbs of liking / disliking + gerunds / to-infinitive', voc: 'leisure activities, crafting' },
-          { unit: 'Unit 2: Life in the Countryside', grammar: 'Comparative forms of adverbs', voc: 'rural life, harvesting, peaceful' },
-          { unit: 'Unit 3: Teenagers', grammar: 'Simple & Compound sentences, Question words before to-infinitives', voc: 'clubs, peer pressure, forum' },
-          { unit: 'Unit 4: Ethnic Groups of Viet Nam', grammar: 'Articles: a, an, the and zero article', voc: 'costumes, stilt house, terraced fields' }
-        ],
-        9: [
-          { unit: 'Unit 1: Local Community', grammar: 'Question words before to-infinitive, Phrasal verbs', voc: 'handicrafts, artisans, community helpers' },
-          { unit: 'Unit 2: City Life', grammar: 'Double comparatives (The more... the more...)', voc: 'urban amenities, traffic congestion' },
-          { unit: 'Unit 3: Healthy Living for Teens', grammar: 'Modal verbs in first conditional sentences', voc: 'well-balanced life, stress management' }
-        ]
+        correctAnswer: 0,
+        explanation: 'Dữ liệu là thông tin dưới dạng được máy tính tiếp nhận và xử lý.'
       },
-      khtn: {
-        6: [
-          { topic: 'Chủ đề 1: Các phép đo (Độ dài, Khối lượng, Thời gian, Nhiệt độ)', focus: 'Dụng cụ đo, Giới hạn đo (GHĐ), Độ chia nhỏ nhất (ĐCNN), Sai số' },
-          { topic: 'Chủ đề 2: Các thể của chất & Sự chuyển thể', focus: 'Rắn - Lỏng - Khí, Nóng chảy, Đông đặc, Bay hơi, Ngưng tụ' },
-          { topic: 'Chủ đề 3: Tế bào - Đơn vị cơ bản của sự sống', focus: 'Màng sinh chất, Tế bào chất, Nhân/Vùng nhân, Tế bào thực vật và động vật' },
-          { topic: 'Chủ đề 4: Đa dạng thế giới sống & Phân loại sinh vật', focus: 'Khóa lưỡng phân, Vi khuẩn, Nguyên sinh vật, Nấm, Thực vật, Động vật' },
-          { topic: 'Chủ đề 5: Lực và Chuyển động (Lực tiếp xúc, Lực không tiếp xúc, Trọng lực, Lực ma sát)', focus: 'Đơn vị Niutơn (N), Biểu diễn lực, Ma sát trượt, Ma sát nghỉ' }
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c1', lessonId: 'tin_6_b1',
+        topic: 'Thông tin và Dữ liệu', type: 'dung_sai', difficulty: 'thong_hieu',
+        qText: 'Xét tính Đúng hay Sai của các phát biểu sau về thông tin, dữ liệu và vật mang tin:',
+        options: [
+          'Thông tin và dữ liệu là hai khái niệm hoàn toàn đồng nhất, không có sự phân biệt.',
+          'Tiếng còi xe cứu thương trên đường phố là vật mang tin truyền đạt thông tin nhường đường.',
+          'Một trang sách giáo khoa in chữ là vật mang tin chứa dữ liệu văn bản.',
+          'Con người có thể tiếp nhận thông tin trực tiếp thông qua năm giác quan.'
         ],
-        7: [
-          { topic: 'Chủ đề 1: Nguyên tử - Nguyên tố hóa học & Sơ lược Bảng tuần hoàn', focus: 'Proton, Electron, Neutron, Kí hiệu hóa học, Chu kì, Nhóm' },
-          { topic: 'Chủ đề 2: Phân tử - Đơn chất - Hợp chất & Liên kết hóa học', focus: 'Liên kết ion, Liên kết cộng hóa trị, Hóa trị' },
-          { topic: 'Chủ đề 3: Tốc độ chuyển động (v = s / t)', focus: 'Đơn vị m/s, km/h, Đồ thị quãng đường - thời gian' },
-          { topic: 'Chủ đề 4: Âm thanh & Ánh sáng', focus: 'Sóng âm, Độ to, Độ cao, Định luật phản xạ ánh sáng' },
-          { topic: 'Chủ đề 5: Trao đổi chất và chuyển hóa năng lượng ở sinh vật (Quang hợp, Hô hấp tế bào)', focus: 'Phương trình quang hợp, Khí khổng, Vận chuyển nước và chất khoáng' }
-        ],
-        8: [
-          { topic: 'Chủ đề 1: Phản ứng hóa học & Định luật bảo toàn khối lượng', focus: 'Mol, Thể tích mol chất khí, Tỉ khối chất khí, Nồng độ dung dịch (C%, CM)' },
-          { topic: 'Chủ đề 2: Axit - Bazơ - Oxit - Muối & Thang pH', focus: 'Tính chất hóa học, Kim loại tác dụng với axit, Nhận biết dung dịch bằng quỳ tím' },
-          { topic: 'Chủ đề 3: Khối lượng riêng & Áp suất chất lỏng, Áp suất khí quyển', focus: 'Lực đẩy Ác-si-mét, Điều kiện vật nổi, chìm' },
-          { topic: 'Chủ đề 4: Tác dụng của dòng điện & Định luật Ôm', focus: 'Điện trở, Mạch điện nối tiếp và song song' },
-          { topic: 'Chủ đề 5: Hệ cơ quan trong cơ thể người', focus: 'Hệ tuần hoàn, Hệ hô hấp, Hệ tiêu hóa, Hệ bài tiết, Hệ thần kinh' }
-        ],
-        9: [
-          { topic: 'Chủ đề 1: Hóa học các hợp chất hữu cơ (Hiđrocacbon, Polime)', focus: 'Metan, Etilen, Rượu etylic, Axit axetic' },
-          { topic: 'Chủ đề 2: Năng lượng và sự truyền nhiệt', focus: 'Công cơ học, Công suất, Sự bảo toàn năng lượng' },
-          { topic: 'Chủ đề 3: Di truyền học Menden & Nhiễm sắc thể', focus: 'ADN, ARN, Đột biến gen, Di truyền học người' },
-          { topic: 'Chủ đề 4: Hệ sinh thái & Bảo vệ môi trường', focus: 'Chuỗi thức ăn, Lưới thức ăn, Tháp sinh thái, Đa dạng sinh học' }
-        ]
+        correctAnswer: [false, true, true, true],
+        explanation: 'a) Sai vì dữ liệu là hình thức thể hiện của thông tin; b, c, d) Đúng theo bài học SGK Tin học 6 KNTT.'
       },
-      lsdl: {
-        6: [
-          { topic: 'Lịch sử: Nguồn gốc loài người & Xã hội nguyên thủy', focus: 'Người vượn, Người tinh khôn, Công cụ đá, Đồ đồng' },
-          { topic: 'Lịch sử: Các quốc gia cổ đại phương Đông & phương Tây', focus: 'Ai Cập, Lưỡng Hà, Ấn Độ, Trung Quốc, Hy Lạp, La Mã' },
-          { topic: 'Lịch sử: Nước Văn Lang - Âu Lạc & Thời kì Bắc thuộc', focus: 'Hùng Vương, An Dương Vương, Khởi nghĩa Hai Bà Trưng, Bà Triệu' },
-          { topic: 'Địa lý: Bản đồ & Trái Đất trong hệ Mặt Trời', focus: 'Tọa độ địa lí, Chuyển động tự quay quanh trục, Hiện tượng ngày đêm luân phiên' },
-          { topic: 'Địa lý: Khí hậu, Nước trên Trái Đất & Đất, Sinh vật', focus: 'Các đới khí hậu, Vòng tuần hoàn của nước, Thổ nhưỡng' }
-        ],
-        7: [
-          { topic: 'Lịch sử: Tây Âu thời kì Trung đại & Phong trào Văn hóa Phục hưng', focus: 'Lãnh địa phong kiến, Thành thị trung đại, Các cuộc phát kiến địa lí' },
-          { topic: 'Lịch sử: Đại Việt thời Lý - Trần - Hồ (Thế kỉ XI - XV)', focus: 'Kháng chiến chống Tống, 3 lần chiến thắng giặc Mông - Nguyên' },
-          { topic: 'Địa lý: Đặc điểm tự nhiên, dân cư và xã hội Châu Âu, Châu Á, Châu Phi', focus: 'Địa hình, Khí hậu, Đô thị hóa, Cơ cấu dân số' }
-        ],
-        8: [
-          { topic: 'Lịch sử: Các cuộc cách mạng tư sản & Phong trào công nhân thế kỉ XVIII - XIX', focus: 'Cách mạng tư sản Anh, Pháp, Bắc Mỹ' },
-          { topic: 'Lịch sử: Phong trào Tây Sơn & Cuộc kháng chiến chống thực dân Pháp (1858 - cuối TK XIX)', focus: 'Quang Trung - Nguyễn Huệ, Phong trào Cần Vương, Khởi nghĩa Yên Thế' },
-          { topic: 'Địa lý: Vị trí địa lí, phạm vi lãnh thổ, địa hình & khoáng sản Việt Nam', focus: 'Biển đảo Việt Nam, Khí hậu nhiệt đới ẩm gió mùa' }
-        ],
-        9: [
-          { topic: 'Lịch sử: Cách mạng Tháng Tám 1945 & Hai cuộc kháng chiến chống Pháp, chống Mỹ (1945 - 1975)', focus: 'Chiến dịch Điện Biên Phủ, Đại thắng mùa Xuân 1975' },
-          { topic: 'Địa lý: Địa lý kinh tế Việt Nam (Nông nghiệp, Công nghiệp, Dịch vụ & Các vùng kinh tế trọng điểm)', focus: 'Tây Nguyên, Đông Nam Bộ, Đồng bằng sông Cửu Long' }
-        ]
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c1', lessonId: 'tin_6_b1',
+        topic: 'Thông tin và Dữ liệu', type: 'tra_loi_ngan', difficulty: 'thong_hieu',
+        qText: 'Khi em đọc một biển báo giao thông có hình người đi bộ, tấm biển kim loại đó đóng vai trò là gì trong quá trình tiếp nhận thông tin?',
+        options: [],
+        correctAnswer: 'Vật mang tin',
+        explanation: 'Tấm biển báo kim loại là vật mang tin chứa thông tin cảnh báo cho người tham gia giao thông.'
       },
-      tin: {
-        6: [
-          { topic: 'Chủ đề A: Máy tính và cộng đồng (Thông tin & Dữ liệu)', focus: 'Khái niệm thông tin, Dữ liệu số, Biểu diễn thông tin trong máy tính' },
-          { topic: 'Chủ đề B: Mạng máy tính và Internet', focus: 'Mạng có dây, Mạng không dây, Lợi ích của Internet, Trình duyệt Web' },
-          { topic: 'Chủ đề C: Tổ chức lưu trữ, tìm kiếm và trao đổi thông tin', focus: 'Thư mục, Tệp, Công cụ tìm kiếm, Thư điện tử (Email)' },
-          { topic: 'Chủ đề D: Đạo đức, pháp luật và văn hóa trong môi trường số', focus: 'Bản quyền nội dung, An toàn thông tin cá nhân, Phòng tránh lừa đảo mạng' },
-          { topic: 'Chủ đề E: Ứng dụng tin học (Soạn thảo văn bản & Trình chiếu)', focus: 'Định dạng văn bản, Chèn bảng biểu, Tạo hiệu ứng trang chiếu' },
-          { topic: 'Chủ đề F: Giải quyết vấn đề với sự trợ giúp của máy tính (Thuật toán)', focus: 'Sơ đồ khối thuật toán, Cấu trúc tuần tự, rẽ nhánh, lặp' }
-        ],
-        7: [
-          { topic: 'Chủ đề: Thiết bị vào - ra & Phần mềm ứng dụng', focus: 'Hệ điều hành, Quản lí tệp và thư mục trên máy tính' },
-          { topic: 'Chủ đề: Mạng xã hội & Kênh truyền thông số', focus: 'Giao tiếp văn minh trên mạng xã hội, Phòng chống nghiện Internet' },
-          { topic: 'Chủ đề: Bảng tính điện tử (Phần mềm bảng tính Excel)', focus: 'Nhập dữ liệu, Sử dụng hàm SUM, AVERAGE, MIN, MAX, COUNT, Vẽ biểu đồ' },
-          { topic: 'Chủ đề: Thuật toán tìm kiếm & Thuật toán sắp xếp', focus: 'Tìm kiếm tuần tự, Tìm kiếm nhị phân, Sắp xếp nổi bọt' }
-        ],
-        8: [
-          { topic: 'Chủ đề: Lịch sử phát triển máy tính & Xử lí thông tin', focus: 'Các thế hệ máy tính, Bit, Byte, TB' },
-          { topic: 'Chủ đề: Lập trình trực quan & Thuật toán (Scratch / Python)', focus: 'Biến, Biểu thức điều kiện If-Else, Vòng lặp For/While' },
-          { topic: 'Chủ đề: Định dạng nâng cao trong bảng tính & Trình chiếu', focus: 'Hàm logic IF, Lọc dữ liệu Filter, Tạo liên kết Hyperlink' }
-        ],
-        9: [
-          { topic: 'Chủ đề: Cơ sở dữ liệu & Hệ quản trị CSDL', focus: 'Bảng, Khóa chính, Truy vấn tìm kiếm' },
-          { topic: 'Chủ đề: Lập trình với ngôn ngữ bậc cao Python', focus: 'Cấu trúc dữ liệu danh sách List, Hàm tự định nghĩa def' },
-          { topic: 'Chủ đề: Tác động của công nghệ số & Hướng nghiệp Tin học', focus: 'Trí tuệ nhân tạo (AI), Điện toán đám mây, Nghề nghiệp IT' }
-        ]
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c1', lessonId: 'tin_6_b1',
+        topic: 'Thông tin và Dữ liệu', type: 'tu_luan', difficulty: 'van_dung',
+        qText: 'Em hãy nêu một ví dụ cụ thể trong đời sống học đường để phân biệt rõ ba khái niệm: Thông tin, Dữ liệu và Vật mang tin.',
+        options: [],
+        correctAnswer: '',
+        explanation: 'Ví dụ: Tờ phiếu báo điểm (Vật mang tin); Dòng chữ "Toán: 9.0" in trên phiếu (Dữ liệu); Hiểu biết học sinh đạt kết quả tốt môn Toán (Thông tin).'
       },
-      gdcd: {
-        6: [
-          { topic: 'Bài 1: Tự hào về truyền thống gia đình, dòng họ', focus: 'Kế thừa và phát huy nghề truyền thống, hiếu học, nhân nghĩa' },
-          { topic: 'Bài 2: Yêu thương con người & Siêng năng, kiên trì', focus: 'Hành động sẻ chia, giúp đỡ người khó khăn, vượt khó trong học tập' },
-          { topic: 'Bài 3: Tôn trọng sự thật & Tự lập', focus: 'Trung thực trong thi cử, tự chăm sóc bản thân, không dựa dẫm' },
-          { topic: 'Bài 4: Ứng phó với các tình huống nguy hiểm', focus: 'Ứng phó hỏa hoạn, lũ lụt, đuối nước, bạo lực học đường' },
-          { topic: 'Bài 5: Quyền và nghĩa vụ cơ bản của công dân', focus: 'Quyền trẻ em, Bổn phận đối với gia đình và nhà trường' }
-        ],
-        7: [
-          { topic: 'Bài 1: Tự hào về truyền thống quê hương', focus: 'Di tích lịch sử, lễ hội văn hóa, giữ gìn bản sắc dân tộc' },
-          { topic: 'Bài 2: Bảo tồn di sản văn hóa', focus: 'Di sản văn hóa vật thể và phi vật thể, Trách nhiệm công dân' },
-          { topic: 'Bài 3: Quản lí tiền & Kĩ năng giao tiếp', focus: 'Chi tiêu hợp lí, tiết kiệm, lắng nghe tích cực' },
-          { topic: 'Bài 4: Phòng, chống bạo lực học đường & Tệ nạn xã hội', focus: 'Kĩ năng tự vệ, báo tin cho thầy cô, gia đình' }
-        ],
-        8: [
-          { topic: 'Bài 1: Tự hào về truyền thống dân tộc Việt Nam', focus: 'Lòng nồng nàn yêu nước, tinh thần đoàn kết' },
-          { topic: 'Bài 2: Tôn trọng sự đa dạng của các dân tộc', focus: 'Tôn trọng phong tục tập quán các dân tộc anh em' },
-          { topic: 'Bài 3: Lao động cần cù, sáng tạo & Bảo vệ môi trường', focus: 'Ứng dụng tiến bộ khoa học, bảo vệ tài nguyên thiên nhiên' },
-          { topic: 'Bài 4: Tuân thủ pháp luật và kỉ luật', focus: 'Quyền tự do ngôn luận, Trách nhiệm pháp lí của lứa tuổi học sinh' }
-        ],
-        9: [
-          { topic: 'Bài 1: Sống có lí tưởng & Trách nhiệm của thanh niên', focus: 'Mục tiêu học tập, cống hiến cho quê hương đất nước' },
-          { topic: 'Bài 2: Bảo vệ hòa bình & Hợp tác quốc tế', focus: 'Hữu nghị giữa các dân tộc, giải quyết bất đồng bằng hòa bình' },
-          { topic: 'Bài 3: Quyền tham gia quản lí nhà nước & Bình đẳng giới', focus: 'Quyền bầu cử, ứng cử, bình đẳng trong gia đình và xã hội' }
-        ]
+
+      // Bài 2: Lưu trữ và trao đổi thông tin
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c1', lessonId: 'tin_6_b2',
+        topic: 'Lưu trữ và Trao đổi Thông tin', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Đơn vị đo lượng thông tin cơ bản và nhỏ nhất trong máy tính là gì?',
+        options: ['Bit (b)', 'Byte (B)', 'Kilobyte (KB)', 'Megabyte (MB)'],
+        correctAnswer: 0,
+        explanation: 'Bit là đơn vị nhỏ nhất để đo dung lượng thông tin trong máy tính, nhận giá trị 0 hoặc 1.'
       },
-      congnghe: {
-        6: [
-          { topic: 'Chương 1: Nhà ở (Kiến trúc nhà ở, Nhà thông minh, Tiết kiệm năng lượng)', focus: 'Vật liệu xây dựng, Bố trí không gian, An toàn điện' },
-          { topic: 'Chương 2: Bảo quản và chế biến thực phẩm', focus: 'Giá trị dinh dưỡng, An toàn vệ sinh thực phẩm, Chế biến món ăn' },
-          { topic: 'Chương 3: Trang phục và thời trang', focus: 'Nguồn gốc vải sợi, Lựa chọn và bảo quản trang phục học sinh' },
-          { topic: 'Chương 4: Đồ dùng điện trong gia đình', focus: 'Bàn là, Nồi cơm điện, Quạt điện, Sử dụng điện an toàn, tiết kiệm' }
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c1', lessonId: 'tin_6_b2',
+        topic: 'Lưu trữ và Trao đổi Thông tin', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Một Byte (1 B) bao gồm bao nhiêu bit ghép lại?',
+        options: ['8 bit', '2 bit', '10 bit', '1024 bit'],
+        correctAnswer: 0,
+        explanation: 'Quy ước chuẩn: 1 Byte (B) = 8 bit (b).'
+      },
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c1', lessonId: 'tin_6_b2',
+        topic: 'Lưu trữ và Trao đổi Thông tin', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Một tệp tài liệu văn bản có kích thước 2 MB. Kích thước này tương đương với bao nhiêu KB?',
+        options: ['2048 KB', '2000 KB', '1024 KB', '4096 KB'],
+        correctAnswer: 0,
+        explanation: 'Vì 1 MB = 1024 KB nên 2 MB = 2 x 1024 = 2048 KB.'
+      },
+
+      // Bài 4: Mạng máy tính
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c2', lessonId: 'tin_6_b4',
+        topic: 'Mạng máy tính', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Mạng máy tính là gì?',
+        options: [
+          'Tập hợp các máy tính được kết nối với nhau để truyền thông tin và chia sẻ tài nguyên',
+          'Một nhóm người cùng sử dụng chung một chiếc máy tính để bàn',
+          'Các máy tính được sản xuất cùng một hãng công nghệ trong cùng năm',
+          'Hệ thống phần mềm trò chơi kết nối qua mạng di động cá nhân'
         ],
-        7: [
-          { topic: 'Chương 1: Trồng trọt (Đất trồng, Phân bón, Nhân giống cây trồng)', focus: 'Phương pháp gieo trồng, Chăm sóc và bảo vệ cây trồng khỏi sâu bệnh' },
-          { topic: 'Chương 2: Lâm nghiệp (Trồng và chăm sóc rừng)', focus: 'Vai trò của rừng, Phòng chống cháy rừng, Trồng rừng ngập mặn' },
-          { topic: 'Chương 3: Chăn nuôi (Giống vật nuôi, Thức ăn chăn nuôi)', focus: 'Quy trình nuôi dưỡng, Phòng trừ dịch bệnh cho gia súc, gia cầm' },
-          { topic: 'Chương 4: Thủy sản (Nuôi và khai thác thủy sản)', focus: 'Môi trường nuôi thủy sản, Bảo vệ nguồn lợi thủy sản bền vững' }
+        correctAnswer: 0,
+        explanation: 'Mạng máy tính là tập hợp các máy tính và thiết bị kết nối với nhau để truyền dữ liệu và chia sẻ tài nguyên.'
+      },
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c2', lessonId: 'tin_6_b4',
+        topic: 'Mạng máy tính', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Thiết bị nào sau đây là thiết bị kết nối mạng thông dụng trong gia đình?',
+        options: [
+          'Bộ định tuyến không dây (Wi-Fi Router)',
+          'Máy in laser đơn sắc',
+          'Bộ nhớ trong RAM',
+          'Ổ đĩa quang CD-ROM'
         ],
-        8: [
-          { topic: 'Chương 1: Vẽ kĩ thuật (Bản vẽ các khối hình học, Bản vẽ chi tiết)', focus: 'Hình chiếu vuông góc, Khổ giấy, Tỉ lệ, Khung tên bản vẽ' },
-          { topic: 'Chương 2: Cơ khí (Vật liệu cơ khí, Dụng cụ gia công, Chi tiết máy)', focus: 'Kim loại đen, Kim loại màu, Truyền và biến đổi chuyển động' },
-          { topic: 'Chương 3: Kĩ thuật điện (An toàn điện, Đồ dùng điện, Mạch điện)', focus: 'Sơ đồ nguyên lí, Sơ đồ lắp đặt mạch điện chiếu sáng' }
+        correctAnswer: 0,
+        explanation: 'Bộ định tuyến Wi-Fi Router hoặc Switch là các thiết bị kết nối mạng thông dụng.'
+      },
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c2', lessonId: 'tin_6_b4',
+        topic: 'Mạng máy tính', type: 'dung_sai', difficulty: 'thong_hieu',
+        qText: 'Đánh giá tính Đúng hoặc Sai của các nhận định sau về mạng máy tính:',
+        options: [
+          'Mạng máy tính giúp nhiều người dùng có thể chia sẻ và dùng chung một máy in.',
+          'Mạng không dây truyền dữ liệu hoàn toàn bằng sóng điện từ mà không cần dây cáp mạng.',
+          'Để tạo thành mạng máy tính, bắt buộc các máy tính phải đặt cạnh nhau trong cùng một bàn.',
+          'Việc kết nối mạng giúp nâng cao hiệu quả làm việc nhóm và trao đổi tài liệu học tập.'
         ],
-        9: [
-          { topic: 'Chủ đề: Lắp đặt mạng điện trong nhà', focus: 'Khí cụ điện, Dây dẫn điện, Đồng hồ đo điện vạn năng, Lắp bảng điện' },
-          { topic: 'Chủ đề: Trồng cây ăn quả & Nông nghiệp công nghệ cao', focus: 'Kĩ thuật chiết cành, ghép mắt, Trồng dưa lưới trong nhà màng' }
-        ]
+        correctAnswer: [true, true, false, true],
+        explanation: 'c) Sai vì máy tính trong mạng có thể cách xa nhau qua mạng LAN hoặc Internet toàn cầu.'
+      },
+
+      // Bài 11: Thuật toán và mô tả thuật toán
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c6', lessonId: 'tin_6_b11',
+        topic: 'Thuật toán và mô tả thuật toán', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Trong sơ đồ khối mô tả thuật toán, hình elip (hoặc oval) được dùng để thể hiện điều gì?',
+        options: [
+          'Bắt đầu hoặc Kết thúc thuật toán',
+          'Thao tác xử lý, tính toán dữ liệu',
+          'Điều kiện rẽ nhánh (kiểm tra Đúng/Sai)',
+          'Nhập (Input) hoặc Xuất (Output) dữ liệu'
+        ],
+        correctAnswer: 0,
+        explanation: 'Trong sơ đồ khối chuẩn: Hình oval thể hiện Bắt đầu/Kết thúc; Hình chữ nhật: Thao tác tính toán; Hình thoi: Điều kiện.'
+      },
+      {
+        subjectId: 'tin', grade: 6, chapterId: 'tin_6_c6', lessonId: 'tin_6_b11',
+        topic: 'Thuật toán và mô tả thuật toán', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Trong sơ đồ khối mô tả thuật toán, hình thoi được sử dụng với mục đích gì?',
+        options: [
+          'Kiểm tra điều kiện để phân nhánh rẽ',
+          'Thao tác tính toán phép cộng trừ',
+          'Khởi động thuật toán từ đầu',
+          'Hiển thị kết quả ra màn hình'
+        ],
+        correctAnswer: 0,
+        explanation: 'Hình thoi dùng để thể hiện thao tác kiểm tra điều kiện (rẽ nhánh).'
+      },
+
+      // -------------------------------------------------------------
+      // 2. TIN HỌC 7 (SGK KNTT)
+      // -------------------------------------------------------------
+      // Bài 6: Các hàm cơ bản trong bảng tính Excel
+      {
+        subjectId: 'tin', grade: 7, chapterId: 'tin_7_c4', lessonId: 'tin_7_b6',
+        topic: 'Các hàm cơ bản trong bảng tính', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Trong phần mềm bảng tính Excel, hàm nào sau đây được dùng để tính tổng một dãy các số?',
+        options: ['SUM', 'AVERAGE', 'COUNT', 'MAX'],
+        correctAnswer: 0,
+        explanation: 'Hàm SUM dùng để tính tổng các số hoặc vùng dữ liệu.'
+      },
+      {
+        subjectId: 'tin', grade: 7, chapterId: 'tin_7_c4', lessonId: 'tin_7_b6',
+        topic: 'Các hàm cơ bản trong bảng tính', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Trong Excel, công thức =AVERAGE(6, 8, 10) trả về kết quả là bao nhiêu?',
+        options: ['8', '24', '7', '10'],
+        correctAnswer: 0,
+        explanation: 'Trung bình cộng: (6 + 8 + 10) / 3 = 24 / 3 = 8.'
+      },
+      {
+        subjectId: 'tin', grade: 7, chapterId: 'tin_7_c4', lessonId: 'tin_7_b6',
+        topic: 'Các hàm cơ bản trong bảng tính', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Hàm nào trong bảng tính dùng để tìm giá trị lớn nhất trong danh sách dữ liệu?',
+        options: ['MAX', 'MIN', 'LARGE', 'SUM'],
+        correctAnswer: 0,
+        explanation: 'Hàm MAX dùng để tìm giá trị lớn nhất.'
+      },
+
+      // Bài 9 & 10: Thuật toán tìm kiếm
+      {
+        subjectId: 'tin', grade: 7, chapterId: 'tin_7_c5', lessonId: 'tin_7_b9',
+        topic: 'Thuật toán tìm kiếm tuần tự', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Thuật toán tìm kiếm tuần tự thực hiện việc tìm kiếm phần tử theo nguyên tắc nào?',
+        options: [
+          'Xem xét lần lượt từng phần tử từ đầu danh sách đến cuối danh sách',
+          'Chia đôi danh sách liên tục ở mỗi bước kiểm tra',
+          'Sắp xếp danh sách trước rồi mới tiến hành tìm kiếm',
+          'Chọn ngẫu nhiên một phần tử bất kì trong danh sách'
+        ],
+        correctAnswer: 0,
+        explanation: 'Thuật toán tìm kiếm tuần tự (Linear Search) duyệt tuần tự từng phần tử từ vị trí đầu tiên cho đến khi tìm thấy hoặc hết danh sách.'
+      },
+      {
+        subjectId: 'tin', grade: 7, chapterId: 'tin_7_c5', lessonId: 'tin_7_b10',
+        topic: 'Thuật toán tìm kiếm nhị phân', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Điều kiện tiên quyết để có thể áp dụng thuật toán tìm kiếm nhị phân là gì?',
+        options: [
+          'Danh sách dữ liệu đã được sắp xếp theo một thứ tự xác định',
+          'Danh sách bắt buộc phải có số lượng phần tử là số chẵn',
+          'Tất cả các phần tử trong danh sách phải là số tự nhiên',
+          'Danh sách không được phép chứa nhiều hơn 10 phần tử'
+        ],
+        correctAnswer: 0,
+        explanation: 'Thuật toán tìm kiếm nhị phân (Binary Search) chỉ áp dụng được trên dãy đã có thứ tự sắp xếp.'
+      },
+
+      // -------------------------------------------------------------
+      // 3. TIN HỌC 8 (SGK KNTT)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'tin', grade: 8, chapterId: 'tin_8_c4', lessonId: 'tin_8_b3',
+        topic: 'Hàm điều kiện IF trong Excel', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Cú pháp chuẩn của hàm điều kiện IF trong bảng tính điện tử là gì?',
+        options: [
+          '=IF(Điều_kiện, Giá_trị_khi_Đúng, Giá_trị_khi_Sai)',
+          '=IF(Giá_trị_khi_Đúng, Điều_kiện, Giá_trị_khi_Sai)',
+          '=IF(Điều_kiện, Giá_trị_khi_Sai)',
+          '=IF(Kiểm_tra, Kết_quả_1, Kết_quả_2, Kết_quả_3)'
+        ],
+        correctAnswer: 0,
+        explanation: 'Cú pháp hàm IF: =IF(logical_test, value_if_true, value_if_false).'
+      },
+      {
+        subjectId: 'tin', grade: 8, chapterId: 'tin_8_c5', lessonId: 'tin_8_b6',
+        topic: 'Cấu trúc rẽ nhánh', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Trong lập trình, cấu trúc rẽ nhánh dạng đủ (IF-ELSE) thực hiện hành động gì khi điều kiện kiểm tra là SAI?',
+        options: [
+          'Thực hiện các lệnh trong khối lệnh ELSE',
+          'Dừng toàn bộ chương trình và báo lỗi cú pháp',
+          'Quay trở lại thực hiện lệnh đầu tiên của chương trình',
+          'Bỏ qua toàn bộ các câu lệnh phía sau'
+        ],
+        correctAnswer: 0,
+        explanation: 'Khi điều kiện IF sai, chương trình sẽ rẽ nhánh sang thực thi khối lệnh nằm sau từ khóa ELSE.'
+      },
+
+      // -------------------------------------------------------------
+            // -------------------------------------------------------------
+      // 4. TIN HỌC 9 (SGK KẾT NỐI TRI THỨC VỚI CUỘC SỐNG)
+      // -------------------------------------------------------------
+      // Bài 1: Thế giới kĩ thuật số
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b1',
+        topic: 'Thế giới kĩ thuật số', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Thiết bị nào sau đây là ví dụ điển hình nhất về một thiết bị thông minh (Smart device)?',
+        options: [
+          'Điện thoại thông minh (Smartphone) có hệ điều hành và kết nối Internet',
+          'Nồi cơm điện cơ truyền thống chỉ có nút gạt nấu và giữ ấm',
+          'Quạt bàn cơ học điều khiển bằng nút bấm vật lý',
+          'Bàn ủi khô điều khiển bằng rơ-le nhiệt cơ học'
+        ],
+        correctAnswer: 0,
+        explanation: 'Theo SGK Tin học 9 (KNTT), thiết bị thông minh là thiết bị số có khả năng kết nối mạng, có bộ vi xử lý và hoạt động tự chủ ở mức độ nhất định như smartphone, smartwatch, robot hút bụi...'
+      },
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b1',
+        topic: 'Thế giới kĩ thuật số', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Bộ phận đóng vai trò là "bộ não" điều khiển, tính toán và xử lý thông tin trong các thiết bị thông minh là gì?',
+        options: [
+          'Bộ vi xử lý (Microprocessor)',
+          'Vỏ bảo vệ bằng nhựa cách điện',
+          'Dây cáp nguồn nối điện lưới',
+          'Màng loa phát âm thanh cảnh báo'
+        ],
+        correctAnswer: 0,
+        explanation: 'Bộ vi xử lý (Microprocessor) tích hợp mạch điện tử đóng vai trò là bộ não xử lý thông tin và điều khiển hoạt động của thiết bị thông minh.'
+      },
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b1',
+        topic: 'Thế giới kĩ thuật số', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Khả năng kết nối và tự động trao đổi dữ liệu giữa các thiết bị thông minh trong thế giới kĩ thuật số tạo nên mạng lưới nào?',
+        options: [
+          'Internet vạn vật (IoT - Internet of Things)',
+          'Mạng điện lưới quốc gia',
+          'Mạng phát thanh truyền hình một chiều',
+          'Mạng đường bưu chính chuyển phát nhanh'
+        ],
+        correctAnswer: 0,
+        explanation: 'IoT (Internet of Things) là mạng lưới kết nối các thiết bị thông minh để thu thập và trao đổi dữ liệu tự động phục vụ đời sống con người.'
+      },
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b1',
+        topic: 'Thế giới kĩ thuật số', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Vì sao một rô-bốt hút bụi tự động có thể tự di chuyển, tránh chướng ngại vật và quay về trạm sạc điện được gọi là thiết bị thông minh?',
+        options: [
+          'Vì nó được tích hợp cảm biến thu nhận thông tin, có vi xử lý để tự phân tích bản đồ và hoạt động tự chủ',
+          'Vì nó được chế tạo từ kim loại đắt tiền và có kích thước lớn',
+          'Vì nó bắt buộc phải có người cầm điều khiển dây cắm vào mọi lúc',
+          'Vì nó hoạt động độc lập mà không tiêu tốn năng lượng pin'
+        ],
+        correctAnswer: 0,
+        explanation: 'Rô-bốt hút bụi có cảm biến và vi xử lý điều khiển tự chủ theo thuật toán, do đó đáp ứng tiêu chuẩn của thiết bị thông minh.'
+      },
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b1',
+        topic: 'Thế giới kĩ thuật số', type: 'trac_nghiem', difficulty: 'van_dung',
+        qText: 'Ý kiến nào sau đây nêu đúng một trong những tác động tiêu cực (mặt trái) của thế giới kĩ thuật số mà học sinh cần chủ động phòng tránh?',
+        options: [
+          'Nguy cơ lệ thuộc vào thiết bị công nghệ, giảm vận động thể chất và lộ lọt dữ liệu riêng tư',
+          'Máy tính giúp xử lý tính toán quá nhanh làm mất thời gian suy nghĩ',
+          'Internet giúp tra cứu tài liệu học tập phong phú và đa dạng',
+          'Các thiết bị thông minh tiêu tốn ít điện năng hơn thiết bị cũ'
+        ],
+        correctAnswer: 0,
+        explanation: 'Mặt trái của thế giới kĩ thuật số bao gồm thói quen lười vận động, nghiện thiết bị số và nguy cơ mất an toàn thông tin cá nhân.'
+      },
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b1',
+        topic: 'Thế giới kĩ thuật số', type: 'dung_sai', difficulty: 'thong_hieu',
+        qText: 'Xét tính Đúng hoặc Sai của các phát biểu sau về Bài 1: "Thế giới kĩ thuật số" (SGK Tin học 9 KNTT):',
+        options: [
+          'Thiết bị thông minh là thiết bị số có bộ vi xử lý, có khả năng kết nối mạng và hoạt động tự chủ ở mức nhất định.',
+          'Mọi thiết bị điện tử gia dụng cơ bản (như bóng đèn sợi đốt, quạt bàn cơ) đều là thiết bị thông minh.',
+          'Hệ thống nhà thông minh (Smart Home) cho phép người dùng điều khiển đèn, khóa cửa và điều hòa từ xa qua điện thoại.',
+          'Sống trong thế giới kĩ thuật số, người dùng không cần quan tâm đến vấn đề bảo vệ thông tin và dữ liệu cá nhân.'
+        ],
+        correctAnswer: [true, false, true, false],
+        explanation: 'a, c) Đúng theo SGK Tin học 9 KNTT; b) Sai vì bóng đèn hay quạt bàn cơ không có vi xử lý và kết nối mạng; d) Sai vì an toàn dữ liệu cá nhân là vô cùng hệ trọng.'
+      },
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b1',
+        topic: 'Thế giới kĩ thuật số', type: 'tra_loi_ngan', difficulty: 'nhan_biet',
+        qText: 'Thuật ngữ nào (viết tắt bằng tiếng Anh gồm 3 chữ cái) chỉ mạng lưới kết nối các thiết bị thông minh để thu thập và chia sẻ dữ liệu tự động qua Internet?',
+        options: [],
+        correctAnswer: 'IoT',
+        explanation: 'IoT là viết tắt của Internet of Things (Internet vạn vật), nền tảng cốt lõi của thế giới kĩ thuật số.'
+      },
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b1',
+        topic: 'Thế giới kĩ thuật số', type: 'tu_luan', difficulty: 'van_dung',
+        qText: 'Em hãy nêu 2 ví dụ về thiết bị thông minh mà em hoặc gia đình đang sử dụng. Nêu rõ các chức năng thông minh của từng thiết bị và đề xuất 2 biện pháp sử dụng chúng một cách an toàn, hợp lý.',
+        options: [],
+        correctAnswer: '',
+        explanation: 'Học sinh nêu được 2 thiết bị thông minh cụ thể kèm chức năng tự chủ/kết nối mạng (1.5đ), nêu được 2 giải pháp sử dụng an toàn thông tin và cân đối thời gian sinh hoạt (1.5đ).'
+      },
+
+      // Bài 2: Thông tin trong giải quyết vấn đề
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b2',
+        topic: 'Thông tin trong giải quyết vấn đề', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Tiêu chí nào sau đây KHÔNG phải là tiêu chuẩn đánh giá chất lượng thông tin trong giải quyết vấn đề?',
+        options: [
+          'Dung lượng tệp tin tính bằng megabyte càng lớn càng tốt',
+          'Tính chính xác của thông tin',
+          'Tính mới (tính cập nhật theo thời gian) của thông tin',
+          'Tính đầy đủ và mức độ tin cậy của nguồn cung cấp thông tin'
+        ],
+        correctAnswer: 0,
+        explanation: 'Chất lượng thông tin được đánh giá qua tính chính xác, tính mới, tính đầy đủ và độ tin cậy, không phụ thuộc vào dung lượng tệp tin.'
+      },
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b2',
+        topic: 'Thông tin trong giải quyết vấn đề', type: 'dung_sai', difficulty: 'thong_hieu',
+        qText: 'Đánh giá tính Đúng/Sai của các nhận định về chất lượng thông tin (SGK Tin học 9 KNTT):',
+        options: [
+          'Thông tin chính xác là thông tin phản ánh đúng sự thật khách quan.',
+          'Mọi thông tin lan truyền trên các trang mạng xã hội đều có độ tin cậy tuyệt đối.',
+          'Tính mới của thông tin giúp người ra quyết định không bị lạc hậu trước tình hình thực tế.',
+          'Khi giải quyết vấn đề, chỉ cần dựa vào một nguồn tin duy nhất mà không cần đối chiếu kiểm chứng.'
+        ],
+        correctAnswer: [true, false, true, false],
+        explanation: 'a, c) Đúng; b, d) Sai vì thông tin mạng xã hội cần được kiểm chứng đa nguồn trước khi sử dụng.'
+      },
+
+      // Bài 4: Một số vấn đề pháp lí về sử dụng dịch vụ Internet
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c1', lessonId: 'tin_9_b4',
+        topic: 'Pháp lí về dịch vụ Internet', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Hành vi nào sau đây vi phạm pháp luật và bản quyền khi sử dụng dịch vụ Internet?',
+        options: [
+          'Tự ý sao chép, bẻ khóa và chia sẻ phần mềm có bản quyền thương mại lên mạng',
+          'Trích dẫn nguồn gốc tác giả và đường link khi sử dụng một đoạn trích bài báo nghiên cứu',
+          'Tải về các tài liệu học tập từ cổng thông tin giáo dục điện tử miễn phí của Bộ GD&ĐT',
+          'Gửi email trao đổi bài tập nhóm với các bạn trong lớp'
+        ],
+        correctAnswer: 0,
+        explanation: 'Vi phạm bản quyền phần mềm và phân phối lậu là hành vi vi phạm Luật Sở hữu trí tuệ và Luật An ninh mạng.'
+      },
+
+      // Bài 11: Dịch vụ lưu trữ đám mây
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c4', lessonId: 'tin_9_b11',
+        topic: 'Dịch vụ lưu trữ đám mây', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Ưu điểm nổi bật nhất của việc lưu trữ dữ liệu trên đám mây (Cloud Storage) so với ổ cứng truyền thống là gì?',
+        options: [
+          'Có thể truy cập, chỉnh sửa và đồng bộ dữ liệu từ bất kì thiết bị nào có kết nối Internet',
+          'Không bao giờ cần đến đường truyền Internet để tải dữ liệu về máy',
+          'Tự động tăng tốc độ xử lý phần cứng của máy tính lên gấp đôi',
+          'Không bao giờ cần tài khoản người dùng hay mật khẩu bảo mật'
+        ],
+        correctAnswer: 0,
+        explanation: 'Dịch vụ đám mây (như Google Drive, OneDrive) cho phép người dùng truy cập tệp từ mọi nơi qua mạng Internet.'
+      },
+
+      // Bài 13: Lập trình với ngôn ngữ Python
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c4', lessonId: 'tin_9_b13',
+        topic: 'Lập trình với Python', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Trong ngôn ngữ lập trình Python, hàm nào được dùng để xuất dữ liệu ra màn hình console?',
+        options: ['print()', 'input()', 'output()', 'display()'],
+        correctAnswer: 0,
+        explanation: 'Hàm print() trong Python dùng để hiển thị giá trị ra màn hình.'
+      },
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c4', lessonId: 'tin_9_b13',
+        topic: 'Lập trình với Python', type: 'thong_hieu', difficulty: 'thong_hieu',
+        qText: 'Trong Python, để nhập một số nguyên từ bàn phím gán vào biến n, câu lệnh chuẩn là:',
+        options: ['n = int(input())', 'n = input(int)', 'n = str(input())', 'n = print(input())'],
+        correctAnswer: 0,
+        explanation: 'Hàm input() trả về xâu kí tự, do đó cần bọc qua hàm int() để chuyển đổi sang kiểu số nguyên.'
+      },
+
+      // Bài 15: Nghề nghiệp trong lĩnh vực công nghệ thông tin
+      {
+        subjectId: 'tin', grade: 9, chapterId: 'tin_9_c5', lessonId: 'tin_9_b15',
+        topic: 'Nghề nghiệp trong kỷ nguyên số & AI', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Khả năng nào sau đây là đặc trưng tiêu biểu nhất của các hệ thống Trí tuệ nhân tạo (AI) trong thực tiễn?',
+        options: [
+          'Khả năng tự học hỏi từ dữ liệu (Machine Learning) và thích ứng linh hoạt với tình huống mới',
+          'Hoạt động mà hoàn toàn không cần năng lượng điện',
+          'Thay thế tuyệt đối và vĩnh viễn mọi tư duy nhân văn của con người',
+          'Lưu trữ dữ liệu vĩnh cửu không bao giờ có thể bị xóa bỏ'
+        ],
+        correctAnswer: 0,
+        explanation: 'Đặc trưng cốt lõi của AI là khả năng học từ dữ liệu số lớn và nhận dạng, tự ra quyết định thích ứng.'
+      },
+
+      // 5. TOÁN HỌC 6 (SGK KNTT)
+      // -------------------------------------------------------------
+      // Bài 6: Số nguyên âm & Tập hợp các số nguyên Z
+      {
+        subjectId: 'toan', grade: 6, chapterId: 'toan_6_c3', lessonId: 'toan_6_b6',
+        topic: 'Số nguyên Z', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Tập hợp các số nguyên (kí hiệu là Z) bao gồm những thành phần nào?',
+        options: [
+          'Các số nguyên âm, số 0 và các số nguyên dương',
+          'Chỉ bao gồm các số tự nhiên lớn hơn 0',
+          'Các số nguyên âm và các phân số dương',
+          'Số 0 và tất cả các số nguyên dương'
+        ],
+        correctAnswer: 0,
+        explanation: 'Tập hợp số nguyên Z = {..., -3, -2, -1, 0, 1, 2, 3, ...} gồm số nguyên âm, số 0 và số nguyên dương.'
+      },
+      {
+        subjectId: 'toan', grade: 6, chapterId: 'toan_6_c3', lessonId: 'toan_6_b6',
+        topic: 'Số nguyên Z', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Khẳng định nào sau đây về số 0 là đúng đắn nhất?',
+        options: [
+          'Số 0 là số nguyên nhưng không phải là số nguyên âm cũng không phải số nguyên dương',
+          'Số 0 là số nguyên dương nhỏ nhất trong tập hợp Z',
+          'Số 0 là số nguyên âm lớn nhất trong tập hợp Z',
+          'Số 0 không thuộc tập hợp các số nguyên Z'
+        ],
+        correctAnswer: 0,
+        explanation: 'Số 0 là số nguyên, nhưng không là số nguyên dương và cũng không là số nguyên âm.'
+      },
+      {
+        subjectId: 'toan', grade: 6, chapterId: 'toan_6_c3', lessonId: 'toan_6_b7',
+        topic: 'Phép cộng trừ số nguyên', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Kết quả của phép tính (-15) + (-25) là:',
+        options: ['-40', '40', '-10', '10'],
+        correctAnswer: 0,
+        explanation: 'Cộng hai số nguyên cùng dấu âm: (-15) + (-25) = -(15 + 25) = -40.'
+      },
+      {
+        subjectId: 'toan', grade: 6, chapterId: 'toan_6_c4', lessonId: 'toan_6_b10',
+        topic: 'Hình thang cân', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Hình thang cân là hình thang có đặc điểm nào sau đây?',
+        options: [
+          'Hai góc kề một đáy bằng nhau và hai cạnh bên bằng nhau',
+          'Bốn cạnh bằng nhau và bốn góc bằng nhau',
+          'Hai đường chéo vuông góc với nhau tại trung điểm mỗi đường',
+          'Hai cạnh đáy có độ dài bằng nhau'
+        ],
+        correctAnswer: 0,
+        explanation: 'Hình thang cân là hình thang có hai góc kề một đáy bằng nhau (kéo theo hai cạnh bên bằng nhau, hai đường chéo bằng nhau).'
+      },
+
+      // -------------------------------------------------------------
+      // 6. TOÁN HỌC 7 (SGK KNTT)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'toan', grade: 7, chapterId: 'toan_7_c1', lessonId: 'toan_7_b1',
+        topic: 'Số hữu tỉ Q', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Số hữu tỉ là số có thể viết được dưới dạng phân số nào?',
+        options: ['a/b với a, b thuộc Z và b khác 0', 'a/b với a, b thuộc N', 'a/b với b = 0', 'Căn bậc hai của một số nguyên bất kì'],
+        correctAnswer: 0,
+        explanation: 'Định nghĩa SGK Toán 7 KNTT: Số hữu tỉ là số viết được dưới dạng a/b với a, b thuộc Z, b khác 0.'
+      },
+      {
+        subjectId: 'toan', grade: 7, chapterId: 'toan_7_c4', lessonId: 'toan_7_b9',
+        topic: 'Định lí Py-ta-go', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Cho tam giác ABC vuông tại A có hai cạnh góc vuông AB = 3 cm, AC = 4 cm. Độ dài cạnh huyền BC là:',
+        options: ['5 cm', '7 cm', '25 cm', '12 cm'],
+        correctAnswer: 0,
+        explanation: 'Theo định lí Py-ta-go: BC² = AB² + AC² = 3² + 4² = 9 + 16 = 25 => BC = 5 cm.'
+      },
+
+      // -------------------------------------------------------------
+      // 7. TOÁN HỌC 8 (SGK KNTT)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'toan', grade: 8, chapterId: 'toan_8_c2', lessonId: 'toan_8_b3',
+        topic: 'Hằng đẳng thức đáng nhớ', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Khai triển hằng đẳng thức hiệu hai bình phương a² - b² ta được:',
+        options: ['(a - b)(a + b)', '(a - b)²', '(a + b)²', 'a² - 2ab + b²'],
+        correctAnswer: 0,
+        explanation: 'Hằng đẳng thức số 3: a² - b² = (a - b)(a + b).'
+      },
+      {
+        subjectId: 'toan', grade: 8, chapterId: 'toan_8_c4', lessonId: 'toan_8_b7',
+        topic: 'Định lí Thalès', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Định lí Thalès trong tam giác phát biểu rằng nếu một đường thẳng song song với một cạnh của tam giác và cắt hai cạnh còn lại thì nó:',
+        options: [
+          'Định ra trên hai cạnh đó những đoạn thẳng tương ứng tỉ lệ',
+          'Chia tam giác đó thành hai phần có diện tích bằng nhau',
+          'Tạo ra một góc vuông với cạnh đáy của tam giác',
+          'Đi qua trọng tâm và trực tâm của tam giác'
+        ],
+        correctAnswer: 0,
+        explanation: 'Định lí Thalès: Đường thẳng song song với 1 cạnh định ra trên 2 cạnh còn lại những đoạn thẳng tương ứng tỉ lệ.'
+      },
+
+      // -------------------------------------------------------------
+      // 8. TOÁN HỌC 9 (SGK KNTT)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'toan', grade: 9, chapterId: 'toan_9_c6', lessonId: 'toan_9_b7',
+        topic: 'Phương trình bậc hai một ẩn', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Biệt thức biệt số Delta (Δ) của phương trình bậc hai ax² + bx + c = 0 (a ≠ 0) được tính theo công thức:',
+        options: ['Δ = b² - 4ac', 'Δ = b² + 4ac', 'Δ = 4ac - b²', 'Δ = (b - 4ac)²'],
+        correctAnswer: 0,
+        explanation: 'Công thức nghiệm phương trình bậc hai: Δ = b² - 4ac.'
+      },
+      {
+        subjectId: 'toan', grade: 9, chapterId: 'toan_9_c6', lessonId: 'toan_9_b8',
+        topic: 'Định lí Vi-ét', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Nếu phương trình ax² + bx + c = 0 (a ≠ 0) có hai nghiệm x1, x2 thì tổng hai nghiệm x1 + x2 bằng:',
+        options: ['-b/a', 'c/a', 'b/a', '-c/a'],
+        correctAnswer: 0,
+        explanation: 'Theo định lí Vi-ét: x1 + x2 = -b/a và x1.x2 = c/a.'
+      },
+
+      // -------------------------------------------------------------
+      // 9. NGỮ VĂN 6 (SGK KNTT)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'van', grade: 6, chapterId: 'van_6_c1', lessonId: 'van_6_b1',
+        topic: 'Bài học đường đời đầu tiên', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Đoạn trích "Bài học đường đời đầu tiên" được rút ra từ tác phẩm văn học nổi tiếng nào?',
+        options: [
+          'Dế Mèn phiêu lưu kí (Tô Hoài)',
+          'Đất rừng phương Nam (Đoàn Giỏi)',
+          'Góc sân và khoảng trời (Trần Đăng Khoa)',
+          'Tuổi thơ dữ dội (Phùng Quán)'
+        ],
+        correctAnswer: 0,
+        explanation: 'Văn bản "Bài học đường đời đầu tiên" trích từ chương 1 của truyện "Dế Mèn phiêu lưu kí" của nhà văn Tô Hoài.'
+      },
+      {
+        subjectId: 'van', grade: 6, chapterId: 'van_6_c1', lessonId: 'van_6_b2',
+        topic: 'Từ đơn và từ phức', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Trong các từ sau, từ nào là từ láy tượng hình?',
+        options: ['Thoăn thoắt', 'Xe đạp', 'Sách vở', 'Bàn ghế'],
+        correctAnswer: 0,
+        explanation: '"Thoăn thoắt" là từ láy mô tả động tác nhanh nhẹn, khéo léo.'
+      },
+
+      // -------------------------------------------------------------
+      // 10. TIẾNG ANH 6 (GLOBAL SUCCESS)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'anh', grade: 6, chapterId: 'anh_6_c1', lessonId: 'anh_6_b1',
+        topic: 'Unit 1: My New School', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Choose the correct form of the verb: "She usually ______ her homework right after school."',
+        options: ['does', 'do', 'doing', 'is do'],
+        correctAnswer: 0,
+        explanation: 'Chủ ngữ "She" ngôi thứ ba số ít ở thì Hiện tại đơn: do -> does.'
+      },
+      {
+        subjectId: 'anh', grade: 6, chapterId: 'anh_6_c4', lessonId: 'anh_6_b4',
+        topic: 'Unit 4: My Neighbourhood', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Complete the sentence: "Living in the city is ______ than living in the countryside."',
+        options: ['more expensive', 'expensiver', 'most expensive', 'as expensive'],
+        correctAnswer: 0,
+        explanation: 'So sánh hơn với tính từ dài (expensive): more + adj + than.'
+      },
+
+      // -------------------------------------------------------------
+      // 11. KHOA HỌC TỰ NHIÊN 6 (SGK KNTT)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'khtn', grade: 6, chapterId: 'khtn_6_c1', lessonId: 'khtn_6_b1',
+        topic: 'Các phép đo', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Giới hạn đo (GHĐ) của một thước kẻ là gì?',
+        options: [
+          'Độ dài lớn nhất ghi trên thước',
+          'Độ dài giữa hai vạch chia liên tiếp trên thước',
+          'Độ dài nhỏ nhất mà thước có thể đo được',
+          'Khoảng cách từ mép thước đến vạch số 0'
+        ],
+        correctAnswer: 0,
+        explanation: 'Giới hạn đo (GHĐ) của thước là độ dài lớn nhất ghi trên thước.'
+      },
+      {
+        subjectId: 'khtn', grade: 6, chapterId: 'khtn_6_c3', lessonId: 'khtn_6_b3',
+        topic: 'Tế bào - Đơn vị sự sống', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Thành phần nào sau đây có chức năng điều khiển mọi hoạt động sống của tế bào?',
+        options: ['Nhân tế bào (hoặc vùng nhân)', 'Màng sinh chất', 'Chất tế bào', 'Không bào'],
+        correctAnswer: 0,
+        explanation: 'Nhân tế bào chứa vật chất di truyền và điều khiển mọi hoạt động sống của tế bào.'
+      },
+
+      // -------------------------------------------------------------
+      // 12. LỊCH SỬ & ĐỊA LÝ 6 (SGK KNTT)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'lsdl', grade: 6, chapterId: 'lsdl_6_c2', lessonId: 'lsdl_6_b3',
+        topic: 'Nhà nước Văn Lang - Âu Lạc', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Kinh đô đầu tiên của nhà nước Văn Lang thời các vua Hùng đóng tại đâu?',
+        options: [
+          'Phong Châu (nay thuộc tỉnh Phú Thọ)',
+          'Cổ Loa (Đông Anh, Hà Nội)',
+          'Hoa Lư (Ninh Bình)',
+          'Thăng Long (Hà Nội)'
+        ],
+        correctAnswer: 0,
+        explanation: 'Nhà nước Văn Lang đóng đô ở Phong Châu (Bạch Hạc, Phú Thọ).'
+      },
+
+      // -------------------------------------------------------------
+      // 13. GDCD 6 (SGK KNTT)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'gdcd', grade: 6, chapterId: 'gdcd_6_c1', lessonId: 'gdcd_6_b1',
+        topic: 'Tự hào truyền thống gia đình dòng họ', type: 'trac_nghiem', difficulty: 'thong_hieu',
+        qText: 'Hành động nào sau đây thể hiện thái độ tự hào và phát huy truyền thống tốt đẹp của gia đình, dòng họ?',
+        options: [
+          'Chăm ngoan, học giỏi và tích cực gìn giữ nghề truyền thống của ông cha',
+          'Tỏ thái độ tự ti, giấu giếm về nguồn gốc xuất thân của dòng họ mình',
+          'Ỷ lại vào thành tích của cha mẹ mà lười biếng, không chịu rèn luyện bản thân',
+          'Cho rằng các truyền thống xưa cũ đã lỗi thời và không cần tôn trọng'
+        ],
+        correctAnswer: 0,
+        explanation: 'Học sinh cần nỗ lực học tập, giữ gìn và phát huy những giá trị đạo đức, nghề nghiệp tốt đẹp của gia đình.'
+      },
+
+      // -------------------------------------------------------------
+      // 14. CÔNG NGHỆ 6 (SGK KNTT)
+      // -------------------------------------------------------------
+      {
+        subjectId: 'congnghe', grade: 6, chapterId: 'congnghe_6_c1', lessonId: 'congnghe_6_b1',
+        topic: 'Ngôi nhà thông minh', type: 'trac_nghiem', difficulty: 'nhan_biet',
+        qText: 'Đặc điểm nổi bật nhất của ngôi nhà thông minh (Smart Home) là gì?',
+        options: [
+          'Được trang bị hệ thống điều khiển tự động hoặc bán tự động cho các thiết bị',
+          'Được xây dựng với quy mô diện tích rất lớn và nhiều phòng ngủ',
+          'Sử dụng toàn bộ vật liệu đắt tiền nhập khẩu từ nước ngoài',
+          'Không cần sử dụng điện năng mà vẫn hoạt động bình thường'
+        ],
+        correctAnswer: 0,
+        explanation: 'Ngôi nhà thông minh có hệ thống thiết bị được kết nối và điều khiển tự động/từ xa nhằm nâng cao tiện nghi và tiết kiệm năng lượng.'
       }
-    };
+    ];
 
-    // Helper: Select match in knowledge base
-    let curKBList = [];
-    if (subKey.includes('toan')) curKBList = (knttKnowledgeBase.toan && knttKnowledgeBase.toan[gNum]) || knttKnowledgeBase.toan[6];
-    else if (subKey.includes('van')) curKBList = (knttKnowledgeBase.van && knttKnowledgeBase.van[gNum]) || knttKnowledgeBase.van[6];
-    else if (subKey.includes('anh')) curKBList = (knttKnowledgeBase.anh && knttKnowledgeBase.anh[gNum]) || knttKnowledgeBase.anh[6];
-    else if (subKey.includes('khtn')) curKBList = (knttKnowledgeBase.khtn && knttKnowledgeBase.khtn[gNum]) || knttKnowledgeBase.khtn[6];
-    else if (subKey.includes('lsdl') || subKey.includes('su') || subKey.includes('dia')) curKBList = (knttKnowledgeBase.lsdl && knttKnowledgeBase.lsdl[gNum]) || knttKnowledgeBase.lsdl[6];
-    else if (subKey.includes('tin')) curKBList = (knttKnowledgeBase.tin && knttKnowledgeBase.tin[gNum]) || knttKnowledgeBase.tin[6];
-    else if (subKey.includes('gdcd')) curKBList = (knttKnowledgeBase.gdcd && knttKnowledgeBase.gdcd[gNum]) || knttKnowledgeBase.gdcd[6];
-    else if (subKey.includes('congnghe') || subKey.includes('cn')) curKBList = (knttKnowledgeBase.congnghe && knttKnowledgeBase.congnghe[gNum]) || knttKnowledgeBase.congnghe[6];
-    else curKBList = [{ topic: cleanTopic, focus: 'Chuẩn kiến thức kĩ năng GDPT 2018' }];
+    // =========================================================================
+    // HỆ THỐNG SINH THUẬT TOÁN TẠO CÂU HỎI THEO BÀI HỌC VÀ CHỦ ĐỀ CHUẨN KNTT
+    // Không bao giờ lặp lại câu hỏi giống nhau, không dùng tiền tố trích dẫn vô nghĩa
+    // =========================================================================
+    const generateLessonTargetedQuestion = (subKey, gNum, targetLessonTitle, targetTopic, curType, curDiff, procIndex, seenSet) => {
+      // Làm sạch tên bài học và chủ đề để trích xuất từ khóa trọng tâm
+      const cleanConcept = (targetLessonTitle || targetTopic || `Nội dung kiến thức Khối ${gNum}`)
+        .replace(/^Bài\s*\d+\s*[:\-–]\s*/i, '')
+        .replace(/^Unit\s*\d+\s*[:\-–]\s*/i, '')
+        .replace(/^Chương\s*\w+\s*[:\-–]\s*/i, '')
+        .replace(/^Chủ đề\s*\w+\s*[:\-–]\s*/i, '')
+        .replace(/\(.*\)/g, '')
+        .trim();
 
-    for (let i = 0; i < count; i++) {
-      const curType = (qType === 'all' || !qType) ? typeList[i % typeList.length] : qType;
-      const curDiff = (difficulty === 'all' || !difficulty) ? diffList[i % diffList.length] : difficulty;
-      const kbItem = curKBList[i % curKBList.length] || curKBList[0];
-      const activeTopic = cleanPrompt ? `${cleanTopic} (${cleanPrompt})` : (kbItem.topic || kbItem.unit || cleanTopic);
-
+      const normConcept = normText(cleanConcept);
       let qText = '';
-      let opts = [];
-      let correct = 0;
-      let exp = '';
+      let options = [];
+      let correctAnswer = 0;
+      let explanation = '';
 
-      // 1. TOÁN HỌC (SGK KẾT NỐI TRI THỨC)
       if (subKey.includes('toan')) {
-        const diffLabel = curDiff === 'nhan_biet' ? 'Nhận biết' : curDiff === 'thong_hieu' ? 'Thông hiểu' : curDiff === 'van_dung' ? 'Vận dụng' : 'Vận dụng cao';
         if (curType === 'trac_nghiem') {
-          if (curDiff === 'nhan_biet') {
-            qText = `Trong chương trình Toán ${gNum} (bộ sách Kết Nối Tri Thức), khẳng định nào sau đây là ĐÚNG?`;
-            opts = [
-              `A. ${kbItem.rule || 'Số 0 không phải là số nguyên âm cũng không phải là số nguyên dương.'}`,
-              `B. Tích của hai số nguyên âm luôn luôn là một số nguyên âm.`,
-              `C. Phân số có mẫu số bằng 0 là một số hữu tỉ xác định.`,
-              `D. Hai góc kề bù là hai góc có tổng số đo bằng 90 độ.`
-            ];
-            correct = 0;
-            exp = `Giải thích (Mức độ Nhận biết): Theo chuẩn SGK Toán ${gNum} KNTT, khẳng định A là định nghĩa chính xác. B sai vì âm nhân âm ra dương; C sai vì mẫu số phải khác 0; D sai vì kề bù có tổng bằng 180°.`;
-          } else if (curDiff === 'thong_hieu') {
-            qText = `Thực hiện tính hợp lí giá trị biểu thức: P = 25 . (-4) + (-15) . 4 - 4 . 60?`;
-            opts = [
-              `A. P = -400`,
-              `B. P = 400`,
-              `C. P = -240`,
-              `D. P = -100`
-            ];
-            correct = 0;
-            exp = `Giải thích (Mức độ Thông hiểu): Đặt thừa số chung 4 ra ngoài: P = 4 . [(-25) + (-15) - 60] = 4 . (-100) = -400.`;
-          } else if (curDiff === 'van_dung') {
-            qText = `Bác Ba có một mảnh vườn hình chữ nhật có chiều dài 24m, chiều rộng bằng 2/3 chiều dài. Bác dành 1/4 diện tích mảnh vườn để trồng rau xanh. Tính diện tích phần đất trồng rau?`;
-            opts = [
-              `A. 96 m²`,
-              `B. 144 m²`,
-              `C. 192 m²`,
-              `D. 384 m²`
-            ];
-            correct = 0;
-            exp = `Giải thích (Mức độ Vận dụng thực tế): Chiều rộng mảnh vườn là: 24 . 2/3 = 16 (m). Diện tích cả mảnh vườn là: 24 . 16 = 384 (m²). Diện tích trồng rau là: 384 . 1/4 = 96 (m²).`;
+          const numA = (procIndex + 2) * 3 + 1;
+          const numB = (procIndex + 1) * 2 + 3;
+          const numC = (procIndex + 4);
+          if (gNum === 6) {
+            const sumVal = numA * numB - numC;
+            qText = `Tính giá trị của biểu thức số học liên quan đến "${cleanConcept}": P = ${numA} . ${numB} - ${numC}?`;
+            options = [`${sumVal}`, `${sumVal + 10}`, `${sumVal - 10}`, `${sumVal + numA}`];
+            correctAnswer = 0;
+            explanation = `Thực hiện phép tính theo thứ tự SGK Toán 6 KNTT: Nhân trước, trừ sau: ${numA} . ${numB} - ${numC} = ${numA * numB} - ${numC} = ${sumVal}.`;
+          } else if (gNum === 7) {
+            const p = procIndex + 2;
+            const res = 5 - 2;
+            qText = `Tìm số hữu tỉ x trong bài học "${cleanConcept}": x + 2/${p} = 5/${p}?`;
+            options = [`x = ${res}/${p}`, `x = 7/${p}`, `x = 1/${p}`, `x = -${res}/${p}`];
+            correctAnswer = 0;
+            explanation = `Quy tắc chuyển vế: x = 5/${p} - 2/${p} = ${res}/${p}.`;
+          } else if (gNum === 8) {
+            const k = procIndex + 2;
+            qText = `Áp dụng hằng đẳng thức trong bài "${cleanConcept}", khai triển biểu thức (x + ${k})² ta được:`;
+            options = [`x² + ${2 * k}x + ${k * k}`, `x² + ${k * k}`, `x² + ${k}x + ${k * k}`, `x² - ${2 * k}x + ${k * k}`];
+            correctAnswer = 0;
+            explanation = `Bình phương một tổng: (x + ${k})² = x² + 2.${k}.x + ${k}² = x² + ${2 * k}x + ${k * k}.`;
           } else {
-            qText = `(Vận dụng cao) Một cửa hàng nhập về một lô hàng với giá gốc 500.000 đồng/sản phẩm. Ban đầu cửa hàng bán với giá lãi 30% so với giá gốc. Sau đó, để tri ân khách hàng nhân dịp khai giảng, cửa hàng giảm giá 15% trên giá đang bán. Hỏi sau khi giảm giá, cửa hàng còn lãi bao nhiêu tiền trên mỗi sản phẩm?`;
-            opts = [
-              `A. Lãi 52.500 đồng/sản phẩm`,
-              `B. Lãi 75.000 đồng/sản phẩm`,
-              `C. Lãi 150.000 đồng/sản phẩm`,
-              `D. Lỗ 25.000 đồng/sản phẩm`
-            ];
-            correct = 0;
-            exp = `Giải thích (Vận dụng cao): Giá bán ban đầu: 500.000 x 130% = 650.000 (đồng). Giá sau khi giảm 15%: 650.000 x (1 - 0.15) = 552.500 (đồng). Tiền lãi thực tế: 552.500 - 500.000 = 52.500 (đồng/sản phẩm).`;
+            const r = procIndex + 3;
+            qText = `Tập nghiệm của phương trình đại số trong bài "${cleanConcept}": x² - ${r * r} = 0 là:`;
+            options = [`x = ${r} hoặc x = -${r}`, `x = ${r}`, `x = ${r * r}`, 'Phương trình vô nghiệm'];
+            correctAnswer = 0;
+            explanation = `Ta có x² = ${r * r} <=> x = ±${r}.`;
           }
         } else if (curType === 'dung_sai') {
-          qText = `Đọc kĩ các dữ liệu toán học liên quan đến nội dung "${activeTopic}" và xác định tính Đúng/Sai cho từng phát biểu dưới đây:`;
-          opts = [
-            `a. Số nguyên âm được biểu diễn ở phía bên trái điểm 0 trên trục số nằm ngang.`,
-            `b. Phép chia hai số nguyên cùng dấu luôn cho kết quả là một số nguyên âm.`,
-            `c. Trong hình chữ nhật, hai đường chéo bằng nhau và cắt nhau tại trung điểm của mỗi đường.`,
-            `d. Mọi số tự nhiên có chữ số tận cùng là 5 thì luôn chia hết cho cả 2 và 5.`
+          qText = `Xét tính Đúng hoặc Sai của các khẳng định toán học sau về "${cleanConcept}":`;
+          options = [
+            `Quy tắc và tính chất định nghĩa của "${cleanConcept}" áp dụng nhất quán trên tập số nghiên cứu.`,
+            `Số 0 là phần tử trung hòa trong phép toán cộng của các tập hợp số học.`,
+            `Phép chia cho số 0 luôn luôn xác định và có giá trị bằng chính số đó.`,
+            `Mọi góc vuông trong hình học Euclide phẳng đều có số đo chính xác bằng 90°.`
           ];
-          correct = [true, false, true, false];
-          exp = `Hướng dẫn chấm Đúng/Sai: a) ĐÚNG (theo quy ước trục số); b) SAI (cùng dấu chia nhau ra số dương); c) ĐÚNG (tính chất hình chữ nhật SGK KNTT); d) SAI (tận cùng là 5 chỉ chia hết cho 5, không chia hết cho 2).`;
+          correctAnswer = [true, true, false, true];
+          explanation = 'Mệnh đề c) Sai vì phép chia cho số 0 không xác định trong toán học.';
         } else if (curType === 'tra_loi_ngan') {
-          qText = `Tìm số nguyên x biết: 3x - (-15) = 36? (Nhập kết quả là một số)`;
-          opts = [];
-          correct = '7';
-          exp = `Đáp án đúng: 7. Lời giải: 3x + 15 = 36 => 3x = 36 - 15 = 21 => x = 21 : 3 = 7.`;
+          const val = (procIndex + 3) * 4;
+          qText = `Tính giá trị của biểu thức trong nội dung "${cleanConcept}": (${val} + 12) : 4? (Ghi kết quả dưới dạng số)`;
+          options = [];
+          correctAnswer = String((val + 12) / 4);
+          explanation = `Ta có (${val} + 12) : 4 = ${val + 12} : 4 = ${(val + 12) / 4}.`;
         } else {
-          qText = `Một mảnh đất hình thang cân có độ dài hai đáy lần lượt là 12m và 20m, chiều cao là 8m. Người ta lát gạch lối đi xung quanh và trồng cỏ bên trong.
-1) Hãy tính diện tích của mảnh đất hình thang cân này.
-2) Biết chi phí mua cỏ giống là 45.000 đồng/m². Tính tổng số tiền cần dùng để phủ kín toàn bộ diện tích mảnh đất.`;
-          opts = [];
-          correct = '';
-          exp = `Ma trận & Thang điểm chấm tự luận:
-- Câu 1: Công thức diện tích hình thang: S = ((12 + 20) x 8) / 2 = 128 (m²). (1.0 điểm)
-- Câu 2: Tổng chi phí mua cỏ: 128 x 45.000 = 5.760.000 (đồng). (1.0 điểm)
-- Kết luận và đơn vị chuẩn xác. (0.5 điểm)`;
+          qText = `Vận dụng kiến thức bài học "${cleanConcept}": Một mảnh đất hình chữ nhật có chu vi bằng ${(procIndex + 5) * 20} m, chiều rộng bằng 1/3 chiều dài. Em hãy tính chiều dài, chiều rộng và diện tích của mảnh đất đó.`;
+          options = [];
+          correctAnswer = '';
+          explanation = `Nửa chu vi = ${(procIndex + 5) * 10} m. Chiều dài = 3 phần, chiều rộng = 1 phần. Tính chiều dài, chiều rộng và diện tích mảnh đất.`;
         }
-      }
-      // 2. NGỮ VĂN (SGK KẾT NỐI TRI THỨC)
-      else if (subKey.includes('van')) {
-        const textEx = kbItem.textSample || 'Ngữ liệu văn bản SGK Kết Nối Tri Thức';
+      } else if (subKey.includes('tin')) {
+        // TIN HỌC: Sinh động bám sát ngữ nghĩa chính xác của cleanConcept
+        const isDigitalWorld = normConcept.includes('ki thuat so') || normConcept.includes('thong minh') || normConcept.includes('iot');
+        const isPython = normConcept.includes('python') || normConcept.includes('lap trinh') || normConcept.includes('thuat toan') || normConcept.includes('mang');
+        const isDataOrDB = normConcept.includes('co so du lieu') || normConcept.includes('csdl') || normConcept.includes('bang tinh') || normConcept.includes('excel') || normConcept.includes('countif');
+        const isSecurityOrLaw = normConcept.includes('phap li') || normConcept.includes('dao duc') || normConcept.includes('an toan') || normConcept.includes('ban quyen');
+        const isInfoProblem = normConcept.includes('thong tin') || normConcept.includes('giai quyet van de') || normConcept.includes('chat luong');
+
         if (curType === 'trac_nghiem') {
-          qText = `Đọc ngữ liệu bài học thuộc chủ đề "${activeTopic}" (${textEx}), biện pháp nghệ thuật nào dưới đây được tác giả vận dụng nổi bật nhất?`;
-          opts = [
-            `A. So sánh kết hợp với nhân hóa và từ ngữ giàu tính gợi hình, gợi cảm`,
-            `B. Sử dụng hoàn toàn từ ngữ địa phương khó hiểu`,
-            `C. Liệt kê trùng lặp không có chọn lọc nghệ thuật`,
-            `D. Chỉ sử dụng câu rút gọn và câu đặc biệt`
-          ];
-          correct = 0;
-          exp = `Giải thích (SGK Ngữ văn ${gNum} KNTT): Biện pháp so sánh và nhân hóa giúp cảnh vật và tâm trạng nhân vật trở nên sinh động, gần gũi và gợi cảm xúc sâu sắc cho người đọc.`;
+          if (isDigitalWorld) {
+            const aspectsDW = [
+              {
+                q: `Trong bài học "${cleanConcept}", đặc điểm cốt lõi nào giúp phân biệt thiết bị thông minh với các thiết bị số thông thường?`,
+                opts: [
+                  'Có bộ vi xử lý, có khả năng kết nối mạng và hoạt động tự chủ ở mức độ nhất định',
+                  'Chỉ có khả năng nhận tín hiệu điện cơ học thủ công từ con người',
+                  'Không cần nguồn năng lượng điện mà vẫn tự vận hành được',
+                  'Chỉ dùng để trang trí trong phòng khách gia đình'
+                ],
+                exp: 'Thiết bị thông minh có bộ vi xử lý và kết nối mạng, có khả năng xử lý dữ liệu và tự chủ hoạt động.'
+              },
+              {
+                q: `Bộ phận nào sau đây đóng vai trò trung tâm điều khiển và xử lý thông tin của các thiết bị trong "${cleanConcept}"?`,
+                opts: [
+                  'Bộ vi xử lý (Microprocessor)',
+                  'Màn hình tinh thể lỏng',
+                  'Vỏ nhựa chống trầy xước bên ngoài',
+                  'Cáp sạc kết nối nguồn'
+                ],
+                exp: 'Bộ vi xử lý tích hợp vi mạch điều khiển mọi hoạt động tiếp nhận và xử lý dữ liệu của thiết bị thông minh.'
+              },
+              {
+                q: `Thiết bị nào sau đây thể hiện rõ nét nhất ứng dụng thực tiễn của "${cleanConcept}" trong gia đình hiện đại?`,
+                opts: [
+                  'Rô-bốt hút bụi tự động định vị và tránh chướng ngại vật trong phòng',
+                  'Bếp gas đơn đánh lửa cơ học bằng núm vặn',
+                  'Đồng hồ cơ chạy bằng dây cót truyền thống',
+                  'Bàn là nhiệt cơ điều khiển bằng nút xoay thủ công'
+                ],
+                exp: 'Rô-bốt hút bụi tự hành có cảm biến và vi xử lý điều khiển tự chủ theo bản đồ phòng.'
+              },
+              {
+                q: `Để đảm bảo an toàn thông tin cá nhân khi tương tác với các thiết bị trong "${cleanConcept}", người dùng nên:`,
+                opts: [
+                  'Đặt mật khẩu mạnh cho tài khoản thiết bị và thường xuyên cập nhật phần mềm bảo mật',
+                  'Chia sẻ công khai mật khẩu mạng wifi và mã PIN của thiết bị',
+                  'Tắt toàn bộ tính năng xác thực hai yếu tố khi kết nối mạng',
+                  'Cho phép tất cả ứng dụng lạ truy cập vào dữ liệu vị trí và máy ảnh'
+                ],
+                exp: 'Bảo mật tài khoản và cập nhật định kì là nguyên tắc số cốt lõi trong thế giới kĩ thuật số.'
+              }
+            ];
+            const item = aspectsDW[procIndex % aspectsDW.length];
+            qText = item.q;
+            options = item.opts;
+            correctAnswer = 0;
+            explanation = item.exp;
+          } else if (isPython) {
+            const aspectsPy = [
+              {
+                q: `Trong bài học "${cleanConcept}", hàm nào của Python được sử dụng để nhập dữ liệu từ bàn phím?`,
+                opts: ['input()', 'print()', 'scan()', 'read()'],
+                exp: 'Hàm input() trong Python dùng để nhận dữ liệu nhập từ người dùng dưới dạng xâu kí tự.'
+              },
+              {
+                q: `Trong Python, toán tử nào sau đây dùng để thực hiện phép chia lấy phần nguyên giữa hai số?`,
+                opts: ['//', '%', '/', '**'],
+                exp: 'Toán tử // chia lấy phần nguyên, % chia lấy phần dư.'
+              }
+            ];
+            const item = aspectsPy[procIndex % aspectsPy.length];
+            qText = item.q;
+            options = item.opts;
+            correctAnswer = 0;
+            explanation = item.exp;
+          } else if (isInfoProblem) {
+            const aspectsInfo = [
+              {
+                q: `Khi đánh giá thông tin trong bài học "${cleanConcept}", tiêu chí "tính chính xác" thể hiện điều gì?`,
+                opts: [
+                  'Thông tin phản ánh đúng sự thật khách quan và có thể kiểm chứng được',
+                  'Thông tin có dung lượng tệp tin lớn nhất trên máy chủ',
+                  'Thông tin được chia sẻ bởi nhiều tài khoản mạng xã hội ẩn danh',
+                  'Thông tin không bao giờ cần kiểm tra nguồn gốc phát hành'
+                ],
+                exp: 'Tính chính xác đòi hỏi thông tin phản ánh đúng sự thật và có căn cứ xác thực.'
+              },
+              {
+                q: `Tiêu chí nào thể hiện rằng thông tin được cập nhật kịp thời với thời điểm giải quyết vấn đề trong "${cleanConcept}"?`,
+                opts: ['Tính mới', 'Tính phức tạp', 'Tính trừu tượng', 'Tính bảo mật'],
+                exp: 'Tính mới phản ánh mức độ cập nhật của thông tin theo thời gian thực tiễn.'
+              }
+            ];
+            const item = aspectsInfo[procIndex % aspectsInfo.length];
+            qText = item.q;
+            options = item.opts;
+            correctAnswer = 0;
+            explanation = item.exp;
+          } else {
+            // Khái niệm tin học chuẩn mực theo cleanConcept
+            const aspectsGen = [
+              {
+                q: `Khái niệm cốt lõi nào sau đây phản ánh chính xác bản chất và mục tiêu của bài học "${cleanConcept}" (SGK Tin học Lớp ${gNum} KNTT)?`,
+                opts: [
+                  'Trang bị kiến thức và kĩ năng xử lý dữ liệu, giải quyết vấn đề hiệu quả trong kỷ nguyên số',
+                  'Chỉ áp dụng riêng cho các thiết bị phần cứng máy tính để bàn đời cũ',
+                  'Không có bất kì liên hệ hay ứng dụng nào vào đời sống học tập thực tế',
+                  'Bỏ qua toàn bộ các quy tắc văn hóa và an toàn thông tin trên môi trường mạng'
+                ],
+                exp: `Theo chuẩn GDPT 2018 Tin học ${gNum}, bài học "${cleanConcept}" hướng tới phát triển năng lực ứng dụng công nghệ và tư duy khoa học.`
+              },
+              {
+                q: `Khi thực hành và vận dụng nội dung "${cleanConcept}", thao tác nào thể hiện phương pháp làm việc khoa học và an toàn?`,
+                opts: [
+                  'Lập kế hoạch rõ ràng, kiểm tra tính đúng đắn của dữ liệu và tuân thủ quy tắc bảo mật',
+                  'Thực hiện tùy tiện không theo quy trình hướng dẫn của bài học',
+                  'Sao chép nguyên văn bài làm của người khác mà không hiểu bản chất',
+                  'Vội vàng kết luận khi chưa thu thập đầy đủ căn cứ xác thực'
+                ],
+                exp: 'Phương pháp khoa học yêu cầu quy trình bài bản, kiểm chứng và bảo mật thông tin.'
+              }
+            ];
+            const item = aspectsGen[procIndex % aspectsGen.length];
+            qText = item.q;
+            options = item.opts;
+            correctAnswer = 0;
+            explanation = item.exp;
+          }
         } else if (curType === 'dung_sai') {
-          qText = `Đánh giá tính Đúng hay Sai của các khẳng định sau về kiến thức Đọc hiểu và Thực hành Tiếng Việt:`;
-          opts = [
-            `a. Người kể chuyện ngôi thứ nhất xưng "tôi" và trực tiếp chứng kiến hoặc tham gia vào câu chuyện.`,
-            `b. Từ ghép đẳng lập là từ ghép mà các tiếng bình đẳng về mặt ngữ pháp, không phân tiếng chính, tiếng phụ.`,
-            `c. Trạng ngữ là thành phần chính bắt buộc phải có để câu hoàn chỉnh về mặt cấu trúc ngữ pháp.`,
-            `d. Biện pháp tu từ ẩn dụ là gọi tên sự vật, hiện tượng này bằng tên sự vật, hiện tượng khác có nét tương đồng.`
+          qText = `Đánh giá tính Đúng hoặc Sai của các nhận định sư phạm sau về bài học "${cleanConcept}":`;
+          options = [
+            `Nội dung "${cleanConcept}" trang bị kĩ năng số cần thiết cho học sinh theo chuẩn SGK Tin học Lớp ${gNum} KNTT.`,
+            `Các kiến thức trong "${cleanConcept}" hoàn toàn biệt lập và không có liên hệ với các công nghệ số hiện đại.`,
+            `Học sinh cần có ý thức tự giác, tư duy phản biện và bảo đảm đạo đức khi thực hành bài học này.`,
+            `Trong môi trường số, không cần quan tâm đến quyền sở hữu trí tuệ hay dữ liệu riêng tư của người khác.`
           ];
-          correct = [true, true, false, true];
-          exp = `Giải thích Đúng/Sai: a) ĐÚNG; b) ĐÚNG (khái niệm từ ghép đẳng lập KNTT); c) SAI (trạng ngữ là thành phần phụ của câu); d) ĐÚNG (định nghĩa ẩn dụ).`;
+          correctAnswer = [true, false, true, false];
+          explanation = 'Mệnh đề a, c) Đúng; b, d) Sai theo chuẩn đạo đức và năng lực số của Chương trình GDPT 2018.';
         } else if (curType === 'tra_loi_ngan') {
-          qText = `Xác định từ láy tượng thanh trong câu văn sau: "Tiếng suối chảy róc rách qua từng khe đá mát lạnh."? (Nhập từ láy tìm được)`;
-          opts = [];
-          correct = 'róc rách';
-          exp = `Đáp án đúng: róc rách. (Từ láy tượng thanh mô phỏng âm thanh tiếng nước chảy róc rách).`;
+          if (isDigitalWorld) {
+            qText = `Trong thế giới kĩ thuật số, bộ phận vi mạch điện tử nào đóng vai trò là "bộ não" điều khiển và xử lý thông tin của các thiết bị thông minh?`;
+            options = [];
+            correctAnswer = 'bộ vi xử lý';
+            explanation = 'Bộ vi xử lý (microprocessor) là bộ não của mọi thiết bị thông minh.';
+          } else {
+            qText = `Từ khóa hoặc khái niệm then chốt nhất được nghiên cứu và hình thành trong bài học "${cleanConcept}" là gì?`;
+            options = [];
+            correctAnswer = cleanConcept;
+            explanation = `Khái niệm trọng tâm của bài học chính là: ${cleanConcept}.`;
+          }
         } else {
-          qText = `Viết một đoạn văn ngắn (từ 6 đến 8 câu) ghi lại cảm nghĩ sâu sắc của em về thông điệp cuộc sống được gửi gắm trong bài học "${activeTopic}". Trong đoạn văn có sử dụng ít nhất một biện pháp tu từ so sánh (gạch chân dưới câu văn có sử dụng biện pháp so sánh đó).`;
-          opts = [];
-          correct = '';
-          exp = `Hướng dẫn chấm bài tự luận Ngữ văn:
-1. Về hình thức (0.75 đ): Đúng dung lượng 6 - 8 câu, không sai chính tả, diễn đạt mạch lạc.
-2. Về nội dung (1.25 đ): Nêu rõ cảm nghĩ về thông điệp ý nghĩa (yêu thương gia đình, tình yêu quê hương, bảo vệ thiên nhiên...).
-3. Tiếng Việt (0.5 đ): Sử dụng đúng và chỉ rõ được 01 câu có biện pháp tu từ so sánh.`;
+          qText = `Dựa vào bài học "${cleanConcept}" (SGK Tin học ${gNum} Kết Nối Tri Thức), em hãy trình bày ý nghĩa thực tiễn của nội dung này và liên hệ với các thói quen sử dụng công nghệ của bản thân trong học tập.`;
+          options = [];
+          correctAnswer = '';
+          explanation = `Nêu đúng ý nghĩa thực tiễn của ${cleanConcept} (1.5đ), nêu liên hệ bản thân và bài học kinh nghiệm thiết thực (1.5đ).`;
         }
-      }
-      // 3. TIẾNG ANH (GLOBAL SUCCESS - KNTT)
-      else if (subKey.includes('anh') || subKey.includes('eng')) {
+      } else {
+        // CÁC MÔN HỌC KHÁC: Văn, Toán, KHTN, Sử - Địa, GDCD, Công nghệ, Ngoại ngữ
+        const aspects = [
+          {
+            focus: 'Bản chất và đặc trưng cốt lõi',
+            qText: `Nội dung trọng tâm nào sau đây thể hiện chính xác nhất đặc điểm cốt lõi của bài học "${cleanConcept}" (SGK Lớp ${gNum} Kết Nối Tri Thức)?`,
+            optCorrect: `Nắm vững bản chất, quy luật đặc trưng và vận dụng đúng phương pháp khoa học của bài học`,
+            optWrongs: [
+              'Chỉ học thuộc lòng máy móc định nghĩa mà không liên hệ với thực tiễn đời sống',
+              'Bỏ qua các bước quan sát, thực nghiệm và phân tích cứ liệu trong SGK',
+              'Áp dụng tùy tiện các nhận định cảm tính không có cơ sở khoa học'
+            ],
+            exp: `Theo định hướng GDPT 2018, bài học "${cleanConcept}" chú trọng hình thành năng lực tự chủ và tư duy vận dụng sáng tạo.`
+          },
+          {
+            focus: 'Ứng dụng thực tiễn và liên hệ đời sống',
+            qText: `Trong đời sống thực tiễn, việc tìm hiểu và nắm vững kiến thức "${cleanConcept}" mang lại ý nghĩa thiết thực nào nhất?`,
+            optCorrect: `Giúp giải thích các hiện tượng thực tế và giải quyết hiệu quả các vấn đề phát sinh trong học tập và sinh hoạt`,
+            optWrongs: [
+              'Không mang lại bất kì giá trị áp dụng thực tiễn nào ngoài kiểm tra trên lớp',
+              'Chỉ có ý nghĩa lý thuyết thuần túy dành cho các nhà nghiên cứu chuyên sâu',
+              'Làm cho các quy trình làm việc thực tế trở nên phức tạp và tốn kém hơn'
+            ],
+            exp: `Trọng tâm "Kết Nối Tri Thức Với Cuộc Sống" của bài học "${cleanConcept}" là đưa kiến thức vào giải quyết vấn đề thực tế.`
+          }
+        ];
+
+        const chosenAspect = aspects[procIndex % aspects.length];
+
         if (curType === 'trac_nghiem') {
-          qText = `Choose the best answer (A, B, C or D) to complete the sentence: "My brother usually ________ basketball with his classmates after school on Fridays."`;
-          opts = [
-            `A. plays`,
-            `B. is playing`,
-            `C. play`,
-            `D. played`
-          ];
-          correct = 0;
-          exp = `Explanation: In English Grade ${gNum} (Global Success), with subject "My brother" (singular noun) and the adverb of frequency "usually", we use the Present Simple tense with verb ending in -s/-es -> "plays".`;
+          qText = chosenAspect.qText;
+          options = [chosenAspect.optCorrect, ...chosenAspect.optWrongs];
+          correctAnswer = 0;
+          explanation = chosenAspect.exp;
         } else if (curType === 'dung_sai') {
-          qText = `Read the statements about English grammar & vocabulary in Unit "${activeTopic}" and decide whether each statement is True (T) or False (F):`;
-          opts = [
-            `a. The adverb of frequency "always" usually goes before the main verb and after the verb "to be".`,
-            `b. The comparative form of the adjective "good" is "gooder".`,
-            `c. We use "must" to express an obligation or something that is very necessary.`,
-            `d. "Neighbourhood" means the area of a town where people live and each other is friendly.`
+          qText = `Xác định tính Đúng hoặc Sai của các nhận định sư phạm sau về bài học "${cleanConcept}":`;
+          options = [
+            `Nội dung bài học "${cleanConcept}" đáp ứng đúng chuẩn yêu cầu cần đạt của môn ${subName} Lớp ${gNum}.`,
+            `Kiến thức trong bài học hoàn toàn tách rời với thực tế đời sống và không thể ứng dụng.`,
+            `Học sinh cần rèn luyện phẩm chất tự học, hợp tác và tư duy độc lập khi tìm hiểu bài học này.`,
+            `Việc kiểm tra đánh giá chỉ nhằm mục đích ghi nhớ máy móc các chi tiết trong sách giáo khoa.`
           ];
-          correct = [true, false, true, true];
-          exp = `Answer key: a) TRUE; b) FALSE (the comparative form of "good" is "better"); c) TRUE; d) TRUE.`;
+          correctAnswer = [true, false, true, false];
+          explanation = 'a, c) Đúng; b, d) Sai theo định hướng phát triển năng lực người học GDPT 2018.';
         } else if (curType === 'tra_loi_ngan') {
-          qText = `Give the correct form of the word in brackets: "Lan is very ________. She always helps her friends with their homework." (HELP)`;
-          opts = [];
-          correct = 'helpful';
-          exp = `Correct answer: helpful (Adjective describing personality from the verb help).`;
+          qText = `Khái niệm hoặc từ khóa cốt lõi nhất thể hiện nội dung trọng tâm của bài học "${cleanConcept}" trong chương trình môn ${subName} Lớp ${gNum} là gì?`;
+          options = [];
+          correctAnswer = cleanConcept;
+          explanation = `Khái niệm trọng tâm của bài học chính là: ${cleanConcept}.`;
         } else {
-          qText = `Write a short paragraph (50 - 70 words) about your favourite topic related to "${activeTopic}". Use the following prompts:
-- What is it?
-- Why do you like it?
-- How often do you do it?`;
-          opts = [];
-          correct = '';
-          exp = `Scoring Criteria (Writing):
-- Task achievement & content relevance: 1.0 pt
-- Vocabulary & Grammar accuracy (tenses, structures): 1.0 pt
-- Coherence and connectors: 0.5 pt`;
-        }
-      }
-      // 4. KHOA HỌC TỰ NHIÊN (KHTN KNTT)
-      else if (subKey.includes('khtn') || subKey.includes('ly') || subKey.includes('hoa') || subKey.includes('sinh')) {
-        if (curType === 'trac_nghiem') {
-          qText = `Theo chương trình KHTN ${gNum} bộ sách Kết Nối Tri Thức, phát biểu nào sau đây mô tả ĐÚNG nhất bản chất khoa học của bài học "${activeTopic}"?`;
-          opts = [
-            `A. ${kbItem.focus ? kbItem.focus.split(',')[0] : 'Tế bào là đơn vị cơ bản cấu tạo nên mọi cơ thể sống.'}`,
-            `B. Chất rắn không có hình dạng xác định và luôn chiếm toàn bộ thể tích bình chứa.`,
-            `C. Khối lượng của một vật thay đổi khi đưa vật từ Trái Đất lên Mặt Trăng.`,
-            `D. Khi nhiệt độ tăng thì sự nở vì nhiệt của các chất lỏng khác nhau luôn giống hệt nhau.`
-          ];
-          correct = 0;
-          exp = `Giải thích (KHTN ${gNum} KNTT): Khẳng định A phản ánh chính xác kiến thức cốt lõi. B sai vì chất rắn có hình dạng xác định; C sai vì khối lượng là lượng chất không đổi; D sai vì các chất lỏng khác nhau nở vì nhiệt khác nhau.`;
-        } else if (curType === 'dung_sai') {
-          qText = `Xác định tính Đúng hay Sai của các mệnh đề khoa học thực nghiệm sau đây:`;
-          opts = [
-            `a. Tế bào nhân thực có màng nhân bao bọc vật chất di truyền, tế bào nhân sơ thì không có màng nhân.`,
-            `b. Lực ma sát trượt luôn cùng chiều với chiều chuyển động của vật.`,
-            `c. Năng lượng không tự sinh ra cũng không tự mất đi, chỉ chuyển hóa từ dạng này sang dạng khác.`,
-            `d. Nước cất là một hỗn hợp gồm nhiều chất hóa học khác nhau hòa tan.`
-          ];
-          correct = [true, false, true, false];
-          exp = `Giải thích: a) ĐÚNG; b) SAI (lực ma sát trượt cản trở chuyển động nên ngược chiều); c) ĐÚNG (Định luật bảo toàn năng lượng); d) SAI (nước cất là chất tinh khiết).`;
-        } else if (curType === 'tra_loi_ngan') {
-          qText = `Đơn vị đo lực chuẩn trong Hệ đo lường quốc tế (SI) là gì? (Nhập tên đầy đủ hoặc kí hiệu chữ cái)`;
-          opts = [];
-          correct = 'Niutơn';
-          exp = `Đáp án đúng: Niutơn (hoặc N / Newton).`;
-        } else {
-          qText = `Hãy giải thích vì sao khi mùa đông thời tiết hanh khô, khi cởi áo len bằng sợi tổng hợp trong phòng tối ta thường nghe thấy tiếng lách tách nhỏ và có thể thấy những tia lửa điện nhỏ lóe sáng? Nêu cách phòng tránh hiện tượng tĩnh điện này trong đời sống.`;
-          opts = [];
-          correct = '';
-          exp = `Hướng dẫn chấm KHTN:
-- Giải thích hiện tượng nhiễm điện do cọ xát giữa các lớp áo len (1.25 đ).
-- Giải thích sự phóng điện tạo tia lửa điện và tiếng nổ lách tách (0.75 đ).
-- Nêu biện pháp: tăng độ ẩm không khí, mặc áo vải cotton tự nhiên, dùng nước xả vải chống tĩnh điện (0.5 đ).`;
-        }
-      }
-      // 5. TIN HỌC (KNTT)
-      else if (subKey.includes('tin')) {
-        if (curType === 'trac_nghiem') {
-          qText = `Liên quan đến chủ đề "${activeTopic}" (SGK Tin học ${gNum} Kết Nối Tri Thức), khẳng định nào sau đây nêu ĐÚNG nhất theo chuẩn GDPT 2018?`;
-          opts = [
-            `A. Thông tin là những hiểu biết của con người về thế giới xung quanh và về chính bản thân mình`,
-            `B. Dữ liệu và thông tin là hai khái niệm hoàn toàn đồng nhất và không có sự phân biệt`,
-            `C. Mạng không dây (Wi-Fi) chỉ có thể kết nối được tối đa hai thiết bị máy tính cùng lúc`,
-            `D. Việc chia sẻ thông tin cá nhân của người khác lên mạng xã hội không bao giờ vi phạm pháp luật`
-          ];
-          correct = 0;
-          exp = `Giải thích (Tin học ${gNum} KNTT): Khái niệm chuẩn SGK: Thông tin là sự hiểu biết; dữ liệu là các con số, văn bản, hình ảnh, âm thanh được máy tính tiếp nhận và xử lí.`;
-        } else if (curType === 'dung_sai') {
-          qText = `Đánh giá tính Đúng/Sai của các nhận định dưới đây về sử dụng phần mềm và an toàn thông tin số:`;
-          opts = [
-            `a. Mật khẩu mạnh nên có ít nhất 8 kí tự, kết hợp chữ hoa, chữ thường, chữ số và kí tự đặc biệt.`,
-            `b. Tệp có phần mở rộng .xlsx là tệp trình chiếu do phần mềm PowerPoint tạo ra.`,
-            `c. Trong bảng tính Excel, để tính trung bình cộng của một khối ô tính ta sử dụng hàm AVERAGE.`,
-            `d. Cấu trúc lặp trong thuật toán cho phép thực hiện một khối lệnh nhiều lần theo điều kiện.`
-          ];
-          correct = [true, false, true, true];
-          exp = `Giải thích: a) ĐÚNG; b) SAI (.xlsx là tệp bảng tính Excel); c) ĐÚNG (hàm AVERAGE); d) ĐÚNG (khái niệm vòng lặp).`;
-        } else if (curType === 'tra_loi_ngan') {
-          qText = `Trong phần mềm soạn thảo văn bản hoặc hệ điều hành Windows, tổ hợp phím tắt nào dùng để Lưu (Save) tệp văn bản đang mở?`;
-          opts = [];
-          correct = 'Ctrl + S';
-          exp = `Đáp án đúng: Ctrl + S (hoặc Ctrl+S / Ctrl-S).`;
-        } else {
-          qText = `Em hãy nêu 3 mối nguy cơ phổ biến khi học sinh tham gia mạng xã hội và đề xuất 3 biện pháp cụ thể để bảo vệ thông tin cá nhân và tài khoản trực tuyến của bản thân một cách an toàn, văn minh.`;
-          opts = [];
-          correct = '';
-          exp = `Thang điểm chấm Tin học:
-- Nêu đúng 3 nguy cơ (lộ lọt thông tin, lừa đảo trực tuyến, bạo lực mạng) (1.25 đ).
-- Đề xuất 3 biện pháp đúng đắn (đặt mật khẩu mạnh, không kết bạn với người lạ, không truy cập liên kết đáng ngờ) (1.25 đ).`;
-        }
-      }
-      // 6. LỊCH SỬ & ĐỊA LÝ, GDCD, CÔNG NGHỆ, CÁC MÔN CÒN LẠI
-      else {
-        if (curType === 'trac_nghiem') {
-          qText = `Trong chương trình ${subName} ${gNum} (bộ sách Kết Nối Tri Thức Với Cuộc Sống), nội dung nào dưới đây phản ánh ĐÚNG nhất bài học "${activeTopic}"?`;
-          opts = [
-            `A. Nắm vững bản chất kiến thức cốt lõi và vận dụng linh hoạt vào thực tiễn đời sống`,
-            `B. Chỉ ghi nhớ máy móc câu chữ mà không cần hiểu ý nghĩa ứng dụng thực tế`,
-            `C. Bỏ qua các bước kiểm tra an toàn và quy trình thực nghiệm quy định`,
-            `D. Áp dụng các kết quả phỏng đoán ngẫu nhiên không có cơ sở khoa học`
-          ];
-          correct = 0;
-          exp = `Giải thích (${subName} ${gNum} KNTT): Đáp án A đáp ứng đúng mục tiêu phát triển phẩm chất và năng lực của Chương trình GDPT 2018.`;
-        } else if (curType === 'dung_sai') {
-          qText = `Nhận định tính Đúng hoặc Sai cho các mệnh đề sau đây:`;
-          opts = [
-            `a. Việc học tập môn ${subName} giúp học sinh nâng cao hiểu biết và rèn luyện kĩ năng giải quyết vấn đề.`,
-            `b. Giữ gìn và phát huy các giá trị văn hóa truyền thống tốt đẹp là trách nhiệm của mỗi công dân.`,
-            `c. Mọi hành vi vi phạm chuẩn mực đạo đức và pháp luật đều không để lại hậu quả cho xã hội.`,
-            `d. Thực hành và liên hệ thực tế là phương pháp quan trọng để ghi nhớ kiến thức sâu sắc.`
-          ];
-          correct = [true, true, false, true];
-          exp = `Giải thích: a) ĐÚNG; b) ĐÚNG; c) SAI (vi phạm pháp luật luôn gây hại cho xã hội); d) ĐÚNG.`;
-        } else if (curType === 'tra_loi_ngan') {
-          qText = `Nêu từ khóa khái niệm quan trọng nhất được nhấn mạnh trong bài học "${activeTopic}"?`;
-          opts = [];
-          correct = cleanTopic.split(/[-–:]/)[0].trim() || 'Trách nhiệm';
-          exp = `Đáp án: ${correct}.`;
-        } else {
-          qText = `Từ nội dung bài học "${activeTopic}", em hãy liên hệ thực tế tại trường học hoặc địa phương nơi em đang sinh sống và nêu 2 việc làm cụ thể mà học sinh THCS có thể thực hiện để đóng góp tích cực cho cộng đồng.`;
-          opts = [];
-          correct = '';
-          exp = `Hướng dẫn chấm:
-- Nêu được 2 việc làm cụ thể, thiết thực, phù hợp lứa tuổi học sinh THCS (2.0 đ).
-- Bài viết có cảm xúc chân thành, lập luận rõ ràng, thuyết phục (0.5 đ).`;
+          qText = `Dựa vào kiến thức bài học "${cleanConcept}" (SGK Kết Nối Tri Thức), em hãy viết một đoạn văn ngắn (khoảng 5 - 7 dòng) trình bày hiểu biết của mình và liên hệ thực tế bản thân trong việc vận dụng bài học này.`;
+          options = [];
+          correctAnswer = '';
+          explanation = 'Đoạn văn nêu đúng kiến thức cốt lõi (1.5đ), có liên hệ thực tế bản thân sinh động, giàu tính thuyết phục (1.5đ).';
         }
       }
 
+      // Đảm bảo không trùng lặp văn bản câu hỏi trong phiên tạo
+      let finalQText = qText;
+      let counter = 1;
+      while (seenSet.has(finalQText)) {
+        finalQText = `${qText} (Ý ${counter})`;
+        counter++;
+      }
+      seenSet.add(finalQText);
+
+      return {
+        type: curType,
+        difficulty: curDiff || 'nhan_biet',
+        qText: finalQText,
+        options: options.map(cleanOptPrefix),
+        correctAnswer: correctAnswer,
+        explanation: explanation
+      };
+    };
+
+    // =========================================================================
+    // LỌC VÀ XẾP HẠNG CÂU HỎI TỪ KHO BÀI HỌC KNTT
+    // =========================================================================
+        // 1. Lọc ban đầu theo Môn học và Khối lớp
+    let pool = KNTT_QUESTIONS_POOL.filter(q => {
+      const matchSub = (q.subjectId === subKey) || (subKey.includes(q.subjectId));
+      const matchGrade = !q.grade || (q.grade === gNum);
+      return matchSub && matchGrade;
+    });
+
+    // 2. LỌC NGHIÊM NGẶT THEO BÀI HỌC VÀ CHƯƠNG (STRICT ISOLATION)
+    // Khi giáo viên chọn Bài học cụ thể (lessonId hoặc lessonTitle), CHỈ LẤY CÂU HỎI THUỘC ĐÚNG BÀI HỌC ĐÓ!
+    // Tuyệt đối không để câu hỏi của bài khác (như Python, AI) bị kéo lẫn vào bài Thế giới kĩ thuật số
+    if (lessonId) {
+      const exactMatch = pool.filter(q => q.lessonId === lessonId);
+      if (exactMatch.length > 0) {
+        pool = exactMatch;
+      } else if (lessonTitle) {
+        const normLT = normText(lessonTitle.replace(/^Bài\s*\d+\s*[:\-–]\s*/i, '').trim());
+        const titleMatch = pool.filter(q => {
+          const normQTopic = normText(q.topic || '');
+          const normQQ = normText(q.qText || '');
+          return (normLT.length > 3 && (normQTopic.includes(normLT) || normQQ.includes(normLT)));
+        });
+        pool = (titleMatch.length > 0) ? titleMatch : [];
+      } else {
+        pool = [];
+      }
+    } else if (chapterId) {
+      // Nếu chỉ chọn Chương/Chủ đề (chưa chọn bài cụ thể), chỉ lấy câu hỏi thuộc đúng chương đó
+      const chapMatch = pool.filter(q => q.chapterId === chapterId);
+      if (chapMatch.length > 0) {
+        pool = chapMatch;
+      }
+    }
+
+    // 3. Lọc theo Dạng câu hỏi nếu có chỉ định cụ thể
+    if (qType && qType !== 'all') {
+      pool = pool.filter(q => q.type === qType);
+    }
+
+    // 4. Lọc theo Mức độ nếu có chỉ định cụ thể
+    if (difficulty && difficulty !== 'all') {
+      pool = pool.filter(q => q.difficulty === difficulty);
+    }
+
+    // 5. Xếp hạng ưu tiên theo mức độ phù hợp với yêu cầu của giáo viên
+    const searchTerms = normText(cleanPrompt + ' ' + cleanTopic).split(/\s+/).filter(w => w.length > 2);
+    pool.sort((a, b) => {
+      let scoreA = 0;
+      let scoreB = 0;
+      const textA = normText(a.qText + ' ' + (a.topic || ''));
+      const textB = normText(b.qText + ' ' + (b.topic || ''));
+      searchTerms.forEach(term => {
+        if (textA.includes(term)) scoreA += 10;
+        if (textB.includes(term)) scoreB += 10;
+      });
+      return scoreB - scoreA;
+    });
+
+    const generated = [];
+    const seenTexts = new Set();
+    const targetTypes = (qType === 'all' || !qType) ? ['trac_nghiem', 'dung_sai', 'tra_loi_ngan', 'tu_luan'] : [qType];
+    const targetDiffs = (difficulty === 'all' || !difficulty) ? ['nhan_biet', 'thong_hieu', 'van_dung', 'van_dung_cao'] : [difficulty];
+
+    // 1. Lấy các câu hỏi độc nhất từ kho câu hỏi tuyển chọn
+    for (const item of pool) {
+      if (generated.length >= count) break;
+      const cleanQText = item.qText.trim();
+      if (!seenTexts.has(cleanQText)) {
+        seenTexts.add(cleanQText);
+        generated.push({
+          id: 'q_ai_' + Date.now() + '_' + generated.length + '_' + Math.random().toString(36).substr(2, 4),
+          subjectId: subjectId || 'toan',
+          chapterId: chapterId || item.chapterId || null,
+          lessonId: lessonId || item.lessonId || null,
+          topic: item.topic || cleanTopic,
+          grade: gNum,
+          type: item.type,
+          difficulty: item.difficulty || 'nhan_biet',
+          questionText: cleanQText,
+          options: (item.options || []).map(cleanOptPrefix),
+          correctAnswer: item.correctAnswer,
+          explanation: item.explanation || '',
+          approved: true,
+          checked: true
+        });
+      }
+    }
+
+    // 2. Nếu số lượng yêu cầu lớn hơn số câu hỏi sẵn có, kích hoạt động cơ sinh bài học mục tiêu
+    let procIndex = 0;
+    while (generated.length < count) {
+      const curType = targetTypes[generated.length % targetTypes.length];
+      const curDiff = targetDiffs[generated.length % targetDiffs.length];
+      const procQ = generateLessonTargetedQuestion(subKey, gNum, lessonTitle, cleanTopic, curType, curDiff, procIndex++, seenTexts);
+
       generated.push({
-        id: 'q_ai_' + Date.now() + '_' + i,
+        id: 'q_ai_' + Date.now() + '_' + generated.length + '_' + Math.random().toString(36).substr(2, 4),
         subjectId: subjectId || 'toan',
         chapterId: chapterId || null,
         lessonId: lessonId || null,
-        topic: activeTopic,
+        topic: cleanTopic,
         grade: gNum,
-        type: curType,
-        difficulty: curDiff,
-        questionText: qText,
-        options: opts,
-        correctAnswer: correct,
-        explanation: exp,
+        type: procQ.type,
+        difficulty: procQ.difficulty,
+        questionText: procQ.qText,
+        options: procQ.options,
+        correctAnswer: procQ.correctAnswer,
+        explanation: procQ.explanation,
         approved: true,
         checked: true
       });
@@ -3520,21 +4342,19 @@ class LMSApp {
   }
 
   // =========================================================================
-  // 🌟 MODAL CẤU HÌNH TẠO CÂU HỎI BẰNG AI (CÓ Ô NHẬP PROMPT GIÁO VIÊN & ĐẦY ĐỦ DẠNG)
+  // 🌟 MODAL CẤU HÌNH TẠO CÂU HỎI BẰNG AI (ĐỒNG BỘ 100% MÔN - KHỐI - BÀI HỌC KNTT)
   // =========================================================================
   showGenerateQuestionsAIModal(subjectId, parentDom) {
     const oldModal = document.getElementById('generate-ai-q-modal');
     if (oldModal) oldModal.remove();
 
     const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
-    const currentSubjectObj = subjects.find(s => s.id === subjectId) || { id: 'toan', name: 'Toán học' };
+    const currentSubjectObj = subjects.find(s => s.id === subjectId) || { id: 'tin', name: 'Tin học' };
 
     const chapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters() : [];
     const lessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons() : [];
 
     const activeSubId = subjectId || currentSubjectObj.id;
-    const subChapters = chapters.filter(c => c.subjectId === activeSubId);
-    const subLessons = lessons.filter(l => l.subjectId === activeSubId || subChapters.some(c => c.id === l.chapterId));
 
     const modal = document.createElement('div');
     modal.id = 'generate-ai-q-modal';
@@ -3573,7 +4393,7 @@ class LMSApp {
             <div>
               <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">🎓 Khối Lớp:</label>
               <select id="ai-q-grade" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-weight:600; font-size:0.9rem; background:#fff;">
-                <option value="6">Khối 6</option>
+                <option value="6" selected>Khối 6</option>
                 <option value="7">Khối 7</option>
                 <option value="8">Khối 8</option>
                 <option value="9">Khối 9</option>
@@ -3598,15 +4418,13 @@ class LMSApp {
               <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📂 Chủ Đề / Chương (SGK KNTT):</label>
               <select id="ai-q-chapter" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff;">
                 <option value="">📂 Tất cả Chủ đề / Chương</option>
-                ${subChapters.map(c => `<option value="${c.id}">${c.title}</option>`).join('')}
               </select>
             </div>
 
             <div>
-              <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📖 Bài Học Trọng Tâm:</label>
+              <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📖 Bài Học Trọng Tâm (KNTT):</label>
               <select id="ai-q-lesson" style="width:100%; padding:0.6rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.88rem; background:#fff;">
                 <option value="">📖 Tất cả các Bài học</option>
-                ${subLessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('')}
               </select>
             </div>
           </div>
@@ -3639,10 +4457,10 @@ class LMSApp {
           <!-- Hàng 4: Chủ đề tùy chọn -->
           <div>
             <label style="font-weight:700; font-size:0.85rem; color:#1e293b; display:block; margin-bottom:0.3rem;">📌 Chủ Đề / Bài Học Cụ Thể (Tùy chọn):</label>
-            <input type="text" id="ai-q-topic" placeholder="Ví dụ: Phân số và Số thập phân, Hình thang cân, Thông tin & Dữ liệu, Hiện tượng quang hợp..." style="width:100%; padding:0.6rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.9rem;">
+            <input type="text" id="ai-q-topic" placeholder="Ví dụ: Thông tin và Dữ liệu, Mạng máy tính, Số nguyên, Hằng đẳng thức, Hiện tượng quang hợp..." style="width:100%; padding:0.6rem 0.85rem; border-radius:10px; border:1.5px solid #cbd5e1; font-size:0.9rem;">
           </div>
 
-          <!-- Hàng 5 (MỚI): Ô NHẬP YÊU CẦU RIÊNG CỦA GIÁO VIÊN (TEACHER PROMPT) -->
+          <!-- Hàng 5: Yêu cầu riêng của Giáo viên (Teacher Prompt) -->
           <div style="background:#f8fafc; border:1.5px solid #c4b5fd; border-radius:14px; padding:0.9rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem; flex-wrap:wrap; gap:0.4rem;">
               <label for="ai-q-teacher-prompt" style="font-weight:800; font-size:0.88rem; color:#6d28d9; display:flex; align-items:center; gap:0.35rem; margin:0;">
@@ -3651,11 +4469,11 @@ class LMSApp {
               <span style="font-size:0.75rem; color:#64748b;">(Tùy chọn thêm để câu hỏi sát với bài giảng)</span>
             </div>
             
-            <textarea id="ai-q-teacher-prompt" rows="2" placeholder="Ví dụ: Cho bài toán thực tế có liên hệ mảnh ruộng hình chữ nhật; hoặc Tạo câu hỏi đọc hiểu bài thơ Đồng dao mùa xuân; hoặc Tập trung ngữ pháp thì Hiện tại hoàn thành..." style="width:100%; padding:0.6rem 0.8rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.88rem; font-family:var(--font-body); resize:vertical;"></textarea>
+            <textarea id="ai-q-teacher-prompt" rows="2" placeholder="Ví dụ: Cho bài toán thực tế có liên hệ mảnh ruộng hình chữ nhật; hoặc Tạo câu hỏi đọc hiểu bài thơ; hoặc Tập trung kĩ năng tính toán..." style="width:100%; padding:0.6rem 0.8rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.88rem; font-family:var(--font-body); resize:vertical;"></textarea>
 
             <!-- Gợi ý nhanh (Quick Prompt Chips) -->
             <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-top:0.45rem;">
-              <button type="button" class="ai-prompt-chip" data-text="Lồng ghép tình huống thực tế đời sống gắn liền địa phương Tây Nguyên" style="background:#fff; border:1px solid #cbd5e1; border-radius:20px; padding:0.2rem 0.6rem; font-size:0.75rem; color:#475569; cursor:pointer;">+ Tình huống thực tế</button>
+              <button type="button" class="ai-prompt-chip" data-text="Lồng ghép tình huống thực tế đời sống gắn liền địa phương" style="background:#fff; border:1px solid #cbd5e1; border-radius:20px; padding:0.2rem 0.6rem; font-size:0.75rem; color:#475569; cursor:pointer;">+ Tình huống thực tế</button>
               <button type="button" class="ai-prompt-chip" data-text="Câu hỏi có bảng số liệu và yêu cầu phân tích kết quả" style="background:#fff; border:1px solid #cbd5e1; border-radius:20px; padding:0.2rem 0.6rem; font-size:0.75rem; color:#475569; cursor:pointer;">+ Bảng số liệu thống kê</button>
               <button type="button" class="ai-prompt-chip" data-text="Trọng tâm rèn luyện kĩ năng tính toán và lập luận logic từng bước" style="background:#fff; border:1px solid #cbd5e1; border-radius:20px; padding:0.2rem 0.6rem; font-size:0.75rem; color:#475569; cursor:pointer;">+ Rèn kĩ năng tính toán</button>
               <button type="button" class="ai-prompt-chip" data-text="Ngữ liệu chuẩn trích từ sách giáo khoa Kết Nối Tri Thức Với Cuộc Sống" style="background:#fff; border:1px solid #cbd5e1; border-radius:20px; padding:0.2rem 0.6rem; font-size:0.75rem; color:#475569; cursor:pointer;">+ Bám sát ngữ liệu SGK KNTT</button>
@@ -3696,37 +4514,56 @@ class LMSApp {
       };
     });
 
-    // Dynamic dropdown updates on subject change
+    // Dynamic dropdown updates synchronized with Subject and Grade
     const subSelect = modal.querySelector('#ai-q-subject');
+    const gradeSelect = modal.querySelector('#ai-q-grade');
     const chapSelect = modal.querySelector('#ai-q-chapter');
     const lesSelect = modal.querySelector('#ai-q-lesson');
 
-    subSelect.onchange = (e) => {
-      const sId = e.target.value;
-      const filteredChaps = chapters.filter(c => c.subjectId === sId);
-      const filteredLessed = lessons.filter(l => l.subjectId === sId || filteredChaps.some(c => c.id === l.chapterId));
+    const updateDropdowns = () => {
+      const sId = subSelect.value;
+      const gNum = parseInt(gradeSelect.value, 10) || 6;
 
-      chapSelect.innerHTML = `<option value="">📂 Tất cả Chủ đề / Chương</option>` + filteredChaps.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
-      lesSelect.innerHTML = `<option value="">📖 Tất cả các Bài học</option>` + filteredLessed.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+      const filteredChaps = chapters.filter(c => c.subjectId === sId && (!c.grade || c.grade === gNum));
+      const chapIds = new Set(filteredChaps.map(c => c.id));
+
+      chapSelect.innerHTML = `<option value="">📂 Tất cả Chủ đề / Chương (KNTT Lớp ${gNum})</option>` + 
+        filteredChaps.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+
+      const selectedChapId = chapSelect.value;
+      let filteredLessons = lessons.filter(l => {
+        if (selectedChapId) return l.chapterId === selectedChapId;
+        return (l.subjectId === sId && (!l.grade || l.grade === gNum)) || chapIds.has(l.chapterId);
+      });
+
+      lesSelect.innerHTML = `<option value="">📖 Tất cả các Bài học (KNTT Lớp ${gNum})</option>` + 
+        filteredLessons.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
     };
 
-    chapSelect.onchange = (e) => {
-      const cId = e.target.value;
+    subSelect.onchange = updateDropdowns;
+    gradeSelect.onchange = updateDropdowns;
+    chapSelect.onchange = () => {
+      const cId = chapSelect.value;
+      const sId = subSelect.value;
+      const gNum = parseInt(gradeSelect.value, 10) || 6;
       if (cId) {
         const filteredLessed = lessons.filter(l => l.chapterId === cId);
         lesSelect.innerHTML = `<option value="">📖 Tất cả các Bài học trong chương này</option>` + filteredLessed.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
       } else {
-        const sId = subSelect.value;
-        const filteredChaps = chapters.filter(c => c.subjectId === sId);
-        const filteredLessed = lessons.filter(l => l.subjectId === sId || filteredChaps.some(c => c.id === l.chapterId));
-        lesSelect.innerHTML = `<option value="">📖 Tất cả các Bài học</option>` + filteredLessed.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+        const filteredChaps = chapters.filter(c => c.subjectId === sId && (!c.grade || c.grade === gNum));
+        const chapIds = new Set(filteredChaps.map(c => c.id));
+        const filteredLessed = lessons.filter(l => (l.subjectId === sId && (!l.grade || l.grade === gNum)) || chapIds.has(l.chapterId));
+        lesSelect.innerHTML = `<option value="">📖 Tất cả các Bài học (KNTT Lớp ${gNum})</option>` + filteredLessed.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
       }
     };
+
+    // Initialize dropdowns on modal render
+    updateDropdowns();
 
     form.onsubmit = (e) => {
       e.preventDefault();
       const subId = subSelect.value;
-      const grade = modal.querySelector('#ai-q-grade').value;
+      const grade = gradeSelect.value;
       const count = parseInt(modal.querySelector('#ai-q-count').value, 10);
       const type = modal.querySelector('#ai-q-type').value;
       const diff = modal.querySelector('#ai-q-diff').value;
@@ -3740,7 +4577,7 @@ class LMSApp {
         <div style="text-align:center; padding:2.5rem 1rem;">
           <div style="font-size:3rem; animation:spin 1s infinite linear; display:inline-block; margin-bottom:0.6rem;">🤖</div>
           <div style="font-weight:700; font-family:var(--font-title); color:#6d28d9; font-size:1.15rem;">AI đang phân tích Chuẩn GDPT 2018 (SGK Kết Nối Tri Thức) & sinh ${count} câu hỏi...</div>
-          <div style="font-size:0.85rem; color:#64748b; margin-top:0.4rem;">Đang cấu trúc hóa theo 4 dạng CV 7991 và yêu cầu sư phạm của giáo viên...</div>
+          <div style="font-size:0.85rem; color:#64748b; margin-top:0.4rem;">Đang cấu trúc hóa theo 4 dạng CV 7991 và bám sát bài học đã chọn...</div>
         </div>
       `;
 
@@ -3751,9 +4588,6 @@ class LMSApp {
     };
   }
 
-  // =========================================================================
-  // 🌟 HIỂN THỊ XEM TRƯỚC, BIÊN TẬP VÀ LƯU CÂU HỎI AI VÀO NGÂN HÀNG
-  // =========================================================================
   renderAIGeneratedPreview(container, questionsList, parentDom, modal) {
     let generatedItems = [...questionsList];
 
@@ -3790,10 +4624,11 @@ class LMSApp {
               optionsHtml = `
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.45rem; margin-bottom:0.6rem;">
                   ${q.options.map((opt, oIdx) => {
+                    const cleanOpt = String(opt || '').replace(/^[A-Da-d][\.\)]\s*/, '').trim();
                     const isCorrect = (q.correctAnswer === oIdx);
                     return `
                       <div style="font-size:0.84rem; background:${isCorrect ? '#dcfce7' : '#f8fafc'}; border:1.5px solid ${isCorrect ? '#86efac' : '#e2e8f0'}; padding:0.45rem 0.65rem; border-radius:8px; color:${isCorrect ? '#166534' : '#334155'}; font-weight:${isCorrect ? '700' : '400'}; display:flex; justify-content:space-between; align-items:center;">
-                        <span>${opt}</span>
+                        <span><strong>${String.fromCharCode(65 + oIdx)}.</strong> ${cleanOpt}</span>
                         ${isCorrect ? '<span style="font-size:0.75rem; background:#16a34a; color:#fff; padding:0.1rem 0.4rem; border-radius:4px;">✅ Đúng</span>' : ''}
                       </div>
                     `;
@@ -3804,10 +4639,11 @@ class LMSApp {
               optionsHtml = `
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.45rem; margin-bottom:0.6rem;">
                   ${q.options.map((opt, oIdx) => {
+                    const cleanOpt = String(opt || '').replace(/^[a-dA-D][\.\)]\s*/, '').trim();
                     const isTrue = Array.isArray(q.correctAnswer) ? q.correctAnswer[oIdx] : true;
                     return `
                       <div style="font-size:0.83rem; background:#f8fafc; border:1px solid #e2e8f0; padding:0.45rem 0.65rem; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                        <span>${opt}</span>
+                        <span><strong>${String.fromCharCode(97 + oIdx)})</strong> ${cleanOpt}</span>
                         <span style="font-weight:700; background:${isTrue ? '#dcfce7' : '#fee2e2'}; color:${isTrue ? '#15803d' : '#b91c1c'}; padding:0.15rem 0.45rem; border-radius:4px; font-size:0.75rem;">
                           ${isTrue ? '✅ ĐÚNG' : '❌ SAI'}
                         </span>
@@ -3912,10 +4748,11 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
 
         if (typeof db !== 'undefined' && db.addQuestion) {
           toSave.forEach(q => {
+            const cleanOptions = (q.options || []).map(opt => String(opt || '').replace(/^[A-Da-d][\.\)]\s*/, '').trim());
             let items = null;
-            if (q.type === 'dung_sai' && Array.isArray(q.options)) {
-              items = q.options.map((opt, oIdx) => ({
-                text: opt,
+            if (q.type === 'dung_sai' && Array.isArray(cleanOptions)) {
+              items = cleanOptions.map((opt, oIdx) => ({
+                text: String(opt || '').replace(/^[a-dA-D][\.\)]\s*/, '').trim(),
                 isCorrect: Array.isArray(q.correctAnswer) ? q.correctAnswer[oIdx] : true
               }));
             }
@@ -3929,7 +4766,7 @@ ${q.explanation || 'Đã có ma trận hướng dẫn chấm tự luận'}
               type: q.type || 'trac_nghiem',
               difficulty: q.difficulty || 'nhan_biet',
               questionText: q.questionText,
-              options: q.options || [],
+              options: cleanOptions,
               correctAnswer: q.correctAnswer,
               items: items,
               explanation: q.explanation || '',
@@ -4893,6 +5730,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
     const oldModal = document.getElementById('add-question-modal');
     if (oldModal) oldModal.remove();
 
+    const activeGrade = (this.selectedQuestionGrade && this.selectedQuestionGrade !== 'all') ? parseInt(this.selectedQuestionGrade, 10) : 6;
     const chapters = (typeof db !== 'undefined' && db.getChapters) ? db.getChapters().filter(c => c.subjectId === subjectId) : [];
     const lessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons().filter(l => l.subjectId === subjectId || chapters.some(c => c.id === l.chapterId)) : [];
 
@@ -4914,10 +5752,10 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
             <div>
               <label style="font-weight: 700; font-size:0.88rem; color:#1e293b; display:block; margin-bottom:0.35rem;">🎓 Khối Lớp:</label>
               <select id="new-q-grade" style="width:100%; padding:0.6rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight: 600; background:#fff;">
-                <option value="6" ${(this.selectedQuestionGrade === '6' || this.selectedQuestionGrade === 'all') ? 'selected' : ''}>Khối 6</option>
-                <option value="7" ${this.selectedQuestionGrade === '7' ? 'selected' : ''}>Khối 7</option>
-                <option value="8" ${this.selectedQuestionGrade === '8' ? 'selected' : ''}>Khối 8</option>
-                <option value="9" ${this.selectedQuestionGrade === '9' ? 'selected' : ''}>Khối 9</option>
+                <option value="6" ${activeGrade === 6 ? 'selected' : ''}>🎓 Khối 6</option>
+                <option value="7" ${activeGrade === 7 ? 'selected' : ''}>🎓 Khối 7</option>
+                <option value="8" ${activeGrade === 8 ? 'selected' : ''}>🎓 Khối 8</option>
+                <option value="9" ${activeGrade === 9 ? 'selected' : ''}>🎓 Khối 9</option>
               </select>
             </div>
 
@@ -5036,6 +5874,45 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
     document.body.appendChild(modal);
     modal.querySelector('#close-add-q-modal').onclick = () => modal.remove();
     modal.querySelector('#btn-cancel-add-q').onclick = () => modal.remove();
+    // Đồng bộ danh mục Chương và Bài học theo Khối lớp trong Modal Thêm Câu Hỏi
+    const qGradeSelect = modal.querySelector('#new-q-grade');
+    const qChapSelect = modal.querySelector('#new-q-chapter');
+    const qLesSelect = modal.querySelector('#new-q-lesson');
+
+    const updateQChapsAndLessons = () => {
+      const gNum = parseInt(qGradeSelect.value, 10) || 6;
+      const filteredChaps = chapters.filter(c => (!c.grade || parseInt(c.grade, 10) === gNum));
+      const chapIds = new Set(filteredChaps.map(c => c.id));
+      
+      qChapSelect.innerHTML = '<option value="">(Chưa chọn chủ đề / chương)</option>' + 
+        filteredChaps.map(c => `<option value="${c.id}" ${c.id === this.selectedQuestionChapter ? 'selected' : ''}>${c.title}</option>`).join('');
+
+      const selCId = qChapSelect.value;
+      const filteredLess = lessons.filter(l => {
+        if (selCId) return l.chapterId === selCId;
+        return chapIds.has(l.chapterId) || (!l.grade || parseInt(l.grade, 10) === gNum);
+      });
+
+      qLesSelect.innerHTML = '<option value="">(Chưa chọn bài học)</option>' + 
+        filteredLess.map(l => `<option value="${l.id}" ${l.id === this.selectedQuestionLesson ? 'selected' : ''}>${l.title}</option>`).join('');
+    };
+
+    if (qGradeSelect) {
+      qGradeSelect.onchange = updateQChapsAndLessons;
+      if (qChapSelect) qChapSelect.onchange = () => {
+        const cId = qChapSelect.value;
+        const gNum = parseInt(qGradeSelect.value, 10) || 6;
+        if (cId) {
+          const filteredLess = lessons.filter(l => l.chapterId === cId);
+          qLesSelect.innerHTML = '<option value="">(Chưa chọn bài học)</option>' + 
+            filteredLess.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+        } else {
+          updateQChapsAndLessons();
+        }
+      };
+      updateQChapsAndLessons();
+    }
+
 
     // Bind Image File Reader for Question Text Image
     modal._qImageUrl = '';
