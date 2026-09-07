@@ -3205,6 +3205,10 @@ class LMSApp {
   // Chuẩn Thông tư 22/2021/TT-BGDĐT, Công văn 7991 và Chương trình GDPT 2018
   // =========================================================================
   generateAIQuestionsList(subjectId, grade, topic, qType, difficulty, count, chapterId = null, lessonId = null, teacherPrompt = '') {
+    let normQType = qType;
+    if (qType === 'multiple_choice') normQType = 'trac_nghiem';
+    if (qType === 'true_false') normQType = 'dung_sai';
+
     const subjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
     const subObj = subjects.find(s => s.id === subjectId) || { id: subjectId || 'toan', name: 'Môn học' };
     const subName = subObj.name;
@@ -3999,7 +4003,7 @@ class LMSApp {
         const isSecurityOrLaw = normConcept.includes('phap li') || normConcept.includes('dao duc') || normConcept.includes('an toan') || normConcept.includes('ban quyen');
         const isInfoProblem = normConcept.includes('thong tin') || normConcept.includes('giai quyet van de') || normConcept.includes('chat luong');
 
-        if (curType === 'trac_nghiem') {
+        if (curType === 'trac_nghiem' || curType === 'multiple_choice') {
           if (isDigitalWorld) {
             const aspectsDW = [
               {
@@ -4041,6 +4045,86 @@ class LMSApp {
                   'Cho phép tất cả ứng dụng lạ truy cập vào dữ liệu vị trí và máy ảnh'
                 ],
                 exp: 'Bảo mật tài khoản và cập nhật định kì là nguyên tắc số cốt lõi trong thế giới kĩ thuật số.'
+              },
+              {
+                q: `Hệ thống nhà thông minh (Smart Home) trong thế giới kĩ thuật số mang lại lợi ích nổi bật nào nhất cho người sử dụng?`,
+                opts: [
+                  'Cho phép giám sát an ninh, điều khiển từ xa và tự động tối ưu hóa điện năng tiêu thụ',
+                  'Làm cho các thiết bị điện trong nhà hoàn toàn không tiêu thụ bất kì nguồn điện nào',
+                  'Thay thế hoàn toàn con người trong tất cả mọi hoạt động suy nghĩ và giao tiếp xã hội',
+                  'Chỉ hoạt động được khi có dây cáp nối trực tiếp vào trạm biến áp trung tâm'
+                ],
+                exp: 'Smart Home tích hợp các thiết bị thông minh kết nối mạng để mang lại sự tiện nghi, an toàn và tiết kiệm năng lượng.'
+              },
+              {
+                q: `Bộ phận cảm biến (Sensor) trong các thiết bị thuộc "${cleanConcept}" có nhiệm vụ quan trọng nào?`,
+                opts: [
+                  'Thu nhận các tín hiệu vật lý từ môi trường (ánh sáng, nhiệt độ, chuyển động) và chuyển đổi thành dữ liệu số',
+                  'Cung cấp năng lượng điện vĩnh cửu cho toàn bộ thiết bị hoạt động',
+                  'Chỉ có tác dụng phát ra âm thanh báo động khi thiết bị hết pin',
+                  'Đóng vai trò làm bộ khung kim loại nâng đỡ cho thiết bị'
+                ],
+                exp: 'Cảm biến giúp thiết bị thông minh "cảm nhận" được môi trường xung quanh để vi xử lý đưa ra quyết định tự chủ.'
+              },
+              {
+                q: `Khái niệm "Internet vạn vật" (IoT) gắn liền mật thiết với bài học "${cleanConcept}" được hiểu chính xác là:`,
+                opts: [
+                  'Mạng lưới các thiết bị thông minh được gắn cảm biến và kết nối Internet để tự động trao đổi dữ liệu',
+                  'Mạng máy tính văn phòng chỉ gồm các máy tính để bàn nối với một máy in duy nhất',
+                  'Mạng lưới đường truyền hình cáp một chiều phát sóng các kênh giải trí',
+                  'Hệ thống mạng viễn thông dùng riêng cho các vệ tinh quân sự'
+                ],
+                exp: 'IoT là mạng lưới vạn vật kết nối Internet, nơi các thiết bị thông minh thu thập và chia sẻ dữ liệu với nhau.'
+              },
+              {
+                q: `Trong lĩnh vực chăm sóc sức khỏe, thiết bị đeo thông minh (Smartwatch) thuộc "${cleanConcept}" có thể hỗ trợ điều gì?`,
+                opts: [
+                  'Đo nhịp tim, đếm số bước chân, theo dõi giấc ngủ và cảnh báo khi người dùng té ngã',
+                  'Thay thế hoàn toàn bác sĩ trong việc phẫu thuật và điều trị bệnh nhân tại bệnh viện',
+                  'Tự động tiêm thuốc cho bệnh nhân mà không cần chỉ định y tế',
+                  'Chữa khỏi hoàn toàn mọi căn bệnh mãn tính chỉ bằng việc đeo trên cổ tay'
+                ],
+                exp: 'Đồng hồ thông minh có cảm biến sinh học giúp theo dõi các chỉ số sức khỏe hàng ngày và đưa ra cảnh báo kịp thời.'
+              },
+              {
+                q: `Một trong những thách thức lớn nhất về mặt bảo mật trong "${cleanConcept}" là gì?`,
+                opts: [
+                  'Nguy cơ bị tin tặc tấn công, đánh cắp dữ liệu riêng tư nếu thiết bị dùng mật khẩu mặc định',
+                  'Các thiết bị quá rẻ tiền nên ai cũng có thể mua được nhiều cái',
+                  'Tốc độ truyền dữ liệu qua Internet quá nhanh làm quá tải đường truyền',
+                  'Thiết bị thông minh không thể tương thích với điện lưới gia đình'
+                ],
+                exp: 'Thiết bị thông minh nếu không được bảo mật kỹ có thể trở thành cửa ngõ cho tin tặc xâm nhập mạng gia đình.'
+              },
+              {
+                q: `Trong nông nghiệp công nghệ cao, ứng dụng của "${cleanConcept}" được thể hiện rõ nét qua giải pháp nào?`,
+                opts: [
+                  'Cảm biến độ ẩm đất tự động kích hoạt hệ thống tưới nhỏ giọt khi đất bị khô',
+                  'Sử dụng các công cụ cuốc xẻng thủ công truyền thống không có động cơ',
+                  'Chỉ phụ thuộc hoàn toàn vào lượng nước mưa tự nhiên để tưới cây',
+                  'Thu hoạch nông sản hoàn toàn bằng sức người thủ công'
+                ],
+                exp: 'Nông nghiệp thông minh ứng dụng cảm biến và tự động hóa giúp nâng cao năng suất và tiết kiệm tài nguyên.'
+              },
+              {
+                q: `Thói quen nào sau đây giúp học sinh sử dụng công nghệ trong "${cleanConcept}" một cách lành mạnh và khoa học?`,
+                opts: [
+                  'Cân đối hợp lý giữa thời gian học tập số với vận động thể chất và bảo vệ thị lực',
+                  'Sử dụng điện thoại thông minh liên tục suốt đêm không nghỉ ngơi',
+                  'Chia sẻ thông tin tài khoản và mật khẩu cá nhân cho mọi người trên mạng',
+                  'Tuyệt đối tin tưởng mọi tin tức chưa được kiểm chứng trên mạng xã hội'
+                ],
+                exp: 'Học sinh cần xây dựng lối sống số lành mạnh, cân bằng giữa công nghệ và đời sống thực tế.'
+              },
+              {
+                q: `Trong giao thông thông minh thuộc thế giới số, camera AI có thể thực hiện chức năng nào tự động?`,
+                opts: [
+                  'Nhận diện mật độ xe để điều chỉnh thời gian đèn tín hiệu giao thông linh hoạt',
+                  'Làm cho toàn bộ các phương tiện giao thông tự động biến mất khi tắc đường',
+                  'Thay thế hoàn toàn mặt đường nhựa bằng kính chịu lực',
+                  'Cung cấp nhiên liệu xăng xe tự động cho mọi xe chạy qua'
+                ],
+                exp: 'Camera giao thông thông minh giúp điều tiết luồng xe và ghi nhận vi phạm tự động.'
               }
             ];
             const item = aspectsDW[procIndex % aspectsDW.length];
@@ -4207,8 +4291,8 @@ class LMSApp {
       // Đảm bảo không trùng lặp văn bản câu hỏi trong phiên tạo
       let finalQText = qText;
       let counter = 1;
-      while (seenSet.has(finalQText)) {
-        finalQText = `${qText} (Ý ${counter})`;
+      if (seenSet.has(finalQText)) {
+        finalQText = `[Mở rộng ${counter}] ${qText}`;
         counter++;
       }
       seenSet.add(finalQText);
@@ -4260,8 +4344,12 @@ class LMSApp {
     }
 
     // 3. Lọc theo Dạng câu hỏi nếu có chỉ định cụ thể
-    if (qType && qType !== 'all') {
-      pool = pool.filter(q => q.type === qType);
+    if (normQType && normQType !== 'all') {
+      pool = pool.filter(q => {
+        if (normQType === 'trac_nghiem') return q.type === 'trac_nghiem' || q.type === 'multiple_choice';
+        if (normQType === 'dung_sai') return q.type === 'dung_sai' || q.type === 'true_false';
+        return q.type === normQType;
+      });
     }
 
     // 4. Lọc theo Mức độ nếu có chỉ định cụ thể
@@ -4285,7 +4373,7 @@ class LMSApp {
 
     const generated = [];
     const seenTexts = new Set();
-    const targetTypes = (qType === 'all' || !qType) ? ['trac_nghiem', 'dung_sai', 'tra_loi_ngan', 'tu_luan'] : [qType];
+    const targetTypes = (normQType === 'all' || !normQType) ? ['trac_nghiem', 'dung_sai', 'tra_loi_ngan', 'tu_luan'] : [normQType];
     const targetDiffs = (difficulty === 'all' || !difficulty) ? ['nhan_biet', 'thong_hieu', 'van_dung', 'van_dung_cao'] : [difficulty];
 
     // 1. Lấy các câu hỏi độc nhất từ kho câu hỏi tuyển chọn
