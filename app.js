@@ -27393,10 +27393,10 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
           <div id="wheel-led-box" style="position:relative; width:430px; height:430px; min-width:430px; min-height:430px; flex-shrink:0; aspect-ratio:1/1; border-radius:50%; background:radial-gradient(circle, #312e81 0%, #0f172a 100%); border:6px solid #fbbf24; box-shadow:0 0 35px rgba(251,191,36,0.6), inset 0 0 25px rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; box-sizing:border-box;">
             
             <!-- Canvas for 24 Flashing LED Lights (Covers entire 418x418 inner space, mathematically locked) -->
-            <canvas id="wheel-led-canvas" width="418" height="418" style="position:absolute; inset:0; width:100%; height:100%; border-radius:50%; pointer-events:none;"></canvas>
+            <canvas id="wheel-led-canvas" width="418" height="418" style="position:absolute; inset:0; width:100%; height:100%; border-radius:50%; pointer-events:none; z-index:2;"></canvas>
 
             <!-- Canvas Element for Wheel -->
-            <canvas id="wheel-canvas" width="390" height="390" style="border-radius:50%; box-shadow:0 0 20px rgba(0,0,0,0.6); position:relative; z-index:1;"></canvas>
+            <canvas id="wheel-canvas" width="384" height="384" style="border-radius:50%; box-shadow:0 0 20px rgba(0,0,0,0.6); position:relative; z-index:1;"></canvas>
 
             <!-- Pointer Needle (Kim Vàng 3D at top) -->
             <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:18px solid transparent; border-right:18px solid transparent; border-top:35px solid #ef4444; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.8)); z-index:10; pointer-events:none;"></div>
@@ -27470,15 +27470,15 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   const autoScaleWheel = () => {
     const card = modal.querySelector('#wheel-main-card');
     if (!card) return;
-    const availH = (window.innerHeight || document.documentElement.clientHeight || 700) - 16;
-    const availW = (window.innerWidth || document.documentElement.clientWidth || 1000) - 16;
-    const baseH = 650;
-    const baseW = 960;
+    const availH = (window.innerHeight || document.documentElement.clientHeight || 700) - 24;
+    const availW = (window.innerWidth || document.documentElement.clientWidth || 1000) - 24;
+    const baseH = 700;
+    const baseW = 970;
     const scaleH = availH < baseH ? (availH / baseH) : 1;
     const scaleW = availW < baseW ? (availW / baseW) : 1;
     const scale = Math.min(scaleH, scaleW, 1);
     if (scale < 0.99) {
-      card.style.transform = `scale(${Math.max(0.72, parseFloat(scale.toFixed(3)))})`;
+      card.style.transform = `scale(${Math.max(0.65, parseFloat(scale.toFixed(3)))})`;
       card.style.transformOrigin = 'center center';
     } else {
       card.style.transform = 'none';
@@ -27575,9 +27575,9 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   // Draw Canvas Wheel
   const canvas = modal.querySelector('#wheel-canvas');
   const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
-  const centerX = 195;
-  const centerY = 195;
-  const radius = 185;
+  const centerX = 192;
+  const centerY = 192;
+  const radius = 188;
   const colors = [
     '#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6',
     '#ec4899', '#f97316', '#84cc16', '#14b8a6', '#6366f1', '#d946ef'
@@ -27589,36 +27589,74 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
   const drawWheel = (angle) => {
     if (!ctx) return;
-    ctx.clearRect(0, 0, 390, 390);
+    ctx.clearRect(0, 0, 384, 384);
     const numSlices = students.length;
     if (numSlices === 0) {
+      // Draw 12 decorative slices to fill the wheel face with vibrant Gameshow colors
+      const demoColors = [
+        '#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6',
+        '#ec4899', '#f97316', '#84cc16', '#14b8a6', '#6366f1', '#d946ef'
+      ];
+      const sliceAngle = (2 * Math.PI) / 12;
+      for (let i = 0; i < 12; i++) {
+        const startA = i * sliceAngle;
+        const endA = startA + sliceAngle;
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startA, endA);
+        ctx.closePath();
+        ctx.fillStyle = demoColors[i % demoColors.length];
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        // Decorative star in wedge
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startA + sliceAngle / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#fef08a';
+        ctx.font = '16px Arial, sans-serif';
+        ctx.fillText('⭐', radius - 15, 6);
+        ctx.restore();
+      }
+
+      // Outer Golden Boundary Ring
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.fillStyle = '#1e293b';
-      ctx.fill();
       ctx.lineWidth = 4;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.stroke();
+
+      // Large Center Hub Badge (Fills center proportionately without hollow empty gap)
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 115, 0, 2 * Math.PI);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.lineWidth = 3.5;
       ctx.strokeStyle = '#38bdf8';
       ctx.stroke();
 
       ctx.save();
       // Glowing Center Icon
-      ctx.font = '44px Arial, "Segoe UI", sans-serif';
+      ctx.font = '40px Arial, "Segoe UI", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('📋', centerX, centerY - 32);
+      ctx.fillText('🎡', centerX, centerY - 35);
 
       // Primary Warning Title (Bold, bright yellow, high contrast)
       ctx.fillStyle = '#fde047';
-      ctx.font = 'bold 18px Arial, "Segoe UI", sans-serif';
+      ctx.font = 'bold 16px Arial, "Segoe UI", sans-serif';
       ctx.shadowColor = 'rgba(0,0,0,0.9)';
       ctx.shadowBlur = 8;
-      ctx.fillText('Chưa có học sinh trong lớp', centerX, centerY + 16);
+      ctx.fillText('Chưa có học sinh trong lớp', centerX, centerY + 14);
 
       // Subtitle Prompt (Clear bright cyan)
       ctx.fillStyle = '#93c5fd';
-      ctx.font = 'bold 14px Arial, "Segoe UI", sans-serif';
+      ctx.font = 'bold 13px Arial, "Segoe UI", sans-serif';
       ctx.shadowBlur = 4;
-      ctx.fillText('(Vui lòng nạp danh sách học sinh)', centerX, centerY + 42);
+      ctx.fillText('(Vui lòng nạp danh sách học sinh)', centerX, centerY + 38);
       ctx.restore();
       return;
     }
@@ -27652,6 +27690,13 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
       ctx.fillText(name, radius - 18, 5);
       ctx.restore();
     }
+
+    // Outer Golden Boundary Ring
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#fbbf24';
+    ctx.stroke();
 
     // Center Cap
     ctx.beginPath();
@@ -27895,7 +27940,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
     const totalLeds = 24;
     const cx = 209;
     const cy = 209;
-    const r = 197;
+    const r = 200;
     for (let i = 0; i < totalLeds; i++) {
       const angle = (i * 360 / totalLeds) * (Math.PI / 180);
       const x = cx + r * Math.cos(angle);
@@ -27904,7 +27949,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
       ledCtx.save();
       ledCtx.beginPath();
-      ledCtx.arc(x, y, 6, 0, Math.PI * 2);
+      ledCtx.arc(x, y, 5.5, 0, Math.PI * 2);
       ledCtx.fillStyle = color;
       ledCtx.shadowColor = color;
       ledCtx.shadowBlur = 10;
@@ -27912,7 +27957,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
       // 3D bulb specular highlight
       ledCtx.beginPath();
-      ledCtx.arc(x - 1.5, y - 1.5, 2, 0, Math.PI * 2);
+      ledCtx.arc(x - 1.5, y - 1.5, 1.8, 0, Math.PI * 2);
       ledCtx.fillStyle = 'rgba(255,255,255,0.85)';
       ledCtx.fill();
       ledCtx.restore();
