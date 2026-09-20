@@ -27390,17 +27390,17 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
         <div style="display:flex; flex-direction:column; align-items:center; position:relative;">
           
           <!-- Outer Container with 24 Flashing LED Lights -->
-          <div id="wheel-led-box" style="position:relative; width:430px; height:430px; border-radius:50%; background:radial-gradient(circle, #312e81 0%, #0f172a 100%); border:6px solid #fbbf24; box-shadow:0 0 35px rgba(251,191,36,0.6), inset 0 0 25px rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center;">
+          <div id="wheel-led-box" style="position:relative; width:400px; height:400px; min-width:400px; min-height:400px; flex-shrink:0; aspect-ratio:1/1; border-radius:50%; background:radial-gradient(circle, #312e81 0%, #0f172a 100%); border:6px solid #fbbf24; box-shadow:0 0 35px rgba(251,191,36,0.6), inset 0 0 25px rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; box-sizing:border-box;">
             
-            <!-- 24 Flashing LED Dots Around the Wheel Perimeter -->
-            <div id="led-dots-container" style="position:absolute; inset:0; pointer-events:none; border-radius:50%;"></div>
+            <!-- Canvas for 24 Flashing LED Lights (Covers entire 388x388 inner space, mathematically locked) -->
+            <canvas id="wheel-led-canvas" width="388" height="388" style="position:absolute; inset:0; width:100%; height:100%; border-radius:50%; pointer-events:none;"></canvas>
 
-            <!-- Canvas Element -->
-            <canvas id="wheel-canvas" width="390" height="390" style="border-radius:50%; box-shadow:0 0 20px rgba(0,0,0,0.5);"></canvas>
+            <!-- Canvas Element for Wheel -->
+            <canvas id="wheel-canvas" width="350" height="350" style="border-radius:50%; box-shadow:0 0 20px rgba(0,0,0,0.6); position:relative; z-index:1;"></canvas>
 
             <!-- Pointer Needle (Kim Vàng 3D at top) -->
-            <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:18px solid transparent; border-right:18px solid transparent; border-top:35px solid #ef4444; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.8)); z-index:10;"></div>
-            <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:10px; height:10px; background:#facc15; border-radius:50%; z-index:11; box-shadow:0 0 10px #facc15;"></div>
+            <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent; border-top:32px solid #ef4444; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.8)); z-index:10; pointer-events:none;"></div>
+            <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:10px; height:10px; background:#facc15; border-radius:50%; z-index:11; box-shadow:0 0 10px #facc15; pointer-events:none;"></div>
           </div>
 
           <!-- Spin Button -->
@@ -27465,18 +27465,20 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   document.body.appendChild(modal);
 
   // Dynamic Uniform Scale for Low-Height Screens (1366x768, 1280x720, Taskbars, Browser bars)
+  let ledInterval = null;
+  let spinMusicInterval = null;
   const autoScaleWheel = () => {
     const card = modal.querySelector('#wheel-main-card');
     if (!card) return;
-    const availH = (window.innerHeight || document.documentElement.clientHeight || 700) - 24;
-    const availW = (window.innerWidth || document.documentElement.clientWidth || 1000) - 24;
-    const baseH = 680;
-    const baseW = 970;
+    const availH = (window.innerHeight || document.documentElement.clientHeight || 700) - 20;
+    const availW = (window.innerWidth || document.documentElement.clientWidth || 1000) - 20;
+    const baseH = 610;
+    const baseW = 960;
     const scaleH = availH < baseH ? (availH / baseH) : 1;
     const scaleW = availW < baseW ? (availW / baseW) : 1;
     const scale = Math.min(scaleH, scaleW, 1);
     if (scale < 0.99) {
-      card.style.transform = `scale(${Math.max(0.65, parseFloat(scale.toFixed(3)))})`;
+      card.style.transform = `scale(${Math.max(0.6, parseFloat(scale.toFixed(3)))})`;
       card.style.transformOrigin = 'center center';
     } else {
       card.style.transform = 'none';
@@ -27488,6 +27490,8 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
   const cleanupWheelModal = () => {
     window.removeEventListener('resize', autoScaleWheel);
+    if (ledInterval) clearInterval(ledInterval);
+    if (spinMusicInterval) clearInterval(spinMusicInterval);
     modal.remove();
   };
   modal.querySelector('#close-wheel-modal').onclick = cleanupWheelModal;
@@ -27568,26 +27572,12 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
     }
   };
 
-  // Create 24 Flashing LED Lights around Perimeter
-  const ledContainer = modal.querySelector('#led-dots-container');
-  const totalLeds = 24;
-  for (let i = 0; i < totalLeds; i++) {
-    const angle = (i * 360 / totalLeds) * (Math.PI / 180);
-    const r = 207; // radius in px
-    const x = 215 + r * Math.cos(angle) - 7;
-    const y = 215 + r * Math.sin(angle) - 7;
-    const dot = document.createElement('div');
-    dot.className = 'led-dot';
-    dot.style.cssText = `position:absolute; left:${x}px; top:${y}px; width:14px; height:14px; border-radius:50%; background:#facc15; box-shadow:0 0 10px #facc15; transition:background 0.1s;`;
-    ledContainer.appendChild(dot);
-  }
-
   // Draw Canvas Wheel
   const canvas = modal.querySelector('#wheel-canvas');
   const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
-  const centerX = 195;
-  const centerY = 195;
-  const radius = 185;
+  const centerX = 175;
+  const centerY = 175;
+  const radius = 170;
   const colors = [
     '#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6',
     '#ec4899', '#f97316', '#84cc16', '#14b8a6', '#6366f1', '#d946ef'
@@ -27599,7 +27589,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
   const drawWheel = (angle) => {
     if (!ctx) return;
-    ctx.clearRect(0, 0, 390, 390);
+    ctx.clearRect(0, 0, 350, 350);
     const numSlices = students.length;
     if (numSlices === 0) {
       ctx.beginPath();
@@ -27646,13 +27636,13 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
       ctx.shadowColor = 'rgba(0,0,0,0.85)';
       ctx.shadowBlur = 5;
       const name = (students[i].name || students[i].fullName || 'Học sinh').split(' ').slice(-2).join(' ');
-      ctx.fillText(name, radius - 18, 5);
+      ctx.fillText(name, radius - 15, 4);
       ctx.restore();
     }
 
     // Center Cap
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 30, 0, 2 * Math.PI);
+    ctx.arc(centerX, centerY, 26, 0, 2 * Math.PI);
     ctx.fillStyle = '#1e1b4b';
     ctx.fill();
     ctx.lineWidth = 4;
@@ -27761,7 +27751,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   const playTickSound = () => {};
 
   // Background Music Controller
-  let spinMusicInterval = null;
+  spinMusicInterval = null;
   const startSpinMusic = () => {
     try {
       if (spinMusicInterval) {
@@ -27880,20 +27870,47 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
     window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
   }
 
-  // LED Light Flashing Animation Loop
+  // Canvas-based 24 Flashing LED Lights around Perimeter (Mathematically locked to center, 100% immune to screen height / zoom)
   let ledStep = 0;
-  const ledDots = modal.querySelectorAll('.led-dot');
-  const animateLeds = () => {
-    ledStep++;
-    const palette = ['#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899', '#facc15'];
-    ledDots.forEach((dot, idx) => {
-      const colorIndex = (idx + ledStep) % palette.length;
-      dot.style.background = palette[colorIndex];
-      dot.style.boxShadow = `0 0 12px ${palette[colorIndex]}`;
-    });
+  const ledCanvas = modal.querySelector('#wheel-led-canvas');
+  const ledCtx = ledCanvas && ledCanvas.getContext ? ledCanvas.getContext('2d') : null;
+  const ledPalette = ['#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899', '#facc15'];
+
+  const drawLeds = (step) => {
+    if (!ledCtx) return;
+    ledCtx.clearRect(0, 0, 388, 388);
+    const totalLeds = 24;
+    const cx = 194;
+    const cy = 194;
+    const r = 182;
+    for (let i = 0; i < totalLeds; i++) {
+      const angle = (i * 360 / totalLeds) * (Math.PI / 180);
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      const color = ledPalette[(i + step) % ledPalette.length];
+
+      ledCtx.save();
+      ledCtx.beginPath();
+      ledCtx.arc(x, y, 5.5, 0, Math.PI * 2);
+      ledCtx.fillStyle = color;
+      ledCtx.shadowColor = color;
+      ledCtx.shadowBlur = 10;
+      ledCtx.fill();
+
+      // 3D bulb specular highlight
+      ledCtx.beginPath();
+      ledCtx.arc(x - 1.5, y - 1.5, 1.8, 0, Math.PI * 2);
+      ledCtx.fillStyle = 'rgba(255,255,255,0.8)';
+      ledCtx.fill();
+      ledCtx.restore();
+    }
   };
 
-  const ledInterval = setInterval(animateLeds, 120);
+  drawLeds(0);
+  ledInterval = setInterval(() => {
+    ledStep++;
+    drawLeds(ledStep);
+  }, 120);
 
   // Spin Button Handler
   modal.querySelector('#btn-spin-wheel').onclick = () => {
