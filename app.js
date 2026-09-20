@@ -27314,13 +27314,13 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   let activeGrade = cId.charAt(0) || '6';
 
   modal.innerHTML = `
-    <div id="wheel-main-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border:2px solid #6366f1; border-radius:24px; width:100%; max-width:960px; padding:1.35rem 1.6rem; box-shadow:0 25px 60px rgba(99,102,241,0.4); font-family:var(--font-body); color:#fff; position:relative; overflow:hidden; transition:transform 0.15s ease-out; transform-origin:center center;">
+    <div id="wheel-main-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border:2px solid #6366f1; border-radius:24px; width:100%; max-width:960px; padding:1rem 1.4rem; box-shadow:0 25px 60px rgba(99,102,241,0.4); font-family:var(--font-body); color:#fff; position:relative; overflow:hidden; transition:transform 0.15s ease-out; transform-origin:center center; box-sizing:border-box; margin:auto;">
       
       <!-- Fireworks Canvas Overlay -->
       <canvas id="wheel-fireworks-canvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:99999;"></canvas>
 
       <!-- Top Header & Close Button -->
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid rgba(255,255,255,0.15); padding-bottom:0.75rem; margin-bottom:1rem; position:relative; z-index:2;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid rgba(255,255,255,0.15); padding-bottom:0.55rem; margin-bottom:0.75rem; position:relative; z-index:2;">
         <div style="display:flex; align-items:center; gap:0.6rem;">
           <span style="font-size:1.6rem; animation:spin 3s infinite linear;">🎡</span>
           <div>
@@ -27334,7 +27334,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
       </div>
 
       <!-- Control Bar: Grade Pills, Class Dropdown & Subject Dropdown -->
-      <div style="background:rgba(15,23,42,0.7); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:0.75rem 1rem; margin-bottom:1.25rem; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; position:relative; z-index:2;">
+      <div style="background:rgba(15,23,42,0.7); border:1px solid rgba(255,255,255,0.15); border-radius:16px; padding:0.55rem 0.9rem; margin-bottom:0.9rem; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; position:relative; z-index:2;">
         
         <!-- Grade Pills (Khối 6, 7, 8, 9) -->
         <div style="display:flex; align-items:center; gap:0.4rem;">
@@ -27390,17 +27390,17 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
         <div style="display:flex; flex-direction:column; align-items:center; position:relative;">
           
           <!-- Outer Container with 24 Flashing LED Lights -->
-          <div id="wheel-led-box" style="position:relative; width:400px; height:400px; min-width:400px; min-height:400px; flex-shrink:0; aspect-ratio:1/1; border-radius:50%; background:radial-gradient(circle, #312e81 0%, #0f172a 100%); border:6px solid #fbbf24; box-shadow:0 0 35px rgba(251,191,36,0.6), inset 0 0 25px rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; box-sizing:border-box;">
+          <div id="wheel-led-box" style="position:relative; width:430px; height:430px; min-width:430px; min-height:430px; flex-shrink:0; aspect-ratio:1/1; border-radius:50%; background:radial-gradient(circle, #312e81 0%, #0f172a 100%); border:6px solid #fbbf24; box-shadow:0 0 35px rgba(251,191,36,0.6), inset 0 0 25px rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; box-sizing:border-box;">
             
-            <!-- Canvas for 24 Flashing LED Lights (Covers entire 388x388 inner space, mathematically locked) -->
-            <canvas id="wheel-led-canvas" width="388" height="388" style="position:absolute; inset:0; width:100%; height:100%; border-radius:50%; pointer-events:none;"></canvas>
+            <!-- Canvas for 24 Flashing LED Lights (Covers entire 418x418 inner space, mathematically locked) -->
+            <canvas id="wheel-led-canvas" width="418" height="418" style="position:absolute; inset:0; width:100%; height:100%; border-radius:50%; pointer-events:none;"></canvas>
 
             <!-- Canvas Element for Wheel -->
-            <canvas id="wheel-canvas" width="350" height="350" style="border-radius:50%; box-shadow:0 0 20px rgba(0,0,0,0.6); position:relative; z-index:1;"></canvas>
+            <canvas id="wheel-canvas" width="390" height="390" style="border-radius:50%; box-shadow:0 0 20px rgba(0,0,0,0.6); position:relative; z-index:1;"></canvas>
 
             <!-- Pointer Needle (Kim Vàng 3D at top) -->
-            <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent; border-top:32px solid #ef4444; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.8)); z-index:10; pointer-events:none;"></div>
-            <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:10px; height:10px; background:#facc15; border-radius:50%; z-index:11; box-shadow:0 0 10px #facc15; pointer-events:none;"></div>
+            <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:18px solid transparent; border-right:18px solid transparent; border-top:35px solid #ef4444; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.8)); z-index:10; pointer-events:none;"></div>
+            <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); width:10px; height:10px; background:#facc15; border-radius:50%; z-index:11; box-shadow:0 0 10px #facc15; pointer-events:none;"></div>
           </div>
 
           <!-- Spin Button -->
@@ -27470,15 +27470,15 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   const autoScaleWheel = () => {
     const card = modal.querySelector('#wheel-main-card');
     if (!card) return;
-    const availH = (window.innerHeight || document.documentElement.clientHeight || 700) - 20;
-    const availW = (window.innerWidth || document.documentElement.clientWidth || 1000) - 20;
-    const baseH = 610;
+    const availH = (window.innerHeight || document.documentElement.clientHeight || 700) - 16;
+    const availW = (window.innerWidth || document.documentElement.clientWidth || 1000) - 16;
+    const baseH = 650;
     const baseW = 960;
     const scaleH = availH < baseH ? (availH / baseH) : 1;
     const scaleW = availW < baseW ? (availW / baseW) : 1;
     const scale = Math.min(scaleH, scaleW, 1);
     if (scale < 0.99) {
-      card.style.transform = `scale(${Math.max(0.6, parseFloat(scale.toFixed(3)))})`;
+      card.style.transform = `scale(${Math.max(0.72, parseFloat(scale.toFixed(3)))})`;
       card.style.transformOrigin = 'center center';
     } else {
       card.style.transform = 'none';
@@ -27575,9 +27575,9 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   // Draw Canvas Wheel
   const canvas = modal.querySelector('#wheel-canvas');
   const ctx = canvas && canvas.getContext ? canvas.getContext('2d') : null;
-  const centerX = 175;
-  const centerY = 175;
-  const radius = 170;
+  const centerX = 195;
+  const centerY = 195;
+  const radius = 185;
   const colors = [
     '#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6',
     '#ec4899', '#f97316', '#84cc16', '#14b8a6', '#6366f1', '#d946ef'
@@ -27589,24 +27589,37 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
   const drawWheel = (angle) => {
     if (!ctx) return;
-    ctx.clearRect(0, 0, 350, 350);
+    ctx.clearRect(0, 0, 390, 390);
     const numSlices = students.length;
     if (numSlices === 0) {
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
       ctx.fillStyle = '#1e293b';
       ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#38bdf8';
       ctx.stroke();
 
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = 'bold 15px Arial, "Segoe UI", sans-serif';
+      ctx.save();
+      // Glowing Center Icon
+      ctx.font = '44px Arial, "Segoe UI", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('Chưa có học sinh trong lớp', centerX, centerY - 12);
-      ctx.font = '12px Arial, "Segoe UI", sans-serif';
-      ctx.fillText('(Vui lòng nạp danh sách học sinh)', centerX, centerY + 14);
+      ctx.fillText('📋', centerX, centerY - 32);
+
+      // Primary Warning Title (Bold, bright yellow, high contrast)
+      ctx.fillStyle = '#fde047';
+      ctx.font = 'bold 18px Arial, "Segoe UI", sans-serif';
+      ctx.shadowColor = 'rgba(0,0,0,0.9)';
+      ctx.shadowBlur = 8;
+      ctx.fillText('Chưa có học sinh trong lớp', centerX, centerY + 16);
+
+      // Subtitle Prompt (Clear bright cyan)
+      ctx.fillStyle = '#93c5fd';
+      ctx.font = 'bold 14px Arial, "Segoe UI", sans-serif';
+      ctx.shadowBlur = 4;
+      ctx.fillText('(Vui lòng nạp danh sách học sinh)', centerX, centerY + 42);
+      ctx.restore();
       return;
     }
     const sliceAngle = (2 * Math.PI) / numSlices;
@@ -27636,13 +27649,13 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
       ctx.shadowColor = 'rgba(0,0,0,0.85)';
       ctx.shadowBlur = 5;
       const name = (students[i].name || students[i].fullName || 'Học sinh').split(' ').slice(-2).join(' ');
-      ctx.fillText(name, radius - 15, 4);
+      ctx.fillText(name, radius - 18, 5);
       ctx.restore();
     }
 
     // Center Cap
     ctx.beginPath();
-    ctx.arc(centerX, centerY, 26, 0, 2 * Math.PI);
+    ctx.arc(centerX, centerY, 30, 0, 2 * Math.PI);
     ctx.fillStyle = '#1e1b4b';
     ctx.fill();
     ctx.lineWidth = 4;
@@ -27878,11 +27891,11 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
   const drawLeds = (step) => {
     if (!ledCtx) return;
-    ledCtx.clearRect(0, 0, 388, 388);
+    ledCtx.clearRect(0, 0, 418, 418);
     const totalLeds = 24;
-    const cx = 194;
-    const cy = 194;
-    const r = 182;
+    const cx = 209;
+    const cy = 209;
+    const r = 197;
     for (let i = 0; i < totalLeds; i++) {
       const angle = (i * 360 / totalLeds) * (Math.PI / 180);
       const x = cx + r * Math.cos(angle);
@@ -27891,7 +27904,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
       ledCtx.save();
       ledCtx.beginPath();
-      ledCtx.arc(x, y, 5.5, 0, Math.PI * 2);
+      ledCtx.arc(x, y, 6, 0, Math.PI * 2);
       ledCtx.fillStyle = color;
       ledCtx.shadowColor = color;
       ledCtx.shadowBlur = 10;
@@ -27899,8 +27912,8 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
       // 3D bulb specular highlight
       ledCtx.beginPath();
-      ledCtx.arc(x - 1.5, y - 1.5, 1.8, 0, Math.PI * 2);
-      ledCtx.fillStyle = 'rgba(255,255,255,0.8)';
+      ledCtx.arc(x - 1.5, y - 1.5, 2, 0, Math.PI * 2);
+      ledCtx.fillStyle = 'rgba(255,255,255,0.85)';
       ledCtx.fill();
       ledCtx.restore();
     }
