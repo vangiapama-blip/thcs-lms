@@ -939,7 +939,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'duckrace-arena-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:#034d74;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:#034d74;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -2261,7 +2261,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'tugofwar-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:#090d16;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:#090d16;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -3321,7 +3321,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'minesweeper-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:#060810;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:#060810;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -4408,7 +4408,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'fruitninja-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -5581,7 +5581,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'matching-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
 
     const isMobile = window.innerWidth < 640;
 
@@ -6646,7 +6646,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'trainorder-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -9603,8 +9603,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       }
 
       const containerStyle = isFullscreen 
-        ? 'width:99vw;height:98vh;max-width:1600px;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden;'
-        : 'width:92vw;max-width:1150px;max-height:92vh;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden;'
+        ? 'width:99vw;height:98vh;max-width:1600px;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow-y:auto;box-sizing:border-box;'
+        : 'width:94vw;max-width:1150px;max-height:96vh;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow-y:auto;box-sizing:border-box;margin:auto;'
 
       modal.innerHTML = `
 <div style="${containerStyle}">
@@ -11052,7 +11052,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const arena = document.createElement('div');
     arena.id = 'headtilt-arena-fullscreen';
-    arena.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
+    arena.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
 
     // AUDIO & BGM SYNTHESIS ENGINE
     let audioEnabled = true;
@@ -14935,48 +14935,70 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
   // =========================================================================
   // TAB 15: QUÉT THẺ PLICKERS BẰNG AI & BỘ TẠO MÃ QR / IN THẺ CHO HỌC SINH
   // =========================================================================
-  _selectedPlickersClassId: '6A',
+  _selectedPlickersClassId: '',
 
   _getPlickersClasses() {
     try {
-      if (window.DB && window.DB.state && window.DB.state.classes && Array.isArray(window.DB.state.classes)) {
-        return window.DB.state.classes;
+      if (typeof db !== 'undefined') {
+        if (typeof db.getClassesList === 'function') {
+          const list = db.getClassesList();
+          if (Array.isArray(list) && list.length > 0) {
+            return list.map(c => ({
+              id: c.name || c.id,
+              name: c.name || c.id,
+              grade: c.grade || (c.name ? c.name.charAt(0) : '6')
+            }));
+          }
+        }
+        if (typeof db.getClasses === 'function') {
+          const list = db.getClasses();
+          if (Array.isArray(list) && list.length > 0) {
+            return list.map(c => ({
+              id: c.name || c.id,
+              name: c.name || c.id,
+              grade: c.grade || (c.name ? c.name.charAt(0) : '6')
+            }));
+          }
+        }
       }
-    } catch(e) {}
-    return [{ id: '6A', grade: 6 }, { id: '6B', grade: 6 }, { id: '7A', grade: 7 }, { id: '8A', grade: 8 }, { id: '9A', grade: 9 }];
+    } catch(e) {
+      console.warn('Error getting plickers classes from db:', e);
+    }
+    return [];
   },
 
   _getStudentsForClass(classId) {
+    if (!classId) return [];
     try {
-      // 1. Check custom imported class list in localStorage
+      // 1. Check custom imported class list in localStorage for this class
       const customKey = 'plickers_custom_class_' + classId;
-      const customRaw = localStorage.getItem(customKey);
+      const customRaw = (typeof localStorage !== 'undefined') ? localStorage.getItem(customKey) : null;
       if (customRaw) {
         const parsed = JSON.parse(customRaw);
         if (parsed && Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
 
-      // 2. Check Database students by classId
-      if (window.DB && window.DB.state && window.DB.state.students && Array.isArray(window.DB.state.students)) {
-        const matched = window.DB.state.students.filter(s => s.classId === classId);
-        if (matched && matched.length > 0) {
-          return matched.map(s => s.name || s.fullName);
+      // 2. Check Database students by classId from central db (Quản lý học sinh)
+      if (typeof db !== 'undefined' && typeof db.getStudents === 'function') {
+        const allStudents = db.getStudents();
+        if (Array.isArray(allStudents) && allStudents.length > 0) {
+          const target = String(classId).trim().toLowerCase();
+          const matched = allStudents.filter(s => {
+            if (!s) return false;
+            const sClass = String(s.classId || s.className || '').trim().toLowerCase();
+            return sClass === target;
+          });
+          if (matched && matched.length > 0) {
+            return matched.map(s => s.name || s.fullName || ('Học sinh ' + s.id));
+          }
         }
       }
-    } catch(e) {}
+    } catch(e) {
+      console.warn('Error getting students for class in plickers:', e);
+    }
 
-    // 3. Fallback standard 35 students for demonstration
-    return [
-      'Trần Đức Đức', 'Lê Ngọc Ngọc', 'Phạm Gia Hùng', 'Hoàng Khánh Trang',
-      'Vũ Hải Phong', 'Đặng Gia Anh', 'Bùi Văn Bình', 'Đỗ Trúc Nhi',
-      'Hồ Hoàng Phúc', 'Y Thị Quỳnh', 'Nông Đức Huy', 'Nguyễn Ngọc Yến',
-      'Trần Gia Sơn', 'Lê Khánh Lam', 'Phạm Hải Triết', 'Hoàng Gia Vân',
-      'Vũ Văn Lâm', 'Đặng Trúc Mai', 'Bùi Hoàng Tâm', 'Đỗ Thị Vy',
-      'Hồ Đức Đức', 'Y Ngọc Ngọc', 'Nông Gia Hùng', 'Nguyễn Khánh Trang',
-      'Trần Hải Phong', 'Lê Gia Anh', 'Phạm Văn Bình', 'Hoàng Trúc Nhi',
-      'Vũ Hoàng Phúc', 'Đặng Thị Quỳnh', 'Bùi Đức Huy', 'Đỗ Ngọc Yến',
-      'Hồ Gia Sơn', 'Y Khánh Lam', 'Nông Hải Triết'
-    ];
+    // 3. Strictly NO demo fake students! Return empty array so teacher knows this class has no students yet.
+    return [];
   },
 
   _renderPlickersDashboard() {
@@ -14990,8 +15012,11 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const gradeKey = this.icebreaker.grade || this.slides.grade || '6';
 
     const classes = this._getPlickersClasses();
-    const currentClassId = this._selectedPlickersClassId || '6A';
-    const studentsList = this._getStudentsForClass(currentClassId);
+    const currentClassId = (this._selectedPlickersClassId && classes.some(c => c.id === this._selectedPlickersClassId))
+      ? this._selectedPlickersClassId
+      : (classes[0] ? classes[0].id : '');
+    this._selectedPlickersClassId = currentClassId;
+    const studentsList = currentClassId ? this._getStudentsForClass(currentClassId) : [];
 
     const defaultQs = this._getDefaultQuestionsForGame('plickers');
     const loadedQs = this._getLoadedQuestions('plickers') || defaultQs;
@@ -15053,11 +15078,11 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
             <div>
               <label style="font-weight:800;font-size:.8rem;color:#312e81;display:block;margin-bottom:.3rem;">🏫 Chọn Lớp Học (Sĩ Số):</label>
               <select id="plickers-class-select" style="width:100%;padding:.55rem .75rem;border-radius:10px;border:2px solid #6366f1;font-weight:800;color:#312e81;background:#fff;outline:none;">
-                ${classes.map(c => `
+                ${classes.length > 0 ? classes.map(c => `
                   <option value="${c.id}" ${c.id === currentClassId ? 'selected' : ''}>
                     Lớp ${c.id} (${this._getStudentsForClass(c.id).length} HS)
                   </option>
-                `).join('')}
+                `).join('') : '<option value="">-- Chưa có lớp học --</option>'}
               </select>
             </div>
 
@@ -15436,10 +15461,14 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       }
     ];
 
-    const currentClassId = this._selectedPlickersClassId || '6A';
-    const activeClassList = (this._getStudentsForClass && this._getStudentsForClass(currentClassId)) || [
-      'Nguyễn Văn An', 'Trần Thị Mai', 'Lê Hoàng Nam', 'Phạm Minh Đức', 'Vũ Quỳnh Anh', 'Đặng Quốc Huy', 'Bùi Thu Trang', 'Hoàng Bảo Ngọc'
-    ];
+    const classes = this._getPlickersClasses ? this._getPlickersClasses() : [];
+    const currentClassId = this._selectedPlickersClassId || (classes[0] ? classes[0].id : '');
+    const activeClassList = (this._getStudentsForClass && currentClassId) ? this._getStudentsForClass(currentClassId) : [];
+
+    if (!currentClassId || activeClassList.length === 0) {
+      alert('⚠️ Lớp ' + (currentClassId || '') + ' chưa có danh sách học sinh thực tế!\nThầy/Cô vui lòng khai báo học sinh trong hệ thống trước khi bắt đầu quét thẻ.');
+      return;
+    }
 
     let currentQIdx = 0;
     let cameraStream = null;
@@ -16307,8 +16336,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const area = this._dom ? this._dom.querySelector('#ait-area') : document.getElementById('ait-area');
     if (!area) return;
 
-    const classes = this._getPlickersClasses ? this._getPlickersClasses() : [{id:'6A', name:'Lớp 6A'}];
-    const currentClassId = this._selectedPlickersClassId || '6A';
+    const classes = this._getPlickersClasses ? this._getPlickersClasses() : [];
+    const currentClassId = this._selectedPlickersClassId || (classes[0] ? classes[0].id : '');
     const cfg = this._mysteryPuzzleConfig || {
       gridSize: '3x3',
       keyword: 'THÁNH GIÓNG (LỊCH SỬ VIỆT NAM)',
@@ -17588,7 +17617,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'crossword-arena-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle at center, #0f172a 0%, #020617 100%);z-index:9999999;display:flex;flex-direction:column;font-family:var(--font-title);color:#fff;overflow:hidden;animation:fadeIn .25s;';
+    modal.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle at center, #0f172a 0%, #020617 100%);z-index:9999999;display:flex;flex-direction:column;font-family:var(--font-title);color:#fff;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s;';
 
     const renderArena = () => {
       modal.innerHTML = `
@@ -19626,7 +19655,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'goldminer-quiz-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#020617; z-index:9999999; display:flex; flex-direction:column; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.25s ease-out;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#020617; z-index:9999999; display:flex; flex-direction:column; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.25s ease-out;';
 
     modal.innerHTML = `
       <!-- TOP HUD -->
@@ -20177,7 +20206,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'treasure-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#070b19; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s cubic-bezier(0.16,1,0.3,1);';
+    modal.style.cssText = 'position:fixed; inset:0; background:#070b19; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s cubic-bezier(0.16,1,0.3,1);';
     document.body.appendChild(modal);
 
     // Upbeat Pirate Synth Soundtrack Engine (D minor / Tropical Adventure - 128 BPM)
@@ -20889,7 +20918,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'cw-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s ease;';
     document.body.appendChild(modal);
 
     // Soft, Gentle, Elegant Ambient Gameshow BGM (Very gentle volume, warm sine/triangle waves)
@@ -21681,7 +21710,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'space-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s ease;';
     document.body.appendChild(modal);
 
     // Soft Ambient Sci-Fi Space BGM (Gentle sine/triangle cosmic pads)
@@ -22321,7 +22350,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'arena-battle-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#060a14; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#060a14; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s ease;';
     document.body.appendChild(modal);
 
     // Soft Epic Arena Synth BGM (Gentle heroic harmony & percussion)
@@ -22994,7 +23023,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'st7-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#022c22; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#022c22; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s ease;';
     document.body.appendChild(modal);
 
     // Inspiring Soft Ambient Acoustic BGM
@@ -23827,7 +23856,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'starrace-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#042f2e; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, "Montserrat", "Segoe UI", sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.25s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#042f2e; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, "Montserrat", "Segoe UI", sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.25s ease;';
     document.body.appendChild(modal);
 
     const unlockAudio = () => {
@@ -25114,7 +25143,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
       const m = document.createElement('div');
       m.id = 'letter-theater-modal';
-      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(16px);z-index:9999999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.25s ease-out;';
+      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(16px);z-index:9999999;display:flex; overflow-y:auto; box-sizing:border-box;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.25s ease-out;';
 
       const renderTheaterStage = () => {
         m.innerHTML = `
@@ -28331,7 +28360,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const openNumberTheaterModal = (item) => {
       let isMorphed = false;
       const m = document.createElement('div');
-      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(14px);z-index:9999999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.2s ease-out;';
+      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(14px);z-index:9999999;display:flex; overflow-y:auto; box-sizing:border-box;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.2s ease-out;';
 
       const greetingText = `Xin chào! Mình là Số ${item.num} trong từ ${item.countWord}!`;
 

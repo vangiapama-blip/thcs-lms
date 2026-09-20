@@ -27293,7 +27293,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
   const modal = document.createElement('div');
   modal.id = 'lucky-wheel-modal';
-  modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.88); backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1rem; animation:fadeIn 0.25s ease-out;';
+  modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.88); backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:0.5rem; animation:fadeIn 0.25s ease-out; overflow-y:auto; box-sizing:border-box;';
 
   // Get all classes from DB (No demo classes!)
   const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
@@ -27314,7 +27314,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   let activeGrade = cId.charAt(0) || '6';
 
   modal.innerHTML = `
-    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border:2px solid #6366f1; border-radius:24px; width:100%; max-width:960px; padding:1.5rem 1.75rem; box-shadow:0 25px 60px rgba(99,102,241,0.4); font-family:var(--font-body); color:#fff; position:relative; overflow:hidden;">
+    <div class="lucky-wheel-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border:2px solid #6366f1; border-radius:22px; width:100%; max-width:960px; max-height:96vh; overflow-y:auto; padding:1.1rem 1.4rem; box-shadow:0 25px 60px rgba(99,102,241,0.4); font-family:var(--font-body); color:#fff; position:relative; box-sizing:border-box; margin:auto;">
       
       <!-- Fireworks Canvas Overlay -->
       <canvas id="wheel-fireworks-canvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:99999;"></canvas>
@@ -29029,12 +29029,10 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
 
   const modal = document.createElement('div');
   modal.id = 'gold-miner-modal';
-  modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(11,19,41,0.95); backdrop-filter:blur(16px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:0.75rem; animation:fadeIn 0.25s ease-out;';
+  modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(11,19,41,0.95); backdrop-filter:blur(16px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:0.5rem; animation:fadeIn 0.25s ease-out; overflow-y:auto; box-sizing:border-box;';
 
-  const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [
-    { id: '6A', name: '6A', grade: '6' }, { id: '6B', name: '6B', grade: '6' },
-    { id: '7A', name: '7A', grade: '7' }, { id: '8A', name: '8A', grade: '8' }, { id: '9A', name: '9A', grade: '9' }
-  ];
+  const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
+  if (!cId && allClasses.length > 0) cId = allClasses[0].id;
   const allSubjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [
     { id: 'toan', name: 'Môn Toán' }, { id: 'van', name: 'Môn Ngữ Văn' }, { id: 'anh', name: 'Môn Tiếng Anh' },
     { id: 'khtn', name: 'Môn KHTN' }, { id: 'lsdl', name: 'Môn Lịch sử & Địa lí' }
@@ -29044,16 +29042,7 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
   let sId = subjectId;
   let activeGrade = cId.charAt(0) || '6';
 
-  let students = ((typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : []).filter(s => (s.classId || '6A') === cId);
-  if (students.length === 0) {
-    students = [
-      { id: 'hs_6a_1', name: 'Hoàng Văn Kiên', classId: cId },
-      { id: 'hs_6a_2', name: 'Ngọc Hà', classId: cId },
-      { id: 'hs_6a_3', name: 'Đức Mạnh', classId: cId },
-      { id: 'hs_6a_4', name: 'Phương Linh', classId: cId },
-      { id: 'hs_6a_5', name: 'Minh Tuấn', classId: cId }
-    ];
-  }
+  let students = ((typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : []).filter(s => s && s.classId && String(s.classId) === String(cId));
 
   // Web Audio Synthesizer for Cable Launch, Pulley Reel, Catch Chime & Fanfare Victory
   let audioCtx = null;
@@ -29143,7 +29132,7 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
   };
 
   modal.innerHTML = `
-    <div style="background: linear-gradient(135deg, #0b1329 0%, #1e1b4b 100%); border:2.5px solid #f59e0b; border-radius:24px; width:96vw; max-width:1280px; height:92vh; max-height:860px; padding:1.25rem 1.5rem; box-shadow:0 25px 60px rgba(245,158,11,0.5); font-family:var(--font-body); color:#fff; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between;">
+    <div class="gold-miner-card" style="background: linear-gradient(135deg, #0b1329 0%, #1e1b4b 100%); border:2.5px solid #f59e0b; border-radius:22px; width:96vw; max-width:1280px; max-height:96vh; overflow-y:auto; padding:0.85rem 1.25rem; box-shadow:0 25px 60px rgba(245,158,11,0.5); font-family:var(--font-body); color:#fff; position:relative; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; margin:auto;">
       
       <canvas id="miner-fireworks-canvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:99999;"></canvas>
 
