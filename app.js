@@ -27295,30 +27295,20 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   modal.id = 'lucky-wheel-modal';
   modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.88); backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:1rem; animation:fadeIn 0.25s ease-out;';
 
-  // Get all classes from DB
-  const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [
-    { id: '6A', name: '6A', grade: '6' }, { id: '6B', name: '6B', grade: '6' }, { id: '6C', name: '6C', grade: '6' },
-    { id: '7A', name: '7A', grade: '7' }, { id: '7B', name: '7B', grade: '7' },
-    { id: '8A', name: '8A', grade: '8' }, { id: '8B', name: '8B', grade: '8' },
-    { id: '9A', name: '9A', grade: '9' }, { id: '9B', name: '9B', grade: '9' }
-  ];
+  // Get all classes from DB (No demo classes!)
+  const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
 
   const allSubjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [
     { id: 'toan', name: 'Môn Toán' }, { id: 'van', name: 'Môn Ngữ Văn' }, { id: 'anh', name: 'Môn Tiếng Anh' },
     { id: 'khtn', name: 'Môn KHTN' }, { id: 'lsdl', name: 'Môn Lịch sử & Địa lí' }, { id: 'gdcd', name: 'Môn GDCD' }
   ];
 
-  // Helper to load students of selected class
-  let students = ((typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : []).filter(s => (s.classId || '6A') === cId);
-  if (students.length === 0) {
-    students = [
-      { id: 'hs_6a_1', name: 'Hoàng Văn Kiên', classId: cId },
-      { id: 'hs_6a_2', name: 'Ngọc Hà', classId: cId },
-      { id: 'hs_6a_3', name: 'Đức Mạnh', classId: cId },
-      { id: 'hs_6a_4', name: 'Phương Linh', classId: cId },
-      { id: 'hs_6a_5', name: 'Minh Tuấn', classId: cId }
-    ];
+  if (!cId && allClasses.length > 0) {
+    cId = allClasses[0].id;
   }
+
+  // Helper to load students of selected class (Strictly real students, NO demo/mock!)
+  let students = ((typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : []).filter(s => s && s.classId && String(s.classId) === String(cId));
 
   // Active Grade
   let activeGrade = cId.charAt(0) || '6';
@@ -27584,6 +27574,24 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
     if (!ctx) return;
     ctx.clearRect(0, 0, 390, 390);
     const numSlices = students.length;
+    if (numSlices === 0) {
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.fillStyle = '#1e293b';
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#475569';
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 15px Arial, "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Chưa có học sinh trong lớp', centerX, centerY - 12);
+      ctx.font = '12px Arial, "Segoe UI", sans-serif';
+      ctx.fillText('(Vui lòng nạp danh sách học sinh)', centerX, centerY + 14);
+      return;
+    }
     const sliceAngle = (2 * Math.PI) / numSlices;
 
     for (let i = 0; i < numSlices; i++) {
@@ -27637,23 +27645,16 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   const reloadClassStudents = (newClassId) => {
     cId = newClassId;
     this._aiPickerSelectedClass = cId;
-    students = ((typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : []).filter(s => (s.classId || '6A') === cId);
-    if (students.length === 0) {
-      students = [
-        { id: `hs_${cId}_1`, name: `Học sinh 1 - ${cId}`, classId: cId },
-        { id: `hs_${cId}_2`, name: `Học sinh 2 - ${cId}`, classId: cId },
-        { id: `hs_${cId}_3`, name: `Học sinh 3 - ${cId}`, classId: cId }
-      ];
-    }
+    students = ((typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : []).filter(s => s && s.classId && String(s.classId) === String(cId));
 
     // Update Header
-    modal.querySelector('#wheel-header-title').innerText = `VÒNG QUAY NÓN KỲ DIỆU – LỚP ${cId}`;
-    modal.querySelector('#wheel-header-sub').innerText = `🎯 Có ${students.length} học sinh trong danh sách quay thưởng`;
+    modal.querySelector('#wheel-header-title').innerText = cId ? `VÒNG QUAY NÓN KỲ DIỆU – LỚP ${cId}` : 'VÒNG QUAY NÓN KỲ DIỆU';
+    modal.querySelector('#wheel-header-sub').innerText = students.length > 0 ? `🎯 Có ${students.length} học sinh trong danh sách quay thưởng` : '⚠️ Lớp này chưa có danh sách học sinh thực tế';
 
     // Redraw Canvas Slices immediately with new Class Students!
     currentWinner = null;
-    modal.querySelector('#wheel-winner-name').innerText = 'Sẵn sàng quay!';
-    modal.querySelector('#wheel-winner-code').innerText = `Vòng quay đã nạp danh sách Lớp ${cId}`;
+    modal.querySelector('#wheel-winner-name').innerText = students.length > 0 ? 'Sẵn sàng quay!' : 'Chưa có học sinh';
+    modal.querySelector('#wheel-winner-code').innerText = students.length > 0 ? `Vòng quay đã nạp danh sách Lớp ${cId}` : 'Vui lòng khai báo danh sách học sinh vào lớp này';
     drawWheel(0);
   };
 
@@ -27670,11 +27671,13 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
       // Update Class dropdown list for new grade
       const selClass = modal.querySelector('#sel-wheel-class-modal');
-      const filteredClasses = allClasses.filter(c => String(c.grade || c.id.charAt(0)) === activeGrade);
-      selClass.innerHTML = filteredClasses.map(c => `<option value="${c.id}">Lớp ${c.name || c.id}</option>`).join('');
-
+      const filteredClasses = allClasses.filter(c => String(c.grade || (c.id ? c.id.charAt(0) : '')) === activeGrade);
       if (filteredClasses.length > 0) {
+        selClass.innerHTML = filteredClasses.map(c => `<option value="${c.id}">Lớp ${c.name || c.id}</option>`).join('');
         reloadClassStudents(filteredClasses[0].id);
+      } else {
+        selClass.innerHTML = `<option value="">-- Khối ${activeGrade} chưa có lớp --</option>`;
+        reloadClassStudents('');
       }
     };
   });
@@ -28319,21 +28322,15 @@ LMSApp.prototype.submitAiPickerScore = function(dom) {
 LMSApp.prototype.render_ai_picker = function(dom) {
   if (!db) return;
 
-  const classesList = (db.state && db.state.classesList) ? db.state.classesList : [{ id: '6A', name: '6A' }, { id: '6B', name: '6B' }, { id: '7A', name: '7A' }, { id: '8A', name: '8A' }, { id: '9A', name: '9A' }];
-  const subjectsList = (db.state && db.state.subjectsList) ? db.state.subjectsList : [{ id: 'toan', name: 'Toán học' }, { id: 'van', name: 'Ngữ văn' }, { id: 'anh', name: 'Tiếng Anh' }];
-  const currentClassId = this._aiPickerSelectedClass || (classesList[0] ? (classesList[0].name || classesList[0].id) : '6A');
+  const classesList = (db.getClassesList && db.getClassesList().length > 0) ? db.getClassesList() : ((db.state && db.state.classesList) ? db.state.classesList : []);
+  const subjectsList = (db.getSubjects && db.getSubjects().length > 0) ? db.getSubjects() : ((db.state && db.state.subjectsList) ? db.state.subjectsList : []);
+  const currentClassId = this._aiPickerSelectedClass || (classesList[0] ? (classesList[0].name || classesList[0].id) : '');
   const currentSubjectId = this._aiPickerSelectedSubject || 'toan';
   const currentCamMode = this._aiPickerCamMode || 'webcam';
 
   const studentsList = (db.getStudents ? db.getStudents() : []);
-  const studentsInClass = studentsList.filter(s => (s.classId || '6A') === currentClassId);
-  const displayStudents = studentsInClass.length > 0 ? studentsInClass : [
-    { id: 'hs_6a_1', name: 'Trần Đức Đức', classId: '6A' },
-    { id: 'hs_6a_2', name: 'Nguyễn Minh Khôi', classId: '6A' },
-    { id: 'hs_6a_3', name: 'Phạm Thanh Thảo', classId: '6A' },
-    { id: 'hs_6a_4', name: 'Lê Hoàng Nam', classId: '6A' },
-    { id: 'hs_6a_5', name: 'Vũ Ngọc Anh', classId: '6A' }
-  ];
+  const studentsInClass = currentClassId ? studentsList.filter(s => (s.classId || '') === currentClassId) : [];
+  const displayStudents = studentsInClass;
 
   const facePositions = [
     { top: '47.5%', left: '2.8%', width: '7.6%', height: '13%' },

@@ -1769,13 +1769,7 @@ const INITIAL_STATE = {
     { id: 'HK2', name: 'Học kỳ II', current: false }
   ],
   grades: [6, 7, 8, 9],
-  classes: [
-    { id: '6A', grade: 6, room: 'Phòng 101', homeroomTeacherId: null },
-    { id: '6B', grade: 6, room: 'Phòng 102', homeroomTeacherId: null },
-    { id: '7A', grade: 7, room: 'Phòng 201', homeroomTeacherId: null },
-    { id: '8A', grade: 8, room: 'Phòng 301', homeroomTeacherId: null },
-    { id: '9A', grade: 9, room: 'Phòng 401', homeroomTeacherId: null }
-  ],
+  classes: [],
   subjects: DEFAULT_SUBJECTS,
   teachers: DEFAULT_TEACHERS,
   students: DEFAULT_STUDENTS,
@@ -2098,13 +2092,7 @@ class LMSDatabase {
 
     if (!this.state) this.state = {};
     if (this.state.classesList === undefined) {
-      this.state.classesList = [
-        { id: 'cls_6a', grade: '6', name: '6A', homeroomTeacher: 'Chu Văn Giáp', studentCount: 35 },
-        { id: 'cls_6b', grade: '6', name: '6B', homeroomTeacher: 'Cao Thị Ngọc Châu', studentCount: 36 },
-        { id: 'cls_7a', grade: '7', name: '7A', homeroomTeacher: 'Trần Thanh Xuân', studentCount: 34 },
-        { id: 'cls_8a', grade: '8', name: '8A', homeroomTeacher: 'Lê Thị Liên Hương', studentCount: 35 },
-        { id: 'cls_9a', grade: '9', name: '9A', homeroomTeacher: 'Nông Văn Dũng', studentCount: 35 }
-      ];
+      this.state.classesList = [];
     }
 
     if (!this.state) this.state = {};
@@ -2320,6 +2308,7 @@ class LMSDatabase {
     this._migrateDefaultExams();
     this._migrateAssignmentsAndSubmissions();
     this._migrateDemoTeachersAndStudents();
+    this._migrateDemoClasses();
     this._migrateRemainingDemoData();
   }
 
@@ -2355,6 +2344,38 @@ class LMSDatabase {
     if (!this.state) this.state = {};
     if (!this.state.exams || !Array.isArray(this.state.exams)) {
       this.state.exams = [];
+    }
+  }
+
+  
+  _migrateDemoClasses() {
+    if (!this.state) this.state = {};
+    const demoClassIds = new Set(['cls_6a', 'cls_6b', 'cls_7a', 'cls_8a', 'cls_9a', '6A', '6B', '7A', '8A', '9A']);
+    const demoTeachers = new Set(['Chu Văn Giáp', 'Cao Thị Ngọc Châu', 'Trần Thanh Xuân', 'Lê Thị Liên Hương', 'Nông Văn Dũng']);
+    if (Array.isArray(this.state.classesList)) {
+      this.state.classesList = this.state.classesList.filter(c => {
+        if (!c) return false;
+        if (demoClassIds.has(c.id) || demoClassIds.has(c.name)) {
+          if (!c.homeroomTeacher || demoTeachers.has(c.homeroomTeacher)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    } else {
+      this.state.classesList = [];
+    }
+
+    if (Array.isArray(this.state.classes)) {
+      this.state.classes = this.state.classes.filter(c => {
+        if (!c) return false;
+        if (demoClassIds.has(c.id) || demoClassIds.has(c.name)) {
+          return false;
+        }
+        return true;
+      });
+    } else {
+      this.state.classes = [];
     }
   }
 
