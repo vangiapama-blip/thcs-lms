@@ -29133,18 +29133,30 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
   modal.id = 'gold-miner-modal';
   modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(11,19,41,0.95); backdrop-filter:blur(16px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:0.75rem; animation:fadeIn 0.25s ease-out;';
 
+  let cId = classId || '6A';
+  let sId = subjectId || 'toan';
+
   const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
-  if (!cId && allClasses.length > 0) cId = allClasses[0].id;
+  if ((!cId || !allClasses.some(c => c.id === cId)) && allClasses.length > 0) {
+    cId = allClasses[0].id;
+  }
   const allSubjects = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [
     { id: 'toan', name: 'Môn Toán' }, { id: 'van', name: 'Môn Ngữ Văn' }, { id: 'anh', name: 'Môn Tiếng Anh' },
     { id: 'khtn', name: 'Môn KHTN' }, { id: 'lsdl', name: 'Môn Lịch sử & Địa lí' }
   ];
 
-  let cId = classId;
-  let sId = subjectId;
-  let activeGrade = cId.charAt(0) || '6';
+  let activeGrade = (cId && typeof cId === 'string' && cId.length > 0) ? cId.charAt(0) : '6';
 
   let students = ((typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : []).filter(s => s && s.classId && String(s.classId) === String(cId));
+  if (students.length === 0) {
+    students = [
+      { id: `hs_${cId.toLowerCase()}_1`, name: 'Hoàng Văn Kiên', classId: cId },
+      { id: `hs_${cId.toLowerCase()}_2`, name: 'Ngọc Hà', classId: cId },
+      { id: `hs_${cId.toLowerCase()}_3`, name: 'Đức Mạnh', classId: cId },
+      { id: `hs_${cId.toLowerCase()}_4`, name: 'Phương Linh', classId: cId },
+      { id: `hs_${cId.toLowerCase()}_5`, name: 'Minh Tuấn', classId: cId }
+    ];
+  }
 
   // Web Audio Synthesizer for Cable Launch, Pulley Reel, Catch Chime & Fanfare Victory
   let audioCtx = null;
@@ -29261,9 +29273,8 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
           `).join('')}
         </div>
 
-        <div style="display:flex; align-items:center;">
-          <label style="font-size:0.82rem; font-weight:800; color:#fbbf24;">🏫 Lớp:</label>  };
-        <label style="font-size:0.82rem; font-weight:800; color:#fbbf24;">🏫 Lớp:</label>
+        <div style="display:flex; align-items:center; gap:0.4rem;">
+          <label style="font-size:0.82rem; font-weight:800; color:#fbbf24;">🏫 Lớp:</label>
           <select id="miner-sel-class" style="height:34px; padding:0 0.7rem; border-radius:10px; border:1.5px solid #6366f1; background:#1e1b4b; color:#fff; font-weight:800; font-size:0.85rem;">
             ${allClasses.filter(c => (c.grade || c.id.charAt(0)) === activeGrade).map(c => `
               <option value="${c.id}" ${c.id === cId ? 'selected' : ''}>Lớp ${c.name || c.id}</option>
@@ -30329,9 +30340,9 @@ if (typeof window !== 'undefined') {
     else if (LMSApp.prototype.showLuckyWheelModal) LMSApp.prototype.showLuckyWheelModal(c, s);
   };
 
-  window.showGoldMinerModal = function(c, s) {
-    if (window.app && window.app.showGoldMinerModal) window.app.showGoldMinerModal(c, s);
-    else if (LMSApp.prototype.showGoldMinerModal) LMSApp.prototype.showGoldMinerModal(c, s);
+  window.showGoldMinerModal = function(c, s, q) {
+    if (window.app && window.app.showGoldMinerModal) window.app.showGoldMinerModal(c, s, q);
+    else if (LMSApp.prototype.showGoldMinerModal) LMSApp.prototype.showGoldMinerModal(c, s, q);
   };
 }
 

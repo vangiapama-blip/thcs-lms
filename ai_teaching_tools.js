@@ -10742,12 +10742,18 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
   
   _renderGoldMiner() {
-    this._renderGenericGameDashboard('goldminer', '6. GAME AI ĐÀO VÀNG GỌI HỌC SINH', '⛏️', '#f59e0b', 'linear-gradient(180deg, #ffffff 0%, #fffbeb 100%)', 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', () => {
-      const cls = (this.icebreaker && this.icebreaker.grade ? (this.icebreaker.grade + 'A') : '6A');
-      const sub = (this.icebreaker && this.icebreaker.subjectId) || 'toan';
-      const qs = this._getLoadedQuestions('goldminer') || this._getDefaultQuestionsForGame('goldminer');
-      if (typeof window.showGoldMinerModal === 'function') window.showGoldMinerModal(cls, sub, qs);
-      else if (typeof LMSApp !== 'undefined' && LMSApp.prototype.showGoldMinerModal) LMSApp.prototype.showGoldMinerModal(cls, sub, qs);
+    this._renderGenericGameDashboard('goldminer', '6. GAME AI ĐÀO VÀNG GỌI HỌC SINH', '⛏️', '#f59e0b', 'linear-gradient(180deg, #ffffff 0%, #fffbeb 100%)', 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', (subName, loadedQs, opts) => {
+      const selectedGrade = (opts && opts.grade && opts.grade !== 'all') ? opts.grade : ((this.icebreaker && this.icebreaker.grade) || '6');
+      const sub = (opts && opts.subjectId) || (this.icebreaker && this.icebreaker.subjectId) || 'toan';
+      const cls = selectedGrade + 'A';
+      const qs = loadedQs || this._getLoadedQuestions('goldminer') || this._getDefaultQuestionsForGame('goldminer');
+      if (typeof window.showGoldMinerModal === 'function') {
+        window.showGoldMinerModal(cls, sub, qs);
+      } else if (typeof window.app !== 'undefined' && window.app.showGoldMinerModal) {
+        window.app.showGoldMinerModal(cls, sub, qs);
+      } else if (typeof LMSApp !== 'undefined' && LMSApp.prototype.showGoldMinerModal) {
+        LMSApp.prototype.showGoldMinerModal(cls, sub, qs);
+      }
     });
   },
 
