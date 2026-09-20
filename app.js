@@ -27293,7 +27293,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
 
   const modal = document.createElement('div');
   modal.id = 'lucky-wheel-modal';
-  modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(15,23,42,0.88); backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:0.5rem; animation:fadeIn 0.25s ease-out; overflow-y:auto; box-sizing:border-box;';
+  modal.style.cssText = 'position:fixed; inset:0; width:100vw; height:100vh; background:rgba(15,23,42,0.88); backdrop-filter:blur(12px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:0.5rem; overflow-y:auto; box-sizing:border-box; animation:fadeIn 0.25s ease-out;';
 
   // Get all classes from DB (No demo classes!)
   const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
@@ -27314,7 +27314,7 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   let activeGrade = cId.charAt(0) || '6';
 
   modal.innerHTML = `
-    <div class="lucky-wheel-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border:2px solid #6366f1; border-radius:22px; width:100%; max-width:960px; max-height:96vh; overflow-y:auto; padding:1.1rem 1.4rem; box-shadow:0 25px 60px rgba(99,102,241,0.4); font-family:var(--font-body); color:#fff; position:relative; box-sizing:border-box; margin:auto;">
+    <div id="wheel-main-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border:2px solid #6366f1; border-radius:24px; width:100%; max-width:960px; padding:1.35rem 1.6rem; box-shadow:0 25px 60px rgba(99,102,241,0.4); font-family:var(--font-body); color:#fff; position:relative; overflow:hidden; transition:transform 0.15s ease-out; transform-origin:center center;">
       
       <!-- Fireworks Canvas Overlay -->
       <canvas id="wheel-fireworks-canvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:99999;"></canvas>
@@ -27463,7 +27463,34 @@ LMSApp.prototype.showLuckyWheelModal = function(classId = '6A', subjectId = 'toa
   `;
 
   document.body.appendChild(modal);
-  modal.querySelector('#close-wheel-modal').onclick = () => modal.remove();
+
+  // Dynamic Uniform Scale for Low-Height Screens (1366x768, 1280x720, Taskbars, Browser bars)
+  const autoScaleWheel = () => {
+    const card = modal.querySelector('#wheel-main-card');
+    if (!card) return;
+    const availH = (window.innerHeight || document.documentElement.clientHeight || 700) - 24;
+    const availW = (window.innerWidth || document.documentElement.clientWidth || 1000) - 24;
+    const baseH = 680;
+    const baseW = 970;
+    const scaleH = availH < baseH ? (availH / baseH) : 1;
+    const scaleW = availW < baseW ? (availW / baseW) : 1;
+    const scale = Math.min(scaleH, scaleW, 1);
+    if (scale < 0.99) {
+      card.style.transform = `scale(${Math.max(0.65, parseFloat(scale.toFixed(3)))})`;
+      card.style.transformOrigin = 'center center';
+    } else {
+      card.style.transform = 'none';
+    }
+  };
+
+  autoScaleWheel();
+  window.addEventListener('resize', autoScaleWheel);
+
+  const cleanupWheelModal = () => {
+    window.removeEventListener('resize', autoScaleWheel);
+    modal.remove();
+  };
+  modal.querySelector('#close-wheel-modal').onclick = cleanupWheelModal;
 
   // Trigger Fireworks Explosion Function
   const triggerFireworks = () => {
@@ -29029,7 +29056,7 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
 
   const modal = document.createElement('div');
   modal.id = 'gold-miner-modal';
-  modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(11,19,41,0.95); backdrop-filter:blur(16px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:0.5rem; animation:fadeIn 0.25s ease-out; overflow-y:auto; box-sizing:border-box;';
+  modal.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(11,19,41,0.95); backdrop-filter:blur(16px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:0.75rem; animation:fadeIn 0.25s ease-out;';
 
   const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
   if (!cId && allClasses.length > 0) cId = allClasses[0].id;
@@ -29132,7 +29159,7 @@ LMSApp.prototype.showGoldMinerModal = function(classId = '6A', subjectId = 'toan
   };
 
   modal.innerHTML = `
-    <div class="gold-miner-card" style="background: linear-gradient(135deg, #0b1329 0%, #1e1b4b 100%); border:2.5px solid #f59e0b; border-radius:22px; width:96vw; max-width:1280px; max-height:96vh; overflow-y:auto; padding:0.85rem 1.25rem; box-shadow:0 25px 60px rgba(245,158,11,0.5); font-family:var(--font-body); color:#fff; position:relative; display:flex; flex-direction:column; justify-content:space-between; box-sizing:border-box; margin:auto;">
+    <div style="background: linear-gradient(135deg, #0b1329 0%, #1e1b4b 100%); border:2.5px solid #f59e0b; border-radius:24px; width:96vw; max-width:1280px; height:92vh; max-height:860px; padding:1.25rem 1.5rem; box-shadow:0 25px 60px rgba(245,158,11,0.5); font-family:var(--font-body); color:#fff; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:space-between;">
       
       <canvas id="miner-fireworks-canvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:99999;"></canvas>
 

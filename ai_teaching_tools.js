@@ -939,7 +939,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'duckrace-arena-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:#034d74;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:#034d74;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -2261,7 +2261,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'tugofwar-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:#090d16;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:#090d16;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -3321,7 +3321,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'minesweeper-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:#060810;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:#060810;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -4408,7 +4408,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'fruitninja-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -5581,7 +5581,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'matching-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
 
     const isMobile = window.innerWidth < 640;
 
@@ -6646,7 +6646,7 @@ window.AITeachingTools = {
 
     const modal = document.createElement('div');
     modal.id = 'trainorder-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
+    modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
 
     modal.innerHTML = `
       <!-- TOP CONTROL HUD -->
@@ -9603,8 +9603,8 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
       }
 
       const containerStyle = isFullscreen 
-        ? 'width:99vw;height:98vh;max-width:1600px;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow-y:auto;box-sizing:border-box;'
-        : 'width:94vw;max-width:1150px;max-height:96vh;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow-y:auto;box-sizing:border-box;margin:auto;'
+        ? 'width:99vw;height:98vh;max-width:1600px;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden;'
+        : 'width:92vw;max-width:1150px;max-height:92vh;background:#ffffff;border-radius:18px;border:1.5px solid #cbd5e1;box-shadow:0 20px 60px rgba(0,0,0,0.25);display:flex;flex-direction:column;overflow:hidden;'
 
       modal.innerHTML = `
 <div style="${containerStyle}">
@@ -11052,7 +11052,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const arena = document.createElement('div');
     arena.id = 'headtilt-arena-fullscreen';
-    arena.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
+    arena.style.cssText = 'position:fixed;inset:0;background:linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1e293b;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;touch-action:none;';
 
     // AUDIO & BGM SYNTHESIS ENGINE
     let audioEnabled = true;
@@ -17617,7 +17617,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'crossword-arena-modal';
-    modal.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle at center, #0f172a 0%, #020617 100%);z-index:9999999;display:flex;flex-direction:column;font-family:var(--font-title);color:#fff;overflow-y:auto;box-sizing:border-box;animation:fadeIn .25s;';
+    modal.style.cssText = 'position:fixed;inset:0;background:radial-gradient(circle at center, #0f172a 0%, #020617 100%);z-index:9999999;display:flex;flex-direction:column;font-family:var(--font-title);color:#fff;overflow:hidden;animation:fadeIn .25s;';
 
     const renderArena = () => {
       modal.innerHTML = `
@@ -19655,7 +19655,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'goldminer-quiz-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#020617; z-index:9999999; display:flex; flex-direction:column; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.25s ease-out;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#020617; z-index:9999999; display:flex; flex-direction:column; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.25s ease-out;';
 
     modal.innerHTML = `
       <!-- TOP HUD -->
@@ -20206,7 +20206,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'treasure-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#070b19; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s cubic-bezier(0.16,1,0.3,1);';
+    modal.style.cssText = 'position:fixed; inset:0; background:#070b19; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s cubic-bezier(0.16,1,0.3,1);';
     document.body.appendChild(modal);
 
     // Upbeat Pirate Synth Soundtrack Engine (D minor / Tropical Adventure - 128 BPM)
@@ -20918,7 +20918,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'cw-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
     document.body.appendChild(modal);
 
     // Soft, Gentle, Elegant Ambient Gameshow BGM (Very gentle volume, warm sine/triangle waves)
@@ -21710,7 +21710,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'space-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#040714; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
     document.body.appendChild(modal);
 
     // Soft Ambient Sci-Fi Space BGM (Gentle sine/triangle cosmic pads)
@@ -22350,7 +22350,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'arena-battle-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#060a14; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#060a14; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
     document.body.appendChild(modal);
 
     // Soft Epic Arena Synth BGM (Gentle heroic harmony & percussion)
@@ -23023,7 +23023,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'st7-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#022c22; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.3s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#022c22; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, system-ui, sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.3s ease;';
     document.body.appendChild(modal);
 
     // Inspiring Soft Ambient Acoustic BGM
@@ -23856,7 +23856,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
     const modal = document.createElement('div');
     modal.id = 'starrace-arena-modal';
-    modal.style.cssText = 'position:fixed; inset:0; background:#042f2e; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, "Montserrat", "Segoe UI", sans-serif); color:#fff; overflow-y:auto; box-sizing:border-box; user-select:none; animation:fadeIn 0.25s ease;';
+    modal.style.cssText = 'position:fixed; inset:0; background:#042f2e; z-index:9999999; display:flex; flex-direction:column; font-family:var(--font-title, "Montserrat", "Segoe UI", sans-serif); color:#fff; overflow:hidden; user-select:none; animation:fadeIn 0.25s ease;';
     document.body.appendChild(modal);
 
     const unlockAudio = () => {
@@ -25143,7 +25143,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
 
       const m = document.createElement('div');
       m.id = 'letter-theater-modal';
-      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(16px);z-index:9999999;display:flex; overflow-y:auto; box-sizing:border-box;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.25s ease-out;';
+      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(16px);z-index:9999999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.25s ease-out;';
 
       const renderTheaterStage = () => {
         m.innerHTML = `
@@ -28360,7 +28360,7 @@ Trình bày lần lượt từng slide theo cấu trúc chuẩn:
     const openNumberTheaterModal = (item) => {
       let isMorphed = false;
       const m = document.createElement('div');
-      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(14px);z-index:9999999;display:flex; overflow-y:auto; box-sizing:border-box;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.2s ease-out;';
+      m.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.92);backdrop-filter:blur(14px);z-index:9999999;display:flex;align-items:center;justify-content:center;padding:1rem;font-family:var(--font-body);animation:fadeIn 0.2s ease-out;';
 
       const greetingText = `Xin chào! Mình là Số ${item.num} trong từ ${item.countWord}!`;
 
