@@ -9950,7 +9950,7 @@ render_students(dom) {
       importStudentsBtn.onclick = () => this.showStudentImportModal(dom);
     }
 
-    // Export Students to Excel/CSV
+    // Export Students to Excel (.xlsx)
     const exportBtn = dom.querySelector('#btn-export-students-excel');
     if (exportBtn) {
       exportBtn.onclick = () => {
@@ -9959,9 +9959,10 @@ render_students(dom) {
           username: s.username || `hs_${(s.classId||'').toLowerCase()}_${idx+1}`,
           password: s.password || 'hs123456'
         }));
-        const headers = ['STT','Họ và tên','Giới tính','Ngày sinh','Lớp','Họ tên phụ huynh','SĐT phụ huynh','Tên đăng nhập','Mật khẩu'];
+        const headers = ['STT', 'Mã học sinh (ID)', 'Họ và tên', 'Giới tính', 'Ngày sinh', 'Lớp', 'Họ tên phụ huynh', 'SĐT phụ huynh', 'Tên đăng nhập', 'Mật khẩu'];
         const rows = students.map((s, i) => [
-          i+1,
+          i + 1,
+          s.id || '',
           s.name || '',
           s.gender || 'Nam',
           s.dob || '',
@@ -9971,15 +9972,74 @@ render_students(dom) {
           s.username || '',
           s.password || 'hs123456'
         ]);
-        const csvContent = '\uFEFF' + [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\r\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `DanhSach_HocSinh_${new Date().toISOString().slice(0,10)}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        this.showToast('✅ Đã xuất danh sách học sinh ra Excel!');
+
+        const fileName = `DanhSach_HocSinh_${new Date().toISOString().slice(0, 10)}.xlsx`;
+
+        if (typeof ExcelJS !== 'undefined') {
+          const wb = new ExcelJS.Workbook();
+          wb.creator = 'THCS Ama Trang Lơng';
+          const ws = wb.addWorksheet('Danh_Sach_Hoc_Sinh', { views: [{ showGridLines: true }] });
+          ws.columns = [
+            { header: 'STT', key: 'stt', width: 6 },
+            { header: 'Mã học sinh (ID)', key: 'id', width: 18 },
+            { header: 'Họ và tên', key: 'name', width: 26 },
+            { header: 'Giới tính', key: 'gender', width: 12 },
+            { header: 'Ngày sinh', key: 'dob', width: 16 },
+            { header: 'Lớp', key: 'class', width: 12 },
+            { header: 'Họ tên phụ huynh', key: 'parentName', width: 26 },
+            { header: 'SĐT phụ huynh', key: 'parentPhone', width: 18 },
+            { header: 'Tên đăng nhập', key: 'username', width: 22 },
+            { header: 'Mật khẩu', key: 'password', width: 16 }
+          ];
+          rows.forEach(r => ws.addRow(r));
+          ws.getColumn('B').numFmt = '@';
+          ws.getColumn('E').numFmt = '@';
+          ws.getColumn('H').numFmt = '@';
+          ws.getColumn('J').numFmt = '@';
+
+          ws.getRow(1).height = 26;
+          ws.getRow(1).eachCell(cell => {
+            cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          });
+
+          wb.xlsx.writeBuffer().then(buffer => {
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            this.showToast('✅ Đã xuất danh sách học sinh ra Excel (.xlsx)!');
+          }).catch(err => {
+            console.error('Lỗi xuất ExcelJS học sinh:', err);
+            this.showToast('Lỗi xuất tệp Excel, vui lòng thử lại!', 'danger');
+          });
+        } else if (typeof XLSX !== 'undefined') {
+          const wb = XLSX.utils.book_new();
+          const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+          ws['!cols'] = [
+            { wch: 6 }, { wch: 18 }, { wch: 26 }, { wch: 12 }, { wch: 16 },
+            { wch: 12 }, { wch: 26 }, { wch: 18 }, { wch: 22 }, { wch: 16 }
+          ];
+          XLSX.utils.book_append_sheet(wb, ws, 'Danh_Sach_Hoc_Sinh');
+          XLSX.writeFile(wb, fileName);
+          this.showToast('✅ Đã xuất danh sách học sinh ra Excel (.xlsx)!');
+        } else {
+          const csvContent = '\uFEFF' + [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\r\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `DanhSach_HocSinh_${new Date().toISOString().slice(0, 10)}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+          this.showToast('✅ Đã xuất danh sách học sinh!');
+        }
       };
     }
 
@@ -10274,9 +10334,9 @@ render_students(dom) {
 
         <div style="background:#ecfdf5;border:1.5px solid #a7f3d0;padding:1rem;border-radius:12px;margin-bottom:1.25rem;text-align:left;">
           <div style="font-weight: 500;color:#047857;margin-bottom:0.4rem;font-size:0.95rem;">📄 Tải tệp mẫu Excel chuẩn học sinh:</div>
-          <p style="font-size:0.85rem;color:#065f46;margin:0 0 0.75rem 0;">Tệp mẫu chứa sẵn các cột: <em>Mã học sinh (ID), Họ và tên, Giới tính, Ngày sinh, Lớp, Họ tên phụ huynh, SĐT phụ huynh, Mật khẩu</em>.</p>
-          <button id="btn-download-student-excel-template" style="; font-weight: 400;font-family:var(--font-title);padding:0.5rem 1rem;background:#059669;color:#fff;border:none;border-radius:6px;cursor:pointer;">
-            📥 Tải tệp mẫu Excel (.csv / .xlsx)
+          <p style="font-size:0.85rem;color:#065f46;margin:0 0 0.75rem 0;">Tệp mẫu Excel (.xlsx) chuẩn GDPT gồm 2 sheet: <em>Mau_Danh_Sach_Hoc_Sinh</em> (có menu chọn Giới tính & Lớp, chống lỗi số điện thoại) và <em>Danh_Sach_Lop</em>.</p>
+          <button id="btn-download-student-excel-template" style="; font-weight: 400;font-family:var(--font-title);padding:0.55rem 1.1rem;background:#059669;color:#fff;border:none;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:0.4rem;box-shadow:0 3px 10px rgba(5,150,105,0.25);">
+            📥 Tải tệp mẫu Excel chuẩn (.xlsx)
           </button>
         </div>
 
@@ -10300,7 +10360,7 @@ render_students(dom) {
           <div style="font-size:3rem;">📤</div>
           <div>
             <span style="font-weight: 500;color:#059669;font-size:1.05rem;display:block;margin-bottom:0.25rem;">NHẤP VÀO ĐÂY ĐỂ CHỌN TỆP EXCEL / CSV</span>
-            <span style="font-size:0.82rem;color:#475569; font-weight:400; font-size:0.88rem;display:block;font-weight:500;">Hỗ trợ tệp định dạng .csv, .xlsx, .xls</span>
+            <span style="font-size:0.82rem;color:#475569; font-weight:400; font-size:0.88rem;display:block;font-weight:500;">Hỗ trợ tệp định dạng .xlsx, .xls, .csv</span>
           </div>
         </div>
       </div>
@@ -10314,17 +10374,162 @@ render_students(dom) {
     modal.querySelector('#btn-download-student-excel-template').onclick = () => {
       const headers = ['Mã học sinh (ID)', 'Họ và tên', 'Giới tính', 'Ngày sinh', 'Lớp', 'Họ tên phụ huynh', 'SĐT phụ huynh', 'Mật khẩu'];
       const sampleData = [
-        ['HS2024001', 'Nguyễn Văn An', 'Nam', '', '6A', 'Nguyễn Văn Bình', '0901234567', 'hs123456'],
-        ['HS2024002', 'Trần Thị Bích', 'Nữ', '', '6A', 'Trần Văn Cường', '0912345678', 'hs123456']
+        ['HS2024001', 'Nguyễn Văn An', 'Nam', '15/09/2012', '6A', 'Nguyễn Văn Bình', '0901234567', 'hs123456'],
+        ['HS2024002', 'Trần Thị Bích', 'Nữ', '22/04/2012', '6A', 'Trần Văn Cường', '0912345678', 'hs123456'],
+        ['HS2024003', 'Lê Hoàng Long', 'Nam', '08/11/2011', '7B', 'Lê Quốc Hưng', '0934567890', 'hs123456'],
+        ['HS2024004', 'Phạm Ngọc Ánh', 'Nữ', '14/01/2010', '8A', 'Phạm Quang Minh', '0945678901', 'hs123456']
       ];
-      let csvContent = '\uFEFF' + headers.map(h => `"${h}"`).join(',') + '\r\n';
-      sampleData.forEach(row => { csvContent += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\r\n'; });
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'Mau_Danh_Sach_Hoc_Sinh_THCS.csv'; a.click();
-      URL.revokeObjectURL(url);
-      this.showToast('Đã tải về tệp mẫu Excel danh sách học sinh!');
+
+      // Lấy danh sách lớp thực tế trong CSDL
+      let declaredClasses = [];
+      if (typeof db !== 'undefined') {
+        if (db.getClassesList) {
+          declaredClasses = db.getClassesList().map(c => c.name || c.id);
+        } else if (db.state && Array.isArray(db.state.classesList)) {
+          declaredClasses = db.state.classesList.map(c => c.name || c.id);
+        }
+      }
+      declaredClasses = Array.from(new Set(declaredClasses.filter(Boolean)));
+      if (declaredClasses.length === 0) {
+        declaredClasses = ['6A', '6B', '6C', '7A', '7B', '7C', '8A', '8B', '8C', '9A', '9B', '9C'];
+      }
+
+      // Tiêu đề Sheet 2: Danh sách Lớp
+      const classHeaders = ['STT', 'Tên Lớp (Chọn vào cột E)', 'Khối', 'Hướng dẫn'];
+      const classRows = declaredClasses.map((cls, idx) => {
+        const num = cls.replace(/\D/g, '') || cls.charAt(0) || '6';
+        return [
+          idx + 1,
+          cls,
+          'Khối ' + num,
+          `Chọn '${cls}' trong danh sách thả xuống ở cột E (Sheet Mau_Danh_Sach_Hoc_Sinh)`
+        ];
+      });
+
+      // Tạo file Excel chuẩn bằng ExcelJS
+      if (typeof ExcelJS !== 'undefined') {
+        const wb = new ExcelJS.Workbook();
+        wb.creator = 'THCS Ama Trang Lơng';
+        wb.lastModifiedBy = 'THCS Ama Trang Lơng';
+        wb.created = new Date();
+        wb.modified = new Date();
+
+        // Sheet 1: Mau_Danh_Sach_Hoc_Sinh
+        const ws1 = wb.addWorksheet('Mau_Danh_Sach_Hoc_Sinh', { views: [{ showGridLines: true }] });
+        ws1.columns = [
+          { header: 'Mã học sinh (ID)', key: 'id', width: 18 },
+          { header: 'Họ và tên', key: 'name', width: 26 },
+          { header: 'Giới tính', key: 'gender', width: 14 },
+          { header: 'Ngày sinh', key: 'dob', width: 16 },
+          { header: 'Lớp', key: 'class', width: 14 },
+          { header: 'Họ tên phụ huynh', key: 'parentName', width: 26 },
+          { header: 'SĐT phụ huynh', key: 'parentPhone', width: 18 },
+          { header: 'Mật khẩu', key: 'password', width: 16 }
+        ];
+
+        sampleData.forEach(row => ws1.addRow(row));
+
+        // Ép kiểu chuỗi Text (@) cho Mã HS, Ngày sinh, SĐT và Mật khẩu để chống lỗi lũy thừa 9.88E+08
+        ws1.getColumn('A').numFmt = '@';
+        ws1.getColumn('D').numFmt = '@';
+        ws1.getColumn('G').numFmt = '@';
+        ws1.getColumn('H').numFmt = '@';
+
+        // Sheet 2: Danh_Sach_Lop
+        const ws2 = wb.addWorksheet('Danh_Sach_Lop', { views: [{ showGridLines: true }] });
+        ws2.columns = [
+          { header: 'STT', key: 'stt', width: 6 },
+          { header: 'Tên Lớp (Chọn vào cột E)', key: 'name', width: 26 },
+          { header: 'Khối', key: 'grade', width: 16 },
+          { header: 'Hướng dẫn', key: 'guide', width: 65 }
+        ];
+
+        classRows.forEach(row => ws2.addRow(row));
+
+        // Data Validation: Dropdown chọn Giới tính (Nam, Nữ) ở cột C
+        for (let r = 2; r <= 500; r++) {
+          ws1.getCell('C' + r).dataValidation = {
+            type: 'list',
+            allowBlank: true,
+            formulae: ['"Nam,Nữ"'],
+            showErrorMessage: true,
+            errorTitle: 'Giới tính không hợp lệ',
+            error: 'Vui lòng chọn Nam hoặc Nữ từ danh sách thả xuống.'
+          };
+        }
+
+        // Data Validation: Dropdown chọn Lớp ở cột E (liên kết sang Sheet Danh_Sach_Lop)
+        const classCount = classRows.length;
+        const classFormula = `Danh_Sach_Lop!$B$2:$B$${classCount + 1}`;
+        for (let r = 2; r <= 500; r++) {
+          ws1.getCell('E' + r).dataValidation = {
+            type: 'list',
+            allowBlank: true,
+            formulae: [classFormula],
+            showErrorMessage: true,
+            errorTitle: 'Lớp học không hợp lệ',
+            error: 'Vui lòng chọn lớp học từ danh sách thả xuống (6A, 6B, 7A...).',
+            showInputMessage: true,
+            promptTitle: 'Chọn Lớp học',
+            prompt: 'Bấm mũi tên thả xuống để chọn lớp học.'
+          };
+        }
+
+        // Định dạng Header nổi bật
+        ws1.getRow(1).height = 26;
+        ws1.getRow(1).eachCell(cell => {
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+
+        ws2.getRow(1).height = 26;
+        ws2.getRow(1).eachCell(cell => {
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1D4ED8' } };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+
+        wb.xlsx.writeBuffer().then(buffer => {
+          const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'Mau_Danh_Sach_Hoc_Sinh_THCS.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          this.showToast('📥 Đã tải tệp mẫu Excel học sinh chuẩn GDPT (.xlsx)!');
+        }).catch(err => {
+          console.error('Lỗi xuất ExcelJS học sinh:', err);
+          this.showToast('Lỗi xuất tệp Excel, vui lòng thử lại!', 'danger');
+        });
+      } else if (typeof XLSX !== 'undefined') {
+        const wb = XLSX.utils.book_new();
+        const ws1 = XLSX.utils.aoa_to_sheet([headers, ...sampleData]);
+        ws1['!cols'] = [
+          { wch: 18 }, { wch: 26 }, { wch: 14 }, { wch: 16 },
+          { wch: 14 }, { wch: 26 }, { wch: 18 }, { wch: 16 }
+        ];
+        XLSX.utils.book_append_sheet(wb, ws1, 'Mau_Danh_Sach_Hoc_Sinh');
+
+        const ws2 = XLSX.utils.aoa_to_sheet([classHeaders, ...classRows]);
+        ws2['!cols'] = [{ wch: 6 }, { wch: 26 }, { wch: 16 }, { wch: 65 }];
+        XLSX.utils.book_append_sheet(wb, ws2, 'Danh_Sach_Lop');
+
+        XLSX.writeFile(wb, 'Mau_Danh_Sach_Hoc_Sinh_THCS.xlsx');
+        this.showToast('📥 Đã tải tệp mẫu Excel học sinh chuẩn GDPT (.xlsx)!');
+      } else {
+        let csvContent = '\uFEFF' + headers.map(h => `"${h}"`).join(',') + '\r\n';
+        sampleData.forEach(row => { csvContent += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\r\n'; });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'Mau_Danh_Sach_Hoc_Sinh_THCS.csv'; a.click();
+        URL.revokeObjectURL(url);
+        this.showToast('Đã tải về tệp mẫu danh sách học sinh!');
+      }
     };
 
     const dropzone = modal.querySelector('#student-excel-dropzone');
@@ -10365,8 +10570,10 @@ render_students(dom) {
           const normTxt = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
           const slugTxt = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
           const seenInFile = new Set(); // chống trùng dòng trong CÙNG file
+          const generatedIdsInBatch = new Set(); // ghi nhớ mã tự tạo trong batch
+
           parsed.forEach((row, idx) => {
-            // Lưu ý: KHÔNG dùng cột STT làm mã HS (STT lặp lại giữa các lớp -> gây trùng/ghi đè)
+            // Lấy mã học sinh từ file nếu có
             const maHS_raw = (
               row['Mã học sinh (ID)'] || row['Mã học sinh'] || row['Mã HS'] || row['Mã số'] ||
               row['id'] || row['ID'] || row['MaHS'] || ''
@@ -10387,32 +10594,10 @@ render_students(dom) {
             if (classId) {
               classId = classId.replace(/^Lớp\s*/i, '').replace(/^Khoi\s+/i, '').replace(/\s+/g, '').trim().toUpperCase();
             }
-            // Không tự gán lớp mặc định (trước đây gán '6A' -> sinh lớp không có trong file)
+            // Không tự gán lớp mặc định
             if (!classId) { noClassCount++; return; }
 
             const nName = normTxt(name);
-            const fileKey = maHS_raw ? ('id:' + maHS_raw.toLowerCase()) : ('nc:' + nName + '|' + classId);
-            if (seenInFile.has(fileKey)) { skippedCount++; return; }
-            seenInFile.add(fileKey);
-
-            // Luôn đối chiếu với danh sách MỚI NHẤT
-            const latestStudents = db.getStudents();
-            const existingStu = latestStudents.find(s =>
-              (maHS_raw && String(s.id).toLowerCase() === maHS_raw.toLowerCase()) ||
-              (normTxt(s.name) === nName && String(s.classId || '').toUpperCase() === classId)
-            );
-
-            // Mã HS ổn định khi file không có cột mã: HS_<LỚP>_<TÊN không dấu>
-            let maHS = maHS_raw;
-            if (!maHS) {
-              const baseId = `HS_${classId}_${slugTxt(name) || (idx + 1)}`;
-              maHS = baseId;
-              let sfx = 2;
-              while (latestStudents.some(s => String(s.id).toLowerCase() === maHS.toLowerCase())) {
-                maHS = `${baseId}_${sfx++}`;
-              }
-            }
-
             const gender = (
               row['Giới tính'] || row['Nam/Nữ'] || row['gender'] || row['Gender'] || row['GIỚI TÍNH'] || 'Nam'
             ).toString().trim();
@@ -10432,6 +10617,59 @@ render_students(dom) {
             const password = (
               row['Mật khẩu'] || row['password'] || row['Pass'] || row['Password'] || 'hs123456'
             ).toString().trim();
+
+            // Kiểm tra trùng dòng trong CÙNG FILE:
+            // - Có Mã HS: chỉ trùng khi cùng Mã HS (hai em cùng tên khác mã vẫn hợp lệ).
+            // - Không có Mã HS: chỉ trùng khi giống hệt toàn bộ Tên + Lớp + Ngày sinh + SĐT + Tên PH.
+            const fileKey = maHS_raw
+              ? ('id:' + maHS_raw.toLowerCase())
+              : ('row:' + nName + '|' + classId + '|' + dob.toLowerCase() + '|' + parentPhone.replace(/\D/g, '') + '|' + parentName.toLowerCase());
+
+            if (seenInFile.has(fileKey)) { skippedCount++; return; }
+            seenInFile.add(fileKey);
+
+            // Luôn đối chiếu với danh sách MỚI NHẤT trong CSDL
+            const latestStudents = db.getStudents();
+            let existingStu = null;
+
+            if (maHS_raw) {
+              // CÓ MÃ HỌC SINH: Phân biệt duy nhất theo Mã học sinh!
+              // Hai học sinh cùng họ tên nhưng khác mã là hai học sinh hoàn toàn khác nhau.
+              existingStu = latestStudents.find(s => String(s.id || '').trim().toLowerCase() === maHS_raw.toLowerCase());
+            } else {
+              // KHÔNG CÓ MÃ HỌC SINH:
+              // Chỉ coi là cùng 1 học sinh nếu trùng Tên + Lớp và không có thông tin nhận dạng nào mâu thuẫn
+              existingStu = latestStudents.find(s => {
+                const sNameNorm = normTxt(s.name);
+                const sClass = String(s.classId || '').trim().toUpperCase();
+                if (sNameNorm !== nName || sClass !== classId) return false;
+
+                // Nếu cả hai đều có ngày sinh và ngày sinh khác nhau -> 2 học sinh trùng tên khác nhau!
+                if (s.dob && dob && s.dob.trim().toLowerCase() !== dob.trim().toLowerCase()) return false;
+
+                // Nếu cả hai đều có SĐT và SĐT khác nhau -> 2 học sinh khác nhau!
+                const sPhone = String(s.parentPhone || '').replace(/\D/g, '');
+                const rPhone = String(parentPhone || '').replace(/\D/g, '');
+                if (sPhone && rPhone && sPhone !== rPhone) return false;
+
+                // Nếu cả hai đều có tên phụ huynh và khác nhau -> 2 học sinh khác nhau!
+                if (s.parentName && parentName && normTxt(s.parentName) !== normTxt(parentName)) return false;
+
+                return true;
+              });
+            }
+
+            // Mã HS ổn định khi file không có cột mã: HS_<LỚP>_<TÊN không dấu>
+            let maHS = maHS_raw;
+            if (!maHS) {
+              const baseId = `HS_${classId}_${slugTxt(name) || (idx + 1)}`;
+              maHS = baseId;
+              let sfx = 2;
+              while (latestStudents.some(s => String(s.id || '').toLowerCase() === maHS.toLowerCase()) || generatedIdsInBatch.has(maHS.toLowerCase())) {
+                maHS = `${baseId}_${sfx++}`;
+              }
+              generatedIdsInBatch.add(maHS.toLowerCase());
+            }
 
             // Auto-register class if missing in system (so sánh đã chuẩn hóa để không tạo lớp trùng)
             const normCls = (v) => String(v || '').replace(/^Lớp\s*/i, '').replace(/\s+/g, '').trim().toUpperCase();
@@ -10462,7 +10700,7 @@ render_students(dom) {
                 });
                 updatedCount++;
               } else {
-                skippedCount++; // Chế độ Thêm mới: HS đã có -> bỏ qua, không nhân đôi
+                skippedCount++; // Chế độ Thêm mới: Đã có mã học sinh này trong hệ thống -> bỏ qua
               }
             } else {
               db.addStudent({
@@ -10483,7 +10721,12 @@ render_students(dom) {
           if (db.autoGenerateParentAccounts) db.autoGenerateParentAccounts();
           db.save();
           modal.remove();
-          const msg = [addedCount > 0 ? `Thêm mới: ${addedCount}` : '', updatedCount > 0 ? `Cập nhật: ${updatedCount}` : '', skippedCount > 0 ? `Bỏ qua trùng: ${skippedCount}` : '', noClassCount > 0 ? `Thiếu lớp: ${noClassCount}` : ''].filter(Boolean).join(' | ');
+          const msg = [
+            addedCount > 0 ? `Thêm mới: ${addedCount}` : '',
+            updatedCount > 0 ? `Cập nhật: ${updatedCount}` : '',
+            skippedCount > 0 ? `Bỏ qua trùng mã HS: ${skippedCount}` : '',
+            noClassCount > 0 ? `Thiếu lớp: ${noClassCount}` : ''
+          ].filter(Boolean).join(' | ');
           this.showToast(`✅ ${msg || 'Không có thay đổi!'} học sinh`);
           if (parentDom) this.render_students(parentDom);
         } catch(err) { this.showToast('Lỗi đọc file: ' + err.message, 'danger'); }
