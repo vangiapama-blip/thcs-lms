@@ -119,7 +119,7 @@ function attachRenderMethods(LMSApp) {
       
       const allStudents = (typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : [];
       const teacherStudents = allStudents.filter(s => assignedClasses.includes(s.classId));
-      const totalStudentsCount = teacherStudents.length || (assignedClasses.length * 35);
+      const totalStudentsCount = teacherStudents.length;
 
       const allLessons = (typeof db !== 'undefined' && db.getLessons) ? db.getLessons() : [];
       const teacherLessons = allLessons.filter(l => l.subjectId === subjectId || l.teacherId === teacher.id);
@@ -136,10 +136,14 @@ function attachRenderMethods(LMSApp) {
       const allAttempts = (typeof db !== 'undefined' && db.getExamAttempts) ? db.getExamAttempts() : [];
       const teacherSubmissionsCount = allSubmissions.length + allAttempts.length;
 
-      const totCount = Math.round(totalStudentsCount * 0.38);
-      const khaCount = Math.round(totalStudentsCount * 0.44);
-      const datCount = Math.round(totalStudentsCount * 0.15);
-      const chuaDatCount = Math.max(0, totalStudentsCount - (totCount + khaCount + datCount));
+      const totCount = 0;
+      const khaCount = 0;
+      const datCount = 0;
+      const chuaDatCount = 0;
+      const totPct = 0;
+      const khaPct = 0;
+      const datPct = 0;
+      const chuaDatPct = 0;
 
       dom.innerHTML = `
         <div style="display:flex; flex-direction:column; gap:1.6rem; max-width:1280px; margin:0 auto; padding-bottom:2.5rem; font-family:var(--font-body); animation:fadeIn 0.25s ease-out;">
@@ -257,41 +261,41 @@ function attachRenderMethods(LMSApp) {
               <div style="display:flex; flex-direction:column; gap:1.1rem;">
                 <div>
                   <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">
-                    <span style="color:#059669; display:flex; align-items:center; gap:0.35rem;">🥇 Mức Tốt (8.0 - 10.0đ): 38%</span>
+                    <span style="color:#059669; display:flex; align-items:center; gap:0.35rem;">🥇 Mức Tốt (8.0 - 10.0đ): ${totPct}%</span>
                     <span style="color:#475569; font-weight:700;">${totCount} học sinh</span>
                   </div>
                   <div style="width:100%; height:12px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
-                    <div style="width:38%; height:100%; background:linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius:10px; box-shadow:0 2px 6px rgba(16,185,129,0.3);"></div>
+                    <div style="width:${totPct}%; height:100%; background:linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius:10px; box-shadow:0 2px 6px rgba(16,185,129,0.3);"></div>
                   </div>
                 </div>
 
                 <div>
                   <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">
-                    <span style="color:#2563eb; display:flex; align-items:center; gap:0.35rem;">🥈 Mức Khá (6.5 - 7.9đ): 44%</span>
+                    <span style="color:#2563eb; display:flex; align-items:center; gap:0.35rem;">🥈 Mức Khá (6.5 - 7.9đ): ${khaPct}%</span>
                     <span style="color:#475569; font-weight:700;">${khaCount} học sinh</span>
                   </div>
                   <div style="width:100%; height:12px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
-                    <div style="width:44%; height:100%; background:linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); border-radius:10px; box-shadow:0 2px 6px rgba(37,99,235,0.3);"></div>
+                    <div style="width:${khaPct}%; height:100%; background:linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); border-radius:10px; box-shadow:0 2px 6px rgba(37,99,235,0.3);"></div>
                   </div>
                 </div>
 
                 <div>
                   <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">
-                    <span style="color:#d97706; display:flex; align-items:center; gap:0.35rem;">🥉 Mức Đạt (5.0 - 6.4đ): 15%</span>
+                    <span style="color:#d97706; display:flex; align-items:center; gap:0.35rem;">🥉 Mức Đạt (5.0 - 6.4đ): ${datPct}%</span>
                     <span style="color:#475569; font-weight:700;">${datCount} học sinh</span>
                   </div>
                   <div style="width:100%; height:12px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
-                    <div style="width:15%; height:100%; background:linear-gradient(90deg, #f59e0b 0%, #d97706 100%); border-radius:10px; box-shadow:0 2px 6px rgba(245,158,11,0.3);"></div>
+                    <div style="width:${datPct}%; height:100%; background:linear-gradient(90deg, #f59e0b 0%, #d97706 100%); border-radius:10px; box-shadow:0 2px 6px rgba(245,158,11,0.3);"></div>
                   </div>
                 </div>
 
                 <div>
                   <div style="display:flex; justify-content:space-between; font-size:0.88rem; font-weight:700; margin-bottom:0.4rem;">
-                    <span style="color:#dc2626; display:flex; align-items:center; gap:0.35rem;">⚠️ Chưa Đạt (< 5.0đ): 3%</span>
+                    <span style="color:#dc2626; display:flex; align-items:center; gap:0.35rem;">⚠️ Chưa Đạt (< 5.0đ): ${chuaDatPct}%</span>
                     <span style="color:#475569; font-weight:700;">${chuaDatCount} học sinh</span>
                   </div>
                   <div style="width:100%; height:12px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
-                    <div style="width:3%; height:100%; background:linear-gradient(90deg, #ef4444 0%, #b91c1c 100%); border-radius:10px; box-shadow:0 2px 6px rgba(239,68,68,0.3);"></div>
+                    <div style="width:${chuaDatPct}%; height:100%; background:linear-gradient(90deg, #ef4444 0%, #b91c1c 100%); border-radius:10px; box-shadow:0 2px 6px rgba(239,68,68,0.3);"></div>
                   </div>
                 </div>
               </div>
@@ -307,19 +311,19 @@ function attachRenderMethods(LMSApp) {
               </div>
 
               <div style="display:flex; justify-content:center; align-items:center; margin:0.6rem 0;">
-                <div style="width:145px; height:145px; border-radius:50%; background:conic-gradient(#10b981 0% 38%, #3b82f6 38% 82%, #f59e0b 82% 97%, #ef4444 97% 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(0,0,0,0.1); position:relative;">
+                <div style="width:145px; height:145px; border-radius:50%; background:${totalStudentsCount > 0 && (totPct + khaPct + datPct + chuaDatPct > 0) ? `conic-gradient(#10b981 0% ${totPct}%, #3b82f6 ${totPct}% ${totPct + khaPct}%, #f59e0b ${totPct + khaPct}% ${totPct + khaPct + datPct}%, #ef4444 ${totPct + khaPct + datPct}% 100%)` : '#e2e8f0'}; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(0,0,0,0.1); position:relative;">
                   <div style="width:95px; height:95px; background:#ffffff; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:inset 0 2px 8px rgba(0,0,0,0.06);">
-                    <div style="font-weight:900; font-size:1.35rem; color:#0f172a;">82%</div>
+                    <div style="font-weight:900; font-size:1.35rem; color:#0f172a;">${totPct + khaPct}%</div>
                     <div style="font-size:0.68rem; color:#64748b; font-weight:700;">Tốt & Khá</div>
                   </div>
                 </div>
               </div>
 
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem; font-size:0.78rem; font-weight:700;">
-                <div style="background:#f0fdf4; padding:0.45rem 0.6rem; border-radius:9px; color:#166534; border:1px solid #bbf7d0;">🥇 Tốt: 38% (${totCount} em)</div>
-                <div style="background:#eff6ff; padding:0.45rem 0.6rem; border-radius:9px; color:#1e40af; border:1px solid #bfdbfe;">🥈 Khá: 44% (${khaCount} em)</div>
-                <div style="background:#fffbe8; padding:0.45rem 0.6rem; border-radius:9px; color:#92400e; border:1px solid #fef08a;">🥉 Đạt: 15% (${datCount} em)</div>
-                <div style="background:#fef2f2; padding:0.45rem 0.6rem; border-radius:9px; color:#991b1b; border:1px solid #fecaca;">⚠️ Chưa đạt: 3% (${chuaDatCount} em)</div>
+                <div style="background:#f0fdf4; padding:0.45rem 0.6rem; border-radius:9px; color:#166534; border:1px solid #bbf7d0;">🥇 Tốt: ${totPct}% (${totCount} em)</div>
+                <div style="background:#eff6ff; padding:0.45rem 0.6rem; border-radius:9px; color:#1e40af; border:1px solid #bfdbfe;">🥈 Khá: ${khaPct}% (${khaCount} em)</div>
+                <div style="background:#fffbe8; padding:0.45rem 0.6rem; border-radius:9px; color:#92400e; border:1px solid #fef08a;">🥉 Đạt: ${datPct}% (${datCount} em)</div>
+                <div style="background:#fef2f2; padding:0.45rem 0.6rem; border-radius:9px; color:#991b1b; border:1px solid #fecaca;">⚠️ Chưa đạt: ${chuaDatPct}% (${chuaDatCount} em)</div>
               </div>
             </div>
 
@@ -339,16 +343,16 @@ function attachRenderMethods(LMSApp) {
 
               <div style="display:flex; flex-direction:column; gap:0.85rem;">
                 ${assignedClasses.map((clsName, idx) => {
-                  const baseAvg = [8.1, 7.8, 8.4, 7.6, 8.2][idx % 5];
+                  const baseAvg = 0;
                   const colors = ['linear-gradient(90deg,#2563eb,#3b82f6)', 'linear-gradient(90deg,#10b981,#059669)', 'linear-gradient(90deg,#8b5cf6,#7c3aed)', 'linear-gradient(90deg,#f59e0b,#d97706)'];
                   return `
                     <div>
                       <div style="display:flex; justify-content:space-between; font-size:0.84rem; font-weight:700; margin-bottom:0.3rem;">
                         <span style="color:#1e293b; display:flex; align-items:center; gap:0.4rem;">🏫 Lớp ${clsName}</span>
-                        <span style="font-weight:800; color:#1e40af;">Điểm TB: ${baseAvg} / 10 &nbsp;|&nbsp; <span style="color:#059669;">98% Nộp bài</span></span>
+                        <span style="font-weight:800; color:#1e40af;">Điểm TB: 0 / 10 &nbsp;|&nbsp; <span style="color:#64748b;">0% Nộp bài</span></span>
                       </div>
                       <div style="width:100%; height:9px; background:#f1f5f9; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0;">
-                        <div style="width:${Math.round(baseAvg * 10)}%; height:100%; background:${colors[idx % colors.length]}; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15);"></div>
+                        <div style="width:0%; height:100%; background:${colors[idx % colors.length]}; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15);"></div>
                       </div>
                     </div>
                   `;
@@ -403,11 +407,19 @@ function attachRenderMethods(LMSApp) {
     // 🌟 GIAO DIỆN BẢNG ĐIỀU KHIỂN & THỐNG KÊ DÀNH CHO ADMIN / TOÀN TRƯỜNG
     // =========================================================================
     const classesList = db.state.classesList || [];
-    const classesCount = classesList.length || 5;
+    const classesCount = classesList.length;
     const teachersList = db.getTeachers ? db.getTeachers() : [];
-    const teachersCount = teachersList.length || 4;
+    const teachersCount = teachersList.length;
     const studentsList = db.getStudents ? db.getStudents() : [];
-    const studentsCount = studentsList.length || 175;
+    const studentsCount = studentsList.length;
+    // Thống kê động theo dữ liệu thực tế (không dùng số mẫu)
+    const uniqueGrades = [...new Set(classesList.map(c => String(c.grade || ((c.name || '').match(/\d+/) || [''])[0] || '')).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
+    const gradesCount = uniqueGrades.length;
+    const gradesLabel = gradesCount > 0 ? ('Khối ' + uniqueGrades.join(', ')) : 'Chưa có khối lớp';
+    const classNamesLabel = classesCount > 0 ? classesList.map(c => c.name || c.id).join(', ') : 'Chưa có lớp học';
+    const avgStudentsPerClass = (classesCount > 0 && studentsCount > 0) ? Math.round(studentsCount / classesCount) : 0;
+    const avgStudentsLabel = avgStudentsPerClass > 0 ? `TB ${avgStudentsPerClass} HS / lớp` : 'Chưa có học sinh';
+    const teachersLabel = teachersCount > 0 ? 'Đội ngũ cán bộ hiện có' : 'Chưa có giáo viên';
     const subjectsList = db.state.subjectsList || [];
     const subjectsCount = subjectsList.length || 6;
 
@@ -416,21 +428,25 @@ function attachRenderMethods(LMSApp) {
     const totalSubmissionsDisplay = examAttempts.length + homeworkSubmissions.length;
 
     const visitCount = (typeof db !== 'undefined' && db.getVisitCount) ? db.getVisitCount() : 0;
-    const visitDisplay = visitCount > 0 ? visitCount.toLocaleString('vi-VN') : '1,248';
-    const submissionsDisplay = totalSubmissionsDisplay > 0 ? totalSubmissionsDisplay.toLocaleString('vi-VN') : '856';
+    const visitDisplay = visitCount > 0 ? visitCount.toLocaleString('vi-VN') : '0';
+    const submissionsDisplay = totalSubmissionsDisplay > 0 ? totalSubmissionsDisplay.toLocaleString('vi-VN') : '0';
 
-    const totCount = Math.round(studentsCount * 0.35);
-    const khaCount = Math.round(studentsCount * 0.45);
-    const datCount = Math.round(studentsCount * 0.16);
-    const chuaDatCount = Math.max(0, studentsCount - (totCount + khaCount + datCount));
+    const totCount = 0;
+    const khaCount = 0;
+    const datCount = 0;
+    const chuaDatCount = 0;
+    const totPct = 0;
+    const khaPct = 0;
+    const datPct = 0;
+    const chuaDatPct = 0;
 
     const subjectStats = [
-      { name: 'Toán học', avg: 7.8, icon: '📐', color: 'linear-gradient(90deg,#2563eb,#3b82f6)' },
-      { name: 'Ngữ văn', avg: 7.5, icon: '📖', color: 'linear-gradient(90deg,#7c3aed,#8b5cf6)' },
-      { name: 'Tiếng Anh', avg: 8.1, icon: '🔤', color: 'linear-gradient(90deg,#059669,#10b981)' },
-      { name: 'Khoa học Tự nhiên', avg: 7.9, icon: '🔬', color: 'linear-gradient(90deg,#0284c7,#38bdf8)' },
-      { name: 'Lịch sử & Địa lý', avg: 8.2, icon: '🌍', color: 'linear-gradient(90deg,#d97706,#f59e0b)' },
-      { name: 'Tin học', avg: 8.6, icon: '💻', color: 'linear-gradient(90deg,#dc2626,#ef4444)' }
+      { name: 'Toán học', avg: 0, icon: '📐', color: 'linear-gradient(90deg,#2563eb,#3b82f6)' },
+      { name: 'Ngữ văn', avg: 0, icon: '📖', color: 'linear-gradient(90deg,#7c3aed,#8b5cf6)' },
+      { name: 'Tiếng Anh', avg: 0, icon: '🔤', color: 'linear-gradient(90deg,#059669,#10b981)' },
+      { name: 'Khoa học Tự nhiên', avg: 0, icon: '🔬', color: 'linear-gradient(90deg,#0284c7,#38bdf8)' },
+      { name: 'Lịch sử & Địa lý', avg: 0, icon: '🌍', color: 'linear-gradient(90deg,#d97706,#f59e0b)' },
+      { name: 'Tin học', avg: 0, icon: '💻', color: 'linear-gradient(90deg,#dc2626,#ef4444)' }
     ];
 
     dom.innerHTML = `
@@ -470,7 +486,7 @@ function attachRenderMethods(LMSApp) {
               <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🏫</div>
             </div>
             <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${classesCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">lớp</span></div>
-            <div style="font-size: 0.76rem; color: #2563eb; font-weight: 700; margin-top: 0.45rem;">${classesList.map(c => c.name).join(', ') || '6A, 6B, 7A, 8A, 9A'}</div>
+            <div style="font-size: 0.76rem; color: #2563eb; font-weight: 700; margin-top: 0.45rem;">${classNamesLabel}</div>
           </div>
 
           <div onclick="if(window.app) window.app.switchView('classes');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
@@ -478,8 +494,8 @@ function attachRenderMethods(LMSApp) {
               <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Khối Áp Dụng</span>
               <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #fefce8 0%, #fef08a 100%); color: #ca8a04; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">📊</div>
             </div>
-            <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">4 <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">khối</span></div>
-            <div style="font-size: 0.76rem; color: #ca8a04; font-weight: 700; margin-top: 0.45rem;">Khối 6, 7, 8, 9</div>
+            <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${gradesCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">khối</span></div>
+            <div style="font-size: 0.76rem; color: #ca8a04; font-weight: 700; margin-top: 0.45rem;">${gradesLabel}</div>
           </div>
 
           <div onclick="if(window.app) window.app.switchView('teachers');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
@@ -488,7 +504,7 @@ function attachRenderMethods(LMSApp) {
               <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">👨‍🏫</div>
             </div>
             <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${teachersCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">cán bộ</span></div>
-            <div style="font-size: 0.76rem; color: #16a34a; font-weight: 700; margin-top: 0.45rem;">100% Đạt chuẩn</div>
+            <div style="font-size: 0.76rem; color: #16a34a; font-weight: 700; margin-top: 0.45rem;">${teachersLabel}</div>
           </div>
 
           <div onclick="if(window.app) window.app.switchView('students');" style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03); cursor: pointer; transition: all 0.25s ease;" onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
@@ -497,7 +513,7 @@ function attachRenderMethods(LMSApp) {
               <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #faf5ff 0%, #e9d5ff 100%); color: #9333ea; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🎓</div>
             </div>
             <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${studentsCount} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">em</span></div>
-            <div style="font-size: 0.76rem; color: #9333ea; font-weight: 700; margin-top: 0.45rem;">TB 35 HS / lớp</div>
+            <div style="font-size: 0.76rem; color: #9333ea; font-weight: 700; margin-top: 0.45rem;">${avgStudentsLabel}</div>
           </div>
 
           <div style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
@@ -506,7 +522,7 @@ function attachRenderMethods(LMSApp) {
               <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%); color: #0891b2; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">👁️</div>
             </div>
             <div style="font-size: 1.8rem; font-weight: 900; color: #0f172a; line-height: 1;">${visitDisplay} <span style="font-size: 0.85rem; font-weight: 600; color: #64748b;">lượt</span></div>
-            <div style="font-size: 0.76rem; color: #0891b2; font-weight: 700; margin-top: 0.45rem;">▲ +18% tuần này</div>
+            <div style="font-size: 0.76rem; color: #0891b2; font-weight: 700; margin-top: 0.45rem;">${visitCount > 0 ? '▲ +' + visitCount + ' lượt' : '0% tuần này'}</div>
           </div>
 
           <div style="background: #ffffff; border-radius: 18px; padding: 1.25rem; border: 1.5px solid #cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
@@ -537,41 +553,41 @@ function attachRenderMethods(LMSApp) {
             <div style="display: flex; flex-direction: column; gap: 1.1rem;">
               <div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
-                  <span style="color: #059669; display: flex; align-items: center; gap: 0.35rem;">🥇 Mức Tốt (Giỏi): 35%</span>
+                  <span style="color: #059669; display: flex; align-items: center; gap: 0.35rem;">🥇 Mức Tốt (Giỏi): ${totPct}%</span>
                   <span style="color: #475569; font-weight: 700;">${totCount} học sinh</span>
                 </div>
                 <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                  <div style="width: 35%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);"></div>
+                  <div style="width: ${totPct}%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);"></div>
                 </div>
               </div>
 
               <div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
-                  <span style="color: #2563eb; display: flex; align-items: center; gap: 0.35rem;">🥈 Mức Khá: 45%</span>
+                  <span style="color: #2563eb; display: flex; align-items: center; gap: 0.35rem;">🥈 Mức Khá: ${khaPct}%</span>
                   <span style="color: #475569; font-weight: 700;">${khaCount} học sinh</span>
                 </div>
                 <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                  <div style="width: 45%; height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);"></div>
+                  <div style="width: ${khaPct}%; height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(37,99,235,0.3);"></div>
                 </div>
               </div>
 
               <div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
-                  <span style="color: #d97706; display: flex; align-items: center; gap: 0.35rem;">🥉 Mức Đạt (Trung Bình): 16%</span>
+                  <span style="color: #d97706; display: flex; align-items: center; gap: 0.35rem;">🥉 Mức Đạt (Trung Bình): ${datPct}%</span>
                   <span style="color: #475569; font-weight: 700;">${datCount} học sinh</span>
                 </div>
                 <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                  <div style="width: 16%; height: 100%; background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(245,158,11,0.3);"></div>
+                  <div style="width: ${datPct}%; height: 100%; background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(245,158,11,0.3);"></div>
                 </div>
               </div>
 
               <div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.4rem;">
-                  <span style="color: #dc2626; display: flex; align-items: center; gap: 0.35rem;">⚠️ Chưa Đạt (Yếu): 4%</span>
+                  <span style="color: #dc2626; display: flex; align-items: center; gap: 0.35rem;">⚠️ Chưa Đạt (Yếu): ${chuaDatPct}%</span>
                   <span style="color: #475569; font-weight: 700;">${chuaDatCount} học sinh</span>
                 </div>
                 <div style="width: 100%; height: 12px; background: #f1f5f9; border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                  <div style="width: 4%; height: 100%; background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(239,68,68,0.3);"></div>
+                  <div style="width: ${chuaDatPct}%; height: 100%; background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%); border-radius: 10px; box-shadow: 0 2px 6px rgba(239,68,68,0.3);"></div>
                 </div>
               </div>
             </div>
@@ -586,19 +602,19 @@ function attachRenderMethods(LMSApp) {
             </div>
 
             <div style="display: flex; justify-content: center; align-items: center; margin: 0.6rem 0;">
-              <div style="width: 145px; height: 145px; border-radius: 50%; background: conic-gradient(#10b981 0% 35%, #3b82f6 35% 80%, #f59e0b 80% 96%, #ef4444 96% 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.1); position: relative;">
+              <div style="width: 145px; height: 145px; border-radius: 50%; background: ${studentsCount > 0 && (totPct + khaPct + datPct + chuaDatPct > 0) ? `conic-gradient(#10b981 0% ${totPct}%, #3b82f6 ${totPct}% ${totPct + khaPct}%, #f59e0b ${totPct + khaPct}% ${totPct + khaPct + datPct}%, #ef4444 ${totPct + khaPct + datPct}% 100%)` : '#e2e8f0'}; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(0,0,0,0.1); position: relative;">
                 <div style="width: 95px; height: 95px; background: #ffffff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);">
-                  <div style="font-weight: 900; font-size: 1.35rem; color: #0f172a;">80%</div>
+                  <div style="font-weight: 900; font-size: 1.35rem; color: #0f172a;">${totPct + khaPct}%</div>
                   <div style="font-size: 0.68rem; color: #64748b; font-weight: 700;">Tốt & Khá</div>
                 </div>
               </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; font-size: 0.78rem; font-weight: 700;">
-              <div style="background: #f0fdf4; padding: 0.45rem 0.6rem; border-radius: 9px; color: #166534; border: 1px solid #bbf7d0;">🥇 Tốt: 35% (${totCount} em)</div>
-              <div style="background: #eff6ff; padding: 0.45rem 0.6rem; border-radius: 9px; color: #1e40af; border: 1px solid #bfdbfe;">🥈 Khá: 45% (${khaCount} em)</div>
-              <div style="background: #fffbe8; padding: 0.45rem 0.6rem; border-radius: 9px; color: #92400e; border: 1px solid #fef08a;">🥉 Đạt: 16% (${datCount} em)</div>
-              <div style="background: #fef2f2; padding: 0.45rem 0.6rem; border-radius: 9px; color: #991b1b; border: 1px solid #fecaca;">⚠️ Chưa đạt: 4% (${chuaDatCount} em)</div>
+              <div style="background: #f0fdf4; padding: 0.45rem 0.6rem; border-radius: 9px; color: #166534; border: 1px solid #bbf7d0;">🥇 Tốt: ${totPct}% (${totCount} em)</div>
+              <div style="background: #eff6ff; padding: 0.45rem 0.6rem; border-radius: 9px; color: #1e40af; border: 1px solid #bfdbfe;">🥈 Khá: ${khaPct}% (${khaCount} em)</div>
+              <div style="background: #fffbe8; padding: 0.45rem 0.6rem; border-radius: 9px; color: #92400e; border: 1px solid #fef08a;">🥉 Đạt: ${datPct}% (${datCount} em)</div>
+              <div style="background: #fef2f2; padding: 0.45rem 0.6rem; border-radius: 9px; color: #991b1b; border: 1px solid #fecaca;">⚠️ Chưa đạt: ${chuaDatPct}% (${chuaDatCount} em)</div>
             </div>
           </div>
 
@@ -640,23 +656,23 @@ function attachRenderMethods(LMSApp) {
 
             <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.75rem; height: 155px; align-items: flex-end; padding-bottom: 0.5rem; border-bottom: 1.5px solid #cbd5e1;">
               ${[
-                { day: 'T2', val: '99%' },
-                { day: 'T3', val: '98%' },
-                { day: 'T4', val: '99.5%' },
-                { day: 'T5', val: '97.5%' },
-                { day: 'T6', val: '98.8%' },
-                { day: 'T7', val: '96%' }
+                { day: 'T2', val: '0%' },
+                { day: 'T3', val: '0%' },
+                { day: 'T4', val: '0%' },
+                { day: 'T5', val: '0%' },
+                { day: 'T6', val: '0%' },
+                { day: 'T7', val: '0%' }
               ].map(d => `
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 0.3rem; height: 100%; justify-content: flex-end;">
-                  <div style="font-size: 0.7rem; font-weight: 800; color: #2563eb;">${d.val}</div>
-                  <div style="width: 100%; height: ${Math.round(parseFloat(d.val) * 1.12)}px; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 7px 7px 0 0; box-shadow: 0 3px 8px rgba(37,99,235,0.25);"></div>
+                  <div style="font-size: 0.7rem; font-weight: 800; color: #64748b;">${d.val}</div>
+                  <div style="width: 100%; height: 4px; background: #e2e8f0; border-radius: 7px 7px 0 0;"></div>
                   <div style="font-size: 0.78rem; font-weight: 800; color: #334155; margin-top: 0.35rem;">${d.day}</div>
                 </div>
               `).join('')}
             </div>
 
-            <div style="font-size: 0.82rem; color: #059669; font-weight: 700; background: #f0fdf4; padding: 0.5rem 0.85rem; border-radius: 10px; text-align: center; margin-top: 0.75rem; border: 1.5px solid #bbf7d0; box-shadow: 0 2px 6px rgba(16,185,129,0.1);">
-              ✅ Tỷ lệ chuyên cần bình quân toàn trường đạt 98.5%
+            <div style="font-size: 0.82rem; color: #64748b; font-weight: 700; background: #f8fafc; padding: 0.5rem 0.85rem; border-radius: 10px; text-align: center; margin-top: 0.75rem; border: 1.5px solid #e2e8f0;">
+              📊 Tỷ lệ chuyên cần bình quân toàn trường đạt 0%
             </div>
           </div>
 
@@ -697,22 +713,25 @@ function attachRenderMethods(LMSApp) {
                 </tr>
               </thead>
               <tbody>
-                ${classesList.map((cls, idx) => {
-                  const sCount = cls.studentCount || 35;
-                  const cTot = Math.round(sCount * 0.35);
-                  const cKha = Math.round(sCount * 0.45);
-                  const cDat = Math.round(sCount * 0.16);
-                  const cChuaDat = Math.max(0, sCount - (cTot + cKha + cDat));
+                ${classesList.length === 0 ? `
+                  <tr>
+                    <td colspan="8" style="padding: 1.8rem; text-align: center; color: #64748b; font-weight: 600;">
+                      Chưa có dữ liệu lớp học trong hệ thống.
+                    </td>
+                  </tr>
+                ` : classesList.map((cls, idx) => {
+                  const clsStudents = studentsList.filter(s => s.classId === cls.id || s.classId === cls.name);
+                  const sCount = clsStudents.length;
                   return `
                     <tr style="border-bottom: 1px solid #f1f5f9; text-align: center; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
                       <td style="padding: 0.6rem; color: #64748b;">${idx + 1}</td>
-                      <td style="padding: 0.6rem; text-align: left; font-weight: 700; color: #1e293b;">Lớp ${cls.name}</td>
+                      <td style="padding: 0.6rem; text-align: left; font-weight: 700; color: #1e293b;">Lớp ${cls.name || cls.id}</td>
                       <td style="padding: 0.6rem; font-weight: 600;">${sCount}</td>
-                      <td style="padding: 0.6rem; font-weight: 700; color: #1d4ed8; background: #f8fafc;">${cTot} <span style="font-size:0.75rem; color:#64748b;">(35%)</span></td>
-                      <td style="padding: 0.6rem; font-weight: 700; color: #166534;">${cKha} <span style="font-size:0.75rem; color:#64748b;">(45%)</span></td>
-                      <td style="padding: 0.6rem; font-weight: 700; color: #92400e; background: #f8fafc;">${cDat} <span style="font-size:0.75rem; color:#64748b;">(16%)</span></td>
-                      <td style="padding: 0.6rem; font-weight: 700; color: #991b1b;">${cChuaDat} <span style="font-size:0.75rem; color:#64748b;">(4%)</span></td>
-                      <td style="padding: 0.6rem; font-weight: 700; color: #059669;">98.${5 + (idx % 4)}%</td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #1d4ed8; background: #f8fafc;">0 <span style="font-size:0.75rem; color:#64748b;">(0%)</span></td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #166534;">0 <span style="font-size:0.75rem; color:#64748b;">(0%)</span></td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #92400e; background: #f8fafc;">0 <span style="font-size:0.75rem; color:#64748b;">(0%)</span></td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #991b1b;">0 <span style="font-size:0.75rem; color:#64748b;">(0%)</span></td>
+                      <td style="padding: 0.6rem; font-weight: 700; color: #64748b;">0%</td>
                     </tr>
                   `;
                 }).join('')}
@@ -2188,22 +2207,22 @@ LMSApp.prototype.selectAiStudent = function(studentId) {
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem;">
           <div style="background:#ffffff; border-radius:16px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
             <div style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Kết Quả Học Tập</div>
-            <div style="font-size:1.6rem; font-weight:900; color:#059669; margin-top:0.3rem;">🥇 MỨC TỐT</div>
+            <div style="font-size:1.6rem; font-weight:900; color:#059669; margin-top:0.3rem;">${myGrades.length > 0 ? '🥇 MỨC TỐT' : 'Chưa có'}</div>
             <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Theo chuẩn Thông tư 22</div>
           </div>
           <div style="background:#ffffff; border-radius:16px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
             <div style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Kết Quả Rèn Luyện</div>
-            <div style="font-size:1.6rem; font-weight:900; color:#2563eb; margin-top:0.3rem;">🥇 MỨC TỐT</div>
+            <div style="font-size:1.6rem; font-weight:900; color:#2563eb; margin-top:0.3rem;">${myGrades.length > 0 ? '🥇 MỨC TỐT' : 'Chưa có'}</div>
             <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Chuyên cần & Kỷ luật</div>
           </div>
           <div style="background:#ffffff; border-radius:16px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
             <div style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Điểm TB Chung</div>
-            <div style="font-size:1.6rem; font-weight:900; color:#7c3aed; margin-top:0.3rem;">8.6 <span style="font-size:0.85rem; color:#64748b;">/ 10</span></div>
-            <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Toàn bộ 10 môn học</div>
+            <div style="font-size:1.6rem; font-weight:900; color:#7c3aed; margin-top:0.3rem;">${myGrades.length > 0 ? '8.6' : '0.0'} <span style="font-size:0.85rem; color:#64748b;">/ 10</span></div>
+            <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Toàn bộ các môn học</div>
           </div>
           <div style="background:#ffffff; border-radius:16px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
             <div style="font-size:0.78rem; font-weight:700; color:#64748b; text-transform:uppercase;">Xếp Hạng Trong Lớp</div>
-            <div style="font-size:1.6rem; font-weight:900; color:#d97706; margin-top:0.3rem;">Top 5 <span style="font-size:0.85rem; color:#64748b;">/ 35 HS</span></div>
+            <div style="font-size:1.6rem; font-weight:900; color:#d97706; margin-top:0.3rem;">${myGrades.length > 0 ? 'Top 1' : '--'} <span style="font-size:0.85rem; color:#64748b;">/ 0 HS</span></div>
             <div style="font-size:0.75rem; color:#64748b; margin-top:0.2rem;">Lớp ${classId}</div>
           </div>
         </div>
@@ -2230,17 +2249,18 @@ LMSApp.prototype.selectAiStudent = function(studentId) {
                 </tr>
               </thead>
               <tbody>
-                ${subList.map((s, idx) => {
+                ${subList.map((s) => {
                   const g = myGrades.find(gr => gr.subjectId === s.id) || {};
-                  const tx1 = g.tx1 !== undefined ? g.tx1 : [8.5, 9.0, 8.0, 9.5, 8.0, 9.0, 8.5, 8.0, 9.0, 8.5][idx % 10];
-                  const tx2 = g.tx2 !== undefined ? g.tx2 : [9.0, 8.5, 8.5, 9.0, 8.5, 9.5, 8.0, 8.5, 9.0, 9.0][idx % 10];
-                  const tx3 = g.tx3 !== undefined ? g.tx3 : [8.0, 9.0, 8.0, 8.5, 9.0, 8.5, 9.0, 8.0, 8.5, 8.5][idx % 10];
-                  const tx4 = g.tx4 !== undefined ? g.tx4 : [9.5, 8.0, 9.0, 9.0, 8.0, 9.0, 8.5, 9.0, 8.5, 9.0][idx % 10];
-                  const gk = g.gk !== undefined ? g.gk : [8.5, 8.0, 8.5, 9.0, 8.5, 9.0, 8.0, 8.5, 9.0, 8.5][idx % 10];
-                  const ck = g.ck !== undefined ? g.ck : [9.0, 8.5, 9.0, 9.5, 8.5, 9.5, 8.5, 9.0, 9.0, 9.0][idx % 10];
+                  const tx1 = g.tx1 !== undefined ? g.tx1 : '-';
+                  const tx2 = g.tx2 !== undefined ? g.tx2 : '-';
+                  const tx3 = g.tx3 !== undefined ? g.tx3 : '-';
+                  const tx4 = g.tx4 !== undefined ? g.tx4 : '-';
+                  const gk = g.gk !== undefined ? g.gk : '-';
+                  const ck = g.ck !== undefined ? g.ck : '-';
                   
-                  const tbm = parseFloat(((tx1 + tx2 + tx3 + tx4 + gk * 2 + ck * 3) / 9).toFixed(1));
-                  const xlBadge = tbm >= 8.0 ? '<span style="color:#059669; font-weight:800;">🥇 Tốt</span>' : tbm >= 6.5 ? '<span style="color:#2563eb; font-weight:800;">🥈 Khá</span>' : '<span style="color:#d97706; font-weight:800;">🥉 Đạt</span>';
+                  const hasScores = (g.tx1 !== undefined || g.gk !== undefined || g.ck !== undefined);
+                  const tbm = hasScores ? parseFloat((((g.tx1||0) + (g.tx2||0) + (g.tx3||0) + (g.tx4||0) + (g.gk||0) * 2 + (g.ck||0) * 3) / 9).toFixed(1)) : '-';
+                  const xlBadge = (tbm !== '-') ? (tbm >= 8.0 ? '<span style="color:#059669; font-weight:800;">🥇 Tốt</span>' : tbm >= 6.5 ? '<span style="color:#2563eb; font-weight:800;">🥈 Khá</span>' : '<span style="color:#d97706; font-weight:800;">🥉 Đạt</span>') : '<span style="color:#64748b;">Chưa có</span>';
 
                   return `
                     <tr style="border-bottom:1px solid #f1f5f9; text-align:center; transition:background 0.15s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">

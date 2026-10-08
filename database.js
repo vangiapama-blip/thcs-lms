@@ -2478,15 +2478,8 @@ class LMSDatabase {
 
   getVisitCount() {
     if (!this.state) this.state = {};
-    // Reset baseline visit count to start fresh from 0
-    if (this.state.visitCount === undefined || this.state.visitCount === null || this.state.visitCount >= 1000) {
+    if (this.state.visitCount === undefined || this.state.visitCount === null) {
       this.state.visitCount = 0;
-    }
-
-    if (!this._visitTracked) {
-      this.state.visitCount += 1;
-      this._visitTracked = true;
-      if (this.save) this.save();
     }
     return this.state.visitCount;
   }

@@ -8153,19 +8153,25 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
     const subjects = db.getSubjects();
     const classes = db.getClasses();
 
-    const filteredTeachers = allTeachers.filter(t => {
+    // Chuẩn hóa chuỗi để tìm kiếm có dấu / không dấu
+    const normSearch = (str) => String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim();
+
+    // Lọc động: được tính lại mỗi lần vẽ bảng (khi gõ ô tìm kiếm)
+    const getFilteredTeachers = () => allTeachers.filter(t => {
       const tSubIds = (t.subjects && Array.isArray(t.subjects) && t.subjects.length > 0) ? t.subjects : (t.subjectId ? [t.subjectId] : []);
       const matchSubject = this.teacherSubjectFilter === 'all' || tSubIds.includes(this.teacherSubjectFilter) || t.subjectId === this.teacherSubjectFilter;
-      const kw = this.teacherSearchKeyword.trim().toLowerCase();
+      const kw = normSearch(this.teacherSearchKeyword);
       const matchKw = !kw || 
-                      t.name.toLowerCase().includes(kw) || 
-                      (t.username && t.username.toLowerCase().includes(kw)) ||
-                      (t.phone && t.phone.includes(kw)) ||
-                      (t.email && t.email.toLowerCase().includes(kw));
+                      normSearch(t.name).includes(kw) || 
+                      normSearch(t.username).includes(kw) ||
+                      normSearch(t.phone).includes(kw) ||
+                      normSearch(t.email).includes(kw) ||
+                      normSearch(t.code).includes(kw);
       return matchSubject && matchKw;
     });
 
     const renderTableRows = () => {
+      const filteredTeachers = getFilteredTeachers();
       if (filteredTeachers.length === 0) {
         return `<tr><td colspan="10" style="text-align:center; padding:2rem; color:var(--text-muted);">Không tìm thấy giáo viên nào phù hợp với bộ lọc.</td></tr>`;
       }
@@ -8217,6 +8223,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
               <div style="display: flex; align-items: center; gap: 0.6rem; white-space: nowrap;">
                 <input type="checkbox" class="teacher-row-checkbox" data-teacher-id="${t.id}" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;">
                 <strong style="color: var(--primary); font-family: var(--font-title); font-size: 0.95rem; white-space: nowrap;">${t.name}</strong>
+                ${t.code ? `<span title="Mã giáo viên" style="background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; border-radius: 6px; padding: 0.05rem 0.4rem; font-size: 0.75rem; font-family: monospace; white-space: nowrap;">${t.code}</span>` : ''}
               </div>
             </td>
             <td style="white-space: nowrap;">${dobFormatted}</td>
@@ -8355,7 +8362,11 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         <div id="add-teacher-form-container" style="display: none; background: #f8fafc; padding: 1.5rem; border-radius: 12px; border: 1.5px solid #cbd5e1; margin-bottom: 1.5rem; animation: fadeIn 0.2s ease-out;">
           <h4 style="margin: 0 0 1rem 0; color: var(--primary); font-family: var(--font-title); font-weight: 400;">➕ Thêm Hồ sơ Giáo viên Mới</h4>
           <form id="add-teacher-form">
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label" style="font-weight: 400;">Mã giáo viên</label>
+                <input type="text" class="form-control" name="tCode" placeholder="Để trống: tự sinh (GV001...)" style="height: 38px;">
+              </div>
               <div class="form-group" style="margin: 0;">
                 <label class="form-label" style="font-weight: 400;">Họ và tên giáo viên</label>
                 <input type="text" class="form-control" name="tName" placeholder="Ví dụ: Nguyễn Văn Hải" required style="height: 38px;">
@@ -8490,8 +8501,14 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         const dob = fd.get('tDob');
         const phone = fd.get('tPhone');
         const email = fd.get('tEmail');
+        const rawCode = String(fd.get('tCode') || '').trim().toUpperCase();
+        if (rawCode && this._findTeacherByCode(rawCode)) {
+          this.showToast(`Mã giáo viên ${rawCode} đã tồn tại, vui lòng nhập mã khác!`, 'warning');
+          return;
+        }
+        const code = rawCode || this._nextTeacherCode();
 
-        const tempTeacher = { id: `gv_${Date.now()}`, name, subjectId, dob, phone, email, classes: [], isHomeroom: null };
+        const tempTeacher = { id: `gv_${Date.now()}`, code, name, subjectId, dob, phone, email, classes: [], isHomeroom: null };
         const cleanUsername = db.generateUniqueTeacherUsername ? db.generateUniqueTeacherUsername(tempTeacher) : `thcsamtl_${Date.now().toString().slice(-4)}`;
         tempTeacher.username = cleanUsername;
         tempTeacher.password = 'gv123456';
@@ -8928,6 +8945,22 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
     overlay.querySelector('#btn-close-view-teacher-bottom').onclick = () => overlay.remove();
   }
 
+  // Tìm giáo viên theo Mã GV (không phân biệt hoa thường); excludeId: bỏ qua chính GV đang sửa
+  _findTeacherByCode(code, excludeId) {
+    const c = String(code || '').trim().toUpperCase();
+    if (!c) return null;
+    return db.getTeachers().find(t => String(t.code || '').trim().toUpperCase() === c && String(t.id) !== String(excludeId || '')) || null;
+  }
+
+  // Sinh Mã GV kế tiếp dạng GV001, GV002... (không trùng mã đã có)
+  _nextTeacherCode(reserved) {
+    const used = new Set(db.getTeachers().map(t => String(t.code || '').trim().toUpperCase()).filter(Boolean));
+    if (reserved) reserved.forEach(c => used.add(String(c).toUpperCase()));
+    let n = 1;
+    while (used.has('GV' + String(n).padStart(3, '0'))) n++;
+    return 'GV' + String(n).padStart(3, '0');
+  }
+
   showEditTeacherModal(teacherId, dom) {
     const teacher = db.getTeachers().find(t => String(t.id) === String(teacherId));
     if (!teacher) return;
@@ -8944,7 +8977,11 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         </div>
 
         <form id="edit-teacher-form">
-          <div style="display:grid; grid-template-columns:2fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div style="display:grid; grid-template-columns:1fr 2fr 1fr; gap:1rem; margin-bottom:1rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-weight: 400;">Mã giáo viên</label>
+              <input type="text" class="form-control" name="tCode" value="${teacher.code || ''}" placeholder="VD: GV001" style="height:38px;">
+            </div>
             <div class="form-group" style="margin:0;">
               <label class="form-label" style="font-weight: 400;">Họ và tên giáo viên</label>
               <input type="text" class="form-control" name="tName" value="${teacher.name}" required style="height:38px;">
@@ -8985,7 +9022,13 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
     overlay.querySelector('#edit-teacher-form').onsubmit = (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
+      const newCode = String(fd.get('tCode') || '').trim().toUpperCase();
+      if (newCode && this._findTeacherByCode(newCode, teacher.id)) {
+        this.showToast(`Mã giáo viên ${newCode} đã được dùng cho giáo viên khác!`, 'warning');
+        return;
+      }
       db.updateTeacher(teacher.id, {
+        code: newCode,
         name: fd.get('tName'),
         subjectId: fd.get('tSubject'),
         dob: fd.get('tDob'),
@@ -9111,11 +9154,17 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           <button id="close-teacher-excel-modal-btn" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#475569; font-weight:400; font-size:0.88rem;">&times;</button>
         </div>
 
-        <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; padding:1rem; border-radius:12px; margin-bottom:1.25rem; text-align:left;">
-          <div style="font-weight: 500; color:#047857; margin-bottom:0.4rem; font-size:0.95rem;">📄 Tải tệp mẫu Excel chuẩn giáo viên:</div>
-          <p style="font-size:0.85rem; color:#065f46; margin:0 0 0.75rem 0;">Tệp mẫu chứa sẵn các cột: <em>Tên giáo viên, Email, SĐT, Mã môn dạy, Danh sách lớp, Ngày sinh, Tên đăng nhập, Mật khẩu</em>.</p>
-          <button id="btn-download-teacher-excel-template" class="btn btn-secondary btn-sm" style="; font-weight: 400; font-family:var(--font-title); padding:0.5rem 1rem; background:#059669; color:#fff; border:none; border-radius:6px; cursor:pointer;">
-            📥 Tải tệp mẫu Excel (.csv / .xlsx)
+        <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; padding:1.1rem; border-radius:12px; margin-bottom:1.25rem; text-align:left;">
+          <div style="font-weight: 600; color:#047857; margin-bottom:0.4rem; font-size:0.95rem; display:flex; align-items:center; gap:0.4rem;">
+            <span>📄</span> Tải tệp mẫu Excel chuẩn giáo viên (2 Sheet - Có Data Validation chọn môn):
+          </div>
+          <p style="font-size:0.85rem; color:#065f46; margin:0 0 0.75rem 0; line-height:1.45;">
+            Tệp mẫu Excel định dạng <strong>.xlsx</strong> bao gồm 2 Sheet tiện lợi:<br>
+            • <strong>Sheet 1 (Mau_Danh_Sach_Giao_Vien):</strong> Cột <em>Mã môn dạy</em> có sẵn mũi tên chọn thả xuống (Data Validation) các mã môn chuẩn lấy từ Quản lý môn học: <code>TOAN</code>, <code>VAN</code>, <code>ANH</code>, <code>KHTN</code>, <code>LSDL</code>, <code>GDCD</code>, <code>TIN</code>, <code>CN</code>, <code>GDTC</code>, <code>NT</code>, <code>HDTN</code>, <code>GDDP</code>.<br>
+            • <strong>Sheet 2 (Ma_Mon_Hoc):</strong> Bảng tra cứu toàn bộ danh mục mã môn học trích xuất trực tiếp từ <em>Quản lý khai báo môn học</em>.
+          </p>
+          <button id="btn-download-teacher-excel-template" class="btn btn-secondary btn-sm" style="font-weight: 500; font-family:var(--font-title); padding:0.55rem 1.15rem; background:linear-gradient(135deg,#059669 0%,#10b981 100%); color:#fff; border:none; border-radius:8px; cursor:pointer; box-shadow:0 4px 12px rgba(16,185,129,0.25); display:inline-flex; align-items:center; gap:0.4rem;">
+            <span>📥</span> Tải tệp mẫu Excel (Data Validation chọn môn TOAN, VAN, TIN...)
           </button>
         </div>
 
@@ -9149,26 +9198,215 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
 
     modal.querySelector('#close-teacher-excel-modal-btn').onclick = () => modal.remove();
 
-    // Download Sample Template handler
+    // Download Sample Template handler (2 Sheets: Danh sách giáo viên + Mã môn học kèm Data Validation)
     modal.querySelector('#btn-download-teacher-excel-template').onclick = () => {
-      const headers = ['Tên giáo viên', 'Email', 'SĐT', 'Mã môn dạy', 'Danh sách lớp', 'Ngày sinh', 'Tên đăng nhập', 'Mật khẩu'];
+      const headers = ['Mã giáo viên', 'Tên giáo viên', 'Email', 'SĐT', 'Mã môn dạy', 'Danh sách lớp', 'Ngày sinh', 'Tên đăng nhập', 'Mật khẩu'];
+      // Mẫu dữ liệu sử dụng đúng các Mã môn chuẩn: TOAN, VAN, TIN, ANH...
       const sampleData = [
-        ['Nguyễn Thị Hương', 'huong.nt@school.edu.vn', '0987654321', 'toan', '6A,6B,7A', '', 'thcsamtl_huongnt', 'gv123456'],
-        ['Trần Hải Nam', 'nam.th@school.edu.vn', '0912345678', 'van', '6A,7A,8A', '', 'thcsamtl_namth', 'gv123456']
+        ['GV001', 'Nguyễn Thị Hương', 'huong.nt@school.edu.vn', '0987654321', 'TOAN', '6A, 6B, 7A', '15/08/1988', 'thcsamtl_huongnt', 'gv123456'],
+        ['GV002', 'Trần Hải Nam', 'nam.th@school.edu.vn', '0912345678', 'VAN', '6A, 7A, 8A', '20/11/1985', 'thcsamtl_namth', 'gv123456'],
+        ['GV003', 'Lê Hoàng Yến', 'yen.lh@school.edu.vn', '0934567890', 'TIN', '6A, 6B, 7A, 8A', '05/03/1992', 'thcsamtl_yenlh', 'gv123456'],
+        ['GV004', 'Phạm Minh Đức', 'duc.pm@school.edu.vn', '0945678901', 'ANH', '7A, 7B, 8A, 9A', '12/10/1990', 'thcsamtl_ducpm', 'gv123456']
       ];
-      let csvContent = '\uFEFF' + headers.map(h => `"${h}"`).join(',') + '\r\n';
-      sampleData.forEach(row => {
-        csvContent += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\r\n';
+
+      // Lấy danh sách môn học trực tiếp từ Quản lý khai báo môn học
+      let declaredSubs = [];
+      if (typeof db !== 'undefined') {
+        if (db.state && Array.isArray(db.state.subjectsList) && db.state.subjectsList.length > 0) {
+          declaredSubs = db.state.subjectsList;
+        } else if (db.getSubjects) {
+          declaredSubs = db.getSubjects().map(s => ({
+            id: s.id,
+            code: (s.id || '').toUpperCase(),
+            name: s.name,
+            periodsPerWeek: 2,
+            type: 'Bắt buộc',
+            grades: '6,7,8,9'
+          }));
+        }
+      }
+
+      // Tiêu đề Sheet 2: Trực tiếp lấy cột MÃ MÔN chuẩn (TOAN, VAN, ANH, KHTN, LSDL, GDCD, TIN, CN, GDTC, NT, HDTN, GDDP)
+      const subjectHeaders = [
+        'STT',
+        'Mã môn (Chọn vào cột E)',
+        'Tên môn học (Chương trình GDPT 2018)',
+        'Số tiết/tuần',
+        'Loại môn',
+        'Khối áp dụng',
+        'Hướng dẫn'
+      ];
+
+      const subjectRows = declaredSubs.map((s, idx) => {
+        // Mã môn chuẩn trong Khai báo môn học: TOAN, VAN, ANH, KHTN, LSDL, GDCD, TIN, CN, GDTC, NT, HDTN, GDDP
+        const code = (s.code || (s.id ? s.id.replace(/^sub_/, '').toUpperCase() : 'TOAN')).toUpperCase();
+        const name = s.name || code;
+        const periods = (s.periodsPerWeek !== undefined ? s.periodsPerWeek : 2) + ' tiết';
+        const type = s.type || 'Bắt buộc';
+        const grades = s.grades ? ('Khối ' + s.grades) : 'Khối 6, 7, 8, 9';
+        return [
+          idx + 1,
+          code, // Cột B: MÃ MÔN IN HOA CHUẨN
+          name,
+          periods,
+          type,
+          grades,
+          `Chọn '${code}' trong danh sách thả xuống ở cột E (Sheet Mau_Danh_Sach_Giao_Vien)`
+        ];
       });
 
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'Mau_Danh_Sach_Giao_Vien_THCS.csv';
-      a.click();
-      URL.revokeObjectURL(url);
-      this.showToast('Đã tải về tệp mẫu Excel danh sách giáo viên!');
+      // Ưu tiên sử dụng ExcelJS để tạo file có Data Validation (mũi tên chọn môn thả xuống)
+      if (typeof ExcelJS !== 'undefined') {
+        const wb = new ExcelJS.Workbook();
+        wb.creator = 'THCS Ama Trang Lơng';
+        wb.lastModifiedBy = 'THCS Ama Trang Lơng';
+        wb.created = new Date();
+        wb.modified = new Date();
+
+        // Sheet 1: Danh sách giáo viên
+        const ws1 = wb.addWorksheet('Mau_Danh_Sach_Giao_Vien', { views: [{ showGridLines: true }] });
+        ws1.columns = [
+          { header: 'Mã giáo viên', key: 'code', width: 16 },
+          { header: 'Tên giáo viên', key: 'name', width: 26 },
+          { header: 'Email', key: 'email', width: 28 },
+          { header: 'SĐT', key: 'phone', width: 16 },
+          { header: 'Mã môn dạy', key: 'subject', width: 18 },
+          { header: 'Danh sách lớp', key: 'classes', width: 22 },
+          { header: 'Ngày sinh', key: 'dob', width: 16 },
+          { header: 'Tên đăng nhập', key: 'username', width: 24 },
+          { header: 'Mật khẩu', key: 'password', width: 16 }
+        ];
+
+        sampleData.forEach(row => ws1.addRow(row));
+
+        // Ép kiểu chuỗi Text (@) cho SĐT và Mã GV để không bị lỗi lũy thừa 9.88E+08
+        ws1.getColumn('D').numFmt = '@';
+        ws1.getColumn('A').numFmt = '@';
+
+        // Sheet 2: Danh sách Mã môn học
+        const ws2 = wb.addWorksheet('Ma_Mon_Hoc', { views: [{ showGridLines: true }] });
+        ws2.columns = [
+          { header: 'STT', key: 'stt', width: 6 },
+          { header: 'Mã môn (Chọn vào cột E)', key: 'code', width: 26 },
+          { header: 'Tên môn học (Chương trình GDPT 2018)', key: 'name', width: 38 },
+          { header: 'Số tiết/tuần', key: 'periods', width: 14 },
+          { header: 'Loại môn', key: 'type', width: 16 },
+          { header: 'Khối áp dụng', key: 'grades', width: 20 },
+          { header: 'Hướng dẫn', key: 'guide', width: 65 }
+        ];
+
+        subjectRows.forEach(row => ws2.addRow(row));
+
+        // TÍCH HỢP DATA VALIDATION CHO CỘT E (Mã môn dạy)
+        // Mũi tên thả xuống lấy trực tiếp từ cột B Sheet Ma_Mon_Hoc (chứa TOAN, VAN, ANH, KHTN...)
+        const subCount = subjectRows.length;
+        const validationFormula = `Ma_Mon_Hoc!$B$2:$B$${subCount + 1}`;
+
+        for (let r = 2; r <= 500; r++) {
+          ws1.getCell('E' + r).dataValidation = {
+            type: 'list',
+            allowBlank: true,
+            formulae: [validationFormula],
+            showErrorMessage: true,
+            errorTitle: 'Mã môn học không hợp lệ',
+            error: 'Vui lòng bấm mũi tên để chọn mã môn từ danh sách thả xuống (TOAN, VAN, ANH, KHTN, LSDL, GDCD, TIN, CN, GDTC, NT, HDTN, GDDP).',
+            showInputMessage: true,
+            promptTitle: 'Mã môn giảng dạy',
+            prompt: 'Bấm mũi tên thả xuống để chọn mã môn học phù hợp (TOAN, VAN, TIN...).'
+          };
+        }
+
+        // Định dạng Header nổi bật, rõ ràng
+        ws1.getRow(1).height = 26;
+        ws1.getRow(1).eachCell(cell => {
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF059669' } };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+
+        ws2.getRow(1).height = 26;
+        ws2.getRow(1).eachCell(cell => {
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1D4ED8' } };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+
+        wb.xlsx.writeBuffer().then(buffer => {
+          const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'Mau_Danh_Sach_Giao_Vien_THCS.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          this.showToast('📥 Đã tải tệp mẫu Excel có Data Validation (Mã môn: TOAN, VAN, TIN...)!');
+        }).catch(err => {
+          console.error('Lỗi xuất ExcelJS:', err);
+          this.showToast('Lỗi xuất tệp Excel, vui lòng thử lại!', 'danger');
+        });
+      } else if (typeof XLSX !== 'undefined') {
+        const wb = XLSX.utils.book_new();
+
+        // Sheet 1: Danh sách giáo viên mẫu
+        const ws1 = XLSX.utils.aoa_to_sheet([headers, ...sampleData]);
+        ws1['!cols'] = [
+          { wch: 16 }, // Mã giáo viên
+          { wch: 25 }, // Tên giáo viên
+          { wch: 28 }, // Email
+          { wch: 16 }, // SĐT
+          { wch: 16 }, // Mã môn dạy
+          { wch: 20 }, // Danh sách lớp
+          { wch: 15 }, // Ngày sinh
+          { wch: 22 }, // Tên đăng nhập
+          { wch: 16 }  // Mật khẩu
+        ];
+
+        Object.keys(ws1).forEach(cellRef => {
+          if (cellRef.startsWith('D') && cellRef !== 'D1' && ws1[cellRef]) {
+            ws1[cellRef].t = 's';
+            ws1[cellRef].z = '@';
+          }
+          if (cellRef.startsWith('A') && cellRef !== 'A1' && ws1[cellRef]) {
+            ws1[cellRef].t = 's';
+          }
+        });
+
+        // Sheet 2: Danh sách Mã môn học
+        const ws2 = XLSX.utils.aoa_to_sheet([subjectHeaders, ...subjectRows]);
+        ws2['!cols'] = [
+          { wch: 6 },  // STT
+          { wch: 26 }, // Mã môn (Chọn vào cột E)
+          { wch: 38 }, // Tên môn học (Chương trình GDPT 2018)
+          { wch: 14 }, // Số tiết/tuần
+          { wch: 16 }, // Loại môn
+          { wch: 20 }, // Khối áp dụng
+          { wch: 65 }  // Hướng dẫn
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws1, 'Mau_Danh_Sach_Giao_Vien');
+        XLSX.utils.book_append_sheet(wb, ws2, 'Ma_Mon_Hoc');
+
+        const fileName = 'Mau_Danh_Sach_Giao_Vien_THCS.xlsx';
+        XLSX.writeFile(wb, fileName);
+        this.showToast('📥 Đã tải tệp mẫu Excel giáo viên (.xlsx) chuẩn 2 Sheet!');
+      } else {
+        // Fallback CSV
+        let csvContent = '\uFEFF' + headers.map(h => `"${h}"`).join(',') + '\r\n';
+        sampleData.forEach(row => {
+          csvContent += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\r\n';
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Mau_Danh_Sach_Giao_Vien_THCS.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showToast('Đã tải về tệp mẫu Excel danh sách giáo viên!');
+      }
     };
 
     const dropzone = modal.querySelector('#teacher-excel-dropzone');
@@ -9196,9 +9434,20 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           if (typeof XLSX !== 'undefined' && isExcelBinary) {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            parsed = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+            // Tự động tìm Sheet chứa dữ liệu giáo viên, bỏ qua Sheet Ma_Mon_Hoc
+            let targetSheetName = workbook.SheetNames[0];
+            for (const sName of workbook.SheetNames) {
+              const lower = sName.toLowerCase();
+              if (lower.includes('giao_vien') || lower.includes('giaovien') || lower.includes('teacher') || lower.includes('danh_sach')) {
+                targetSheetName = sName;
+                break;
+              }
+            }
+            if (targetSheetName.toLowerCase().includes('ma_mon') && workbook.SheetNames.length > 1) {
+              targetSheetName = workbook.SheetNames.find(s => !s.toLowerCase().includes('ma_mon')) || workbook.SheetNames[1];
+            }
+            const worksheet = workbook.Sheets[targetSheetName];
+            parsed = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
           } else {
             const text = evt.target.result;
             parsed = this.parseCSVText(text);
@@ -9210,7 +9459,23 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
 
           let addedCount = 0;
           let updatedCount = 0;
-          const currentTeachers = db.getTeachers();
+          let skippedCount = 0;
+          const seenInFile = new Map(); // khóa (mã GV hoặc tên chuẩn hóa) -> id, chống nhân đôi trong cùng file
+
+          // Mã giáo viên: chỉ khớp CHÍNH XÁC tên cột (tránh khớp nhầm cột "Tên giáo viên")
+          const codeKeys = ['Mã giáo viên', 'Mã GV', 'Mã số GV', 'Mã số giáo viên', 'MaGV', 'code', 'Teacher code'];
+          const nkCode = (k) => String(k).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]/g, '');
+          const wantedCodeKeys = codeKeys.map(nkCode);
+          const readTeacherCode = (row) => {
+            for (const rk in row) {
+              if (wantedCodeKeys.includes(nkCode(rk)) && row[rk] !== undefined && row[rk] !== null && String(row[rk]).trim()) {
+                return String(row[rk]).replace(/\s+/g, '').toUpperCase();
+              }
+            }
+            return '';
+          };
+          // Giữ chỗ các mã có sẵn trong file để mã tự sinh không bị trùng
+          const reservedCodes = parsed.map(readTeacherCode).filter(Boolean);
 
           parsed.forEach(row => {
             // Support exact keys, normalized keys, and loose aliases
@@ -9222,6 +9487,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
               }
               // Fallback search through all row keys
               for (const rk in row) {
+                if (wantedCodeKeys.includes(nkCode(rk))) continue; // không lấy nhầm cột Mã GV
                 const rkNorm = rk.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
                 for (const k of keys) {
                   const kNorm = k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
@@ -9233,38 +9499,109 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
               return '';
             };
 
+            const teacherCode = readTeacherCode(row);
+
             const name = getVal('Tên giáo viên', 'Họ và tên Giáo viên', 'Họ và tên', 'Tên cán bộ', 'Tên', 'Name', 'Giáo viên');
             const email = getVal('Email', 'email');
             const phone = getVal('SĐT', 'Số điện thoại', 'Điện thoại', 'Phone', 'SDT');
-            const subjectId = getVal('Mã môn dạy', 'Môn phụ trách', 'Môn dạy', 'Môn', 'Subject') || 'toan';
+            
+            // Xử lý thông minh Mã môn dạy từ Sheet Ma_Mon_Hoc (chấp nhận id, code, tên môn)
+            const rawSubInput = getVal('Mã môn dạy', 'Môn phụ trách', 'Môn dạy', 'Môn', 'Subject');
+            let subjectId = 'toan';
+            if (rawSubInput) {
+              const val = String(rawSubInput).trim().toLowerCase().replace(/^sub_/, '');
+              const allSubs = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
+              const declSubs = (typeof db !== 'undefined' && db.state && db.state.subjectsList) ? db.state.subjectsList : [];
+
+              const matchId = allSubs.find(s => s.id.toLowerCase() === val || s.id.toLowerCase().replace(/^sub_/, '') === val);
+              if (matchId) {
+                subjectId = matchId.id.replace(/^sub_/, '');
+              } else {
+                const matchCode = declSubs.find(s => (s.code && s.code.toLowerCase() === val) || (s.id && s.id.toLowerCase().replace(/^sub_/, '') === val));
+                if (matchCode) {
+                  subjectId = (matchCode.id || matchCode.code).toLowerCase().replace(/^sub_/, '');
+                } else {
+                  const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+                  const valNorm = norm(rawSubInput);
+                  const matchName = allSubs.find(s => norm(s.name) === valNorm || norm(s.name).includes(valNorm) || valNorm.includes(norm(s.name)))
+                    || declSubs.find(s => norm(s.name) === valNorm || norm(s.name).includes(valNorm) || valNorm.includes(norm(s.name)));
+                  if (matchName) {
+                    subjectId = (matchName.id || matchName.code).toLowerCase().replace(/^sub_/, '');
+                  } else {
+                    subjectId = val;
+                  }
+                }
+              }
+            }
+
             const classesStr = getVal('Danh sách lớp', 'Phân công lớp dạy', 'Lớp dạy', 'Lớp', 'Classes');
             const dob = getVal('Ngày sinh', 'DOB') || '';
             const customUsername = getVal('Tên đăng nhập', 'Username', 'Tai khoản');
             const customPassword = getVal('Mật khẩu', 'Password', 'Mat khau') || 'gv123456';
 
-            const parsedClasses = classesStr ? classesStr.split(/[,;\s]+/).map(c => c.trim()).filter(Boolean) : [];
+            const parsedClasses = classesStr ? classesStr.split(/[,;\s]+/).map(c => c.trim().replace(/^Lớp/i, '').trim().toUpperCase()).filter(Boolean) : [];
 
             if (name) {
-              const existingIdx = currentTeachers.findIndex(t => t.name.trim().toLowerCase() === name.toLowerCase() || (email && t.email.toLowerCase() === email.toLowerCase()));
-              
-              if (existingIdx !== -1 && selectedMode === 'import_update') {
-                db.updateTeacher(currentTeachers[existingIdx].id, {
-                  subjectId: subjectId || currentTeachers[existingIdx].subjectId,
-                  classes: parsedClasses.length > 0 ? parsedClasses : currentTeachers[existingIdx].classes,
-                  dob: dob,
-                  phone: phone || currentTeachers[existingIdx].phone,
-                  email: email || currentTeachers[existingIdx].email,
-                  username: customUsername || currentTeachers[existingIdx].username,
-                  password: customPassword || currentTeachers[existingIdx].password
-                });
-                updatedCount++;
-              } else if (existingIdx === -1) {
+              // Chuẩn hóa: bỏ khoảng trắng thừa, không phân biệt hoa thường
+              const normName = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+              const nName = normName(name);
+              const nEmail = String(email || '').trim().toLowerCase();
+
+              // 1) Giáo viên đã xuất hiện ở dòng trước trong CÙNG file -> gộp lớp/môn, không tạo mới
+              //    Có Mã GV -> phân biệt theo mã (2 GV trùng tên khác mã vẫn là 2 người)
+              const fileKey = teacherCode ? ('code:' + teacherCode) : ('name:' + nName);
+              const seenId = seenInFile.get(fileKey);
+              if (seenId) {
+                const cur = db.getTeachers().find(t => String(t.id) === String(seenId));
+                if (cur) {
+                  const mergedClasses = [...new Set([...(cur.classes || []), ...parsedClasses])];
+                  const curSubs = Array.isArray(cur.subjects) && cur.subjects.length ? cur.subjects : (cur.subjectId ? [cur.subjectId] : []);
+                  const mergedSubs = [...new Set([...curSubs, subjectId].filter(Boolean))];
+                  db.updateTeacher(cur.id, { classes: mergedClasses, subjects: mergedSubs, subjectId: mergedSubs[0] || cur.subjectId });
+                }
+                return;
+              }
+
+              // 2) Đối chiếu với danh sách hiện có (luôn lấy danh sách mới nhất)
+              const latestTeachers = db.getTeachers();
+              let existing = null;
+              if (teacherCode) {
+                // Ưu tiên khớp theo Mã GV; nếu chưa có, chỉ khớp theo tên/email với GV CHƯA có mã
+                existing = latestTeachers.find(t => String(t.code || '').trim().toUpperCase() === teacherCode)
+                  || latestTeachers.find(t => !t.code && (normName(t.name) === nName || (nEmail && String(t.email || '').trim().toLowerCase() === nEmail)));
+              } else {
+                existing = latestTeachers.find(t => normName(t.name) === nName || (nEmail && String(t.email || '').trim().toLowerCase() === nEmail));
+              }
+
+              if (existing) {
+                seenInFile.set(fileKey, existing.id);
+                // GV cũ chưa có mã -> gán mã từ file (cả 2 chế độ)
+                if (teacherCode && !existing.code) {
+                  db.updateTeacher(existing.id, { code: teacherCode });
+                }
+                if (selectedMode === 'import_update') {
+                  db.updateTeacher(existing.id, {
+                    subjectId: subjectId || existing.subjectId,
+                    classes: parsedClasses.length > 0 ? parsedClasses : existing.classes,
+                    dob: dob || existing.dob || '',
+                    phone: phone || existing.phone,
+                    email: email || existing.email,
+                    username: customUsername || existing.username,
+                    password: customPassword || existing.password
+                  });
+                  updatedCount++;
+                } else {
+                  skippedCount++; // Chế độ Thêm mới: GV đã có -> bỏ qua, không nhân đôi
+                }
+              } else {
                 const tempTeacher = {
-                  id: `gv_${Date.now()}_${Math.floor(Math.random()*1000)}`,
-                  name,
+                  id: `gv_${Date.now()}_${Math.floor(Math.random()*100000)}`,
+                  code: teacherCode || this._nextTeacherCode(reservedCodes),
+                  name: name.replace(/\s+/g, ' ').trim(),
                   email,
                   phone,
                   subjectId,
+                  subjects: subjectId ? [subjectId] : [],
                   classes: parsedClasses,
                   dob,
                   isHomeroom: null
@@ -9272,6 +9609,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
                 tempTeacher.username = customUsername || (db.generateUniqueTeacherUsername ? db.generateUniqueTeacherUsername(tempTeacher) : `thcsamtl_${tempTeacher.id}`);
                 tempTeacher.password = customPassword || 'gv123456';
                 db.addTeacher(tempTeacher);
+                seenInFile.set(fileKey, tempTeacher.id);
                 addedCount++;
               }
             }
@@ -9283,7 +9621,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           if (selectedMode === 'import_update') {
             this.showToast(`Import thành công: Đã cập nhật ${updatedCount} giáo viên, thêm mới ${addedCount} giáo viên!`);
           } else {
-            this.showToast(`Import thành công: Đã thêm mới ${addedCount} giáo viên vào hệ thống!`);
+            this.showToast(`Import thành công: Đã thêm mới ${addedCount} giáo viên vào hệ thống!${skippedCount ? ` (Bỏ qua ${skippedCount} giáo viên đã có)` : ''}`);
           }
 
           this.render_teachers(dom);
@@ -9316,19 +9654,25 @@ render_students(dom) {
     const classes = db.getClasses();
     const fileInputId = 'csv-import-students';
 
-    // Filter by Class and Search Keyword
-    const filteredStudents = allStudents.filter(s => {
-      const matchClass = this.studentClassFilter === 'all' || s.classId === this.studentClassFilter || `Khoi${s.classId.charAt(0)}` === this.studentClassFilter;
-      const kw = this.studentSearchKeyword.trim().toLowerCase();
+    // Chuẩn hóa chuỗi để tìm kiếm có dấu / không dấu
+    const normSearch = (str) => String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim();
+
+    // Filter by Class and Search Keyword (lọc động: tính lại mỗi lần vẽ bảng)
+    const getFilteredStudents = () => allStudents.filter(s => {
+      const sClass = String(s.classId || '');
+      const matchClass = this.studentClassFilter === 'all' || sClass === this.studentClassFilter || `Khoi${sClass.charAt(0)}` === this.studentClassFilter;
+      const kw = normSearch(this.studentSearchKeyword);
       const matchKw = !kw || 
-                      s.name.toLowerCase().includes(kw) || 
-                      (s.username && s.username.toLowerCase().includes(kw)) ||
-                      (s.parentPhone && s.parentPhone.includes(kw)) ||
-                      (s.parentName && s.parentName.toLowerCase().includes(kw));
+                      normSearch(s.name).includes(kw) || 
+                      normSearch(s.username).includes(kw) ||
+                      normSearch(s.parentPhone).includes(kw) ||
+                      normSearch(s.parentName).includes(kw) ||
+                      normSearch(sClass).includes(kw);
       return matchClass && matchKw;
     });
 
     const renderTableRows = () => {
+      const filteredStudents = getFilteredStudents();
       if (filteredStudents.length === 0) {
         return `<tr><td colspan="9" style="text-align:center; padding:2rem; color:var(--text-muted);">Không tìm thấy học sinh nào phù hợp với bộ lọc.</td></tr>`;
       }
@@ -10017,18 +10361,21 @@ render_students(dom) {
             parsed = this.parseCSVText(text);
           }
           if (!parsed || parsed.length === 0) { this.showToast('Tệp không có dữ liệu!', 'warning'); return; }
-          let addedCount = 0, updatedCount = 0;
-          const currentStudents = db.getStudents();
+          let addedCount = 0, updatedCount = 0, skippedCount = 0, noClassCount = 0;
+          const normTxt = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+          const slugTxt = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+          const seenInFile = new Set(); // chống trùng dòng trong CÙNG file
           parsed.forEach((row, idx) => {
+            // Lưu ý: KHÔNG dùng cột STT làm mã HS (STT lặp lại giữa các lớp -> gây trùng/ghi đè)
             const maHS_raw = (
               row['Mã học sinh (ID)'] || row['Mã học sinh'] || row['Mã HS'] || row['Mã số'] ||
-              row['id'] || row['ID'] || row['MaHS'] || row['STT'] || ''
+              row['id'] || row['ID'] || row['MaHS'] || ''
             ).toString().trim();
 
             const name = (
               row['Họ và tên'] || row['Họ tên'] || row['Tên học sinh'] || row['Họ và tên học sinh'] ||
               row['name'] || row['Name'] || row['Full Name'] || row['Họ Tên'] || ''
-            ).toString().trim();
+            ).toString().replace(/\s+/g, ' ').trim();
 
             let classId = (
               row['Lớp'] || row['Lớp học'] || row['Class'] || row['classId'] || row['class'] ||
@@ -10038,11 +10385,33 @@ render_students(dom) {
             if (!name) return;
 
             if (classId) {
-              classId = classId.replace(/^Lớp\s+/i, '').replace(/^Khoi\s+/i, '').trim().toUpperCase();
+              classId = classId.replace(/^Lớp\s*/i, '').replace(/^Khoi\s+/i, '').replace(/\s+/g, '').trim().toUpperCase();
             }
-            if (!classId) classId = '6A';
+            // Không tự gán lớp mặc định (trước đây gán '6A' -> sinh lớp không có trong file)
+            if (!classId) { noClassCount++; return; }
 
-            const maHS = maHS_raw || `HS_${classId}_${Date.now().toString().slice(-4)}_${idx + 1}`;
+            const nName = normTxt(name);
+            const fileKey = maHS_raw ? ('id:' + maHS_raw.toLowerCase()) : ('nc:' + nName + '|' + classId);
+            if (seenInFile.has(fileKey)) { skippedCount++; return; }
+            seenInFile.add(fileKey);
+
+            // Luôn đối chiếu với danh sách MỚI NHẤT
+            const latestStudents = db.getStudents();
+            const existingStu = latestStudents.find(s =>
+              (maHS_raw && String(s.id).toLowerCase() === maHS_raw.toLowerCase()) ||
+              (normTxt(s.name) === nName && String(s.classId || '').toUpperCase() === classId)
+            );
+
+            // Mã HS ổn định khi file không có cột mã: HS_<LỚP>_<TÊN không dấu>
+            let maHS = maHS_raw;
+            if (!maHS) {
+              const baseId = `HS_${classId}_${slugTxt(name) || (idx + 1)}`;
+              maHS = baseId;
+              let sfx = 2;
+              while (latestStudents.some(s => String(s.id).toLowerCase() === maHS.toLowerCase())) {
+                maHS = `${baseId}_${sfx++}`;
+              }
+            }
 
             const gender = (
               row['Giới tính'] || row['Nam/Nữ'] || row['gender'] || row['Gender'] || row['GIỚI TÍNH'] || 'Nam'
@@ -10064,9 +10433,10 @@ render_students(dom) {
               row['Mật khẩu'] || row['password'] || row['Pass'] || row['Password'] || 'hs123456'
             ).toString().trim();
 
-            // Auto-register class if missing in system
+            // Auto-register class if missing in system (so sánh đã chuẩn hóa để không tạo lớp trùng)
+            const normCls = (v) => String(v || '').replace(/^Lớp\s*/i, '').replace(/\s+/g, '').trim().toUpperCase();
             const existingClasses = (db && db.getClassesList) ? db.getClassesList() : (db.state.classesList || []);
-            const classExists = existingClasses.some(c => (c.name || c.id || '').toUpperCase() === classId.toUpperCase());
+            const classExists = existingClasses.some(c => normCls(c.name || c.id) === classId || normCls(c.id) === classId);
             if (!classExists) {
               if (db && db.addClass) {
                 db.addClass({
@@ -10079,19 +10449,22 @@ render_students(dom) {
               }
             }
 
-            const existingIdx = currentStudents.findIndex(s => String(s.id).toLowerCase() === String(maHS).toLowerCase() || (s.name === name && s.classId === classId));
-            if (existingIdx !== -1 && selectedMode === 'import_update') {
-              db.updateStudent(currentStudents[existingIdx].id, {
-                name,
-                classId,
-                gender: gender || currentStudents[existingIdx].gender || 'Nam',
-                dob: dob || currentStudents[existingIdx].dob || '',
-                parentName: parentName || currentStudents[existingIdx].parentName || '',
-                parentPhone: parentPhone || currentStudents[existingIdx].parentPhone || '',
-                password: password || currentStudents[existingIdx].password || 'hs123456'
-              });
-              updatedCount++;
-            } else if (existingIdx === -1 || selectedMode === 'import_new') {
+            if (existingStu) {
+              if (selectedMode === 'import_update') {
+                db.updateStudent(existingStu.id, {
+                  name,
+                  classId,
+                  gender: gender || existingStu.gender || 'Nam',
+                  dob: dob || existingStu.dob || '',
+                  parentName: parentName || existingStu.parentName || '',
+                  parentPhone: parentPhone || existingStu.parentPhone || '',
+                  password: password || existingStu.password || 'hs123456'
+                });
+                updatedCount++;
+              } else {
+                skippedCount++; // Chế độ Thêm mới: HS đã có -> bỏ qua, không nhân đôi
+              }
+            } else {
               db.addStudent({
                 id: maHS,
                 name,
@@ -10110,12 +10483,11 @@ render_students(dom) {
           if (db.autoGenerateParentAccounts) db.autoGenerateParentAccounts();
           db.save();
           modal.remove();
-          const msg = [addedCount > 0 ? `Thêm mới: ${addedCount}` : '', updatedCount > 0 ? `Cập nhật: ${updatedCount}` : ''].filter(Boolean).join(' | ');
+          const msg = [addedCount > 0 ? `Thêm mới: ${addedCount}` : '', updatedCount > 0 ? `Cập nhật: ${updatedCount}` : '', skippedCount > 0 ? `Bỏ qua trùng: ${skippedCount}` : '', noClassCount > 0 ? `Thiếu lớp: ${noClassCount}` : ''].filter(Boolean).join(' | ');
           this.showToast(`✅ ${msg || 'Không có thay đổi!'} học sinh`);
           if (parentDom) this.render_students(parentDom);
         } catch(err) { this.showToast('Lỗi đọc file: ' + err.message, 'danger'); }
       };
-      reader.readAsText(file, 'utf-8');
     };
   }
 
@@ -24211,14 +24583,93 @@ render_ai_geometry(dom) {
     const subAsmIds = subAsms.map(a => a.id);
     const subSubs = submissions.filter(s => subAsmIds.includes(s.assignmentId));
 
-    const gradebook = (typeof db !== 'undefined' && db.getGradebook) ? db.getGradebook().filter(g => g.subjectId === subId) : [];
+    const rawGradebook = (typeof db !== 'undefined' && db.getGradebook) ? db.getGradebook().filter(g => g.subjectId === subId) : [];
+
+    // Thu thập danh sách lớp học thực tế và dự phòng
+    const rawClassesList = [];
+    if (typeof db !== 'undefined' && db.getClasses) {
+      try { rawClassesList.push(...db.getClasses()); } catch(e){}
+    }
+    if (typeof db !== 'undefined' && db.getStudents) {
+      try {
+        db.getStudents().forEach(s => {
+          if (s && s.classId) rawClassesList.push({ id: s.classId, name: s.classId });
+        });
+      } catch(e){}
+    }
+    rawGradebook.forEach(g => {
+      if (g && g.classId) rawClassesList.push({ id: g.classId, name: g.classId });
+    });
+
+    const classMap = new Map();
+    rawClassesList.forEach(c => {
+      const cName = (typeof c === 'string' ? c : (c.name || c.id || '')).toString().trim();
+      if (!cName) return;
+      const gradeMatch = cName.match(/\d+/);
+      const grade = (c.grade || (gradeMatch ? gradeMatch[0] : '6')).toString();
+      if (!classMap.has(cName)) {
+        classMap.set(cName, { id: cName, name: cName, grade: grade });
+      }
+    });
+
+    if (classMap.size === 0) {
+      ['6A', '6B', '7A', '7B', '8A', '8B', '9A', '9B'].forEach(cName => {
+        classMap.set(cName, { id: cName, name: cName, grade: cName.charAt(0) });
+      });
+    }
+
+    const allClasses = Array.from(classMap.values()).sort((a, b) => a.name.localeCompare(b.name, 'vi', { numeric: true }));
+
+    this.gradebookFilterGrade = this.gradebookFilterGrade || 'all';
+    this.gradebookFilterClass = this.gradebookFilterClass || 'all';
+    this.gradebookSearchQuery = this.gradebookSearchQuery || '';
+
+    // Lọc lớp theo khối lớp hiện tại
+    const activeGrade = this.gradebookFilterGrade;
+    const availableClasses = activeGrade === 'all' 
+      ? allClasses 
+      : allClasses.filter(c => c.grade === activeGrade || c.name.startsWith(activeGrade));
+
+    if (this.gradebookFilterClass !== 'all') {
+      const matched = availableClasses.find(c => c.name.toUpperCase() === this.gradebookFilterClass.toUpperCase());
+      if (!matched) {
+        this.gradebookFilterClass = 'all';
+      }
+    }
+
+    // Lọc dữ liệu học sinh trong bảng điểm
+    const filteredGradebook = rawGradebook.filter(r => {
+      const cId = (r.classId || '').trim();
+      const cGrade = r.grade ? String(r.grade) : (cId.match(/\d+/) ? cId.match(/\d+/)[0] : '');
+      
+      if (this.gradebookFilterGrade !== 'all') {
+        if (cGrade !== this.gradebookFilterGrade && !cId.startsWith(this.gradebookFilterGrade)) {
+          return false;
+        }
+      }
+
+      if (this.gradebookFilterClass !== 'all') {
+        if (cId.toUpperCase() !== this.gradebookFilterClass.toUpperCase()) {
+          return false;
+        }
+      }
+
+      if (this.gradebookSearchQuery && this.gradebookSearchQuery.trim()) {
+        const q = this.gradebookSearchQuery.trim().toLowerCase();
+        const nameMatch = (r.studentName || '').toLowerCase().includes(q);
+        const idMatch = (r.studentId || '').toLowerCase().includes(q);
+        if (!nameMatch && !idMatch) return false;
+      }
+
+      return true;
+    });
 
     dom.innerHTML = `
       <div style="padding:1.25rem; font-family:var(--font-body); animation:fadeIn 0.25s ease-out;">
         <!-- Top Navigation Bar -->
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem;">
           <div style="display:flex; align-items:center; gap:0.75rem;">
-            <button id="btn-back-grading-subs" style="background:#f1f5f9; border:1.5px solid #cbd5e1; color:#475569; padding:0.45rem 0.9rem; border-radius:10px; ; font-weight: 400; font-size:0.82rem; cursor:pointer;">
+            <button id="btn-back-grading-subs" style="background:#f1f5f9; border:1.5px solid #cbd5e1; color:#475569; padding:0.45rem 0.9rem; border-radius:10px; font-weight: 500; font-size:0.82rem; cursor:pointer;">
               ← Danh sách môn học
             </button>
             <div style="display:flex; align-items:center; gap:0.4rem; font-weight: 500; font-size:1.1rem; color:#0f172a;">
@@ -24229,10 +24680,10 @@ render_ai_geometry(dom) {
 
           <!-- Sub Tabs Toggle -->
           <div style="display:flex; background:#e2e8f0; padding:0.25rem; border-radius:12px; gap:0.25rem;">
-            <button id="tab-btn-queue" style="border:none; padding:0.45rem 0.9rem; border-radius:10px; ; font-weight: 400; font-size:0.82rem; cursor:pointer; background:${this.currentGradingTab === 'queue' ? '#fff' : 'transparent'}; color:${this.currentGradingTab === 'queue' ? '#2563eb' : '#64748b'}; box-shadow:${this.currentGradingTab === 'queue' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
+            <button id="tab-btn-queue" style="border:none; padding:0.45rem 0.9rem; border-radius:10px; font-weight: 500; font-size:0.82rem; cursor:pointer; background:${this.currentGradingTab === 'queue' ? '#fff' : 'transparent'}; color:${this.currentGradingTab === 'queue' ? '#2563eb' : '#64748b'}; box-shadow:${this.currentGradingTab === 'queue' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
               ✍️ Bài Cần Chấm (${subAttempts.length + subSubs.length})
             </button>
-            <button id="tab-btn-gradebook" style="border:none; padding:0.45rem 0.9rem; border-radius:10px; ; font-weight: 400; font-size:0.82rem; cursor:pointer; background:${this.currentGradingTab === 'gradebook' ? '#fff' : 'transparent'}; color:${this.currentGradingTab === 'gradebook' ? '#2563eb' : '#64748b'}; box-shadow:${this.currentGradingTab === 'gradebook' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
+            <button id="tab-btn-gradebook" style="border:none; padding:0.45rem 0.9rem; border-radius:10px; font-weight: 500; font-size:0.82rem; cursor:pointer; background:${this.currentGradingTab === 'gradebook' ? '#fff' : 'transparent'}; color:${this.currentGradingTab === 'gradebook' ? '#2563eb' : '#64748b'}; box-shadow:${this.currentGradingTab === 'gradebook' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};">
               📊 Bảng Điểm GDPT 2018
             </button>
           </div>
@@ -24282,14 +24733,69 @@ render_ai_geometry(dom) {
           <div class="glass-card" style="background:#fff; border-radius:16px; padding:1.25rem; border:1.5px solid #cbd5e1; box-shadow:0 4px 15px rgba(0,0,0,0.04);">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1.5px solid #f1f5f9;">
               <div>
-                <h3 style="margin:0; font-family:var(--font-title); ; font-weight: 400; color:#0f172a; font-size:1.15rem;">
+                <h3 style="margin:0; font-family:var(--font-title); font-weight: 500; color:#0f172a; font-size:1.15rem;">
                   📊 Bảng Điểm Môn ${subject.name} (Năm Học 2025 - 2026)
                 </h3>
                 <p style="margin:0.2rem 0 0 0; font-size:0.8rem; color:#64748b;">Điểm thường xuyên (TX1-4), Giữa kỳ (GK), Cuối kỳ (CK) tự động đồng bộ theo mã HS</p>
               </div>
-              <button id="btn-export-excel-gradebook" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%); color:#fff; border:none; padding:0.55rem 1.1rem; border-radius:10px; ; font-weight: 400; font-size:0.85rem; cursor:pointer; box-shadow:0 4px 14px rgba(16,185,129,0.3);">
-                📥 Xuất File Excel Bảng Điểm
+              <button id="btn-export-excel-gradebook" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%); color:#fff; border:none; padding:0.55rem 1.1rem; border-radius:10px; font-weight: 500; font-size:0.85rem; cursor:pointer; box-shadow:0 4px 14px rgba(16,185,129,0.3); display:inline-flex; align-items:center; gap:0.4rem;">
+                <span>📥</span> Xuất File Excel Bảng Điểm
               </button>
+            </div>
+
+            <!-- BỘ LỌC THEO KHỐI LỚP & TÌM KIẾM HỌC SINH -->
+            <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:0.85rem 1.1rem; margin-bottom:1.15rem; display:flex; flex-wrap:wrap; gap:0.9rem; justify-content:space-between; align-items:center;">
+              <div style="display:flex; flex-wrap:wrap; gap:0.85rem; align-items:center;">
+                <!-- Nhóm nút lọc Khối Lớp -->
+                <div style="display:flex; align-items:center; gap:0.45rem;">
+                  <span style="font-size:0.82rem; font-weight:600; color:#475569; display:flex; align-items:center; gap:0.25rem;">
+                    <span>🎯</span> Khối:
+                  </span>
+                  <div style="display:flex; background:#e2e8f0; padding:0.22rem; border-radius:10px; gap:0.22rem;">
+                    <button class="btn-grade-filter" data-grade="all" style="border:none; padding:0.35rem 0.75rem; border-radius:8px; font-weight:600; font-size:0.8rem; cursor:pointer; background:${this.gradebookFilterGrade === 'all' ? '#2563eb' : 'transparent'}; color:${this.gradebookFilterGrade === 'all' ? '#fff' : '#64748b'}; box-shadow:${this.gradebookFilterGrade === 'all' ? '0 2px 6px rgba(37,99,235,0.3)' : 'none'}; transition:all 0.15s;">
+                      Tất cả
+                    </button>
+                    ${['6', '7', '8', '9'].map(gr => `
+                      <button class="btn-grade-filter" data-grade="${gr}" style="border:none; padding:0.35rem 0.75rem; border-radius:8px; font-weight:600; font-size:0.8rem; cursor:pointer; background:${this.gradebookFilterGrade === gr ? '#2563eb' : 'transparent'}; color:${this.gradebookFilterGrade === gr ? '#fff' : '#64748b'}; box-shadow:${this.gradebookFilterGrade === gr ? '0 2px 6px rgba(37,99,235,0.3)' : 'none'}; transition:all 0.15s;">
+                        Khối ${gr}
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <!-- Chọn Lớp học -->
+                <div style="display:flex; align-items:center; gap:0.45rem;">
+                  <label for="filter-gradebook-class" style="font-size:0.82rem; font-weight:600; color:#475569; display:flex; align-items:center; gap:0.25rem;">
+                    <span>🏫</span> Lớp:
+                  </label>
+                  <select id="filter-gradebook-class" style="padding:0.4rem 0.8rem; border-radius:8px; border:1.5px solid #cbd5e1; background:#fff; font-size:0.82rem; font-weight:500; color:#1e293b; cursor:pointer; outline:none;">
+                    <option value="all">Tất cả lớp ${this.gradebookFilterGrade !== 'all' ? `(Khối ${this.gradebookFilterGrade})` : ''}</option>
+                    ${availableClasses.map(c => `
+                      <option value="${c.name}" ${this.gradebookFilterClass === c.name ? 'selected' : ''}>${c.name}</option>
+                    `).join('')}
+                  </select>
+                </div>
+
+                <!-- Ô tìm kiếm HS -->
+                <div style="position:relative; min-width:230px;">
+                  <input type="text" id="filter-gradebook-search" placeholder="🔍 Tìm tên hoặc mã HS..." value="${(this.gradebookSearchQuery || '').replace(/"/g, '&quot;')}" style="width:100%; padding:0.42rem 1.8rem 0.42rem 0.75rem; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.82rem; background:#fff; color:#1e293b; outline:none; box-sizing:border-box;">
+                  ${this.gradebookSearchQuery ? `
+                    <button id="btn-clear-gradebook-search" style="position:absolute; right:0.5rem; top:50%; transform:translateY(-50%); background:none; border:none; color:#94a3b8; cursor:pointer; font-size:0.85rem; padding:0.1rem;" title="Xóa tìm kiếm">✕</button>
+                  ` : ''}
+                </div>
+              </div>
+
+              <!-- Thống kê số lượng & Reset bộ lọc -->
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                ${(this.gradebookFilterGrade !== 'all' || this.gradebookFilterClass !== 'all' || this.gradebookSearchQuery) ? `
+                  <button id="btn-reset-gradebook-filter" style="background:#fee2e2; border:1px solid #fca5a5; color:#dc2626; padding:0.35rem 0.75rem; border-radius:8px; font-size:0.78rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.25rem;">
+                    🔄 Bỏ lọc
+                  </button>
+                ` : ''}
+                <div id="gradebook-count-badge" style="background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-weight:600; font-size:0.8rem; padding:0.38rem 0.85rem; border-radius:20px; display:flex; align-items:center; gap:0.35rem; white-space:nowrap;">
+                  <span>👥</span> Hiển thị: <strong>${filteredGradebook.length}</strong> / ${rawGradebook.length} HS
+                </div>
+              </div>
             </div>
 
             <div style="overflow-x:auto;">
@@ -24309,22 +24815,34 @@ render_ai_geometry(dom) {
                     <th style="padding:0.6rem; width:80px; background:#d1fae5; color:#059669;">TBM</th>
                   </tr>
                 </thead>
-                <tbody>
-                  ${gradebook.length === 0 ? `
-                    <tr><td colspan="11" style="text-align:center; padding:2rem; color:#64748b;">Chưa có dữ liệu bảng điểm</td></tr>
-                  ` : gradebook.map((r, idx) => `
+                <tbody id="gradebook-table-body">
+                  ${filteredGradebook.length === 0 ? `
+                    <tr>
+                      <td colspan="11" style="text-align:center; padding:2.5rem 1rem; color:#64748b;">
+                        <div style="font-size:2rem; margin-bottom:0.4rem;">📋</div>
+                        <div style="font-weight:500;">${rawGradebook.length === 0 ? 'Chưa có dữ liệu bảng điểm môn học này' : 'Không tìm thấy học sinh nào phù hợp bộ lọc'}</div>
+                        ${(this.gradebookFilterGrade !== 'all' || this.gradebookFilterClass !== 'all' || this.gradebookSearchQuery) ? `
+                          <div style="margin-top:0.6rem;">
+                            <button class="btn-clear-filter-inline" style="background:#eff6ff; border:1px solid #bfdbfe; color:#2563eb; padding:0.35rem 0.8rem; border-radius:8px; font-size:0.8rem; cursor:pointer; font-weight:500;">
+                              🔄 Bỏ lọc để xem toàn bộ
+                            </button>
+                          </div>
+                        ` : ''}
+                      </td>
+                    </tr>
+                  ` : filteredGradebook.map((r, idx) => `
                     <tr style="border-bottom:1px solid #f1f5f9; text-align:center; font-weight:500; color:#1e293b;">
                       <td style="padding:0.55rem; color:#64748b;">${idx + 1}</td>
                       <td style="padding:0.55rem; font-family:monospace; color:#475569;">${r.studentId}</td>
-                      <td style="padding:0.55rem; text-align:left; font-weight: 400;">${r.studentName}</td>
-                      <td style="padding:0.55rem; color:#64748b;">${r.classId || '6A'}</td>
+                      <td style="padding:0.55rem; text-align:left; font-weight: 500;">${r.studentName}</td>
+                      <td style="padding:0.55rem; color:#64748b;"><span style="background:#f1f5f9; padding:0.15rem 0.45rem; border-radius:6px; font-size:0.78rem;">${r.classId || '6A'}</span></td>
                       <td style="padding:0.55rem; background:#f8fafc;">${r.tx1 !== null && r.tx1 !== undefined ? r.tx1 : '-'}</td>
                       <td style="padding:0.55rem; background:#f8fafc;">${r.tx2 !== null && r.tx2 !== undefined ? r.tx2 : '-'}</td>
                       <td style="padding:0.55rem; background:#f8fafc;">${r.tx3 !== null && r.tx3 !== undefined ? r.tx3 : '-'}</td>
                       <td style="padding:0.55rem; background:#f8fafc;">${r.tx4 !== null && r.tx4 !== undefined ? r.tx4 : '-'}</td>
-                      <td style="padding:0.55rem; background:#fffbe8; color:#d97706; font-weight: 500;">${r.gk !== null && r.gk !== undefined ? r.gk : '-'}</td>
-                      <td style="padding:0.55rem; background:#fff5f5; color:#dc2626; font-weight: 500;">${r.ck !== null && r.ck !== undefined ? r.ck : '-'}</td>
-                      <td style="padding:0.55rem; background:#f0fdf4; color:#166534; font-size:0.95rem; font-weight: 500;">${r.tbm !== null && r.tbm !== undefined ? r.tbm : '-'}</td>
+                      <td style="padding:0.55rem; background:#fffbe8; color:#d97706; font-weight: 600;">${r.gk !== null && r.gk !== undefined ? r.gk : '-'}</td>
+                      <td style="padding:0.55rem; background:#fff5f5; color:#dc2626; font-weight: 600;">${r.ck !== null && r.ck !== undefined ? r.ck : '-'}</td>
+                      <td style="padding:0.55rem; background:#f0fdf4; color:#166534; font-size:0.95rem; font-weight: 700;">${r.tbm !== null && r.tbm !== undefined ? r.tbm : '-'}</td>
                     </tr>
                   `).join('')}
                 </tbody>
@@ -24346,6 +24864,119 @@ render_ai_geometry(dom) {
     if (btnQueue) btnQueue.onclick = () => { this.currentGradingTab = 'queue'; this.render_grades(dom); };
     if (btnGb) btnGb.onclick = () => { this.currentGradingTab = 'gradebook'; this.render_grades(dom); };
 
+    // Lọc Khối Lớp
+    dom.querySelectorAll('.btn-grade-filter').forEach(btn => {
+      btn.onclick = () => {
+        const gr = btn.getAttribute('data-grade');
+        this.gradebookFilterGrade = gr;
+        if (gr !== 'all' && this.gradebookFilterClass !== 'all') {
+          const matchCls = availableClasses.find(c => c.name.toUpperCase() === this.gradebookFilterClass.toUpperCase() && (c.grade === gr || c.name.startsWith(gr)));
+          if (!matchCls) {
+            this.gradebookFilterClass = 'all';
+          }
+        }
+        this.render_grades(dom);
+      };
+    });
+
+    // Lọc Lớp Học
+    const selClass = dom.querySelector('#filter-gradebook-class');
+    if (selClass) {
+      selClass.onchange = (e) => {
+        this.gradebookFilterClass = e.target.value;
+        this.render_grades(dom);
+      };
+    }
+
+    // Tìm kiếm Tên / Mã Học Sinh (Realtime typing)
+    const searchInput = dom.querySelector('#filter-gradebook-search');
+    if (searchInput) {
+      searchInput.oninput = (e) => {
+        this.gradebookSearchQuery = e.target.value;
+        const q = this.gradebookSearchQuery.trim().toLowerCase();
+        const currentFiltered = rawGradebook.filter(r => {
+          const cId = (r.classId || '').trim();
+          const cGrade = r.grade ? String(r.grade) : (cId.match(/\d+/) ? cId.match(/\d+/)[0] : '');
+          if (this.gradebookFilterGrade !== 'all') {
+            if (cGrade !== this.gradebookFilterGrade && !cId.startsWith(this.gradebookFilterGrade)) return false;
+          }
+          if (this.gradebookFilterClass !== 'all') {
+            if (cId.toUpperCase() !== this.gradebookFilterClass.toUpperCase()) return false;
+          }
+          if (q) {
+            const nMatch = (r.studentName || '').toLowerCase().includes(q);
+            const iMatch = (r.studentId || '').toLowerCase().includes(q);
+            if (!nMatch && !iMatch) return false;
+          }
+          return true;
+        });
+
+        const countBadge = dom.querySelector('#gradebook-count-badge');
+        if (countBadge) {
+          countBadge.innerHTML = `<span>👥</span> Hiển thị: <strong>${currentFiltered.length}</strong> / ${rawGradebook.length} HS`;
+        }
+
+        const tbody = dom.querySelector('#gradebook-table-body');
+        if (tbody) {
+          if (currentFiltered.length === 0) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="11" style="text-align:center; padding:2.5rem 1rem; color:#64748b;">
+                  <div style="font-size:2rem; margin-bottom:0.4rem;">📋</div>
+                  <div style="font-weight:500;">Không tìm thấy học sinh nào phù hợp bộ lọc</div>
+                </td>
+              </tr>
+            `;
+          } else {
+            tbody.innerHTML = currentFiltered.map((r, idx) => `
+              <tr style="border-bottom:1px solid #f1f5f9; text-align:center; font-weight:500; color:#1e293b;">
+                <td style="padding:0.55rem; color:#64748b;">${idx + 1}</td>
+                <td style="padding:0.55rem; font-family:monospace; color:#475569;">${r.studentId}</td>
+                <td style="padding:0.55rem; text-align:left; font-weight: 500;">${r.studentName}</td>
+                <td style="padding:0.55rem; color:#64748b;"><span style="background:#f1f5f9; padding:0.15rem 0.45rem; border-radius:6px; font-size:0.78rem;">${r.classId || '6A'}</span></td>
+                <td style="padding:0.55rem; background:#f8fafc;">${r.tx1 !== null && r.tx1 !== undefined ? r.tx1 : '-'}</td>
+                <td style="padding:0.55rem; background:#f8fafc;">${r.tx2 !== null && r.tx2 !== undefined ? r.tx2 : '-'}</td>
+                <td style="padding:0.55rem; background:#f8fafc;">${r.tx3 !== null && r.tx3 !== undefined ? r.tx3 : '-'}</td>
+                <td style="padding:0.55rem; background:#f8fafc;">${r.tx4 !== null && r.tx4 !== undefined ? r.tx4 : '-'}</td>
+                <td style="padding:0.55rem; background:#fffbe8; color:#d97706; font-weight: 600;">${r.gk !== null && r.gk !== undefined ? r.gk : '-'}</td>
+                <td style="padding:0.55rem; background:#fff5f5; color:#dc2626; font-weight: 600;">${r.ck !== null && r.ck !== undefined ? r.ck : '-'}</td>
+                <td style="padding:0.55rem; background:#f0fdf4; color:#166534; font-size:0.95rem; font-weight: 700;">${r.tbm !== null && r.tbm !== undefined ? r.tbm : '-'}</td>
+              </tr>
+            `).join('');
+          }
+        }
+      };
+    }
+
+    // Nút Bỏ Lọc
+    const btnReset = dom.querySelector('#btn-reset-gradebook-filter');
+    if (btnReset) {
+      btnReset.onclick = () => {
+        this.gradebookFilterGrade = 'all';
+        this.gradebookFilterClass = 'all';
+        this.gradebookSearchQuery = '';
+        this.render_grades(dom);
+      };
+    }
+
+    const btnClearInline = dom.querySelector('.btn-clear-filter-inline');
+    if (btnClearInline) {
+      btnClearInline.onclick = () => {
+        this.gradebookFilterGrade = 'all';
+        this.gradebookFilterClass = 'all';
+        this.gradebookSearchQuery = '';
+        this.render_grades(dom);
+      };
+    }
+
+    const btnClearSearch = dom.querySelector('#btn-clear-gradebook-search');
+    if (btnClearSearch) {
+      btnClearSearch.onclick = () => {
+        this.gradebookSearchQuery = '';
+        this.render_grades(dom);
+      };
+    }
+
     dom.querySelectorAll('.btn-open-grade-attempt').forEach(btn => {
       btn.onclick = () => this.showTeacherGradingModal(btn.getAttribute('data-attempt-id'));
     });
@@ -24361,7 +24992,7 @@ render_ai_geometry(dom) {
 
     const btnExcel = dom.querySelector('#btn-export-excel-gradebook');
     if (btnExcel) {
-      btnExcel.onclick = () => this.exportGradebookToExcel(subId, subject.name);
+      btnExcel.onclick = () => this.exportGradebookToExcel(subId, subject.name, filteredGradebook, this.gradebookFilterGrade, this.gradebookFilterClass);
     }
   }
 
@@ -24665,39 +25296,47 @@ render_ai_geometry(dom) {
     };
   }
 
-  exportGradebookToExcel(subjectId, subjectName) {
+  exportGradebookToExcel(subjectId, subjectName, filteredRows, filterGrade = 'all', filterClass = 'all') {
     if (typeof XLSX === 'undefined') {
       this.showToast('❌ Thư viện XLSX chưa sẵn sàng!');
       return;
     }
 
-    const gradebook = (typeof db !== 'undefined' && db.getGradebook) ? db.getGradebook().filter(g => g.subjectId === subjectId) : [];
+    const rawGradebook = (typeof db !== 'undefined' && db.getGradebook) ? db.getGradebook().filter(g => g.subjectId === subjectId) : [];
+    const gradebook = (Array.isArray(filteredRows) && filteredRows.length > 0) ? filteredRows : rawGradebook;
     if (gradebook.length === 0) {
-      this.showToast('⚠️ Không có dữ liệu điểm để xuất Excel!');
+      this.showToast('⚠️ Không có dữ liệu học sinh để xuất Excel!');
       return;
+    }
+
+    let scopeLabel = 'Toàn trường';
+    if (filterClass && filterClass !== 'all') {
+      scopeLabel = `Lớp ${filterClass}`;
+    } else if (filterGrade && filterGrade !== 'all') {
+      scopeLabel = `Khối ${filterGrade}`;
     }
 
     const dataRows = [
       ['BẢNG ĐIỂM CHÍNH THỨC GDPT 2018 - MÔN ' + (subjectName || subjectId).toUpperCase()],
-      ['Năm Học: 2025 - 2026'],
+      [`Phạm vi: ${scopeLabel} | Năm Học: 2025 - 2026 | Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`],
       [''],
       ['STT', 'Mã Học Sinh', 'Họ và Tên', 'Lớp', 'TX1', 'TX2', 'TX3', 'TX4', 'GK', 'CK', 'TBM', 'Đánh Giá']
     ];
 
     gradebook.forEach((r, idx) => {
-      const tbmVal = r.tbm !== null && r.tbm !== undefined ? r.tbm : '';
-      const danhGia = tbmVal !== '' ? (tbmVal >= 5.0 ? 'Đạt' : 'Chưa Đạt') : '';
+      const tbmVal = (r.tbm !== null && r.tbm !== undefined) ? r.tbm : '';
+      const danhGia = tbmVal !== '' ? (parseFloat(tbmVal) >= 5.0 ? 'Đạt' : 'Chưa Đạt') : '';
       dataRows.push([
         idx + 1,
-        r.studentId,
-        r.studentName,
+        r.studentId || '',
+        r.studentName || '',
         r.classId || '6A',
-        r.tx1 !== null ? r.tx1 : '',
-        r.tx2 !== null ? r.tx2 : '',
-        r.tx3 !== null ? r.tx3 : '',
-        r.tx4 !== null ? r.tx4 : '',
-        r.gk !== null ? r.gk : '',
-        r.ck !== null ? r.ck : '',
+        (r.tx1 !== null && r.tx1 !== undefined) ? r.tx1 : '',
+        (r.tx2 !== null && r.tx2 !== undefined) ? r.tx2 : '',
+        (r.tx3 !== null && r.tx3 !== undefined) ? r.tx3 : '',
+        (r.tx4 !== null && r.tx4 !== undefined) ? r.tx4 : '',
+        (r.gk !== null && r.gk !== undefined) ? r.gk : '',
+        (r.ck !== null && r.ck !== undefined) ? r.ck : '',
         tbmVal,
         danhGia
       ]);
@@ -24712,8 +25351,13 @@ render_ai_geometry(dom) {
       { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 12 }
     ];
 
-    XLSX.utils.book_append_sheet(wb, ws, 'BangDiem_' + subjectId);
-    const fileName = `BangDiem_Mon_${subjectId}_Lop6A_2025-2026.xlsx`;
+    const safeSubCode = String(subjectId || 'mon').replace(/[^a-zA-Z0-9]/g, '_');
+    const safeScopeCode = (filterClass && filterClass !== 'all') 
+      ? ('Lop' + filterClass) 
+      : ((filterGrade && filterGrade !== 'all') ? ('Khoi' + filterGrade) : 'ToanTruong');
+
+    XLSX.utils.book_append_sheet(wb, ws, 'BangDiem');
+    const fileName = `BangDiem_Mon_${safeSubCode}_${safeScopeCode}_2025-2026.xlsx`;
     XLSX.writeFile(wb, fileName);
     this.showToast(`📥 Đã xuất file Excel: ${fileName}!`);
   }
@@ -25893,8 +26537,8 @@ render_ai_geometry(dom) {
     if (this.reportGradeFilter === undefined) this.reportGradeFilter = 'all';
     if (this.reportClassFilter === undefined) this.reportClassFilter = 'all';
 
-    const totalStudents = students.length || 175;
-    const totalTeachers = teachers.length || 4;
+    const totalStudents = students.length;
+    const totalTeachers = teachers.length;
 
     // Distribute grades by class
     const gradeData = {
@@ -25904,40 +26548,20 @@ render_ai_geometry(dom) {
       '9': { name: 'Khối 9', tot: 0, kha: 0, dat: 0, chuaDat: 0, total: 0 }
     };
 
-    students.forEach((st, idx) => {
-      const cls = st.classId || '6A';
-      const gKey = cls.replace(/\D/g, '').charAt(0) || '6';
-      if (!gradeData[gKey]) gradeData[gKey] = { name: 'Khối ' + gKey, tot: 0, kha: 0, dat: 0, chuaDat: 0, total: 0 };
-      gradeData[gKey].total += 1;
-      const mod = idx % 10;
-      if (mod < 3.5) gradeData[gKey].tot += 1;
-      else if (mod < 8) gradeData[gKey].kha += 1;
-      else if (mod < 9.5) gradeData[gKey].dat += 1;
-      else gradeData[gKey].chuaDat += 1;
-    });
-
-    // Calculate overall Totals
     let totTot = 0, totKha = 0, totDat = 0, totChuaDat = 0;
-    Object.values(gradeData).forEach(g => {
-      totTot += g.tot;
-      totKha += g.kha;
-      totDat += g.dat;
-      totChuaDat += g.chuaDat;
-    });
-
-    const totPct = totalStudents > 0 ? Math.round((totTot / totalStudents) * 100) : 35;
-    const khaPct = totalStudents > 0 ? Math.round((totKha / totalStudents) * 100) : 45;
-    const datPct = totalStudents > 0 ? Math.round((totDat / totalStudents) * 100) : 16;
-    const chuaDatPct = Math.max(0, 100 - (totPct + khaPct + datPct));
+    const totPct = totalStudents > 0 ? Math.round((totTot / totalStudents) * 100) : 0;
+    const khaPct = totalStudents > 0 ? Math.round((totKha / totalStudents) * 100) : 0;
+    const datPct = totalStudents > 0 ? Math.round((totDat / totalStudents) * 100) : 0;
+    const chuaDatPct = 0;
 
     // Subject averages benchmark
     const subjectStats = [
-      { name: 'Toán học', avg: 7.8, icon: '📐', color: '#2563eb' },
-      { name: 'Ngữ văn', avg: 7.5, icon: '📖', color: '#7c3aed' },
-      { name: 'Tiếng Anh', avg: 8.1, icon: '🔤', color: '#059669' },
-      { name: 'Khoa học Tự nhiên', avg: 7.9, icon: '🔬', color: '#0284c7' },
-      { name: 'Lịch sử & Địa lý', avg: 8.2, icon: '🌍', color: '#d97706' },
-      { name: 'Tin học', avg: 8.6, icon: '💻', color: '#dc2626' }
+      { name: 'Toán học', avg: 0, icon: '📐', color: '#2563eb' },
+      { name: 'Ngữ văn', avg: 0, icon: '📖', color: '#7c3aed' },
+      { name: 'Tiếng Anh', avg: 0, icon: '🔤', color: '#059669' },
+      { name: 'Khoa học Tự nhiên', avg: 0, icon: '🔬', color: '#0284c7' },
+      { name: 'Lịch sử & Địa lý', avg: 0, icon: '🌍', color: '#d97706' },
+      { name: 'Tin học', avg: 0, icon: '💻', color: '#dc2626' }
     ];
 
     dom.innerHTML = `
@@ -25998,7 +26622,7 @@ render_ai_geometry(dom) {
               <span style="font-size:0.8rem; font-weight:500; color:#64748b;">TỶ LỆ CHUYÊN CẦN</span>
               <div style="width:36px; height:36px; background:#fefce8; color:#ca8a04; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">⏱️</div>
             </div>
-            <div style="font-size:1.8rem; font-weight:700; color:#ca8a04;">98.5% <span style="font-size:0.85rem; font-weight:400; color:#64748b;">đi học đầy đủ</span></div>
+            <div style="font-size:1.8rem; font-weight:700; color:#ca8a04;">0% <span style="font-size:0.85rem; font-weight:400; color:#64748b;">đi học đầy đủ</span></div>
             <div style="font-size:0.75rem; color:#ca8a04; font-weight:400; margin-top:0.3rem;">Theo dõi chuyên cần theo tuần</div>
           </div>
         </div>
@@ -26028,22 +26652,16 @@ render_ai_geometry(dom) {
             <!-- Bar Chart Graphics Container -->
             <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; height:210px; align-items:flex-end; padding:0 0.5rem 0.5rem 0.5rem; border-bottom:2px solid #cbd5e1;">
               ${Object.values(gradeData).map(g => {
-                const maxVal = Math.max(g.tot, g.kha, g.dat, g.chuaDat, 1);
-                const hTot = Math.round((g.tot / (g.total || 1)) * 160);
-                const hKha = Math.round((g.kha / (g.total || 1)) * 160);
-                const hDat = Math.round((g.dat / (g.total || 1)) * 160);
-                const hChuaDat = Math.round((g.chuaDat / (g.total || 1)) * 160);
-
                 return `
                   <div style="display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end; gap:0.25rem;">
                     <div style="display:flex; align-items:flex-end; gap:0.3rem; width:100%; justify-content:center;">
-                      <div title="Tốt: ${g.tot} HS" style="width:16px; height:${Math.max(12, hTot)}px; background:linear-gradient(180deg,#10b981,#059669); border-radius:4px 4px 0 0; transition:all 0.3s ease;"></div>
-                      <div title="Khá: ${g.kha} HS" style="width:16px; height:${Math.max(12, hKha)}px; background:linear-gradient(180deg,#3b82f6,#2563eb); border-radius:4px 4px 0 0; transition:all 0.3s ease;"></div>
-                      <div title="Đạt: ${g.dat} HS" style="width:16px; height:${Math.max(12, hDat)}px; background:linear-gradient(180deg,#f59e0b,#d97706); border-radius:4px 4px 0 0; transition:all 0.3s ease;"></div>
-                      <div title="Chưa đạt: ${g.chuaDat} HS" style="width:16px; height:${Math.max(6, hChuaDat)}px; background:linear-gradient(180deg,#ef4444,#dc2626); border-radius:4px 4px 0 0; transition:all 0.3s ease;"></div>
+                      <div title="Tốt: 0 HS" style="width:16px; height:4px; background:#e2e8f0; border-radius:4px 4px 0 0;"></div>
+                      <div title="Khá: 0 HS" style="width:16px; height:4px; background:#e2e8f0; border-radius:4px 4px 0 0;"></div>
+                      <div title="Đạt: 0 HS" style="width:16px; height:4px; background:#e2e8f0; border-radius:4px 4px 0 0;"></div>
+                      <div title="Chưa đạt: 0 HS" style="width:16px; height:4px; background:#e2e8f0; border-radius:4px 4px 0 0;"></div>
                     </div>
                     <div style="font-weight:700; font-size:0.82rem; color:#1e293b; margin-top:0.4rem;">${g.name}</div>
-                    <div style="font-size:0.7rem; color:#64748b;">(${g.total} HS)</div>
+                    <div style="font-size:0.7rem; color:#64748b;">(0 HS)</div>
                   </div>
                 `;
               }).join('')}
@@ -26061,7 +26679,7 @@ render_ai_geometry(dom) {
 
             <!-- Graphic Donut Ring -->
             <div style="display:flex; justify-content:center; align-items:center; margin:0.5rem 0;">
-              <div style="width:140px; height:140px; border-radius:50%; background:conic-gradient(#10b981 0% ${totPct}%, #3b82f6 ${totPct}% ${totPct + khaPct}%, #f59e0b ${totPct + khaPct}% ${totPct + khaPct + datPct}%, #ef4444 ${totPct + khaPct + datPct}% 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(0,0,0,0.08); position:relative;">
+              <div style="width:140px; height:140px; border-radius:50%; background:${totalStudents > 0 && (totPct + khaPct + datPct + chuaDatPct > 0) ? `conic-gradient(#10b981 0% ${totPct}%, #3b82f6 ${totPct}% ${totPct + khaPct}%, #f59e0b ${totPct + khaPct}% ${totPct + khaPct + datPct}%, #ef4444 ${totPct + khaPct + datPct}% 100%)` : '#e2e8f0'}; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(0,0,0,0.08); position:relative;">
                 <div style="width:90px; height:90px; background:#fff; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                   <div style="font-weight:700; font-size:1.3rem; color:#0f172a;">${totPct + khaPct}%</div>
                   <div style="font-size:0.65rem; color:#64748b; font-weight:500;">Tốt & Khá</div>
@@ -26118,23 +26736,23 @@ render_ai_geometry(dom) {
             <!-- Graphic Activity Bars -->
             <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:0.75rem; height:160px; align-items:flex-end; padding-bottom:0.5rem; border-bottom:1.5px solid #cbd5e1;">
               ${[
-                { day: 'T2', pct: 99, val: '99%' },
-                { day: 'T3', pct: 98, val: '98%' },
-                { day: 'T4', pct: 99.5, val: '99.5%' },
-                { day: 'T5', pct: 97.5, val: '97.5%' },
-                { day: 'T6', pct: 98.8, val: '98.8%' },
-                { day: 'T7', pct: 96, val: '96%' }
+                { day: 'T2', pct: 0, val: '0%' },
+                { day: 'T3', pct: 0, val: '0%' },
+                { day: 'T4', pct: 0, val: '0%' },
+                { day: 'T5', pct: 0, val: '0%' },
+                { day: 'T6', pct: 0, val: '0%' },
+                { day: 'T7', pct: 0, val: '0%' }
               ].map(d => `
                 <div style="display:flex; flex-direction:column; align-items:center; gap:0.25rem; height:100%; justify-content:flex-end;">
-                  <div style="font-size:0.68rem; font-weight:700; color:#2563eb;">${d.val}</div>
-                  <div style="width:100%; height:${Math.round(d.pct * 1.2)}px; background:linear-gradient(180deg,#3b82f6,#1d4ed8); border-radius:6px 6px 0 0; transition:all 0.3s ease;"></div>
+                  <div style="font-size:0.68rem; font-weight:700; color:#64748b;">${d.val}</div>
+                  <div style="width:100%; height:4px; background:#e2e8f0; border-radius:6px 6px 0 0;"></div>
                   <div style="font-size:0.75rem; font-weight:700; color:#475569; margin-top:0.3rem;">${d.day}</div>
                 </div>
               `).join('')}
             </div>
 
-            <div style="font-size:0.78rem; color:#059669; font-weight:500; background:#f0fdf4; padding:0.5rem 0.75rem; border-radius:8px; text-align:center; margin-top:0.75rem;">
-              ✅ Tỷ lệ chuyên cần bình quân toàn trường đạt 98.5%
+            <div style="font-size:0.78rem; color:#64748b; font-weight:500; background:#f8fafc; padding:0.5rem 0.75rem; border-radius:8px; text-align:center; margin-top:0.75rem; border:1px solid #e2e8f0;">
+              📊 Tỷ lệ chuyên cần bình quân toàn trường đạt 0%
             </div>
           </div>
         </div>
@@ -26166,25 +26784,27 @@ render_ai_geometry(dom) {
                 </tr>
               </thead>
               <tbody>
-                ${classes.map((cls, idx) => {
+                ${classes.length === 0 ? `
+                  <tr>
+                    <td colspan="9" style="padding:1.5rem; text-align:center; color:#64748b; font-weight:600;">
+                      Chưa có dữ liệu lớp học trong hệ thống.
+                    </td>
+                  </tr>
+                ` : classes.map((cls, idx) => {
                   const clsStudents = students.filter(s => (s.classId || '6A') === (cls.name || cls.id));
-                  const siSo = clsStudents.length || 35;
-                  const tot = Math.round(siSo * 0.35);
-                  const kha = Math.round(siSo * 0.45);
-                  const dat = Math.round(siSo * 0.16);
-                  const chuaDat = Math.max(0, siSo - (tot + kha + dat));
+                  const siSo = clsStudents.length;
 
                   return `
                     <tr style="border-bottom:1px solid #f1f5f9; text-align:center; font-weight:500; color:#0f172a;">
                       <td style="padding:0.55rem; color:#64748b;">${idx + 1}</td>
                       <td style="padding:0.55rem; text-align:left; font-weight:700; color:#2563eb;">Lớp ${cls.name || cls.id}</td>
                       <td style="padding:0.55rem; font-weight:700;">${siSo} em</td>
-                      <td style="padding:0.55rem; background:#f8fafc; color:#15803d; font-weight:700;">${tot} (${Math.round((tot/siSo)*100)}%)</td>
-                      <td style="padding:0.55rem; background:#f8fafc; color:#1d4ed8; font-weight:700;">${kha} (${Math.round((kha/siSo)*100)}%)</td>
-                      <td style="padding:0.55rem; background:#fffbe8; color:#d97706;">${dat} (${Math.round((dat/siSo)*100)}%)</td>
-                      <td style="padding:0.55rem; background:#fff5f5; color:#dc2626;">${chuaDat} (${Math.round((chuaDat/siSo)*100)}%)</td>
-                      <td style="padding:0.55rem; background:#f0fdf4; color:#166534; font-size:0.92rem; font-weight:700;">7.85</td>
-                      <td style="padding:0.55rem; color:#059669; font-weight:700;">98.8%</td>
+                      <td style="padding:0.55rem; background:#f8fafc; color:#15803d; font-weight:700;">0 (0%)</td>
+                      <td style="padding:0.55rem; background:#f8fafc; color:#1d4ed8; font-weight:700;">0 (0%)</td>
+                      <td style="padding:0.55rem; background:#fffbe8; color:#d97706;">0 (0%)</td>
+                      <td style="padding:0.55rem; background:#fff5f5; color:#dc2626;">0 (0%)</td>
+                      <td style="padding:0.55rem; background:#f0fdf4; color:#166534; font-size:0.92rem; font-weight:700;">0.0</td>
+                      <td style="padding:0.55rem; color:#64748b; font-weight:700;">0%</td>
                     </tr>
                   `;
                 }).join('')}
@@ -26220,22 +26840,18 @@ render_ai_geometry(dom) {
 
     classes.forEach((cls, idx) => {
       const clsStudents = students.filter(s => (s.classId || '6A') === (cls.name || cls.id));
-      const siSo = clsStudents.length || 35;
-      const tot = Math.round(siSo * 0.35);
-      const kha = Math.round(siSo * 0.45);
-      const dat = Math.round(siSo * 0.16);
-      const chuaDat = Math.max(0, siSo - (tot + kha + dat));
+      const siSo = clsStudents.length;
 
       dataRows.push([
         idx + 1,
         'Lớp ' + (cls.name || cls.id),
         siSo + ' học sinh',
-        `${tot} (${Math.round((tot/siSo)*100)}%)`,
-        `${kha} (${Math.round((kha/siSo)*100)}%)`,
-        `${dat} (${Math.round((dat/siSo)*100)}%)`,
-        `${chuaDat} (${Math.round((chuaDat/siSo)*100)}%)`,
-        '7.85',
-        '98.8%'
+        '0 (0%)',
+        '0 (0%)',
+        '0 (0%)',
+        '0 (0%)',
+        '0.0',
+        '0%'
       ]);
     });
 
@@ -28958,7 +29574,7 @@ LMSApp.prototype.exportTeachersExcel = function() {
       htmlContent += `
         <tr style="background-color:${bgColor};">
           <td style="text-align:center;border:1px solid #cbd5e1;">${idx + 1}</td>
-          <td style="text-align:center;font-weight:bold;color:#2563eb;border:1px solid #cbd5e1;">${t.id || ('GV' + (idx+1))}</td>
+          <td style="text-align:center;font-weight:bold;color:#2563eb;border:1px solid #cbd5e1;">${t.code || t.id || ('GV' + (idx+1))}</td>
           <td style="font-weight:bold;border:1px solid #cbd5e1;">${t.name || ''}</td>
           <td style="text-align:center;border:1px solid #cbd5e1;">${t.phone || ''}</td>
           <td style="border:1px solid #cbd5e1;">${subjectName}</td>
