@@ -13996,6 +13996,22 @@ render_ai_geometry(dom) {
     };
     modal.querySelectorAll('.chk-exam-q').forEach(cb => { cb.onchange = updateQCount; });
     updateQCount();
+    // Khởi tạo trạng thái active cho filter buttons ngay khi modal mở
+    modal.querySelectorAll('.qbank-filter-btn').forEach(b => {
+      const fk = b.getAttribute('data-filter');
+      const colorMap = {
+        all:          { bg: '#475569', text: '#fff', border: '#475569', inBg: '#f1f5f9', inText: '#475569', inBorder: '#cbd5e1' },
+        trac_nghiem:  { bg: '#1d4ed8', text: '#fff', border: '#1d4ed8', inBg: '#eff6ff', inText: '#1d4ed8', inBorder: '#bfdbfe' },
+        dung_sai:     { bg: '#047857', text: '#fff', border: '#047857', inBg: '#ecfdf5', inText: '#047857', inBorder: '#a7f3d0' },
+        tra_loi_ngan: { bg: '#b45309', text: '#fff', border: '#b45309', inBg: '#fffbeb', inText: '#b45309', inBorder: '#fde68a' },
+        tu_luan:      { bg: '#6d28d9', text: '#fff', border: '#6d28d9', inBg: '#f5f3ff', inText: '#6d28d9', inBorder: '#ddd6fe' }
+      };
+      const cm = colorMap[fk] || colorMap.all;
+      const isActive = fk === 'all'; // mặc định "Tất cả" active
+      b.style.background   = isActive ? cm.bg    : cm.inBg;
+      b.style.color        = isActive ? cm.text  : cm.inText;
+      b.style.borderColor  = isActive ? cm.border: cm.inBorder;
+    });
 
 
     // --- BỘ CÔNG CỤ DỰNG & BIÊN SOẠN CÂU HỎI THỦ CÔNG (ĐẦY ĐỦ 4 NHÓM GDPT 2018) ---
@@ -19587,6 +19603,25 @@ render_ai_geometry(dom) {
 
           <!-- Cấu hình Rút Ngẫu Nhiên: Số câu, Thời gian, Số lượt, Chế độ -->
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; background:#f0f9ff; padding:1rem; border-radius:12px; border:1.5px solid #bae6fd;">
+
+            <!-- Lọc dạng câu hỏi từ file (span 2 cột) -->
+            <div style="grid-column:span 2;">
+              <label style="font-weight:600; font-size:0.83rem; color:#0369a1; display:block; margin-bottom:0.45rem;">📋 Chọn Dạng Câu Hỏi Cần Rút:</label>
+              <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+                ${[
+                  { val:'trac_nghiem',  label:'🔤 TNKQ',          color:'#1d4ed8', bg:'#eff6ff', border:'#bfdbfe' },
+                  { val:'dung_sai',     label:'✅ Đúng/Sai',      color:'#047857', bg:'#ecfdf5', border:'#a7f3d0' },
+                  { val:'tra_loi_ngan', label:'✏️ Trả lời ngắn', color:'#b45309', bg:'#fffbeb', border:'#fde68a' },
+                  { val:'tu_luan',      label:'📝 Tự luận',       color:'#6d28d9', bg:'#f5f3ff', border:'#ddd6fe' }
+                ].map(d => `
+                  <label style="display:flex;align-items:center;gap:0.35rem;padding:0.35rem 0.75rem;border-radius:9px;border:1.5px solid ${d.border};background:${d.bg};cursor:pointer;font-size:0.8rem;font-weight:600;color:${d.color};">
+                    <input type="checkbox" class="file-qtype-chk" value="${d.val}" checked style="width:14px;height:14px;accent-color:${d.color};">
+                    ${d.label}
+                  </label>
+                `).join('')}
+              </div>
+              <div style="font-size:0.72rem;color:#64748b;margin-top:0.3rem;">💡 Chỉ rút câu thuộc dạng đã chọn từ tệp tải lên.</div>
+            </div>
             <div>
               <label style="font-weight: 500; font-size:0.83rem; color:#0369a1; display:block; margin-bottom:0.3rem;">🎲 Số câu rút ngẫu nhiên từ tệp:</label>
               <input type="number" id="rand-file-q-count" min="1" max="100" value="10" required style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #7dd3fc; font-weight: 500; font-size:1rem; color:#0369a1;">
@@ -20292,11 +20327,33 @@ render_ai_geometry(dom) {
               </div>
             </div>
 
-            <!-- PHẦN 3: MA TRẬN 4 CẤP ĐỘ NHẬN THỨC THEO CHUẨN BGD -->
+            <!-- PHẦN 3b: CHỌN DẠNG CÂU HỎI -->
+            <div style="background:#fff7ed; border:1.5px solid #fed7aa; border-radius:18px; padding:1.25rem;">
+              <div style="font-weight:700; color:#92400e; font-size:0.92rem; margin-bottom:0.85rem; display:flex; align-items:center; gap:0.4rem;">
+                <span style="background:#b45309; color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.75rem;">3</span>
+                <span>Chọn Dạng Câu Hỏi Trong Đề</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+                ${[
+                  { val:'trac_nghiem',  label:'🔤 TNKQ (4 lựa chọn)',   color:'#1d4ed8', bg:'#eff6ff', border:'#bfdbfe' },
+                  { val:'dung_sai',     label:'✅ Đúng/Sai',             color:'#047857', bg:'#ecfdf5', border:'#a7f3d0' },
+                  { val:'tra_loi_ngan', label:'✏️ Trả lời ngắn',        color:'#b45309', bg:'#fffbeb', border:'#fde68a' },
+                  { val:'tu_luan',      label:'📝 Tự luận',              color:'#6d28d9', bg:'#f5f3ff', border:'#ddd6fe' }
+                ].map(d => `
+                  <label style="display:flex;align-items:center;gap:0.45rem;padding:0.45rem 0.9rem;border-radius:10px;border:1.5px solid ${d.border};background:${d.bg};cursor:pointer;font-size:0.83rem;font-weight:600;color:${d.color};">
+                    <input type="checkbox" class="ai-qtype-chk" value="${d.val}" checked style="width:15px;height:15px;accent-color:${d.color};">
+                    ${d.label}
+                  </label>
+                `).join('')}
+              </div>
+              <div style="font-size:0.74rem;color:#78716c;margin-top:0.5rem;">💡 Bỏ tick dạng câu nào thì AI sẽ không ra dạng đó.</div>
+            </div>
+
+            <!-- PHẦN 4: MA TRẬN 4 CẤP ĐỘ NHẬN THỨC THEO CHUẨN BGD -->
             <div style="background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:18px; padding:1.25rem;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem;">
                 <div style="font-weight:700; color:#166534; font-size:0.92rem; display:flex; align-items:center; gap:0.4rem;">
-                  <span style="background:#15803d; color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.75rem;">3</span>
+                  <span style="background:#15803d; color:#fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.75rem;">4</span>
                   <span>Ma Trận Phân Hóa Đề Thi Chuẩn GDPT 2018</span>
                 </div>
 
@@ -20509,8 +20566,26 @@ render_ai_geometry(dom) {
         const qCount = parseInt(modal.querySelector('#ai-exam-qcount').value, 10) || 10;
         const enableProctoring = modal.querySelector('#ai-opt-proctoring').checked;
 
+        // Lấy dạng câu hỏi được chọn
+        const selectedQTypes = [...modal.querySelectorAll('.ai-qtype-chk:checked')].map(c => c.value);
+        if (selectedQTypes.length === 0) {
+          this.showToast('Vui lòng chọn ít nhất 1 dạng câu hỏi!', 'warning');
+          return;
+        }
+
         // Sinh danh sách câu hỏi theo AI
-        const generatedQuestions = synthesizeAIQuestions(selectedSubId, selectedGrade, topic, qCount, teacherPrompt);
+        let generatedQuestions = synthesizeAIQuestions(selectedSubId, selectedGrade, topic, qCount, teacherPrompt);
+        // Lọc theo dạng câu được chọn
+        if (selectedQTypes.length < 4) {
+          generatedQuestions = generatedQuestions.filter(q => selectedQTypes.includes(q.type || 'trac_nghiem'));
+          // Nếu sau lọc ít hơn yêu cầu, tạo thêm đủ số
+          if (generatedQuestions.length < qCount) {
+            const extra = synthesizeAIQuestions(selectedSubId, selectedGrade, topic, qCount * 2, teacherPrompt)
+              .filter(q => selectedQTypes.includes(q.type || 'trac_nghiem'))
+              .filter(q => !generatedQuestions.find(g => g.questionText === q.questionText));
+            generatedQuestions = [...generatedQuestions, ...extra].slice(0, qCount);
+          }
+        }
 
         if (!generatedQuestions || generatedQuestions.length === 0) {
           alert('Không thể tạo câu hỏi, vui lòng thử lại!');
