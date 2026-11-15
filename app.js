@@ -13693,20 +13693,6 @@ render_ai_geometry(dom) {
             </div>
           </div>
 
-          <!-- Lớp áp dụng -->
-          <div>
-            <label style="font-weight: 500;font-size:0.88rem;color:#1e293b;display:block;margin-bottom:0.4rem;">🏫 Giao cho Lớp:</label>
-            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
-              ${classes.map(cls => {
-                const checked = editExam ? (editExam.classIds||[editExam.classId]).includes(cls.id) : false;
-                return `<label style="display:flex;align-items:center;gap:0.35rem;background:#f8fafc;padding:0.35rem 0.75rem;border-radius:8px;border:1.5px solid #e2e8f0;cursor:pointer;font-size:0.82rem;font-weight: 400;">
-                  <input type="checkbox" class="chk-exam-class" value="${cls.id}" ${checked?'checked':''}>
-                  ${cls.id}
-                </label>`;
-              }).join('')}
-            </div>
-          </div>
-
           <!-- CHẾ ĐỘ THI: THI THỬ VS THI THẬT (CẬP NHẬT BẢNG ĐIỂM CHÍNH THỨC) -->
           <div style="background:linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border:1.5px solid #bbf7d0; border-radius:14px; padding:1rem; display:flex; flex-direction:column; gap:0.65rem;">
             <label style="font-weight: 700; font-size:0.9rem; color:#15803d; display:flex; align-items:center; gap:0.4rem; margin:0;">
@@ -13769,64 +13755,6 @@ render_ai_geometry(dom) {
               </div>
             </div>
           ` : ''}
-
-          <!-- Chọn câu hỏi từ Ngân hàng -->
-          <div>
-            <label style="font-weight:600;font-size:0.88rem;color:#1e293b;display:block;margin-bottom:0.5rem;">📝 Chọn Câu Hỏi Từ Ngân Hàng <span style="font-weight:400;color:#64748b;">(${subQs.length} câu có sẵn)</span></label>
-
-            <!-- Bộ lọc dạng câu hỏi -->
-            <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.5rem;align-items:center;">
-              <span style="font-size:0.75rem;color:#475569;font-weight:600;flex-shrink:0;">Lọc dạng:</span>
-              ${[
-                { key: 'all',          label: 'Tất cả',           color: '#475569', bg: '#f1f5f9', border: '#cbd5e1', count: subQs.length },
-                { key: 'trac_nghiem',  label: '🔤 TNKQ',          color: '#1d4ed8', bg: '#eff6ff', border: '#bfdbfe', count: subQs.filter(q=>(q.type||'trac_nghiem')==='trac_nghiem').length },
-                { key: 'dung_sai',     label: '✅ Đúng/Sai',      color: '#047857', bg: '#ecfdf5', border: '#a7f3d0', count: subQs.filter(q=>q.type==='dung_sai').length },
-                { key: 'tra_loi_ngan', label: '✏️ Trả lời ngắn', color: '#b45309', bg: '#fffbeb', border: '#fde68a', count: subQs.filter(q=>q.type==='tra_loi_ngan').length },
-                { key: 'tu_luan',      label: '📝 Tự luận',       color: '#6d28d9', bg: '#f5f3ff', border: '#ddd6fe', count: subQs.filter(q=>q.type==='tu_luan').length }
-              ].map(f => `
-                <button type="button" class="qbank-filter-btn" data-filter="${f.key}"
-                  style="padding:0.25rem 0.6rem;border-radius:7px;border:1.5px solid ${f.key==='all'?'#475569':f.border};
-                    background:${f.key==='all'?'#475569':f.bg};color:${f.key==='all'?'#fff':f.color};
-                    font-size:0.73rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:0.25rem;">
-                  ${f.label} <span style="background:${f.key==='all'?'rgba(255,255,255,0.25)':'rgba(0,0,0,0.08)'};padding:0.05rem 0.35rem;border-radius:10px;font-size:0.7rem;">${f.count}</span>
-                </button>
-              `).join('')}
-            </div>
-
-            <!-- Ô tìm kiếm -->
-            <div style="position:relative;margin-bottom:0.4rem;">
-              <span style="position:absolute;left:0.55rem;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:0.8rem;pointer-events:none;">🔍</span>
-              <input type="text" id="qbank-search-input" placeholder="Tìm câu hỏi..." style="width:100%;padding:0.45rem 0.5rem 0.45rem 1.8rem;border-radius:8px;border:1.5px solid #e2e8f0;font-size:0.82rem;box-sizing:border-box;outline:none;">
-            </div>
-
-            <!-- Danh sách câu hỏi -->
-            <div id="qbank-list-container" style="max-height:180px;overflow-y:auto;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.4rem;">
-              ${subQs.length === 0
-                ? '<div style="text-align:center;color:#64748b;font-size:0.85rem;padding:1rem;">Chưa có câu hỏi nào cho môn này.<br>Hãy thêm câu hỏi trong mục <strong>Ngân hàng câu hỏi</strong> trước!</div>'
-                : subQs.map(q => {
-                    const checked = editExam ? (editExam.questionIds||[]).includes(q.id) : false;
-                    const qText   = (q.questionText || q.question || '').substring(0, 90);
-                    const qType   = q.type || 'trac_nghiem';
-                    const typeMap = { trac_nghiem:['TNKQ','#1d4ed8','#eff6ff'], dung_sai:['Đúng/Sai','#047857','#ecfdf5'], tra_loi_ngan:['TL ngắn','#b45309','#fffbeb'], tu_luan:['Tự luận','#6d28d9','#f5f3ff'] };
-                    const [tLabel, tColor, tBg] = typeMap[qType] || ['Khác','#475569','#f1f5f9'];
-                    const diffMap = { nhan_biet:'🟢 NB', thong_hieu:'🟡 TH', van_dung:'🔴 VD' };
-                    const diffLabel = diffMap[q.difficulty] || '';
-                    return `<label class="qbank-item" data-qtype="${qType}" data-qtext="${(q.questionText||q.question||'').toLowerCase()}"
-                      style="display:flex;align-items:flex-start;gap:0.45rem;padding:0.4rem 0.5rem;border-radius:7px;cursor:pointer;border:1px solid transparent;transition:background 0.12s;margin-bottom:0.15rem;"
-                      onmouseenter="this.style.background='#f8fafc'" onmouseleave="this.style.background='transparent'">
-                      <input type="checkbox" class="chk-exam-q" value="${q.id}" ${checked?'checked':''} style="width:15px;height:15px;flex-shrink:0;margin-top:2px;">
-                      <span style="flex:1;font-size:0.8rem;color:#334155;line-height:1.4;">${qText}${qText.length>=90?'...':''}</span>
-                      <span style="flex-shrink:0;font-size:0.68rem;font-weight:700;color:${tColor};background:${tBg};padding:0.1rem 0.4rem;border-radius:5px;white-space:nowrap;">${tLabel}</span>
-                      ${diffLabel ? `<span style="flex-shrink:0;font-size:0.65rem;color:#64748b;white-space:nowrap;">${diffLabel}</span>` : ''}
-                    </label>`;
-                  }).join('')
-              }
-            </div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.35rem;flex-wrap:wrap;gap:0.25rem;">
-              <div style="font-size:0.75rem;color:#475569;">💡 Đã chọn: <span id="exam-q-count" style="font-weight:700;color:#1d4ed8;">0</span> câu</div>
-              <div id="qbank-type-count" style="font-size:0.72rem;color:#64748b;"></div>
-            </div>
-          </div>
 
           <!-- BIÊN SOẠN & QUẢN LÝ DẠNG CÂU HỎI THỦ CÔNG (ĐẦY ĐỦ 4 NHÓM GDPT 2018) -->
           <div style="background:#f8fafc; border-radius:16px; padding:1.25rem; border:2px solid #3b82f6; box-shadow:0 4px 16px rgba(59,130,246,0.1); margin-top:0.5rem;">
@@ -13926,92 +13854,6 @@ render_ai_geometry(dom) {
       </div>
     `;
     document.body.appendChild(modal);
-
-    // ── Ngân hàng câu hỏi: lọc dạng + tìm kiếm ──────────────────────────────
-    let _qbankActiveFilter = 'all';
-
-    const applyQBankFilter = () => {
-      const searchVal = (modal.querySelector('#qbank-search-input')?.value || '').toLowerCase().trim();
-      const items = modal.querySelectorAll('.qbank-item');
-      items.forEach(item => {
-        const typeMatch = _qbankActiveFilter === 'all' || item.getAttribute('data-qtype') === _qbankActiveFilter;
-        const textMatch = !searchVal || (item.getAttribute('data-qtext') || '').includes(searchVal);
-        item.style.display = (typeMatch && textMatch) ? '' : 'none';
-      });
-      updateQCount();
-    };
-
-    // Nút lọc dạng câu hỏi
-    const filterColorMap = {
-      all:          { active: '#475569', bg: '#475569', text: '#fff', inactiveBg: '#f1f5f9', inactiveBorder: '#cbd5e1', inactiveText: '#475569' },
-      trac_nghiem:  { active: '#1d4ed8', bg: '#1d4ed8', text: '#fff', inactiveBg: '#eff6ff', inactiveBorder: '#bfdbfe', inactiveText: '#1d4ed8' },
-      dung_sai:     { active: '#047857', bg: '#047857', text: '#fff', inactiveBg: '#ecfdf5', inactiveBorder: '#a7f3d0', inactiveText: '#047857' },
-      tra_loi_ngan: { active: '#b45309', bg: '#b45309', text: '#fff', inactiveBg: '#fffbeb', inactiveBorder: '#fde68a', inactiveText: '#b45309' },
-      tu_luan:      { active: '#6d28d9', bg: '#6d28d9', text: '#fff', inactiveBg: '#f5f3ff', inactiveBorder: '#ddd6fe', inactiveText: '#6d28d9' }
-    };
-
-    modal.querySelectorAll('.qbank-filter-btn').forEach(btn => {
-      btn.onclick = () => {
-        _qbankActiveFilter = btn.getAttribute('data-filter');
-        // Cập nhật style tất cả nút
-        modal.querySelectorAll('.qbank-filter-btn').forEach(b => {
-          const fk = b.getAttribute('data-filter');
-          const cm = filterColorMap[fk] || filterColorMap.all;
-          const isActive = fk === _qbankActiveFilter;
-          b.style.background = isActive ? cm.bg : cm.inactiveBg;
-          b.style.color = isActive ? cm.text : cm.inactiveText;
-          b.style.borderColor = isActive ? cm.bg : cm.inactiveBorder;
-        });
-        applyQBankFilter();
-      };
-    });
-
-    // Ô tìm kiếm
-    const searchInput = modal.querySelector('#qbank-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', applyQBankFilter);
-    }
-
-    // Update q count (kèm thống kê theo nhóm)
-    const updateQCount = () => {
-      const checkedEls = modal.querySelectorAll('.chk-exam-q:checked');
-      const total = checkedEls.length;
-      const el = modal.querySelector('#exam-q-count');
-      if (el) el.textContent = total;
-
-      // Thống kê theo nhóm
-      const typeCounts = {};
-      checkedEls.forEach(cb => {
-        const item = cb.closest('.qbank-item');
-        const t = item ? (item.getAttribute('data-qtype') || 'trac_nghiem') : 'trac_nghiem';
-        typeCounts[t] = (typeCounts[t] || 0) + 1;
-      });
-      const typeEl = modal.querySelector('#qbank-type-count');
-      if (typeEl && total > 0) {
-        const labels = { trac_nghiem: 'TNKQ', dung_sai: 'Đúng/Sai', tra_loi_ngan: 'TL ngắn', tu_luan: 'Tự luận' };
-        typeEl.textContent = Object.entries(typeCounts).map(([k,v]) => `${labels[k]||k}: ${v}`).join(' · ');
-      } else if (typeEl) {
-        typeEl.textContent = '';
-      }
-    };
-    modal.querySelectorAll('.chk-exam-q').forEach(cb => { cb.onchange = updateQCount; });
-    updateQCount();
-    // Khởi tạo trạng thái active cho filter buttons ngay khi modal mở
-    modal.querySelectorAll('.qbank-filter-btn').forEach(b => {
-      const fk = b.getAttribute('data-filter');
-      const colorMap = {
-        all:          { bg: '#475569', text: '#fff', border: '#475569', inBg: '#f1f5f9', inText: '#475569', inBorder: '#cbd5e1' },
-        trac_nghiem:  { bg: '#1d4ed8', text: '#fff', border: '#1d4ed8', inBg: '#eff6ff', inText: '#1d4ed8', inBorder: '#bfdbfe' },
-        dung_sai:     { bg: '#047857', text: '#fff', border: '#047857', inBg: '#ecfdf5', inText: '#047857', inBorder: '#a7f3d0' },
-        tra_loi_ngan: { bg: '#b45309', text: '#fff', border: '#b45309', inBg: '#fffbeb', inText: '#b45309', inBorder: '#fde68a' },
-        tu_luan:      { bg: '#6d28d9', text: '#fff', border: '#6d28d9', inBg: '#f5f3ff', inText: '#6d28d9', inBorder: '#ddd6fe' }
-      };
-      const cm = colorMap[fk] || colorMap.all;
-      const isActive = fk === 'all'; // mặc định "Tất cả" active
-      b.style.background   = isActive ? cm.bg    : cm.inBg;
-      b.style.color        = isActive ? cm.text  : cm.inText;
-      b.style.borderColor  = isActive ? cm.border: cm.inBorder;
-    });
 
 
     // --- BỘ CÔNG CỤ DỰNG & BIÊN SOẠN CÂU HỎI THỦ CÔNG (ĐẦY ĐỦ 4 NHÓM GDPT 2018) ---

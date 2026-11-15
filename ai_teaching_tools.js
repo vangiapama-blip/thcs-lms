@@ -2259,6 +2259,28 @@ window.AITeachingTools = {
     let blueScore = 0;
     let redScore = 0;
 
+    // ── TEAM DATA ─────────────────────────────────────────────
+    let blueTeam = [];
+    let redTeam  = [];
+
+    // Lấy danh sách lớp + học sinh từ DB
+    const allClasses = (typeof db !== 'undefined' && db.getClasses) ? db.getClasses() : [];
+    const allStudents = (typeof db !== 'undefined' && db.getStudents) ? db.getStudents() : [];
+
+    // Hàm chia ngẫu nhiên học sinh của lớp thành 2 đội
+    function splitTeamsRandom(classId) {
+      const pool = allStudents.filter(s => s && String(s.classId) === String(classId));
+      const shuffled = [...pool].sort(() => Math.random() - 0.5);
+      const half = Math.ceil(shuffled.length / 2);
+      blueTeam = shuffled.slice(0, half);
+      redTeam  = shuffled.slice(half);
+    }
+
+    // Nếu có lớp, chia mặc định cho lớp đầu tiên
+    if (allClasses.length > 0) {
+      splitTeamsRandom(allClasses[0].id);
+    }
+
     const modal = document.createElement('div');
     modal.id = 'tugofwar-modal';
     modal.style.cssText = 'position:fixed;inset:0;background:#090d16;z-index:9999999;display:flex;flex-direction:column;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#fff;overflow:hidden;animation:fadeIn .25s ease-out;user-select:none;';
@@ -2328,20 +2350,55 @@ window.AITeachingTools = {
           </div>
         </div>
 
-        <!-- PRE-MATCH START BANNER OVERLAY -->
-        <div id="tow-start-overlay" style="position:absolute;inset:0;background:radial-gradient(circle at center, rgba(15,23,42,0.7) 0%, rgba(15,23,42,0.92) 100%);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:35;transition:opacity .3s ease;">
-          <div style="text-align:center;max-width:580px;padding:2.5rem;background:linear-gradient(145deg, rgba(30,41,59,0.95), rgba(15,23,42,0.98));border:2px solid rgba(244,63,94,0.5);border-radius:26px;box-shadow:0 25px 60px rgba(0,0,0,0.7), 0 0 45px rgba(244,63,94,0.35);animation:floatUp .4s ease;">
-            <div style="display:flex;justify-content:center;gap:1.5rem;font-size:3.5rem;margin-bottom:.5rem;">
+        <!-- PRE-MATCH SETUP OVERLAY: CHỌN LỚP + CHIA ĐỘI NGẪU NHIÊN -->
+        <div id="tow-start-overlay" style="position:absolute;inset:0;background:radial-gradient(circle at center,rgba(15,23,42,0.75) 0%,rgba(15,23,42,0.96) 100%);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:35;overflow-y:auto;padding:1rem;">
+          <div style="text-align:center;width:100%;max-width:900px;padding:1.6rem 2rem;background:linear-gradient(145deg,rgba(30,41,59,0.97),rgba(15,23,42,0.99));border:2px solid rgba(244,63,94,0.5);border-radius:26px;box-shadow:0 25px 60px rgba(0,0,0,0.75),0 0 45px rgba(244,63,94,0.35);animation:floatUp .4s ease;">
+            <!-- TITLE -->
+            <div style="display:flex;justify-content:center;gap:1rem;font-size:2.6rem;margin-bottom:.35rem;">
               <span>🦁🐻🐧🤖</span>
-              <span style="font-size:2.5rem;align-self:center;">⚡VS⚡</span>
+              <span style="font-size:2rem;align-self:center;">⚡VS⚡</span>
               <span>🐯🦊🦖🐒</span>
             </div>
-            <h2 style="font-size:2rem;font-weight:900;margin:0 0 .5rem;background:linear-gradient(90deg,#60a5fa,#fde047,#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ĐẠI CHIẾN KÉO CO KIẾN THỨC</h2>
-            <p style="color:#cbd5e1;font-size:.95rem;line-height:1.5;margin:0 0 1.8rem;font-weight:500;">
-              Hai đội linh vật đã tập trung đông đủ vào vị trí giữ dây!<br>
-              Hãy bấm nút bên dưới để đếm ngược <strong>3... 2... 1... KÉO!</strong> và khai màn trận đấu!
-            </p>
-            <button id="tow-btn-launch" style="background:linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%);color:#ffffff;border:3px solid #fda4af;padding:1rem 2.8rem;border-radius:50px;font-size:1.35rem;font-weight:900;cursor:pointer;letter-spacing:1px;box-shadow:0 10px 30px rgba(244,63,94,0.6), 0 0 30px rgba(253,164,175,0.5);transition:all .2s cubic-bezier(0.175,0.885,0.32,1.275);display:inline-flex;align-items:center;gap:.8rem;">
+            <h2 style="font-size:1.75rem;font-weight:900;margin:0 0 .2rem;background:linear-gradient(90deg,#60a5fa,#fde047,#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ĐẠI CHIẾN KÉO CO KIẾN THỨC</h2>
+            <p style="color:#94a3b8;font-size:.85rem;margin:0 0 1.2rem;">Chọn lớp học → Hệ thống chia ngẫu nhiên 2 đội → Bắt đầu!</p>
+
+            <!-- CHỌN LỚP -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:.75rem;margin-bottom:1.2rem;flex-wrap:wrap;">
+              <label style="color:#fde047;font-weight:800;font-size:.95rem;">🏫 Chọn lớp:</label>
+              <select id="tow-class-select" style="background:#1e293b;color:#fff;border:2px solid #6366f1;padding:.45rem 1rem;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;min-width:140px;">
+                ${allClasses.length > 0
+                  ? allClasses.map(c => `<option value="${c.id}">${c.name || c.id}</option>`).join('')
+                  : '<option value="">-- Chưa có lớp --</option>'}
+              </select>
+              <button id="tow-btn-reshuffle" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;border:none;padding:.45rem 1.2rem;border-radius:12px;font-size:.9rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:.4rem;box-shadow:0 4px 14px rgba(109,40,217,0.5);transition:all .2s;">
+                🔀 Chia Ngẫu Nhiên Lại
+              </button>
+            </div>
+
+            <!-- 2 ĐỘI SIDE BY SIDE -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem;">
+              <!-- ĐỘI XANH -->
+              <div style="background:linear-gradient(145deg,rgba(37,99,235,0.2),rgba(29,78,216,0.1));border:2px solid #3b82f6;border-radius:18px;padding:.9rem 1rem;">
+                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;">
+                  <span style="font-size:1.5rem;">🔵</span>
+                  <span style="font-size:1.1rem;font-weight:900;color:#60a5fa;">ĐỘI XANH</span>
+                  <span id="tow-blue-count" style="background:#1d4ed8;color:#fff;font-size:.75rem;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:auto;">0 HS</span>
+                </div>
+                <div id="tow-blue-list" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:.3rem;"></div>
+              </div>
+              <!-- ĐỘI ĐỎ -->
+              <div style="background:linear-gradient(145deg,rgba(220,38,38,0.2),rgba(185,28,28,0.1));border:2px solid #ef4444;border-radius:18px;padding:.9rem 1rem;">
+                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;">
+                  <span style="font-size:1.5rem;">🔴</span>
+                  <span style="font-size:1.1rem;font-weight:900;color:#f87171;">ĐỘI ĐỎ</span>
+                  <span id="tow-red-count" style="background:#b91c1c;color:#fff;font-size:.75rem;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:auto;">0 HS</span>
+                </div>
+                <div id="tow-red-list" style="max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:.3rem;"></div>
+              </div>
+            </div>
+
+            <!-- BẮT ĐẦU -->
+            <button id="tow-btn-launch" style="background:linear-gradient(135deg,#f43f5e 0%,#e11d48 50%,#be123c 100%);color:#fff;border:3px solid #fda4af;padding:.9rem 2.8rem;border-radius:50px;font-size:1.3rem;font-weight:900;cursor:pointer;letter-spacing:1px;box-shadow:0 10px 30px rgba(244,63,94,0.6),0 0 30px rgba(253,164,175,0.5);transition:all .2s cubic-bezier(0.175,0.885,0.32,1.275);display:inline-flex;align-items:center;gap:.75rem;">
               <span>🚀</span> BẮT ĐẦU HIỆP ĐẤU!
             </button>
           </div>
@@ -2393,7 +2450,60 @@ window.AITeachingTools = {
 
     document.body.appendChild(modal);
 
-    // AUDIO SYNTHESIS & BATTLE BGM ENGINE
+    // ── TEAM SETUP: RENDER DANH SÁCH 2 ĐỘI ───────────────────────────────
+    const renderTeamLists = () => {
+      const blueList  = modal.querySelector('#tow-blue-list');
+      const redList   = modal.querySelector('#tow-red-list');
+      const blueCount = modal.querySelector('#tow-blue-count');
+      const redCount  = modal.querySelector('#tow-red-count');
+      if (!blueList || !redList) return;
+
+      const renderMember = (s, idx, color) =>
+        `<div style="display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,0.05);border-radius:8px;padding:.3rem .6rem;">
+          <span style="font-size:.8rem;color:${color};font-weight:800;min-width:20px;">${idx + 1}.</span>
+          <span style="font-size:.88rem;color:#e2e8f0;font-weight:600;flex:1;">${s.name || s.fullName || 'Học sinh'}</span>
+          <span style="font-size:.7rem;color:#94a3b8;">${s.code || s.id || ''}</span>
+        </div>`;
+
+      blueList.innerHTML = blueTeam.length > 0
+        ? blueTeam.map((s, i) => renderMember(s, i, '#60a5fa')).join('')
+        : '<div style="color:#64748b;font-size:.82rem;text-align:center;padding:.5rem;">Chưa có học sinh</div>';
+
+      redList.innerHTML = redTeam.length > 0
+        ? redTeam.map((s, i) => renderMember(s, i, '#f87171')).join('')
+        : '<div style="color:#64748b;font-size:.82rem;text-align:center;padding:.5rem;">Chưa có học sinh</div>';
+
+      if (blueCount) blueCount.textContent = `${blueTeam.length} HS`;
+      if (redCount)  redCount.textContent  = `${redTeam.length} HS`;
+    };
+
+    // Render lần đầu
+    renderTeamLists();
+
+    // Khi đổi lớp
+    const classSelect = modal.querySelector('#tow-class-select');
+    if (classSelect) {
+      classSelect.addEventListener('change', () => {
+        splitTeamsRandom(classSelect.value);
+        renderTeamLists();
+      });
+    }
+
+    // Nút chia lại ngẫu nhiên
+    const reshuffleBtn = modal.querySelector('#tow-btn-reshuffle');
+    if (reshuffleBtn) {
+      reshuffleBtn.addEventListener('click', () => {
+        const cid = classSelect ? classSelect.value : (allClasses.length > 0 ? allClasses[0].id : '');
+        splitTeamsRandom(cid);
+        renderTeamLists();
+        // Hiệu ứng nút
+        reshuffleBtn.style.transform = 'scale(0.95)';
+        setTimeout(() => reshuffleBtn.style.transform = '', 150);
+      });
+    }
+    // ──────────────────────────────────────────────────────────────────────
+
+
     let audioEnabled = true;
     let audioCtx = null;
     let battleBgmId = null;
@@ -3234,7 +3344,18 @@ window.AITeachingTools = {
     }
 
     // BIND START & REPLAY BUTTONS
-    modal.querySelector('#tow-btn-launch').onclick = () => startCountdownSequence();
+    modal.querySelector('#tow-btn-launch').onclick = () => {
+      // Cập nhật title HUD với tên lớp đã chọn
+      const selClass = classSelect ? classSelect.value : '';
+      const selClassName = allClasses.find(c => String(c.id) === String(selClass));
+      const titleEl = modal.querySelector('h3');
+      if (titleEl && selClassName) {
+        // Giữ nguyên title nhưng thêm thông tin đội
+        modal.querySelector('#tow-score-blue').parentElement.previousElementSibling &&
+          (modal.querySelector('#tow-score-blue').closest('div').title = `Đội Xanh: ${blueTeam.length} HS`);
+      }
+      startCountdownSequence();
+    };
 
     modal.querySelector('#tow-btn-play-again').onclick = () => {
       modal.querySelector('#tow-winner-overlay').style.display = 'none';
@@ -3248,6 +3369,10 @@ window.AITeachingTools = {
       round = 1;
       blueScore = 0;
       redScore = 0;
+      // Chia đội lại ngẫu nhiên khi đấu lại
+      const curClassId = classSelect ? classSelect.value : (allClasses.length > 0 ? allClasses[0].id : '');
+      splitTeamsRandom(curClassId);
+      renderTeamLists();
       renderQuestion();
     };
 
@@ -7426,9 +7551,19 @@ window.AITeachingTools = {
     let currentRound = 1;
     const totalRounds = 4;
 
-    const students = this._getClassStudentsList && this._getClassStudentsList().length > 0 
-      ? this._getClassStudentsList() 
-      : ['Nguyễn Văn An', 'Trần Thị Mai', 'Lê Hoàng Nam', 'Phạm Minh Đức', 'Vũ Quỳnh Anh', 'Đặng Quốc Huy', 'Bùi Thu Trang', 'Hoàng Bảo Ngọc'];
+    // ── LẤY LỚP + HỌC SINH TỪ DB ─────────────────────────────────────────
+    const allClasses_lc  = (typeof db !== 'undefined' && db.getClasses)   ? db.getClasses()   : [];
+    const allStudents_lc = (typeof db !== 'undefined' && db.getStudents)  ? db.getStudents()  : [];
+    let selectedClassId_lc = allClasses_lc.length > 0 ? allClasses_lc[0].id : '';
+
+    const getClassStudents = (classId) => {
+      const pool = allStudents_lc.filter(s => s && String(s.classId) === String(classId));
+      return pool.length > 0
+        ? pool.map(s => s.name || s.fullName || 'Học sinh')
+        : ['Nguyễn Văn An', 'Trần Thị Mai', 'Lê Hoàng Nam', 'Phạm Minh Đức', 'Vũ Quỳnh Anh', 'Đặng Quốc Huy', 'Bùi Thu Trang', 'Hoàng Bảo Ngọc'];
+    };
+
+    let students = getClassStudents(selectedClassId_lc);
 
     const luckyQuestions = [
       {
@@ -7606,15 +7741,27 @@ window.AITeachingTools = {
 
         <!-- PRE-GAME START OVERLAY -->
         <div id="lc-start-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.75);backdrop-filter:blur(10px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:35;transition:opacity .3s ease;">
-          <div style="text-align:center;max-width:640px;padding:2.6rem;background:linear-gradient(145deg, #ffffff, #f8fafc);border:4px solid #14b8a6;border-radius:32px;box-shadow:0 20px 50px rgba(0,0,0,0.15), 0 0 40px rgba(20,184,166,0.25);animation:floatUp .4s ease;">
-            <div style="font-size:4.5rem;margin-bottom:.5rem;filter:drop-shadow(0 6px 15px rgba(20,184,166,0.4));">📸⚡🎁</div>
-            <h2 style="font-size:2.2rem;font-weight:900;margin:0 0 .5rem;background:linear-gradient(90deg,#0d9488,#0284c7,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ĐẤU TRƯỜNG ỐNG KÍNH MAY MẮN AI</h2>
-            <p style="color:#475569;font-size:1.1rem;line-height:1.6;margin:0 0 2rem;font-weight:600;">
-              Ống kính máy ảnh tự động quét tiêu cự hình vuông trên khuôn mặt!<br>
-              Bấm chụp "TÁCH 📸" để chọn ngẫu nhiên bạn may mắn trả lời câu hỏi lấy điểm 10.
+          <div style="text-align:center;max-width:640px;padding:2.2rem;background:linear-gradient(145deg, #ffffff, #f8fafc);border:4px solid #14b8a6;border-radius:32px;box-shadow:0 20px 50px rgba(0,0,0,0.15), 0 0 40px rgba(20,184,166,0.25);animation:floatUp .4s ease;">
+            <div style="font-size:4rem;margin-bottom:.4rem;filter:drop-shadow(0 6px 15px rgba(20,184,166,0.4));">📸⚡🎁</div>
+            <h2 style="font-size:2rem;font-weight:900;margin:0 0 .4rem;background:linear-gradient(90deg,#0d9488,#0284c7,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ĐẤU TRƯỜNG ỐNG KÍNH MAY MẮN AI</h2>
+            <p style="color:#475569;font-size:.95rem;line-height:1.5;margin:0 0 1.2rem;font-weight:600;">
+              Ống kính AI quét khuôn mặt và chọn ngẫu nhiên học sinh trả lời câu hỏi!
             </p>
 
-            <button id="lc-btn-launch" style="background:linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);color:#ffffff;border:3px solid #5eead4;padding:1.1rem 3.2rem;border-radius:50px;font-size:1.45rem;font-weight:900;cursor:pointer;letter-spacing:1px;box-shadow:0 10px 30px rgba(20,184,166,0.4);transition:all .2s cubic-bezier(0.175,0.885,0.32,1.275);display:inline-flex;align-items:center;gap:.9rem;">
+            <!-- CHỌN LỚP -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:.75rem;margin-bottom:1.2rem;flex-wrap:wrap;">
+              <label style="color:#0d9488;font-weight:800;font-size:.95rem;">🏫 Chọn lớp:</label>
+              <select id="lc-class-select" style="background:#f0fdfa;color:#0f172a;border:2px solid #14b8a6;padding:.4rem .9rem;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;min-width:140px;">
+                ${allClasses_lc.length > 0
+                  ? allClasses_lc.map(c => `<option value="${c.id}">${c.name || c.id}</option>`).join('')
+                  : '<option value="">-- Chưa có lớp --</option>'}
+              </select>
+              <span id="lc-student-count-badge" style="background:#14b8a6;color:#fff;font-size:.8rem;font-weight:800;padding:4px 12px;border-radius:999px;">
+                👥 ${getClassStudents(selectedClassId_lc).length} HS
+              </span>
+            </div>
+
+            <button id="lc-btn-launch" style="background:linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);color:#ffffff;border:3px solid #5eead4;padding:1rem 3rem;border-radius:50px;font-size:1.35rem;font-weight:900;cursor:pointer;letter-spacing:1px;box-shadow:0 10px 30px rgba(20,184,166,0.4);transition:all .2s cubic-bezier(0.175,0.885,0.32,1.275);display:inline-flex;align-items:center;gap:.9rem;">
               <span>🚀</span> KHỞI ĐỘNG ỐNG KÍNH!
             </button>
           </div>
@@ -8297,6 +8444,27 @@ window.AITeachingTools = {
     }
 
     modal.querySelector('#lc-btn-launch').onclick = () => startCountdownSequence();
+
+    // ── CLASS SELECT LOGIC ────────────────────────────────────────────────
+    const lcClassSelect = modal.querySelector('#lc-class-select');
+    if (lcClassSelect) {
+      lcClassSelect.addEventListener('change', () => {
+        selectedClassId_lc = lcClassSelect.value;
+        students = getClassStudents(selectedClassId_lc);
+        // Cập nhật badge số học sinh
+        const badge = modal.querySelector('#lc-student-count-badge');
+        if (badge) badge.textContent = `👥 ${students.length} HS`;
+        // Cập nhật title HUD nếu muốn
+        const titleEl = modal.querySelector('#lc-cam-badge');
+        if (titleEl) {
+          const cls = allClasses_lc.find(c => String(c.id) === String(selectedClassId_lc));
+          if (cls) titleEl.textContent = `🏫 ${cls.name || cls.id} · ${students.length} HS`;
+        }
+      });
+    }
+    // ──────────────────────────────────────────────────────────────────────
+
+
 
     modal.querySelector('#lc-btn-play-again').onclick = () => {
       modal.querySelector('#lc-winner-overlay').style.display = 'none';
