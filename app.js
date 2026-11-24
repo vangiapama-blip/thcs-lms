@@ -11781,6 +11781,21 @@ render_ai_geometry(dom) {
           `;
         })() : ''}
 
+        <!-- Thanh tìm kiếm + filter chips -->
+        ${isTeacher ? `
+        <div style="display:flex;flex-wrap:wrap;gap:0.6rem;align-items:center;margin-bottom:1rem;">
+          <div style="flex:1;min-width:200px;position:relative;">
+            <input id="exam-search-input" type="text" placeholder="🔍 Tìm đề theo tiêu đề..." style="width:100%;box-sizing:border-box;padding:0.5rem 0.9rem;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.88rem;outline:none;color:#334155;background:#f8fafc;" />
+          </div>
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;" id="exam-filter-chips">
+            <button class="exam-chip" data-filter="all" style="padding:0.4rem 0.85rem;border-radius:20px;border:1.5px solid #0284c7;background:#0284c7;color:#fff;font-size:0.8rem;font-weight:600;cursor:pointer;">Tất cả</button>
+            <button class="exam-chip" data-filter="draft" style="padding:0.4rem 0.85rem;border-radius:20px;border:1.5px solid #cbd5e1;background:#fff;color:#64748b;font-size:0.8rem;font-weight:600;cursor:pointer;">📝 Bản Nháp</button>
+            <button class="exam-chip" data-filter="assigned" style="padding:0.4rem 0.85rem;border-radius:20px;border:1.5px solid #cbd5e1;background:#fff;color:#64748b;font-size:0.8rem;font-weight:600;cursor:pointer;">✅ Đã Giao</button>
+            <button class="exam-chip" data-filter="real" style="padding:0.4rem 0.85rem;border-radius:20px;border:1.5px solid #cbd5e1;background:#fff;color:#64748b;font-size:0.8rem;font-weight:600;cursor:pointer;">🎯 Thi Thật</button>
+          </div>
+        </div>
+        ` : ''}
+
         <!-- Danh sach de -->
         <div id="exam-list-panel">
           ${(() => {
@@ -11814,7 +11829,7 @@ render_ai_geometry(dom) {
                 exam.enableFullscreen !== false ? '🖥️ Fullscreen' : ''
               ].filter(Boolean);
               return `
-                <div class="glass-card" style="padding:1.25rem;border-radius:14px;border:1.5px solid #e2e8f0;display:flex;flex-wrap:wrap;align-items:center;gap:1rem;transition:box-shadow 0.2s;">
+                <div class="glass-card" data-exam-id-card="${exam.id}" data-exam-title="${(exam.title||'').replace(/"/g,'&quot;')}" data-exam-draft="${assignedClasses.length===0?'1':'0'}" data-exam-assigned="${assignedClasses.length>0?'1':'0'}" data-exam-mode="${exam.examMode||''}" style="padding:1.25rem;border-radius:14px;border:1.5px solid #e2e8f0;display:flex;flex-wrap:wrap;align-items:center;gap:1rem;transition:box-shadow 0.2s;">
                   <div style="flex:1;min-width:220px;">
                     <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.4rem;">
                       <span style="font-weight:600; font-size:1.02rem; color:#0f172a; font-family:var(--font-title);">${exam.title || 'Đề kiểm tra'}</span>
@@ -11831,13 +11846,16 @@ render_ai_geometry(dom) {
                     <div style="display:flex;flex-wrap:wrap;gap:0.4rem;font-size:0.75rem;font-weight: 400;">
                       <span style="background:#f1f5f9;color:#475569;padding:0.2rem 0.55rem;border-radius:6px;">⏱️ ${timeLimit}</span>
                       <span style="background:#f1f5f9;color:#475569;padding:0.2rem 0.55rem;border-radius:6px;">🔄 ${maxAttempts===0?'∞ lần':maxAttempts+' lần'}</span>
+                      <span style="background:#f1f5f9;color:#475569;padding:0.2rem 0.55rem;border-radius:6px;">📝 ${(exam.questions||exam.questionIds||[]).length} câu</span>
+                      <span style="background:#ede9fe;color:#6d28d9;padding:0.2rem 0.55rem;border-radius:6px;">📊 ${exam.targetGradeColumn||'ĐTX1'}</span>
+                      <span style="background:${exam.examMode==='real'?'#fef9c3':'#f0fdf4'};color:${exam.examMode==='real'?'#854d0e':'#166534'};padding:0.2rem 0.55rem;border-radius:6px;">${exam.examMode==='real'?'🎯 Thi Thật':'🧪 Thi Thử'}</span>
                       <span style="background:#f1f5f9;color:#475569;padding:0.2rem 0.55rem;border-radius:6px;">📊 ${attempts.length} bài nộp</span>
                       ${openBadgeT}${closeBadgeT}
                       ${assignedClasses.map(c=>`<span style="background:#dbeafe;color:#1d4ed8;padding:0.2rem 0.55rem;border-radius:6px;font-weight:500;">🏫 Lớp ${c}</span>`).join('')}
                       ${proctorBadges.map(b=>`<span style="background:#fef3c7;color:#92400e;padding:0.2rem 0.55rem;border-radius:6px;">${b}</span>`).join('')}
                     </div>
                   </div>
-                  <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                  <div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
                     ${isTeacher ? `
                       ${(() => {
                         const isQz = (exam.examSubType === 'quizizz' || exam.format === 'quizizz' || exam.isQuizizz || subTab === 'quizizz');
@@ -11850,29 +11868,25 @@ render_ai_geometry(dom) {
                       <button class="btn-exam-edit" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #d97706 0%, #b45309 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:500;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px rgba(217,119,6,0.25);">
                         <span>✏️</span> Xem / Sửa
                       </button>
-                      <button class="btn-exam-print" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:600;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px rgba(2,132,199,0.25);" title="In đề kiểm tra & xuất Word">
-                        <span>🖨️</span> In Đề
-                      </button>
-                      <button class="btn-exam-shuffle" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);color:#fff;border:none;padding:0.42rem 0.85rem;border-radius:8px;font-weight:600;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px rgba(124,58,237,0.3);">
-                        <span>🔀</span> Trộn Đề ${(exam.variants && exam.variants.length > 0) ? `(${exam.variants.length} mã)` : ''}
-                      </button>
                       <button class="btn-exam-assign" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #059669 0%, #047857 100%);color:#fff;border:none;padding:0.42rem 0.85rem;border-radius:8px;font-weight:600;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;box-shadow:0 2px 6px rgba(5,150,105,0.3);">
-                        <span>🚀</span> ${assignedClasses.length === 0 ? 'Giao Bài' : `Giao Bài / Bổ Sung Lớp (${assignedClasses.length})`}
+                        <span>🚀</span> ${assignedClasses.length === 0 ? 'Giao Bài' : `Giao Bài (${assignedClasses.length})`}
                       </button>
-                      ${assignedClasses.length > 0 ? `
-                        <button class="btn-exam-recall" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #475569 0%, #334155 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:500;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;">
-                          <span>↩️</span> Thu Hồi
-                        </button>
-                      ` : ''}
                       <button class="btn-exam-results" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:500;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;">
                         <span>📊</span> Kết Quả (${attempts.length})
                       </button>
-                      <button class="btn-exam-copy" data-exam-id="${exam.id}" style="background:linear-gradient(135deg,#0891b2 0%,#0e7490 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:500;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;" title="Sao chép đề">
-                        <span>📋</span> Sao chép
-                      </button>
-                      <button class="btn-exam-delete" data-exam-id="${exam.id}" style="background:linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);color:#fff;border:none;padding:0.42rem 0.8rem;border-radius:8px;font-weight:500;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;">
-                        <span>🗑️</span> Xóa
-                      </button>
+                      <div style="position:relative;display:inline-block;" class="exam-more-wrap" data-exam-id="${exam.id}">
+                        <button class="btn-exam-more" data-exam-id="${exam.id}" style="background:#f1f5f9;color:#334155;border:1.5px solid #cbd5e1;padding:0.42rem 0.75rem;border-radius:8px;font-weight:600;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:0.25rem;">
+                          ⋯ Thêm
+                        </button>
+                        <div class="exam-more-menu" data-exam-id="${exam.id}" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:200;min-width:160px;overflow:hidden;">
+                          <button class="btn-exam-print exam-more-item" data-exam-id="${exam.id}" style="width:100%;background:none;border:none;padding:0.6rem 1rem;text-align:left;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;color:#334155;font-weight:500;" title="In đề kiểm tra & xuất Word">🖨️ In Đề</button>
+                          <button class="btn-exam-shuffle exam-more-item" data-exam-id="${exam.id}" style="width:100%;background:none;border:none;padding:0.6rem 1rem;text-align:left;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;color:#334155;font-weight:500;">🔀 Trộn Đề${(exam.variants && exam.variants.length > 0) ? ` (${exam.variants.length} mã)` : ''}</button>
+                          <button class="btn-exam-copy exam-more-item" data-exam-id="${exam.id}" style="width:100%;background:none;border:none;padding:0.6rem 1rem;text-align:left;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;color:#334155;font-weight:500;">📋 Sao chép</button>
+                          ${assignedClasses.length > 0 ? `<button class="btn-exam-recall exam-more-item" data-exam-id="${exam.id}" style="width:100%;background:none;border:none;padding:0.6rem 1rem;text-align:left;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;color:#334155;font-weight:500;">↩️ Thu Hồi</button>` : ''}
+                          <div style="border-top:1px solid #f1f5f9;margin:0.25rem 0;"></div>
+                          <button class="btn-exam-delete exam-more-item" data-exam-id="${exam.id}" style="width:100%;background:none;border:none;padding:0.6rem 1rem;text-align:left;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;color:#dc2626;font-weight:500;">🗑️ Xóa</button>
+                        </div>
+                      </div>
                     ` : `
                       <button class="btn-exam-take" data-exam-id="${exam.id}" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:#fff;border:none;padding:0.5rem 1.1rem;border-radius:10px;; font-weight: 400;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(16,185,129,0.35);">🖊️ Làm Bài Thi</button>
                     `}
@@ -12013,6 +12027,59 @@ render_ai_geometry(dom) {
             this.render_exams(dom);
             this.showToast('Đã xóa đề thi!');
           }
+        };
+      });
+      // Dropdown ⋯ Thêm
+      dom.querySelectorAll('.btn-exam-more').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const examId = btn.getAttribute('data-exam-id');
+          dom.querySelectorAll('.exam-more-menu').forEach(m => {
+            if (m.getAttribute('data-exam-id') !== examId) m.style.display = 'none';
+          });
+          const menu = dom.querySelector(`.exam-more-menu[data-exam-id="${examId}"]`);
+          if (menu) menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        };
+      });
+      document.addEventListener('click', () => {
+        dom.querySelectorAll('.exam-more-menu').forEach(m => m.style.display = 'none');
+      }, { once: true, capture: true });
+      dom.querySelectorAll('.exam-more-item').forEach(item => {
+        item.addEventListener('mouseover', () => item.style.background = '#f8fafc');
+        item.addEventListener('mouseout', () => item.style.background = '');
+      });
+      // Tìm kiếm + filter chips
+      let _examSearchTerm = '';
+      let _examFilterMode = 'all';
+      const _applyExamFilter = () => {
+        const term = _examSearchTerm.trim().toLowerCase();
+        dom.querySelectorAll('.glass-card[data-exam-id-card]').forEach(card => {
+          const title = (card.getAttribute('data-exam-title') || '').toLowerCase();
+          const isDraft = card.getAttribute('data-exam-draft') === '1';
+          const isAssigned = card.getAttribute('data-exam-assigned') === '1';
+          const isReal = card.getAttribute('data-exam-mode') === 'real';
+          let show = true;
+          if (term && !title.includes(term)) show = false;
+          if (_examFilterMode === 'draft' && !isDraft) show = false;
+          if (_examFilterMode === 'assigned' && !isAssigned) show = false;
+          if (_examFilterMode === 'real' && !isReal) show = false;
+          card.style.display = show ? '' : 'none';
+        });
+      };
+      const searchInput = dom.querySelector('#exam-search-input');
+      if (searchInput) {
+        searchInput.oninput = (e) => { _examSearchTerm = e.target.value; _applyExamFilter(); };
+      }
+      dom.querySelectorAll('.exam-chip').forEach(chip => {
+        chip.onclick = () => {
+          _examFilterMode = chip.getAttribute('data-filter');
+          dom.querySelectorAll('.exam-chip').forEach(c => {
+            const active = c === chip;
+            c.style.background = active ? '#0284c7' : '#fff';
+            c.style.color = active ? '#fff' : '#64748b';
+            c.style.borderColor = active ? '#0284c7' : '#cbd5e1';
+          });
+          _applyExamFilter();
         };
       });
     } else {
@@ -13519,6 +13586,7 @@ render_ai_geometry(dom) {
     if (!exam) return;
 
     const classes = db.getClasses ? db.getClasses() : [];
+    const allStudents = db.getStudents ? db.getStudents() : [];
     const currentlyAssigned = (exam.classIds || (exam.classId ? [exam.classId] : [])).filter(Boolean);
 
     const oldModal = document.getElementById('assign-exam-modal');
@@ -13555,10 +13623,12 @@ render_ai_geometry(dom) {
               <hr style="margin:0.2rem 0; border:none; border-top:1px solid #e2e8f0;">
               ${classes.map(cls => {
                 const isChecked = currentlyAssigned.includes(cls.id);
+                const stuCount = allStudents.filter(s => s.classId === cls.id).length;
                 return `
                   <label style="display:flex; align-items:center; gap:0.6rem; padding:0.45rem 0.65rem; background:#fff; border-radius:8px; border:1.5px solid ${isChecked ? '#86efac' : '#e2e8f0'}; cursor:pointer; font-size:0.85rem; color:#334155;">
                     <input type="checkbox" class="chk-assign-class-item" value="${cls.id}" ${isChecked ? 'checked' : ''} style="width:17px; height:17px; accent-color:#059669;">
                     <span style="font-weight:${isChecked ? '600' : '400'}; color:${isChecked ? '#166534' : '#334155'};">Lớp ${cls.name || cls.id}</span>
+                    <span style="font-size:0.75rem;color:#64748b;">(${stuCount} HS)</span>
                     ${isChecked ? '<span style="margin-left:auto; font-size:0.75rem; background:#dbeafe; color:#1d4ed8; font-weight:600; padding:0.15rem 0.55rem; border-radius:12px;">Đã giao</span>' : ''}
                   </label>
                 `;
@@ -13643,8 +13713,6 @@ render_ai_geometry(dom) {
     const editExam = editExamId ? (db.getExams().find(e => e.id === editExamId) || null) : null;
     const isEdit = !!editExam;
 
-    const normalizeSubjId = (s) => (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-    const subQs = questions.filter(q => !q.subjectId || normalizeSubjId(q.subjectId) === normalizeSubjId(subjectId));
     const tabLabels = { tx: 'Thường Xuyên (TX)', midterm: 'Giữa Kỳ', final: 'Cuối Kỳ' };
 
     const modal = document.createElement('div');
@@ -13652,9 +13720,14 @@ render_ai_geometry(dom) {
     modal.innerHTML = `
       <div style="background:#fff;border-radius:20px;padding:2rem;width:100%;max-width:760px;position:relative;box-shadow:0 25px 60px rgba(0,0,0,0.3);margin:auto;">
         <button id="btn-close-create-exam" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#475569; font-weight:400; font-size:0.88rem;">✕</button>
-        <h3 style="font-family:var(--font-title); font-weight:600; font-size:1.25rem; color:#0f172a; margin:0 0 1.25rem 0; display:flex; align-items:center; gap:0.5rem;">
-          ${isEdit ? '👁️✏️ CHỈNH SỬA & XEM CHI TIẾT ĐỀ KIỂM TRA' : '➕ TẠO ĐỀ KIỂM TRA MỚI'} — ${subject.name}
+        <h3 style="font-family:var(--font-title); font-weight:600; font-size:1.25rem; color:#0f172a; margin:0 0 0.6rem 0; display:flex; align-items:center; gap:0.5rem;">
+          ${isEdit ? '👁️✏️ CHỈNH SỬA & XEM CHI TIẾT ĐỀ KIỂM TRA' : '➕ TẠO ĐỀ KIỂM TRA MỚI'}
         </h3>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.25rem;align-items:center;">
+          <span style="background:#ede9fe;color:#6d28d9;padding:0.22rem 0.75rem;border-radius:20px;font-size:0.82rem;font-weight:600;">📚 ${subject.name}</span>
+          <span style="background:#fef3c7;color:#92400e;padding:0.22rem 0.75rem;border-radius:20px;font-size:0.82rem;font-weight:600;">${tabLabels[tab] || tab}</span>
+          ${subTab === 'quizizz' ? '<span style="background:#f5f3ff;color:#7c3aed;padding:0.22rem 0.75rem;border-radius:20px;font-size:0.82rem;font-weight:600;">🎮 Quizizz Arena</span>' : ''}
+        </div>
         ${isEdit ? `
           <div style="background:#f0f9ff; border:1.5px solid #bae6fd; border-radius:12px; padding:0.85rem 1rem; margin-bottom:1.25rem; color:#0369a1; font-size:0.85rem; display:flex; align-items:center; gap:0.5rem;">
             <span style="font-size:1.2rem;">👁️</span>
@@ -19295,13 +19368,17 @@ render_ai_geometry(dom) {
       // Lấy đúng tab hiện tại (tx / midterm / final)
       const currentExamCat = (this.currentExamTab && ['tx','midterm','final'].includes(this.currentExamTab))
         ? this.currentExamTab : 'tx';
+      const targetCol = currentExamCat === 'midterm' ? 'GK' : (currentExamCat === 'final' ? 'CK' : 'TX1');
+      const examModeVal = mode === 'thi_that' ? 'real' : 'practice';
       const newAssignment = {
-        id: 'asm_' + Date.now(),
+        id: isExamContext ? ('exam_rnd_' + Date.now()) : ('asm_' + Date.now()),
         title,
         examCategory: currentExamCat,
         examSubType: isQuizizzMode ? 'quizizz' : 'regular',
         format: isQuizizzMode ? 'quizizz' : 'standard',
         isQuizizz: isQuizizzMode,
+        targetGradeColumn: targetCol,
+        examMode: examModeVal,
         description: (isExamContext ? 'Đề kiểm tra ngẫu nhiên' : 'Bài tập ngẫu nhiên') + ` ${selectedQuestions.length} câu - Khối ${selectedGradeStr} (Lớp ${selectedClassId})`,
         subjectId,
         grade: selectedGradeStr,
@@ -19644,13 +19721,17 @@ render_ai_geometry(dom) {
       // Lấy đúng tab hiện tại (tx / midterm / final)
       const fileExamCat = (this.currentExamTab && ['tx','midterm','final'].includes(this.currentExamTab))
         ? this.currentExamTab : 'tx';
+      const fileTargetCol = fileExamCat === 'midterm' ? 'GK' : (fileExamCat === 'final' ? 'CK' : 'TX1');
+      const fileExamModeVal = mode === 'thi_that' ? 'real' : 'practice';
       const newAssignment = {
-        id: 'asm_' + Date.now(),
+        id: isExamContext ? ('exam_file_' + Date.now()) : ('asm_' + Date.now()),
         title,
         examCategory: fileExamCat,
         examSubType: isQuizizzMode ? 'quizizz' : 'regular',
         format: isQuizizzMode ? 'quizizz' : 'standard',
         isQuizizz: isQuizizzMode,
+        targetGradeColumn: fileTargetCol,
+        examMode: fileExamModeVal,
         description: `Bài tập rút từ tệp ${finalPicked.length} câu - Khối ${grade} (Lớp ${classId})`,
         subjectId,
         grade,
@@ -20436,6 +20517,7 @@ render_ai_geometry(dom) {
 
         const currentExamCat = (this.currentExamTab && ['tx','midterm','final'].includes(this.currentExamTab))
           ? this.currentExamTab : 'tx';
+        const aiTargetCol = currentExamCat === 'midterm' ? 'GK' : (currentExamCat === 'final' ? 'CK' : 'TX1');
 
         const newExam = {
           id: 'exam_ai_' + Date.now(),
@@ -20444,6 +20526,8 @@ render_ai_geometry(dom) {
           examSubType: 'regular',
           format: 'standard',
           isQuizizz: false,
+          targetGradeColumn: aiTargetCol,
+          examMode: 'real',
           description: `Đề thi AI bộ sách Kết Nối Tri Thức Với Cuộc Sống - Chủ đề: ${topic} (${generatedQuestions.length} câu - Khối ${selectedGrade})`,
           subjectId: selectedSubId,
           grade: String(selectedGrade),
