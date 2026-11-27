@@ -9179,6 +9179,10 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
               <input type="radio" name="teacherImportMode" value="import_update" style="width:18px; height:18px;">
               <span>🔄 Cập nhật phân công & Thông tin (Nếu giáo viên đã có trong hệ thống)</span>
             </label>
+            <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer; font-weight: 600; font-size:0.88rem; color:#dc2626;">
+              <input type="radio" name="teacherImportMode" value="import_overwrite" style="width:18px; height:18px; accent-color:#dc2626;">
+              <span>🗑️ Ghi đè toàn bộ (Xóa danh sách giáo viên cũ & chỉ nạp danh sách trong file)</span>
+            </label>
           </div>
         </div>
 
@@ -9455,6 +9459,10 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           if (!parsed || parsed.length === 0) {
             this.showToast('Tệp Excel/CSV không có dữ liệu hợp lệ!', 'warning');
             return;
+          }
+
+          if (selectedMode === 'import_overwrite') {
+            if (db.state) db.state.teachers = [];
           }
 
           let addedCount = 0;
@@ -10351,6 +10359,10 @@ render_students(dom) {
               <input type="radio" name="studentImportMode" value="import_update" style="width:18px;height:18px;">
               <span>🔄 Cập nhật thông tin (Nếu mã học sinh đã có trong hệ thống)</span>
             </label>
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight: 600;font-size:0.88rem;color:#dc2626;">
+              <input type="radio" name="studentImportMode" value="import_overwrite" style="width:18px;height:18px;accent-color:#dc2626;">
+              <span>🗑️ Ghi đè toàn bộ (Xóa danh sách học sinh cũ & nạp mới hoàn toàn theo file)</span>
+            </label>
           </div>
         </div>
 
@@ -10566,6 +10578,9 @@ render_students(dom) {
             parsed = this.parseCSVText(text);
           }
           if (!parsed || parsed.length === 0) { this.showToast('Tệp không có dữ liệu!', 'warning'); return; }
+          if (selectedMode === 'import_overwrite') {
+            if (db.state) db.state.students = [];
+          }
           let addedCount = 0, updatedCount = 0, skippedCount = 0, noClassCount = 0;
           const normTxt = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
           const slugTxt = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
@@ -21588,7 +21603,7 @@ render_ai_geometry(dom) {
       address: 'Dliê Ya, Đắc Lắc',
       principal: 'Thầy Y Krơr Niê',
       phone: '0500.3871234',
-      academicYear: '2025-2026'
+      academicYear: (db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')
     };
 
     const user = this.currentUser || { id: 'admin', name: 'Quản trị viên', role: 'admin', email: 'admin@amatranglong.edu.vn', phone: '0397800689' };
@@ -22308,7 +22323,7 @@ render_ai_geometry(dom) {
   showRollOverModal(targetYearId, parentDom) {
     const years = (db.state && db.state.academicYears) ? db.state.academicYears : [];
     const targetYear = years.find(y => y.id === targetYearId) || { id: targetYearId, name: targetYearId };
-    const currentYearId = db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2025-2026';
+    const currentYearId = db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027';
     const sourceYears = years.filter(y => y.id !== targetYearId);
 
     const modal = document.createElement('div');
@@ -22760,12 +22775,15 @@ render_ai_geometry(dom) {
 
         <div style="margin-bottom:1.25rem; background:#eff6ff; border:1px solid #bfdbfe; padding:1rem; border-radius:12px;">
           <div style="font-weight:700; color:#1e40af; margin-bottom:0.4rem;">Chế độ nhập dữ liệu:</div>
-          <div style="display:flex; gap:1.5rem;">
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
             <label style="cursor:pointer; display:flex; align-items:center; gap:0.4rem; font-weight:600; color:#1e293b;">
-              <input type="radio" name="classImportMode" value="import_new" checked> Thêm mới (Bỏ qua lớp trùng)
+              <input type="radio" name="classImportMode" value="import_new" checked> ➕ Thêm mới (Bỏ qua lớp trùng)
             </label>
             <label style="cursor:pointer; display:flex; align-items:center; gap:0.4rem; font-weight:600; color:#1e293b;">
-              <input type="radio" name="classImportMode" value="import_update"> Cập nhật thông tin lớp
+              <input type="radio" name="classImportMode" value="import_update"> 🔄 Cập nhật thông tin lớp
+            </label>
+            <label style="cursor:pointer; display:flex; align-items:center; gap:0.4rem; font-weight:700; color:#dc2626;">
+              <input type="radio" name="classImportMode" value="import_overwrite" style="accent-color:#dc2626;"> 🗑️ Ghi đè toàn bộ (Xóa danh sách lớp cũ & chỉ nạp danh sách lớp trong file)
             </label>
           </div>
         </div>
@@ -22826,6 +22844,12 @@ render_ai_geometry(dom) {
             parsed = this.parseCSVText(text);
           }
           if (!parsed || parsed.length === 0) { this.showToast('Tệp không có dữ liệu!', 'warning'); return; }
+          if (selectedMode === 'import_overwrite') {
+            if (db.state) {
+              db.state.classesList = [];
+              db.state.classes = [];
+            }
+          }
           let addedCount = 0, updatedCount = 0;
           const currentClasses = (db && typeof db.getClassesList === 'function') ? db.getClassesList() : (db.state.classesList || []);
 
@@ -23312,6 +23336,7 @@ render_ai_geometry(dom) {
     
     // Auto restore remembered username and password for THIS SPECIFIC DEVICE
     this.restoreRememberedCredentials();
+    this.initSchoolYearSwitcher();
     
     this.showToast('🔒 Đã đăng xuất khỏi hệ thống.');
     this.renderSidebar();
@@ -25248,7 +25273,7 @@ render_ai_geometry(dom) {
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1.5px solid #f1f5f9;">
               <div>
                 <h3 style="margin:0; font-family:var(--font-title); font-weight: 500; color:#0f172a; font-size:1.15rem;">
-                  📊 Bảng Điểm Môn ${subject.name} (Năm Học 2025 - 2026)
+                  📊 Bảng Điểm Môn ${subject.name} (Năm Học ${(db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')})
                 </h3>
                 <p style="margin:0.2rem 0 0 0; font-size:0.8rem; color:#64748b;">Điểm thường xuyên (TX1-4), Giữa kỳ (GK), Cuối kỳ (CK) tự động đồng bộ theo mã HS</p>
               </div>
@@ -25833,7 +25858,7 @@ render_ai_geometry(dom) {
 
     const dataRows = [
       ['BẢNG ĐIỂM CHÍNH THỨC GDPT 2018 - MÔN ' + (subjectName || subjectId).toUpperCase()],
-      [`Phạm vi: ${scopeLabel} | Năm Học: 2025 - 2026 | Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`],
+      [`Phạm vi: ${scopeLabel} | Năm Học: ${(db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')} | Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`],
       [''],
       ['STT', 'Mã Học Sinh', 'Họ và Tên', 'Lớp', 'TX1', 'TX2', 'TX3', 'TX4', 'GK', 'CK', 'TBM', 'Đánh Giá']
     ];
@@ -25872,7 +25897,7 @@ render_ai_geometry(dom) {
       : ((filterGrade && filterGrade !== 'all') ? ('Khoi' + filterGrade) : 'ToanTruong');
 
     XLSX.utils.book_append_sheet(wb, ws, 'BangDiem');
-    const fileName = `BangDiem_Mon_${safeSubCode}_${safeScopeCode}_2025-2026.xlsx`;
+    const fileName = `BangDiem_Mon_${safeSubCode}_${safeScopeCode}_${(db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')}.xlsx`;
     XLSX.writeFile(wb, fileName);
     this.showToast(`📥 Đã xuất file Excel: ${fileName}!`);
   }
@@ -26009,7 +26034,7 @@ render_ai_geometry(dom) {
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
             <div>
               <h3 style="margin: 0; font-family: var(--font-title); font-weight: 800; font-size: 1.2rem; color: #0f172a;">
-                📊 BẢNG ĐIỂM CHI TIẾT CÁC MÔN HỌC (NĂM HỌC 2025-2026)
+                📊 BẢNG ĐIỂM CHI TIẾT CÁC MÔN HỌC (NĂM HỌC ${(db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')})
               </h3>
               <p style="margin: 0.2rem 0 0 0; font-size: 0.83rem; color: #64748b;">Điểm Đánh giá thường xuyên (ĐTX), Đánh giá giữa kỳ (ĐGK) và Đánh giá cuối kỳ (ĐCK) theo thông tư GDPT 2018</p>
             </div>
@@ -27092,7 +27117,7 @@ render_ai_geometry(dom) {
               Báo Cáo Thống Kê Tổng Hợp Nhà Trường
             </h2>
             <p style="margin:0.2rem 0 0 0; font-size:0.85rem; color:#475569; font-weight:400;">
-              Sơ đồ minh họa trực quan phân tích học lực, điểm số các môn và chuyên cần năm học 2025 - 2026
+              Sơ đồ minh họa trực quan phân tích học lực, điểm số các môn và chuyên cần năm học ${(db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')}
             </p>
           </div>
 
@@ -27219,7 +27244,7 @@ render_ai_geometry(dom) {
             <h3 style="margin:0 0 0.2rem 0; font-size:1.05rem; font-weight:700; color:#0f172a; display:flex; align-items:center; gap:0.4rem;">
               <span>📚</span> Thống Kê Điểm Trung Bình Theo Môn
             </h3>
-            <p style="margin:0 0 1rem 0; font-size:0.78rem; color:#64748b; font-weight:400;">Điểm trung bình các môn học toàn trường năm 2025 - 2026</p>
+            <p style="margin:0 0 1rem 0; font-size:0.78rem; color:#64748b; font-weight:400;">Điểm trung bình các môn học toàn trường năm ${(db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')}</p>
 
             <div style="display:flex; flex-direction:column; gap:0.75rem;">
               ${subjectStats.map(s => {
@@ -27279,7 +27304,7 @@ render_ai_geometry(dom) {
               <h3 style="margin:0; font-family:var(--font-title); font-weight:700; color:#0f172a; font-size:1.1rem;">
                 📋 Bảng Thống Kê Chi Tiết Học Lực & Chuyên Cần Theo Lớp
               </h3>
-              <p style="margin:0.2rem 0 0 0; font-size:0.8rem; color:#64748b;">Số liệu tổng hợp từng lớp học năm học 2025 - 2026</p>
+              <p style="margin:0.2rem 0 0 0; font-size:0.8rem; color:#64748b;">Số liệu tổng hợp từng lớp học năm học ${(db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')}</p>
             </div>
           </div>
 
@@ -27348,7 +27373,7 @@ render_ai_geometry(dom) {
 
     const dataRows = [
       ['BÁO CÁO THỐNG KÊ TỔNG HỢP HỌC LỰC & CHUYÊN CẦN - TRƯỜNG TH-THCS AMA TRANG LƠNG'],
-      ['Năm Học: 2025 - 2026'],
+      ['Năm Học: ' + (db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')],
       [''],
       ['STT', 'Tên Lớp Học', 'Sĩ Số', 'Mức Tốt (Giỏi)', 'Mức Khá', 'Mức Đạt', 'Chưa Đạt', 'TBM Toàn Lớp', 'Tỷ Lệ Chuyên Cần']
     ];
@@ -27378,7 +27403,7 @@ render_ai_geometry(dom) {
     ];
 
     XLSX.utils.book_append_sheet(wb, ws, 'BaoCaoThongKe');
-    const fileName = `BaoCao_ThongKe_TongHop_THCS_AMTL_2025-2026.xlsx`;
+    const fileName = `BaoCao_ThongKe_TongHop_THCS_AMTL_${(db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')}.xlsx`;
     XLSX.writeFile(wb, fileName);
     this.showToast(`📥 Đã xuất file Excel Báo cáo thống kê: ${fileName}!`);
   }
@@ -27446,6 +27471,9 @@ render_ai_geometry(dom) {
             </a>
             <button id="btn-card-upload-backup" onclick="document.getElementById('inp-upload-json-backup').click();" style="background:linear-gradient(135deg,#10b981 0%,#059669 100%); color:#fff; border:none; padding:0.65rem 1.3rem; border-radius:12px; font-weight:700; font-size:0.88rem; cursor:pointer; box-shadow:0 4px 14px rgba(16,185,129,0.35); display:flex; align-items:center; gap:0.4rem;">
               📥 CHỌN FILE SAO LƯU NẠP DỮ LIỆU (.JSON)
+            </button>
+            <button id="btn-clear-and-reset-db" style="background:#fee2e2; color:#b91c1c; border:1.5px solid #fca5a5; padding:0.65rem 1.1rem; border-radius:12px; font-weight:700; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:0.4rem;" title="Dọn sạch dữ liệu cũ/lỗi để nạp file mới">
+              🧹 XÓA TRẮNG ĐỂ NẠP MỚI
             </button>
             <input type="file" id="inp-upload-json-backup" accept=".json" style="display:none;" onchange="if(this.files && this.files[0] && window.app && window.app.restoreFromJSONFile) { window.app.restoreFromJSONFile(this.files[0]); }">
           </div>
@@ -27809,6 +27837,23 @@ if (inpFile) {
   };
 }
 
+const btnClearDb = dom.querySelector('#btn-clear-and-reset-db');
+if (btnClearDb) {
+  btnClearDb.onclick = () => {
+    if (confirm('⚠️ BẠN CÓ CHẮC CHẮN MUỐN XÓA TOÀN BỘ DỮ LIỆU ĐỂ NẠP LẠI TỪ ĐẦU?\n\nToàn bộ học sinh, giáo viên, lớp học cũ trên trình duyệt này sẽ được dọn sạch để bạn nạp file mới chuẩn xác!')) {
+      if (typeof db !== 'undefined') {
+        db.state.students = [];
+        db.state.teachers = [];
+        db.state.classesList = [];
+        db.state.classes = [];
+        db.save();
+        this.showToast('🧹 Đã xóa trắng dữ liệu thành công! Giờ bạn có thể nạp lại file mới.');
+        setTimeout(() => window.location.reload(), 600);
+      }
+    }
+  };
+}
+
 dom.querySelectorAll('.btn-snap-download').forEach(btn => {
   btn.onclick = () => downloadFn();
 });
@@ -27841,7 +27886,7 @@ restoreFromJSONFile(file) {
           const dom = document.getElementById('viewport') || document.getElementById('main-viewport') || document.body;
           this.render_backup(dom);
         }
-        setTimeout(() => window.location.reload(), 500);
+        setTimeout(() => window.location.reload(), 800);
       } else {
         alert('⚠️ Tệp sao lưu không hợp lệ hoặc không đúng cấu trúc CSDL!');
       }
@@ -29951,7 +29996,7 @@ LMSApp.prototype.initSchoolYearSwitcher = function() {
 
     const currentYear = (typeof db !== 'undefined' && db.getSelectedSchoolYear)
       ? db.getSelectedSchoolYear()
-      : ((typeof localStorage !== 'undefined' && localStorage.getItem('THCS_LMS_SELECTED_YEAR')) || '2025-2026');
+      : ((typeof localStorage !== 'undefined' && localStorage.getItem('THCS_LMS_SELECTED_YEAR')) || '2026-2027');
 
     // 1. Cập nhật thẻ hiển thị Năm học tùy chỉnh trên Header / Sidebar
     const textEl = document.getElementById('school-year-current-text');
@@ -29959,13 +30004,35 @@ LMSApp.prototype.initSchoolYearSwitcher = function() {
       textEl.textContent = currentYear;
     }
 
-    // 2. Cập nhật thẻ select nếu có
+    // 2. Cập nhật nhãn năm học trên màn hình Đăng nhập (Login Badge)
+    const loginBadge = document.getElementById('login-logo-year-badge');
+    if (loginBadge) {
+      loginBadge.textContent = currentYear;
+    }
+
+    // 3. Cập nhật thẻ select nếu có
     const sel = document.getElementById('sel-top-school-year');
     if (sel) {
       sel.value = currentYear;
       sel.onchange = () => {
         this.selectYearCustom(sel.value);
       };
+    }
+
+    // 4. Đồng bộ menu dropdown chọn năm học kèm dấu tích năm đang chọn
+    const menu = document.getElementById('custom-year-menu');
+    if (menu && typeof db !== 'undefined' && db.getAcademicYearsList) {
+      const years = db.getAcademicYearsList();
+      if (Array.isArray(years) && years.length > 0) {
+        menu.innerHTML = years.map(y => {
+          const yId = (y.id || '').replace('year_', '').replace('_', '-');
+          const isSel = (yId === currentYear);
+          return `<div onclick="if(window.app) window.app.selectYearCustom('${yId}');" style="padding: 5px 10px; font-size: 11px; font-weight: ${isSel ? '700' : '500'}; color: ${isSel ? '#2563eb' : '#1e293b'}; background: ${isSel ? '#eff6ff' : 'transparent'}; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='${isSel ? '#eff6ff' : 'transparent'}';">
+            <span>${y.name || ('Năm học ' + yId)}</span>
+            ${isSel ? '<span style="color:#2563eb; font-size:10px;">✓</span>' : ''}
+          </div>`;
+        }).join('');
+      }
     }
 };
 
@@ -29974,7 +30041,7 @@ LMSApp.prototype.render_years = function(dom) {
     if (!dom) return;
 
     const yearsList = (typeof db !== 'undefined' && db.getAcademicYearsList) ? db.getAcademicYearsList() : [];
-    const currentSelectedYear = (typeof db !== 'undefined' && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2025-2026';
+    const currentSelectedYear = (typeof db !== 'undefined' && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2026-2027';
 
     dom.innerHTML = '<div style="padding:1.25rem; font-family:var(--font-body); animation:fadeIn 0.25s ease-out; max-width:1250px; margin:0 auto;"><div class="glass-card" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:18px; padding:1.5rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 15px rgba(0,0,0,0.04);"><div><div style="display:inline-flex; align-items:center; gap:0.4rem; background:#dbeafe; border:1.5px solid #93c5fd; color:#1e40af; font-weight:700; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.8rem; margin-bottom:0.4rem;">📅 QUẢN LÝ VÀ CHUYỂN ĐỔI NĂM HỌC</div><h2 style="margin:0; font-family:var(--font-title); font-weight:700; font-size:1.4rem; color:#1e293b;">Danh Sách Năm Học & Xem Dữ Liệu Cũ</h2><p style="margin:0.2rem 0 0 0; font-size:0.85rem; color:#475569; font-weight:400;">Chuyển đổi năm học để tra cứu toàn bộ hồ sơ, bảng điểm và học sinh của các năm học cũ</p></div></div></div>';
 };
@@ -29982,9 +30049,16 @@ LMSApp.prototype.render_years = function(dom) {
 LMSApp.prototype.renderHistoricalYearBanner = function(dom) {
     if (typeof db === 'undefined' || !db.getSelectedSchoolYear) return;
     const selectedYear = db.getSelectedSchoolYear();
-    if (selectedYear === '2025-2026') return;
+    let currentActiveYear = '2026-2027';
+    if (db.state && Array.isArray(db.state.academicYears)) {
+      const activeObj = db.state.academicYears.find(y => y.current || y.isCurrent);
+      if (activeObj && activeObj.id) {
+        currentActiveYear = activeObj.id.replace('year_', '').replace('_', '-');
+      }
+    }
+    if (selectedYear === currentActiveYear) return;
 
-    const bannerHtml = '<div style="background:#fffbe8; border:1.5px solid #fde047; padding:0.85rem 1.2rem; border-radius:14px; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; color:#854d0e; font-weight:600; font-size:0.88rem; box-shadow:0 3px 10px rgba(234,179,8,0.15);"><div style="display:flex; align-items:center; gap:0.6rem;"><span style="font-size:1.3rem;">📜</span><span>ĐANG XEM DỮ LIỆU LỊCH SỬ NĂM HỌC <strong>' + selectedYear + '</strong>.</span></div></div>';
+    const bannerHtml = '<div style="background:#fffbe8; border:1.5px solid #fde047; padding:0.85rem 1.2rem; border-radius:14px; margin-bottom:1.25rem; display:flex; align-items:center; justify-content:space-between; color:#854d0e; font-weight:600; font-size:0.88rem; box-shadow:0 3px 10px rgba(234,179,8,0.15);"><div style="display:flex; align-items:center; gap:0.6rem;"><span style="font-size:1.3rem;">📜</span><span>ĐANG XEM DỮ LIỆU LỊCH SỬ NĂM HỌC <strong>' + selectedYear + '</strong> (Năm học hiện hành: ' + currentActiveYear + ').</span></div></div>';
     if (dom.firstElementChild) dom.firstElementChild.insertAdjacentHTML('afterbegin', bannerHtml);
 };
 
@@ -29999,6 +30073,8 @@ LMSApp.prototype.toggleCustomYearDropdown = function(e) {
 LMSApp.prototype.selectYearCustom = function(yearId) {
     const textEl = document.getElementById('school-year-current-text');
     if (textEl) textEl.textContent = yearId;
+    const loginBadge = document.getElementById('login-logo-year-badge');
+    if (loginBadge) loginBadge.textContent = yearId;
     const menu = document.getElementById('custom-year-menu');
     if (menu) menu.style.display = 'none';
 
@@ -30011,6 +30087,7 @@ LMSApp.prototype.selectYearCustom = function(yearId) {
     if (typeof db !== 'undefined' && db.setSelectedSchoolYear) {
       db.setSelectedSchoolYear(yearId);
     }
+    this.initSchoolYearSwitcher();
     this.showToast('📅 Đã chuyển sang Năm học ' + yearId + '!');
     this.switchView(this.currentView || 'info');
 };
@@ -30061,7 +30138,7 @@ LMSApp.prototype.exportTeachersExcel = function() {
       <body>
         <table>
           <tr><td colspan="9" class="title" style="border:none;font-size:16pt;font-weight:bold;text-align:center;color:#1e3a8a;">DANH SÁCH ĐỘI NGŨ GIÁO VIÊN - TRƯỜNG TH-THCS AMA TRANG LƠNG</td></tr>
-          <tr><td colspan="9" style="border:none;text-align:center;font-style:italic;color:#64748b;">(Xuất từ Hệ thống Quản trị THCS LMS - Năm học 2025-2026)</td></tr>
+          <tr><td colspan="9" style="border:none;text-align:center;font-style:italic;color:#64748b;">(Xuất từ Hệ thống Quản trị THCS LMS - Năm học ${(db.getSelectedSchoolYear ? db.getSelectedSchoolYear() : '2026-2027')})</td></tr>
           <tr><td colspan="9" style="border:none;height:10px;"></td></tr>
           <thead>
             <tr>

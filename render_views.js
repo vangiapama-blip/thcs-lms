@@ -156,7 +156,7 @@ function attachRenderMethods(LMSApp) {
             <div style="position:relative; z-index:2;">
               <div style="display:inline-flex; align-items:center; gap:0.45rem; background:#eff6ff; border:1px solid #bfdbfe; color:#1d4ed8; font-weight:800; padding:0.3rem 0.85rem; border-radius:20px; font-size:0.8rem; margin-bottom:0.6rem;">
                 <span style="width:8px; height:8px; border-radius:50%; background:#10b981; display:inline-block; box-shadow:0 0 8px #10b981;"></span>
-                KHÔNG GIAN GIẢNG DẠY SỐ — NĂM HỌC 2025-2026
+                KHÔNG GIAN GIẢNG DẠY SỐ — NĂM HỌC ${(typeof db !== 'undefined' && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2026-2027'}
               </div>
               <h1 style="margin:0; font-family:var(--font-title); font-size:1.75rem; font-weight:900; letter-spacing:-0.3px; color:#1e3a8a;">
                 Xin chào, <span style="color:#2563eb;">${teacherName}</span>! 👨‍🏫
@@ -469,7 +469,7 @@ function attachRenderMethods(LMSApp) {
               Hệ Thống Quản Lý Giáo Dục Số <span style="color:#059669;">TH</span>-<span style="color:#2563eb;">THCS</span> <span style="color:#dc2626;">AMA TRANG LƠNG</span>
             </h1>
             <p style="margin: 0.4rem 0 0 0; font-size: 0.9rem; color: #475569; font-weight: 400; opacity: 0.95; max-width: 680px; line-height: 1.45;">
-              Trực quan hóa số liệu chất lượng giảng dạy, phân bổ học lực, kết quả các môn học và diễn biến chuyên cần năm học 2025 - 2026.
+              Trực quan hóa số liệu chất lượng giảng dạy, phân bổ học lực, kết quả các môn học và diễn biến chuyên cần năm học ${(typeof db !== 'undefined' && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2026-2027'}.
             </p>
           </div>
 
@@ -691,7 +691,7 @@ function attachRenderMethods(LMSApp) {
               <h3 style="margin: 0; font-family: var(--font-title); font-weight: 800; color: #0f172a; font-size: 1.15rem;">
                 Bảng Mẫu Thống Kê Chi Tiết Học Lực & Chuyên Cần Theo Từng Lớp
               </h3>
-              <p style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: #64748b;">Tổng hợp số liệu chất lượng giáo dục toàn trường năm học 2025 - 2026</p>
+              <p style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: #64748b;">Tổng hợp số liệu chất lượng giáo dục toàn trường năm học ${(typeof db !== 'undefined' && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2026-2027'}</p>
             </div>
 
             <div style="display: flex; align-items: center; gap: 0.6rem;">
@@ -749,11 +749,20 @@ function attachRenderMethods(LMSApp) {
   // 1.1 Khai báo Năm học & Học kỳ
   LMSApp.prototype.render_years = function(dom) {
     if (db.initUserGroupsAndPermissions) db.initUserGroupsAndPermissions();
-    const years = db.state.academicYears || [
+    const years = (db.state && db.state.academicYears && db.state.academicYears.length > 0) ? db.state.academicYears : [
+      {
+        id: 'year_2026_2027',
+        name: 'Năm học 2026 - 2027',
+        isCurrent: true,
+        current: true,
+        hk1: { startDate: '2026-09-05', endDate: '2027-01-15' },
+        hk2: { startDate: '2027-01-16', endDate: '2027-05-31' }
+      },
       {
         id: 'year_2025_2026',
         name: 'Năm học 2025 - 2026',
-        isCurrent: true,
+        isCurrent: false,
+        current: false,
         hk1: { startDate: '2025-09-05', endDate: '2026-01-15' },
         hk2: { startDate: '2026-01-16', endDate: '2026-05-31' }
       }
@@ -809,8 +818,8 @@ function attachRenderMethods(LMSApp) {
                     <span>HỌC KỲ I</span>
                   </div>
                   <div style="font-size: 0.83rem; color: #475569; display: flex; flex-direction: column; gap: 0.35rem;">
-                    <div>📅 <b>Bắt đầu:</b> ${(y.hk1 && y.hk1.startDate) ? formatDateVN(y.hk1.startDate) : '05/09/2025'}</div>
-                    <div>🏁 <b>Kết thúc:</b> ${(y.hk1 && y.hk1.endDate) ? formatDateVN(y.hk1.endDate) : '15/01/2026'}</div>
+                    <div>📅 <b>Bắt đầu:</b> ${(y.hk1 && y.hk1.startDate) ? formatDateVN(y.hk1.startDate) : '05/09/2026'}</div>
+                    <div>🏁 <b>Kết thúc:</b> ${(y.hk1 && y.hk1.endDate) ? formatDateVN(y.hk1.endDate) : '15/01/2027'}</div>
                   </div>
                 </div>
 
@@ -821,8 +830,8 @@ function attachRenderMethods(LMSApp) {
                     <span>HỌC KỲ II</span>
                   </div>
                   <div style="font-size: 0.83rem; color: #475569; display: flex; flex-direction: column; gap: 0.35rem;">
-                    <div>📅 <b>Bắt đầu:</b> ${(y.hk2 && y.hk2.startDate) ? formatDateVN(y.hk2.startDate) : '16/01/2026'}</div>
-                    <div>🏁 <b>Kết thúc:</b> ${(y.hk2 && y.hk2.endDate) ? formatDateVN(y.hk2.endDate) : '31/05/2026'}</div>
+                    <div>📅 <b>Bắt đầu:</b> ${(y.hk2 && y.hk2.startDate) ? formatDateVN(y.hk2.startDate) : '16/01/2027'}</div>
+                    <div>🏁 <b>Kết thúc:</b> ${(y.hk2 && y.hk2.endDate) ? formatDateVN(y.hk2.endDate) : '31/05/2027'}</div>
                   </div>
                 </div>
 
@@ -854,7 +863,7 @@ function attachRenderMethods(LMSApp) {
       address: 'Dliê Ya, Krông Năng, Đắk Lắk',
       principal: 'Chu Văn Giáp',
       phone: '0397800689',
-      academicYear: '2025-2026'
+      academicYear: (typeof db !== 'undefined' && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2026-2027'
     };
 
     dom.innerHTML = `
@@ -2196,7 +2205,7 @@ LMSApp.prototype.selectAiStudent = function(studentId) {
             <h1 style="margin:0; font-family:var(--font-title); font-size:1.65rem; font-weight:900; color:#064e3b;">
               Phiếu Điểm Học Tập — <span style="color:#059669;">${student.name}</span>
             </h1>
-            <p style="margin:0.35rem 0 0 0; color:#475569; font-size:0.9rem; font-weight:500;">Mã HS: <strong style="color:#0f172a;">${student.maHS || student.id}</strong> &nbsp;|&nbsp; Lớp: <strong style="color:#059669;">${classId}</strong> &nbsp;|&nbsp; Năm học: <strong>2025 - 2026</strong></p>
+            <p style="margin:0.35rem 0 0 0; color:#475569; font-size:0.9rem; font-weight:500;">Mã HS: <strong style="color:#0f172a;">${student.maHS || student.id}</strong> &nbsp;|&nbsp; Lớp: <strong style="color:#059669;">${classId}</strong> &nbsp;|&nbsp; Năm học: <strong>${(typeof db !== 'undefined' && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2026-2027'}</strong></p>
           </div>
 
           <div style="display:flex; gap:0.75rem;">

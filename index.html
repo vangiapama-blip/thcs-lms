@@ -73,15 +73,15 @@
           <span class="school-name" id="school-name-text" style="font-size: 1.02rem; font-weight: 900; line-height: 1.2;"><span style="color:#059669;">TH</span>-<span style="color:#2563eb;">THCS</span> <span style="color:#dc2626;">AMA TRANG LƠNG</span></span>
           <span id="school-address-text" style="font-size: 0.78rem; font-weight: 400; color: #475569; line-height: 1.2; margin-top: 0.1rem;">Địa chỉ: Dliê Ya, Đắk Lắk</span>
           <div id="school-year-custom-wrapper" style="position: relative; display: inline-flex; align-items: center; gap: 2px; cursor: pointer; margin-top: 1px;" onclick="if(window.app) window.app.toggleCustomYearDropdown(event);">
-            <span id="school-year-current-text" style="font-size: 8px !important; font-weight: 400 !important; color: #0284c7 !important; line-height: 1 !important; user-select: none;">2025-2026</span>
-            <script>try{var sy=localStorage.getItem("THCS_LMS_SELECTED_YEAR");if(sy){document.getElementById("school-year-current-text").textContent=sy;}}catch(e){}</script>
+            <span id="school-year-current-text" style="font-size: 8px !important; font-weight: 400 !important; color: #0284c7 !important; line-height: 1 !important; user-select: none;">2026-2027</span>
+            <script>try{var sy=localStorage.getItem("THCS_LMS_SELECTED_YEAR")||'2026-2027';document.getElementById("school-year-current-text").textContent=sy;}catch(e){}</script>
             <svg style="width: 7px; height: 7px; fill: none; stroke: #0284c7; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; pointer-events: none;" viewBox="0 0 24 24">
               <path d="M6 9l6 6 6-6"></path>
             </svg>
 
             <div id="custom-year-menu" style="display: none; position: absolute; top: 100%; left: 0; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; min-width: 90px; padding: 4px 0; margin-top: 2px;">
-              <div onclick="if(window.app) window.app.selectYearCustom('2025-2026');" style="padding: 4px 8px; font-size: 11px; font-weight: 500; color: #1e293b; cursor: pointer;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='transparent';">2025-2026</div>
               <div onclick="if(window.app) window.app.selectYearCustom('2026-2027');" style="padding: 4px 8px; font-size: 11px; font-weight: 500; color: #1e293b; cursor: pointer;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='transparent';">2026-2027</div>
+              <div onclick="if(window.app) window.app.selectYearCustom('2025-2026');" style="padding: 4px 8px; font-size: 11px; font-weight: 500; color: #1e293b; cursor: pointer;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='transparent';">2025-2026</div>
             </div>
           </div>
         </div>
@@ -152,8 +152,8 @@
       <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem;">
         <div style="position: relative; margin-bottom: 0.85rem;">
           <img src="logo.png" alt="AMTL Logo" style="width: 90px; height: 90px; object-fit: contain; border-radius: 20px; box-shadow: 0 10px 25px rgba(37,99,235,0.35); border: 3px solid #ffffff; background: #ffffff;">
-          <span id="login-logo-year-badge" style="position: absolute; bottom: -5px; right: -5px; background: #10b981; color: white; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.68rem; font-weight: 400; border: 2px solid #ffffff;">2025-2026</span>
-          <script>try{var sy=localStorage.getItem("THCS_LMS_SELECTED_YEAR");if(sy){document.getElementById("login-logo-year-badge").textContent=sy;}}catch(e){}</script>
+          <span id="login-logo-year-badge" style="position: absolute; bottom: -5px; right: -5px; background: #10b981; color: white; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.68rem; font-weight: 400; border: 2px solid #ffffff;">2026-2027</span>
+          <script>try{var sy=localStorage.getItem("THCS_LMS_SELECTED_YEAR")||'2026-2027';document.getElementById("login-logo-year-badge").textContent=sy;}catch(e){}</script>
         </div>
 
         <span style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; padding: 0.3rem 0.95rem; border-radius: 20px; font-size: 0.78rem; font-weight: 400; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 0.4rem; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">

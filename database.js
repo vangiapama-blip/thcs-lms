@@ -1761,9 +1761,10 @@ const INITIAL_STATE = {
     email: 'amatranglong.thcs@daklak.edu.vn'
   },
   academicYears: [
-    { id: '2025-2026', name: 'Năm học 2025-2026', current: true },
-    { id: '2026-2027', name: 'Năm học 2026-2027', current: false }
+    { id: '2026-2027', name: 'Năm học 2026-2027', current: true, isCurrent: true },
+    { id: '2025-2026', name: 'Năm học 2025-2026', current: false, isCurrent: false }
   ],
+  selectedSchoolYear: '2026-2027',
   semesters: [
     { id: 'HK1', name: 'Học kỳ I', current: true },
     { id: 'HK2', name: 'Học kỳ II', current: false }
@@ -2002,6 +2003,16 @@ class LMSDatabase {
   async syncFromServer(forceRefresh = false) {
     if (typeof fetch === 'undefined') return;
     try {
+      // Nếu máy vừa mới phục hồi file sao lưu trong vòng 30 giây, ưu tiên đẩy local lên server thay vì bị server ghi đè ngược
+      if (this.state && this.state._restoredAt && (Date.now() - this.state._restoredAt < 30000)) {
+        fetch('/api/db/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.state),
+          keepalive: true
+        }).catch(() => {});
+        return;
+      }
       const res = await fetch('/api/db/state');
       if (res.ok) {
         const remoteState = await res.json();
@@ -2035,9 +2046,27 @@ class LMSDatabase {
             }
           });
 
+          // Bảo toàn năm học đã chọn và đồng bộ hai chiều giữa Server và LocalStorage
+          const localSavedYear = (typeof localStorage !== 'undefined' && localStorage.getItem('THCS_LMS_SELECTED_YEAR')) || (this.state && this.state.selectedSchoolYear);
+          if (remoteState.selectedSchoolYear) {
+            this.state.selectedSchoolYear = remoteState.selectedSchoolYear;
+            try {
+              if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('THCS_LMS_SELECTED_YEAR', remoteState.selectedSchoolYear);
+              }
+            } catch (e) {}
+          } else if (localSavedYear) {
+            remoteState.selectedSchoolYear = localSavedYear;
+          } else {
+            remoteState.selectedSchoolYear = '2026-2027';
+          }
+
           this.state = remoteState;
           this.initUserGroupsAndPermissions();
           try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
+          if (typeof window !== 'undefined' && window.app && window.app.initSchoolYearSwitcher) {
+            try { window.app.initSchoolYearSwitcher(); } catch(e) {}
+          }
           console.log('✅ LMS Central Database synchronized safely from Server across all devices!');
         }
       }
@@ -2099,18 +2128,20 @@ class LMSDatabase {
     if (this.state.academicYears === undefined) {
       this.state.academicYears = [
         {
-          id: 'year_2025_2026',
-          name: 'Năm học 2025 - 2026',
+          id: 'year_2026_2027',
+          name: 'Năm học 2026 - 2027',
           isCurrent: true,
-          hk1: { startDate: '2025-09-05', endDate: '2026-01-15', status: 'active' },
-          hk2: { startDate: '2026-01-16', endDate: '2026-05-31', status: 'upcoming' }
+          current: true,
+          hk1: { startDate: '2026-09-05', endDate: '2027-01-15', status: 'active' },
+          hk2: { startDate: '2027-01-16', endDate: '2027-05-31', status: 'upcoming' }
         },
         {
-          id: 'year_2024_2025',
-          name: 'Năm học 2024 - 2025',
+          id: 'year_2025_2026',
+          name: 'Năm học 2025 - 2026',
           isCurrent: false,
-          hk1: { startDate: '2024-09-05', endDate: '2025-01-15', status: 'finished' },
-          hk2: { startDate: '2025-01-16', endDate: '2025-05-31', status: 'finished' }
+          current: false,
+          hk1: { startDate: '2025-09-05', endDate: '2026-01-15', status: 'finished' },
+          hk2: { startDate: '2026-01-16', endDate: '2026-05-31', status: 'finished' }
         }
       ];
     }
@@ -2574,7 +2605,11 @@ class LMSDatabase {
     try {
       if (typeof localStorage !== 'undefined') {
         const localSaved = localStorage.getItem('THCS_LMS_SELECTED_YEAR');
-        if (localSaved) return localSaved;
+        if (localSaved) {
+          if (!this.state) this.state = {};
+          this.state.selectedSchoolYear = localSaved;
+          return localSaved;
+        }
       }
     } catch (e) {}
 
@@ -2587,26 +2622,28 @@ class LMSDatabase {
         }
       }
       if (!this.state.selectedSchoolYear) {
-        this.state.selectedSchoolYear = '2025-2026';
+        this.state.selectedSchoolYear = '2026-2027';
       }
     }
     return this.state.selectedSchoolYear;
   }
 
   setSelectedSchoolYear(yearId) {
+    if (!yearId) return;
+    const cleanId = String(yearId).replace('year_', '').replace('_', '-');
     try {
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('THCS_LMS_SELECTED_YEAR', yearId);
+        localStorage.setItem('THCS_LMS_SELECTED_YEAR', cleanId);
       }
     } catch (e) {}
 
     if (!this.state) this.state = {};
-    this.state.selectedSchoolYear = yearId;
+    this.state.selectedSchoolYear = cleanId;
 
     if (Array.isArray(this.state.academicYears)) {
       this.state.academicYears.forEach(y => {
-        const cleanId = (y.id || '').replace('year_', '').replace('_', '-');
-        const isMatch = (y.id === yearId || cleanId === yearId || (y.name && y.name.includes(yearId)));
+        const yClean = (y.id || '').replace('year_', '').replace('_', '-');
+        const isMatch = (y.id === cleanId || yClean === cleanId || (y.name && y.name.includes(cleanId)));
         y.current = isMatch;
         y.isCurrent = isMatch;
       });
@@ -2618,8 +2655,8 @@ class LMSDatabase {
     if (!this.state) this.state = {};
     if (!this.state.academicYears || !Array.isArray(this.state.academicYears) || this.state.academicYears.length === 0) {
       this.state.academicYears = [
-        { id: '2025-2026', name: 'Năm học 2025-2026', current: true },
-        { id: '2026-2027', name: 'Năm học 2026-2027', current: false }
+        { id: '2026-2027', name: 'Năm học 2026-2027', current: true, isCurrent: true },
+        { id: '2025-2026', name: 'Năm học 2025-2026', current: false, isCurrent: false }
       ];
     }
     return this.state.academicYears;
@@ -2669,10 +2706,21 @@ class LMSDatabase {
 
   importData(jsonData) {
     try {
-      const parsed = JSON.parse(jsonData);
-      if (parsed && typeof parsed === 'object' && parsed.schoolInfo) {
+      const parsed = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+      if (parsed && typeof parsed === 'object' && (parsed.schoolInfo || parsed.classesList || parsed.students || parsed.teachers)) {
+        parsed._restoredAt = Date.now();
+        parsed.updatedAt = new Date().toISOString();
         this.state = parsed;
-        this.save();
+        try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
+        // Cưỡng bức đồng bộ ngay lập tức lên Central Server mà không bị debounce hoặc hủy
+        if (typeof fetch !== 'undefined') {
+          fetch('/api/db/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(this.state),
+            keepalive: true
+          }).catch(() => {});
+        }
         return true;
       }
     } catch (e) {
