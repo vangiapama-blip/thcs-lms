@@ -66,16 +66,26 @@
     const videoElem = document.getElementById('remote-video');
     const fallbackImg = document.getElementById('fallback-img');
     const fallbackBox = document.getElementById('fallback-box');
+    const _camUrlParams = new URLSearchParams(window.location.search);
+    const ROOM_EXAM_ID = String(_camUrlParams.get('room') || _camUrlParams.get('examId') || '').trim();
+    const ROOM_CLASS_ID = String(_camUrlParams.get('cid') || _camUrlParams.get('classId') || '').trim();
+    const ROOM_STUDENT_ID = String(_camUrlParams.get('sid') || _camUrlParams.get('studentId') || '').trim();
+    const ROOM_STUDENT_NAME = String(_camUrlParams.get('name') || '').trim();
 
     function startCam() {
       if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
       }
       
-      statusDisp.innerHTML = '⏳ Đang yêu cầu quyền mở Camera...';
+      statusDisp.innerHTML = ROOM_STUDENT_NAME
+        ? `⏳ Đang mở Camera phụ cho: <strong>${ROOM_STUDENT_NAME}</strong>...`
+        : '⏳ Đang yêu cầu quyền mở Camera...';
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showCamError('Trình duyệt điện thoại không hỗ trợ mở camera trực tiếp.');
+        const httpsHint = (!window.isSecureContext && location.protocol === 'http:')
+          ? ' Hãy truy cập bằng địa chỉ <strong>HTTPS</strong> hoặc dùng nút <strong>Chụp ảnh</strong> bên dưới.'
+          : '';
+        showCamError('Trình duyệt điện thoại không cho phép mở camera trực tiếp.' + httpsHint);
         return;
       }
 
@@ -133,25 +143,71 @@
 
     // Frame Broadcaster to send live stream to LMS App on PC
     let frameBroadcastInterval = null;
+    let lastServerPushTs = 0;
+    let serverDualCamConfirmed = false;
+    let serverDualCamIntervalMs = 2500;
     const camChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('lms_remote_cam') : null;
     const captureCanvas = document.createElement('canvas');
     captureCanvas.width = 640;
     captureCanvas.height = 480;
     const captureCtx = captureCanvas.getContext('2d');
+    const netCanvas = document.createElement('canvas');
+    netCanvas.width = 320;
+    netCanvas.height = 240;
+    const netCtx = netCanvas.getContext('2d');
 
     // Server Base URL for HTTP Stream Pipeline
     const SERVER_BASE = (typeof window !== 'undefined' && window.location.protocol && window.location.protocol.startsWith('http')) 
       ? window.location.origin 
       : 'http://192.168.0.110:8888';
 
+    function pushFrameToProctorServer(imageDataUrl) {
+      if (!ROOM_EXAM_ID && !ROOM_STUDENT_ID && !ROOM_STUDENT_NAME) return;
+      const bodyPayload = {
+        type: 'frame',
+        examId: ROOM_EXAM_ID,
+        room: ROOM_EXAM_ID,
+        classId: ROOM_CLASS_ID,
+        studentId: ROOM_STUDENT_ID,
+        studentName: ROOM_STUDENT_NAME,
+        image: imageDataUrl,
+        timestamp: Date.now()
+      };
+      fetch(SERVER_BASE + '/api/proctor/dualcam/frame', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyPayload)
+      }).then(r => r.ok ? r.json() : null).then(res => {
+        if (res && res.recommendedDualCamMs) {
+          serverDualCamIntervalMs = Math.max(2500, Number(res.recommendedDualCamMs) || 2500) + Math.floor(Math.random() * 1200);
+        }
+        if (res && res.connected && !serverDualCamConfirmed) {
+          serverDualCamConfirmed = true;
+          statusDisp.innerHTML = ROOM_STUDENT_NAME
+            ? `🟢 ĐÃ KẾT NỐI CAMERA PHỤ PHÒNG THI (${ROOM_STUDENT_NAME})`
+            : '🟢 ĐÃ KẾT NỐI CAMERA PHỤ VỚI PHÒNG THI!';
+          statusDisp.style.background = 'rgba(16, 185, 129, 0.28)';
+          statusDisp.style.color = '#34d399';
+        }
+      }).catch(() => {});
+    }
+
     function startFrameBroadcaster() {
       if (frameBroadcastInterval) clearInterval(frameBroadcastInterval);
+      lastServerPushTs = 0;
       frameBroadcastInterval = setInterval(() => {
-        if (!videoElem || videoElem.paused || videoElem.ended || !currentStream) return;
+        if (!videoElem || videoElem.paused || videoElem.ended || !currentStream || videoElem.readyState < 2) return;
         try {
           captureCtx.drawImage(videoElem, 0, 0, 640, 480);
           const dataUrl = captureCanvas.toDataURL('image/jpeg', 0.55);
-          const payload = { type: 'frame', image: dataUrl, timestamp: Date.now() };
+          const payload = {
+            type: 'frame',
+            examId: ROOM_EXAM_ID,
+            studentId: ROOM_STUDENT_ID,
+            studentName: ROOM_STUDENT_NAME,
+            image: dataUrl,
+            timestamp: Date.now()
+          };
 
           // 1. Send via BroadcastChannel (instant same-domain)
           if (camChannel) camChannel.postMessage(payload);
@@ -161,14 +217,16 @@
             localStorage.setItem('THCS_LMS_REMOTE_CAM_FRAME', JSON.stringify(payload));
           } catch(e) {}
 
-          // 3. Real HTTP Stream Pipeline to Server / Laptop
-          fetch(SERVER_BASE + '/api/stream_frame', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          }).catch(() => {});
+          // 3. Real HTTP Stream Pipeline to Server (adaptive pacing for large exam rooms)
+          const now = Date.now();
+          if (now - lastServerPushTs >= serverDualCamIntervalMs) {
+            lastServerPushTs = now;
+            netCtx.drawImage(videoElem, 0, 0, 320, 240);
+            const netUrl = netCanvas.toDataURL('image/jpeg', 0.45);
+            pushFrameToProctorServer(netUrl);
+          }
         } catch(e) {}
-      }, 70); // ~15 FPS smooth stream
+      }, 150);
     }
 
     function triggerRemoteAiCall() {
@@ -232,7 +290,21 @@
           fallbackImg.src = e.target.result;
           videoElem.style.display = 'none';
           fallbackImg.style.display = 'block';
-          statusDisp.innerHTML = '🟢 ĐÃ TẢI ẢNH CHỤP TRỰC TIẾP TỪ ĐIỆN THOẠI';
+          const tmpImg = new Image();
+          tmpImg.onload = () => {
+            try {
+              netCtx.drawImage(tmpImg, 0, 0, 320, 240);
+              const netUrl = netCanvas.toDataURL('image/jpeg', 0.5);
+              pushFrameToProctorServer(netUrl);
+              if (camChannel) {
+                camChannel.postMessage({ type: 'frame', examId: ROOM_EXAM_ID, studentId: ROOM_STUDENT_ID, studentName: ROOM_STUDENT_NAME, image: netUrl, timestamp: Date.now() });
+              }
+            } catch(err) {
+              pushFrameToProctorServer(e.target.result);
+            }
+          };
+          tmpImg.src = e.target.result;
+          statusDisp.innerHTML = '🟢 ĐÃ TẢI & ĐỒNG BỘ ẢNH TỪ ĐIỆN THOẠI';
           statusDisp.style.background = 'rgba(16, 185, 129, 0.2)';
           statusDisp.style.color = '#10b981';
         };

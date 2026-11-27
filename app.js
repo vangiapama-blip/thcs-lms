@@ -12396,14 +12396,15 @@ render_ai_geometry(dom) {
               const openBadgeT  = exam.openTime  ? `<span style="background:#dcfce7;color:#15803d;padding:0.2rem 0.55rem;border-radius:6px;">🟢 Mở: ${fmtDT2(exam.openTime)}</span>`  : '';
               const closeBadgeT = exam.closeTime ? `<span style="background:#fee2e2;color:#dc2626;padding:0.2rem 0.55rem;border-radius:6px;">🔴 Đóng: ${fmtDT2(exam.closeTime)}</span>` : '';
               const timeLimit = exam.timeLimit ? `${exam.timeLimit} phút` : 'Không giới hạn';
-              const maxAttempts = exam.maxAttempts || 1;
+              const maxAttempts = (exam.maxAttempts !== undefined && exam.maxAttempts !== null && exam.maxAttempts !== '') ? Number(exam.maxAttempts) : 1;
+              const isRealExam = exam.examMode ? (exam.examMode === 'real') : (exam.mode !== 'thi_thu');
               const proctorBadges = [
                 exam.enableCamera ? '📷 Camera' : '',
                 exam.enableMic    ? '🎤 Mic'    : '',
                 exam.enableFullscreen !== false ? '🖥️ Fullscreen' : ''
               ].filter(Boolean);
               return `
-                <div class="glass-card" data-exam-id-card="${exam.id}" data-exam-title="${(exam.title||'').replace(/"/g,'&quot;')}" data-exam-draft="${assignedClasses.length===0?'1':'0'}" data-exam-assigned="${assignedClasses.length>0?'1':'0'}" data-exam-mode="${exam.examMode||''}" style="padding:1.25rem;border-radius:14px;border:1.5px solid #e2e8f0;display:flex;flex-wrap:wrap;align-items:center;gap:1rem;transition:box-shadow 0.2s;">
+                <div class="glass-card" data-exam-id-card="${exam.id}" data-exam-title="${(exam.title||'').replace(/"/g,'&quot;')}" data-exam-draft="${assignedClasses.length===0?'1':'0'}" data-exam-assigned="${assignedClasses.length>0?'1':'0'}" data-exam-mode="${exam.examMode||(isRealExam?'real':'practice')}" style="padding:1.25rem;border-radius:14px;border:1.5px solid #e2e8f0;display:flex;flex-wrap:wrap;align-items:center;gap:1rem;transition:box-shadow 0.2s;">
                   <div style="flex:1;min-width:220px;">
                     <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.4rem;">
                       <span style="font-weight:600; font-size:1.02rem; color:#0f172a; font-family:var(--font-title);">${exam.title || 'Đề kiểm tra'}</span>
@@ -12422,7 +12423,7 @@ render_ai_geometry(dom) {
                       <span style="background:#f1f5f9;color:#475569;padding:0.2rem 0.55rem;border-radius:6px;">🔄 ${maxAttempts===0?'∞ lần':maxAttempts+' lần'}</span>
                       <span style="background:#f1f5f9;color:#475569;padding:0.2rem 0.55rem;border-radius:6px;">📝 ${(exam.questions||exam.questionIds||[]).length} câu</span>
                       <span style="background:#ede9fe;color:#6d28d9;padding:0.2rem 0.55rem;border-radius:6px;">📊 ${exam.targetGradeColumn||'ĐTX1'}</span>
-                      <span style="background:${exam.examMode==='real'?'#fef9c3':'#f0fdf4'};color:${exam.examMode==='real'?'#854d0e':'#166534'};padding:0.2rem 0.55rem;border-radius:6px;">${exam.examMode==='real'?'🎯 Thi Thật':'🧪 Thi Thử'}</span>
+                      <span style="background:${isRealExam?'#fef9c3':'#f0fdf4'};color:${isRealExam?'#854d0e':'#166534'};padding:0.2rem 0.55rem;border-radius:6px;">${isRealExam?'🎯 Thi Thật':'🧪 Thi Thử'}</span>
                       <span style="background:#f1f5f9;color:#475569;padding:0.2rem 0.55rem;border-radius:6px;">📊 ${attempts.length} bài nộp</span>
                       ${openBadgeT}${closeBadgeT}
                       ${assignedClasses.map(c=>`<span style="background:#dbeafe;color:#1d4ed8;padding:0.2rem 0.55rem;border-radius:6px;font-weight:500;">🏫 Lớp ${c}</span>`).join('')}
@@ -13673,12 +13674,12 @@ render_ai_geometry(dom) {
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
               <div>
                 <label style="font-weight:600; font-size:0.83rem; color:#1e293b; display:block; margin-bottom:0.3rem;">⏱️ Thời gian (Phút):</label>
-                <input type="number" id="view-edit-exam-time" min="0" value="${exam.timeLimit || 45}" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:500;">
+                <input type="number" id="view-edit-exam-time" min="0" value="${(exam.timeLimit !== undefined && exam.timeLimit !== null) ? exam.timeLimit : 45}" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:500;">
               </div>
               <div>
                 <label style="font-weight:600; font-size:0.83rem; color:#1e293b; display:block; margin-bottom:0.3rem;">🔄 Số lần làm bài:</label>
                 <select id="view-edit-exam-attempts" style="width:100%; padding:0.55rem; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:500; background:#fff;">
-                  <option value="1" ${(exam.maxAttempts||1)===1?'selected':''}>1 lần duy nhất</option>
+                  <option value="1" ${(exam.maxAttempts === undefined || exam.maxAttempts === null || exam.maxAttempts === 1)?'selected':''}>1 lần duy nhất</option>
                   <option value="2" ${exam.maxAttempts===2?'selected':''}>2 lần</option>
                   <option value="3" ${exam.maxAttempts===3?'selected':''}>3 lần</option>
                   <option value="0" ${exam.maxAttempts===0?'selected':''}>Không giới hạn</option>
@@ -13735,7 +13736,8 @@ render_ai_geometry(dom) {
     if (printFromEditBtn) {
       printFromEditBtn.onclick = () => {
         exam.title = modal.querySelector('#view-edit-exam-title').value.trim() || exam.title;
-        exam.timeLimit = parseInt(modal.querySelector('#view-edit-exam-time').value) || exam.timeLimit || 45;
+        const _rawPrintTime = parseInt(modal.querySelector('#view-edit-exam-time').value, 10);
+        exam.timeLimit = !isNaN(_rawPrintTime) ? _rawPrintTime : ((exam.timeLimit !== undefined && exam.timeLimit !== null) ? exam.timeLimit : 45);
         exam.questions = examQuestions;
         if (typeof db !== 'undefined') {
           if (db.updateExam) db.updateExam(exam);
@@ -13811,8 +13813,10 @@ render_ai_geometry(dom) {
       }
 
       exam.title = title;
-      exam.timeLimit = parseInt(modal.querySelector('#view-edit-exam-time').value) || 0;
-      exam.maxAttempts = parseInt(modal.querySelector('#view-edit-exam-attempts').value);
+      const _rawEditTime = parseInt(modal.querySelector('#view-edit-exam-time').value, 10);
+      exam.timeLimit = isNaN(_rawEditTime) ? 0 : _rawEditTime;
+      const _rawEditAtt = parseInt(modal.querySelector('#view-edit-exam-attempts').value, 10);
+      exam.maxAttempts = isNaN(_rawEditAtt) ? 1 : _rawEditAtt;
       exam.dueDate = modal.querySelector('#view-edit-exam-due').value || null;
       exam.questions = examQuestions;
       exam.questionIds = examQuestions.map(q => q.id);
@@ -13827,10 +13831,9 @@ render_ai_geometry(dom) {
       exam.isQuizizz = Boolean(exam.examSubType === 'quizizz' || exam.format === 'quizizz');
 
       if (typeof db !== 'undefined') {
-        if (db.updateExam) db.updateExam(exam);
-        if (db.addExam) db.addExam(exam);
-        if (db.updateAssignment) db.updateAssignment(exam);
-        if (db.addAssignment) db.addAssignment(exam);
+        if (db.updateExam) db.updateExam(exam.id, exam);
+        else if (db.addExam) db.addExam(exam);
+        if (db.updateAssignment) db.updateAssignment(exam.id, exam);
         if (db.save) db.save();
       }
 
@@ -14328,13 +14331,13 @@ render_ai_geometry(dom) {
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
             <div>
               <label style="font-weight: 500;font-size:0.88rem;color:#1e293b;display:block;margin-bottom:0.3rem;">⏱️ Thời Gian Làm Bài (phút):</label>
-              <input type="number" id="exam-time" min="0" value="${editExam?.timeLimit||45}" placeholder="0 = không giới hạn" style="width:100%;padding:0.65rem;border-radius:10px;border:1.5px solid #cbd5e1;font-weight: 400;">
+              <input type="number" id="exam-time" min="0" value="${(editExam?.timeLimit !== undefined && editExam?.timeLimit !== null) ? editExam.timeLimit : 45}" placeholder="0 = không giới hạn" style="width:100%;padding:0.65rem;border-radius:10px;border:1.5px solid #cbd5e1;font-weight: 400;">
               <div style="font-size:0.73rem;color:#475569; font-weight:400; font-size:0.88rem;margin-top:0.2rem;">0 = không giới hạn</div>
             </div>
             <div>
               <label style="font-weight: 500;font-size:0.88rem;color:#1e293b;display:block;margin-bottom:0.3rem;">🔄 Số Lần Làm Bài:</label>
               <select id="exam-attempts" style="width:100%;padding:0.65rem;border-radius:10px;border:1.5px solid #cbd5e1;font-weight: 400;">
-                <option value="1" ${(editExam?.maxAttempts||1)===1?'selected':''}>1 lần duy nhất</option>
+                <option value="1" ${(editExam?.maxAttempts === undefined || editExam?.maxAttempts === null || editExam?.maxAttempts === 1)?'selected':''}>1 lần duy nhất</option>
                 <option value="2" ${editExam?.maxAttempts===2?'selected':''}>2 lần</option>
                 <option value="3" ${editExam?.maxAttempts===3?'selected':''}>3 lần</option>
                 <option value="0" ${editExam?.maxAttempts===0?'selected':''}>Không giới hạn</option>
@@ -14889,7 +14892,11 @@ render_ai_geometry(dom) {
         const title = modal.querySelector('#exam-title').value.trim();
         if (!title) { this.showToast('Vui lòng nhập tiêu đề đề bài!', 'warning'); return; }
 
-        const classIds = [...modal.querySelectorAll('.chk-exam-class:checked')].map(c => c.value);
+        const existingExam = isEdit && typeof db !== 'undefined' && db.getExams ? db.getExams().find(e => e.id === editExamId) : null;
+        const domClassIds = [...modal.querySelectorAll('.chk-exam-class:checked')].map(c => c.value);
+        const classIds = domClassIds.length > 0
+          ? domClassIds
+          : (existingExam ? (existingExam.classIds || existingExam.targetClasses || (existingExam.classId ? [existingExam.classId] : [])) : []);
         const questionIds = [...modal.querySelectorAll('.chk-exam-q:checked')].map(c => c.value);
 
         // Lấy câu từ ngân hàng đã tick
@@ -14906,16 +14913,23 @@ render_ai_geometry(dom) {
           finalQuestions = bankQuestions;
         }
 
+        const finalQuestionIds = finalQuestions.length > 0
+          ? finalQuestions.map(q => q.id).filter(Boolean)
+          : questionIds;
+
         // Chỉ bắt buộc có câu hỏi khi giao đề (có lớp được chọn), lưu nháp thì không cần
-        if (questionIds.length === 0 && finalQuestions.length === 0 && submitAction !== 'save_draft') {
+        if (finalQuestionIds.length === 0 && finalQuestions.length === 0 && submitAction !== 'save_draft') {
           this.showToast('Vui lòng chọn hoặc biên soạn ít nhất 1 câu hỏi cho đề thi!', 'warning');
           return;
         }
 
-        const timeLimit = parseInt(modal.querySelector('#exam-time').value) || 0;
-        const maxAttempts = parseInt(modal.querySelector('#exam-attempts').value) || 1;
+        const _rawTimeLimit = parseInt(modal.querySelector('#exam-time').value, 10);
+        const timeLimit = isNaN(_rawTimeLimit) ? 0 : _rawTimeLimit;
+        const _rawMaxAttempts = parseInt(modal.querySelector('#exam-attempts').value, 10);
+        const maxAttempts = isNaN(_rawMaxAttempts) ? 1 : _rawMaxAttempts;
         const examModeEl = modal.querySelector('input[name="exam-mode"]:checked');
         const examMode = examModeEl ? examModeEl.value : 'thi_that';
+        const normalizedExamMode = examMode === 'thi_thu' ? 'practice' : 'real';
         const gradeColEl = modal.querySelector('#exam-target-grade-col');
         const targetGradeColumn = gradeColEl ? gradeColEl.value : (tab === 'midterm' ? 'GK' : tab === 'final' ? 'CK' : 'TX1');
         const dueDate = modal.querySelector('#exam-due') ? modal.querySelector('#exam-due').value || null : null;
@@ -14934,11 +14948,11 @@ render_ai_geometry(dom) {
         const finalSubTab = (finalTab === 'tx') ? (examSubType || this.currentExamSubTab || 'regular') : 'regular';
 
         if (isEdit) {
-          db.updateExam(editExamId, {
+          const updatedPayload = {
             title, subjectId, classIds, targetClasses: classIds,
             classId: classIds.length > 0 ? classIds[0] : null,
-            questionIds, questions: finalQuestions,
-            timeLimit, maxAttempts, dueDate, mode: examMode,
+            questionIds: finalQuestionIds, questions: finalQuestions,
+            timeLimit, maxAttempts, dueDate, mode: examMode, examMode: normalizedExamMode,
             targetGradeColumn, enableCamera, enableMic,
             examType,
             enableFullscreen: true, 
@@ -14948,8 +14962,11 @@ render_ai_geometry(dom) {
             format: finalSubTab === 'quizizz' ? 'quizizz' : 'standard',
             isQuizizz: finalSubTab === 'quizizz',
             teacherId,
+            published: classIds.length > 0,
             updatedAt: Date.now()
-          });
+          };
+          db.updateExam(editExamId, updatedPayload);
+          if (db.updateAssignment) db.updateAssignment(editExamId, updatedPayload);
           this._lastCreatedExamId = editExamId;
           this.showToast(classIds.length > 0 ? '✅ Đã cập nhật đề kiểm tra!' : '💾 Đã lưu nháp đề kiểm tra thành công!');
         } else {
@@ -14958,8 +14975,8 @@ render_ai_geometry(dom) {
             id: targetExamId,
             title, subjectId, classIds, targetClasses: classIds,
             classId: classIds.length > 0 ? classIds[0] : null,
-            questionIds, questions: finalQuestions,
-            timeLimit, maxAttempts, dueDate, mode: examMode,
+            questionIds: finalQuestionIds, questions: finalQuestions,
+            timeLimit, maxAttempts, dueDate, mode: examMode, examMode: normalizedExamMode,
             targetGradeColumn, enableCamera, enableMic,
             examType,
             enableFullscreen: true, 
@@ -15015,6 +15032,7 @@ render_ai_geometry(dom) {
     let secondsLeft = timeLimitSec > 0 ? timeLimitSec : 999999;
     let timerInterval = null;
     let micInterval = null;
+    let micAudioCtx = null;
     let faceInterval = null;
     let micSpeakTimer = 0;
     let faceAbsentTimer = 0;
@@ -15750,7 +15768,7 @@ render_ai_geometry(dom) {
     if (!isPreviewMode) {
       const studentId = this.currentUser?.id;
       const attempts = db.getStudentAttempts ? db.getStudentAttempts(examId, studentId) : [];
-      const maxAttempts = exam.maxAttempts || 1;
+      const maxAttempts = (exam.maxAttempts !== undefined && exam.maxAttempts !== null && exam.maxAttempts !== '') ? Number(exam.maxAttempts) : 1;
 
       if (maxAttempts > 0 && attempts.length >= maxAttempts) {
         this.showToast(`Bạn đã thi ${attempts.length} lần. Đã đạt giới hạn số lần làm bài!`, 'error');
@@ -16357,42 +16375,60 @@ render_ai_geometry(dom) {
     if (prev) prev.remove();
 
     const playVoiceOrTTS = () => {
-      if (alertObj.audioDataUrl) {
+      const _markSpeakingEnd = () => {
+        window._isSystemSpeakingToStudent = false;
+        window._lastSystemSpeakEndTs = Date.now();
+      };
+      const audioSrc = alertObj.audioUrl || alertObj.audioDataUrl;
+      if (audioSrc) {
         try {
-          const audio = new Audio(alertObj.audioDataUrl);
+          const audio = new Audio(audioSrc);
           audio.volume = 1.0;
+          window._isSystemSpeakingToStudent = true;
+          audio.onended = _markSpeakingEnd;
+          audio.onerror = _markSpeakingEnd;
+          setTimeout(() => { if (window._isSystemSpeakingToStudent) _markSpeakingEnd(); }, 15000);
           const p = audio.play();
           if (p && p.catch) {
             p.catch(() => {
+              _markSpeakingEnd();
               const tip = document.getElementById('spvb-autoplay-tip');
               if (tip) tip.style.display = 'block';
             });
           }
           return;
-        } catch (e) {}
+        } catch (e) { _markSpeakingEnd(); }
       }
       const txt = alertObj.message || 'Giám thị nhắc nhở: Em chú ý tập trung làm bài thi nghiêm túc!';
       try {
         const ttsUrl = `/api/tts?lang=vi&text=${encodeURIComponent(txt.slice(0, 200))}`;
         const a = new Audio(ttsUrl);
         a.volume = 1.0;
+        window._isSystemSpeakingToStudent = true;
+        a.onended = _markSpeakingEnd;
+        a.onerror = _markSpeakingEnd;
+        setTimeout(() => { if (window._isSystemSpeakingToStudent) _markSpeakingEnd(); }, 12000);
         a.play().catch(() => {
           try {
             if (window.speechSynthesis) {
               const u = new SpeechSynthesisUtterance(txt);
               u.lang = 'vi-VN';
               u.rate = 1.0;
+              u.onend = _markSpeakingEnd;
+              u.onerror = _markSpeakingEnd;
               window.speechSynthesis.speak(u);
+            } else {
+              _markSpeakingEnd();
             }
-          } catch (err) {}
+          } catch (err) { _markSpeakingEnd(); }
         });
-      } catch (e) {}
+      } catch (e) { _markSpeakingEnd(); }
     };
 
     const banner = document.createElement('div');
     banner.id = 'student-proctor-voice-banner';
     banner.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;width:92%;max-width:520px;background:linear-gradient(135deg,#fffbeb 0%,#fef2f2 100%);border:3px solid #dc2626;border-radius:18px;padding:1rem 1.25rem;box-shadow:0 20px 50px rgba(220,38,38,0.45);font-family:var(--font-body);animation:fadeIn 0.25s ease-out;';
-    const isVoice = alertObj.mode === 'voice' && alertObj.audioDataUrl;
+    const isVoice = alertObj.mode === 'voice' && !!(alertObj.audioUrl || alertObj.audioDataUrl);
     banner.innerHTML = `
       <div style="display:flex;align-items:flex-start;gap:0.75rem;">
         <div style="font-size:2rem;line-height:1;flex-shrink:0;">${isVoice ? '🎙️' : '📢'}</div>
@@ -16425,19 +16461,26 @@ render_ai_geometry(dom) {
         fetch('/api/proctor/ack', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ examId, studentId, alertId: alertObj.id })
+          body: JSON.stringify({ examId, studentId, classId: this._activeStudentProctorClassId || '', alertId: alertObj.id })
         }).catch(() => {});
       }
     };
   }
 
-  _startStudentProctorClient({ exam, isPreviewMode, studentId, studentName, classId, getProgress, getSnapshot, onForceSubmit }) {
+  _startStudentProctorClient({ exam, isPreviewMode, studentId, studentName, classId, getProgress, getSnapshot, onForceSubmit, onDualCamStatus }) {
     this._stopStudentProctorClient();
     if (!exam || !exam.id || isPreviewMode || typeof fetch === 'undefined') return;
 
     const examId = exam.id;
+    const activeClassId = String(classId || '').trim();
+    this._activeStudentProctorClassId = activeClassId;
     const seenAlertIds = new Set();
     const prog0 = typeof getProgress === 'function' ? getProgress() : { answeredCount: 0, totalCount: 0 };
+    let stopped = false;
+    let hbIntervalMs = 5000;
+    let snapshotEveryNBeats = 4;
+    let hbTimer = null;
+    let es = null;
 
     const handleIncomingAlert = (al) => {
       if (!al || !al.id || seenAlertIds.has(al.id)) return;
@@ -16450,6 +16493,16 @@ render_ai_geometry(dom) {
       this._showStudentProctorAlertOverlay(al, examId, studentId);
     };
 
+    const applyServerScale = (rec) => {
+      if (!rec) return;
+      if (rec.heartbeatMs) hbIntervalMs = Math.max(5000, Number(rec.heartbeatMs) || 5000);
+      if (rec.snapshotEveryNBeats) snapshotEveryNBeats = Math.max(2, Number(rec.snapshotEveryNBeats) || 4);
+      if (rec.disableStudentSSE && es) {
+        try { es.close(); } catch (e) {}
+        es = null;
+      }
+    };
+
     // 1. Báo danh vào phòng giám sát thi (tính giờ vào & vào muộn trên server)
     fetch('/api/proctor/join', {
       method: 'POST',
@@ -16458,32 +16511,42 @@ render_ai_geometry(dom) {
         examId,
         studentId,
         studentName,
-        classId,
+        classId: activeClassId,
         openTime: exam.openTime || null,
         totalCount: prog0.totalCount || 0,
         camActive: !!exam.enableCamera,
         micActive: !!exam.enableMic,
         isPreviewMode: !!isPreviewMode
       })
+    }).then(r => r.ok ? r.json() : null).then(data => {
+      if (data && data.recommendedIntervals) applyServerScale(data.recommendedIntervals);
     }).catch(() => {});
 
-    // 2. Mở kênh SSE lắng nghe giọng nói trực tiếp / lệnh giám thị tức thì
-    let es = null;
+    // 2. Mở kênh SSE lắng nghe giọng nói trực tiếp / lệnh giám thị tức thì (tự tắt khi >600 HS để nhường socket)
     if (typeof EventSource !== 'undefined') {
       try {
-        es = new EventSource(`/api/proctor/stream?examId=${encodeURIComponent(examId)}&role=student&studentId=${encodeURIComponent(studentId)}`);
+        es = new EventSource(`/api/proctor/stream?examId=${encodeURIComponent(examId)}&classId=${encodeURIComponent(activeClassId)}&role=student&studentId=${encodeURIComponent(studentId)}`);
         es.addEventListener('proctor_alert', (evt) => {
           try { handleIncomingAlert(JSON.parse(evt.data)); } catch (e) {}
+        });
+        es.addEventListener('dualcam_status', (evt) => {
+          try {
+            const payload = JSON.parse(evt.data);
+            const conn = !!(payload && payload.connected);
+            window._dualCamConnected = conn;
+            if (typeof onDualCamStatus === 'function') onDualCamStatus(conn);
+          } catch (e) {}
         });
       } catch (e) {}
     }
 
-    // 3. Nhịp tim 5s cập nhật tiến độ + ảnh snapshot mỗi 20s + dự phòng nếu SSE rớt
+    // 3. Nhịp tim thích ứng theo sĩ số phòng thi (có random jitter chống dồn tải 2000 máy cùng giây)
     let beatTick = 0;
-    const hbTimer = setInterval(() => {
+    const sendHeartbeat = () => {
+      if (stopped) return;
       beatTick++;
       const prog = typeof getProgress === 'function' ? getProgress() : { answeredCount: 0, totalCount: 0 };
-      const snap = (beatTick % 4 === 1 && typeof getSnapshot === 'function') ? getSnapshot() : null;
+      const snap = (beatTick % snapshotEveryNBeats === 1 && typeof getSnapshot === 'function') ? getSnapshot() : null;
       fetch('/api/proctor/heartbeat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -16499,13 +16562,34 @@ render_ai_geometry(dom) {
           snapshot: snap
         })
       }).then(r => r.ok ? r.json() : null).then(data => {
-        if (data && Array.isArray(data.pendingAlerts)) {
+        if (!data || stopped) return;
+        if (data.recommendedIntervals) applyServerScale(data.recommendedIntervals);
+        if (Array.isArray(data.pendingAlerts)) {
           data.pendingAlerts.forEach(handleIncomingAlert);
         }
-      }).catch(() => {});
-    }, 5000);
+        if (data.dualCamConnected !== undefined) {
+          window._dualCamConnected = !!data.dualCamConnected;
+          if (typeof onDualCamStatus === 'function') onDualCamStatus(!!data.dualCamConnected);
+        }
+      }).catch(() => {}).finally(() => {
+        if (!stopped) {
+          const jitter = Math.floor(Math.random() * 2000);
+          hbTimer = setTimeout(sendHeartbeat, hbIntervalMs + jitter);
+        }
+      });
+    };
+    hbTimer = setTimeout(sendHeartbeat, hbIntervalMs + Math.floor(Math.random() * 2500));
 
-    this._activeStudentProctorClient = { examId, studentId, es, hbTimer };
+    this._activeStudentProctorClient = {
+      examId,
+      studentId,
+      get es() { return es; },
+      stop: () => {
+        stopped = true;
+        if (hbTimer) { clearTimeout(hbTimer); hbTimer = null; }
+        if (es) { try { es.close(); } catch (e) {} es = null; }
+      }
+    };
   }
 
   _reportStudentProctorViolation({ examId, studentId, studentName, classId, reason, snapshot, violationCount }) {
@@ -16531,7 +16615,7 @@ render_ai_geometry(dom) {
       fetch('/api/proctor/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ examId, studentId, score, totalCount, submitTime })
+        body: JSON.stringify({ examId, classId: this._activeStudentProctorClassId || '', studentId, score, totalCount, submitTime })
       }).catch(() => {});
     }
     this._stopStudentProctorClient();
@@ -16540,7 +16624,8 @@ render_ai_geometry(dom) {
   _stopStudentProctorClient() {
     const c = this._activeStudentProctorClient;
     if (c) {
-      if (c.hbTimer) clearInterval(c.hbTimer);
+      if (typeof c.stop === 'function') c.stop();
+      if (c.hbTimer) { clearInterval(c.hbTimer); clearTimeout(c.hbTimer); }
       if (c.es) { try { c.es.close(); } catch (e) {} }
       this._activeStudentProctorClient = null;
     }
@@ -16548,11 +16633,13 @@ render_ai_geometry(dom) {
     if (banner) banner.remove();
   }
 
-  _openProctorVoiceModal(examId, targetStudentId, targetStudentName) {
+  _openProctorVoiceModal(examId, targetStudentId, targetStudentName, classId = '') {
     const oldVoiceModal = document.getElementById('proctor-voice-modal');
     if (oldVoiceModal) oldVoiceModal.remove();
 
     const teacherName = (this.currentUser && this.currentUser.name) || 'Giám thị';
+    const normalizedClass = (classId && classId !== 'all') ? String(classId) : '';
+    const isAllMode = String(targetStudentId) === 'ALL';
     let mediaRecorder = null;
     let micStream = null;
     let audioChunks = [];
@@ -16589,6 +16676,17 @@ render_ai_geometry(dom) {
           </div>
           <button id="pvm-close" style="background:#f1f5f9;border:none;width:32px;height:32px;border-radius:50%;font-size:1.2rem;cursor:pointer;color:#475569;">&times;</button>
         </div>
+
+        ${isAllMode && normalizedClass ? `
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:0.55rem 0.75rem;margin-bottom:0.85rem;display:flex;gap:1rem;flex-wrap:wrap;font-size:0.8rem;font-weight:600;color:#1e3a8a;">
+            <label style="display:flex;align-items:center;gap:0.35rem;cursor:pointer;">
+              <input type="radio" name="pvm-scope" value="${normalizedClass}" checked style="accent-color:#0d9488;" /> 🏫 Chỉ phòng Lớp ${normalizedClass}
+            </label>
+            <label style="display:flex;align-items:center;gap:0.35rem;cursor:pointer;">
+              <input type="radio" name="pvm-scope" value="ALL_CLASSES" style="accent-color:#dc2626;" /> 🌐 Tất cả các lớp thi đề này
+            </label>
+          </div>
+        ` : ''}
 
         <!-- Khối 1: Thu âm giọng nói trực tiếp của giáo viên -->
         <div style="background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:14px;padding:1rem;margin-bottom:1rem;text-align:center;">
@@ -16630,11 +16728,14 @@ render_ai_geometry(dom) {
     vModal.onclick = (e) => { if (e.target === vModal) closeModal(); };
 
     const sendVoicePayload = async (payload) => {
+      const scopeRadio = vModal.querySelector('input[name="pvm-scope"]:checked');
+      const resolvedClassId = scopeRadio ? scopeRadio.value : (isAllMode ? (normalizedClass || 'ALL_CLASSES') : normalizedClass);
       const res = await fetch('/api/proctor/voice-alert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           examId,
+          classId: resolvedClassId,
           targetStudentId,
           teacherName,
           ...payload
@@ -16807,37 +16908,59 @@ render_ai_geometry(dom) {
         const logsCount = (db.getExamViolationLogs ? db.getExamViolationLogs(ex.id) : []).length;
         const fmtT = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
 
+        const classRoomsHtml = isAssigned ? `
+          <div style="margin-top:0.55rem;padding-top:0.55rem;border-top:1px dashed #e2e8f0;display:flex;flex-wrap:wrap;gap:0.45rem;align-items:center;">
+            <span style="font-size:0.75rem;font-weight:700;color:#0f766e;">🏫 Phòng theo từng lớp (~35–50 HS/phòng):</span>
+            ${classes.map(cls => {
+              const clsCount = allStudents.filter(s => s.classId === cls).length;
+              const clsKey = String(cls).replace(/[^a-zA-Z0-9_-]/g, '_');
+              return `
+                <button class="pr-btn-open-class" data-exam-id="${ex.id}" data-class-id="${cls}" style="padding:0.35rem 0.7rem;background:#f0fdfa;border:1.5px solid #5eead4;border-radius:10px;font-size:0.76rem;font-weight:700;color:#0f766e;cursor:pointer;display:inline-flex;align-items:center;gap:0.35rem;transition:all 0.15s;">
+                  <span>🛡️ Lớp ${cls}</span>
+                  <span style="background:#ccfbf1;color:#0f766e;padding:0.08rem 0.38rem;border-radius:6px;font-size:0.7rem;">${clsCount} HS</span>
+                  <span id="pr-cls-live-${ex.id}-${clsKey}" style="font-size:0.7rem;color:#64748b;"></span>
+                </button>`;
+            }).join('')}
+          </div>
+        ` : '';
+
         return `
-          <div class="glass-card" style="padding:1.15rem 1.25rem;border-radius:16px;border:1.5px solid ${isAssigned ? '#99f6e4' : '#e2e8f0'};background:#ffffff;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 4px 14px rgba(0,0,0,0.04);">
-            <div style="flex:1;min-width:260px;">
-              <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.4rem;">
-                <span style="font-weight:700;font-size:1.02rem;color:#0f172a;font-family:var(--font-title);">${ex.title || 'Đề kiểm tra'}</span>
-                <span style="background:#eff6ff;color:#1d4ed8;padding:0.15rem 0.55rem;border-radius:10px;font-size:0.74rem;font-weight:600;">📚 ${subName}</span>
-                ${isAssigned
-                  ? `<span style="background:#dcfce7;color:#15803d;padding:0.15rem 0.6rem;border-radius:10px;font-size:0.74rem;font-weight:700;">🟢 Đã giao (${classes.join(', ')})</span>`
-                  : `<span style="background:#fff7ed;color:#c2410c;padding:0.15rem 0.6rem;border-radius:10px;font-size:0.74rem;font-weight:700;">📝 Bản nháp (Chưa giao)</span>`}
+          <div class="glass-card" style="padding:1.15rem 1.25rem;border-radius:16px;border:1.5px solid ${isAssigned ? '#99f6e4' : '#e2e8f0'};background:#ffffff;display:flex;flex-direction:column;gap:0.65rem;box-shadow:0 4px 14px rgba(0,0,0,0.04);">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;">
+              <div style="flex:1;min-width:260px;">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.4rem;">
+                  <span style="font-weight:700;font-size:1.02rem;color:#0f172a;font-family:var(--font-title);">${ex.title || 'Đề kiểm tra'}</span>
+                  <span style="background:#eff6ff;color:#1d4ed8;padding:0.15rem 0.55rem;border-radius:10px;font-size:0.74rem;font-weight:600;">📚 ${subName}</span>
+                  ${isAssigned
+                    ? `<span style="background:#dcfce7;color:#15803d;padding:0.15rem 0.6rem;border-radius:10px;font-size:0.74rem;font-weight:700;">🟢 Đã giao (${classes.length} phòng lớp)</span>`
+                    : `<span style="background:#fff7ed;color:#c2410c;padding:0.15rem 0.6rem;border-radius:10px;font-size:0.74rem;font-weight:700;">📝 Bản nháp (Chưa giao)</span>`}
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;font-size:0.78rem;color:#475569;align-items:center;">
+                  <span>⏱️ ${ex.timeLimit ? ex.timeLimit + ' phút' : 'Không giới hạn'}</span>
+                  ${ex.openTime ? `<span>| 🟢 Mở: ${fmtT(ex.openTime)}</span>` : ''}
+                  ${ex.closeTime ? `<span>| 🔴 Đóng: ${fmtT(ex.closeTime)}</span>` : ''}
+                  ${isAssigned ? `<span>| 👥 Tổng sĩ số: <strong>${enrolledTotal}</strong></span>` : ''}
+                  <span>| 📊 Đã nộp: <strong>${attemptsCount}</strong></span>
+                  <span>| 🚨 Log vi phạm: <strong style="color:${logsCount > 0 ? '#dc2626' : '#475569'};">${logsCount}</strong></span>
+                </div>
+                <div id="pr-live-stats-${ex.id}" style="margin-top:0.45rem;font-size:0.78rem;color:#0f766e;font-weight:600;">⏳ Đang kiểm tra trạng thái các phòng lớp...</div>
               </div>
-              <div style="display:flex;flex-wrap:wrap;gap:0.4rem;font-size:0.78rem;color:#475569;align-items:center;">
-                <span>⏱️ ${ex.timeLimit ? ex.timeLimit + ' phút' : 'Không giới hạn'}</span>
-                ${ex.openTime ? `<span>| 🟢 Mở: ${fmtT(ex.openTime)}</span>` : ''}
-                ${ex.closeTime ? `<span>| 🔴 Đóng: ${fmtT(ex.closeTime)}</span>` : ''}
-                ${isAssigned ? `<span>| 👥 Sĩ số: <strong>${enrolledTotal}</strong></span>` : ''}
-                <span>| 📊 Đã nộp: <strong>${attemptsCount}</strong></span>
-                <span>| 🚨 Log vi phạm: <strong style="color:${logsCount > 0 ? '#dc2626' : '#475569'};">${logsCount}</strong></span>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+                ${!isAssigned ? `<button class="pr-btn-assign" data-exam-id="${ex.id}" style="padding:0.55rem 0.95rem;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.84rem;cursor:pointer;">🚀 Giao Bài</button>` : ''}
+                <button class="pr-btn-open" data-exam-id="${ex.id}" data-first-class="${classes[0] || ''}" style="padding:0.6rem 1.2rem;background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(13,148,136,0.3);display:inline-flex;align-items:center;gap:0.4rem;">
+                  <span>🛡️</span> ${classes.length > 1 ? `Vào Phòng ${classes[0]}` : 'Vào Phòng Giám Sát Live'}
+                </button>
               </div>
-              <div id="pr-live-stats-${ex.id}" style="margin-top:0.45rem;font-size:0.78rem;color:#0f766e;font-weight:600;">⏳ Đang kiểm tra phòng thi Live...</div>
             </div>
-            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-              ${!isAssigned ? `<button class="pr-btn-assign" data-exam-id="${ex.id}" style="padding:0.55rem 0.95rem;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.84rem;cursor:pointer;">🚀 Giao Bài</button>` : ''}
-              <button class="pr-btn-open" data-exam-id="${ex.id}" style="padding:0.6rem 1.2rem;background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(13,148,136,0.3);display:inline-flex;align-items:center;gap:0.4rem;">
-                <span>🛡️</span> Vào Phòng Giám Sát Live
-              </button>
-            </div>
+            ${classRoomsHtml}
           </div>`;
       }).join('');
 
       listContainer.querySelectorAll('.pr-btn-open').forEach(btn => {
-        btn.onclick = () => this.showLiveProctoringDashboard(btn.getAttribute('data-exam-id'));
+        btn.onclick = () => this.showLiveProctoringDashboard(btn.getAttribute('data-exam-id'), btn.getAttribute('data-first-class') || null);
+      });
+      listContainer.querySelectorAll('.pr-btn-open-class').forEach(btn => {
+        btn.onclick = () => this.showLiveProctoringDashboard(btn.getAttribute('data-exam-id'), btn.getAttribute('data-class-id'));
       });
       listContainer.querySelectorAll('.pr-btn-assign').forEach(btn => {
         btn.onclick = () => {
@@ -16847,22 +16970,33 @@ render_ai_geometry(dom) {
         };
       });
 
-      // Nạp trạng thái Real-time của từng đề đang mở từ máy chủ
+      // Nạp trạng thái Real-time của từng phòng lớp từ máy chủ (gói gọn nhẹ 1 request/đề)
       if (typeof fetch !== 'undefined') {
         filtered.forEach(ex => {
-          fetch(`/api/proctor/room-state?examId=${encodeURIComponent(ex.id)}&t=${Date.now()}`, { cache: 'no-store' })
+          fetch(`/api/proctor/rooms-summary?examId=${encodeURIComponent(ex.id)}&t=${Date.now()}`, { cache: 'no-store' })
             .then(r => r.ok ? r.json() : null)
             .then(data => {
               const badgeEl = dom.querySelector(`#pr-live-stats-${ex.id}`);
-              if (!badgeEl || !data || !Array.isArray(data.students)) return;
-              const online = data.students.filter(s => s.status === 'online').length;
-              const late = data.students.filter(s => s.isLate).length;
-              const viol = data.students.filter(s => s.violationCount > 0).length;
-              const sub = data.students.filter(s => s.status === 'submitted').length;
-              if (data.students.length === 0) {
-                badgeEl.innerHTML = `<span style="color:#64748b;font-weight:500;">Chưa có thí sinh nào đang kết nối trực tiếp vào phòng thi này.</span>`;
+              if (!badgeEl || !data || !Array.isArray(data.rooms)) return;
+              let online = 0, late = 0, viol = 0, sub = 0, total = 0;
+              data.rooms.forEach(rm => {
+                online += rm.online || 0;
+                late += rm.late || 0;
+                viol += rm.violation || 0;
+                sub += rm.submitted || 0;
+                total += rm.total || 0;
+                if (rm.classId) {
+                  const clsKey = String(rm.classId).replace(/[^a-zA-Z0-9_-]/g, '_');
+                  const cEl = dom.querySelector(`#pr-cls-live-${ex.id}-${clsKey}`);
+                  if (cEl && rm.total > 0) {
+                    cEl.innerHTML = `· 🟢${rm.online}${rm.violation > 0 ? ` <span style="color:#dc2626;">🚨${rm.violation}</span>` : ''}${rm.late > 0 ? ` <span style="color:#b45309;">⏰${rm.late}</span>` : ''}`;
+                  }
+                }
+              });
+              if (total === 0) {
+                badgeEl.innerHTML = `<span style="color:#64748b;font-weight:500;">Chưa có thí sinh nào đang kết nối trực tiếp vào các phòng lớp của đề này.</span>`;
               } else {
-                badgeEl.innerHTML = `🟢 Đang thi: <strong>${online}</strong> | ⏰ Vào muộn: <strong style="color:${late > 0 ? '#b45309' : '#0f766e'};">${late}</strong> | 🚨 Vi phạm: <strong style="color:${viol > 0 ? '#dc2626' : '#0f766e'};">${viol}</strong> | ✅ Đã nộp: <strong>${sub}</strong>`;
+                badgeEl.innerHTML = `🟢 Đang thi: <strong>${online}</strong> | ⏰ Vào muộn: <strong style="color:${late > 0 ? '#b45309' : '#0f766e'};">${late}</strong> | 🚨 Vi phạm: <strong style="color:${viol > 0 ? '#dc2626' : '#0f766e'};">${viol}</strong> | ✅ Đã nộp: <strong>${sub}</strong> (trên ${data.rooms.length} phòng)`;
               }
             }).catch(() => {});
         });
@@ -16924,7 +17058,7 @@ render_ai_geometry(dom) {
     renderList();
   }
 
-  showLiveProctoringDashboard(examId) {
+  showLiveProctoringDashboard(examId, initialClassId = null) {
     const exam = (db.getExams ? db.getExams() : []).find(e => e.id === examId);
     if (!exam) { this.showToast('Không tìm thấy đề thi!', 'error'); return; }
 
@@ -16934,19 +17068,28 @@ render_ai_geometry(dom) {
     if (this._teacherProctorPoll) { clearInterval(this._teacherProctorPoll); this._teacherProctorPoll = null; }
 
     const allStudents = db.getStudents ? db.getStudents() : [];
+    const stuById = new Map();
+    allStudents.forEach(s => stuById.set(s.id, s));
     const assignedClasses = (exam.classIds || (exam.classId ? [exam.classId] : [])).filter(Boolean);
     const enrolledStudents = assignedClasses.length > 0
       ? allStudents.filter(s => assignedClasses.includes(s.classId))
       : [];
+
+    const defaultClass = (initialClassId && assignedClasses.includes(initialClassId))
+      ? initialClassId
+      : (assignedClasses.length >= 1 ? assignedClasses[0] : 'all');
 
     const roomState = {
       lateThresholdMinutes: 5,
       openTime: exam.openTime || null,
       liveMap: new Map(), // studentId -> serialized room student
       filterStatus: 'all',
-      filterClass: 'all',
+      filterClass: defaultClass,
       searchKeyword: '',
-      soundAlert: true
+      soundAlert: true,
+      page: 1,
+      pageSize: 36,
+      renderTimer: null
     };
 
     const modal = document.createElement('div');
@@ -16962,7 +17105,8 @@ render_ai_geometry(dom) {
               <span id="lp-sse-badge" style="font-size:0.72rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:20px;background:#dcfce7;color:#15803d;">🟢 Real-time Live</span>
             </div>
             <p style="margin:0.2rem 0 0 0;font-size:0.82rem;color:#475569;">
-              Đề thi: <strong>${exam.title || 'Đề kiểm tra'}</strong> ${assignedClasses.length ? `| Lớp: <strong>${assignedClasses.join(', ')}</strong>` : ''}
+              Đề thi: <strong>${exam.title || 'Đề kiểm tra'}</strong>
+              <span id="lp-room-subtitle">${roomState.filterClass !== 'all' ? ` | 🛡️ Đang xem: <strong style="color:#0f766e;">Phòng Lớp ${roomState.filterClass}</strong>` : (assignedClasses.length ? ` | Lớp: <strong>${assignedClasses.join(', ')}</strong>` : '')}</span>
               ${exam.openTime ? `| Giờ mở đề: <strong>${new Date(exam.openTime).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</strong>` : ''}
             </p>
           </div>
@@ -16978,7 +17122,7 @@ render_ai_geometry(dom) {
               </select>
             </label>
             <button id="lp-toggle-sound" style="padding:0.42rem 0.75rem;background:#fff;border:1.5px solid #cbd5e1;border-radius:10px;font-size:0.78rem;font-weight:700;color:#0f172a;cursor:pointer;">🔔 Chuông: BẬT</button>
-            <button id="lp-broadcast-all" style="padding:0.45rem 0.9rem;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.8rem;cursor:pointer;box-shadow:0 3px 10px rgba(220,38,38,0.28);">📢 Phát loa toàn phòng</button>
+            <button id="lp-broadcast-all" style="padding:0.45rem 0.9rem;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.8rem;cursor:pointer;box-shadow:0 3px 10px rgba(220,38,38,0.28);">📢 Phát loa phòng này</button>
             <button id="lp-close" style="background:#f1f5f9;border:1.5px solid #e2e8f0;color:#475569;font-size:1.3rem;cursor:pointer;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;">&times;</button>
           </div>
         </div>
@@ -16987,10 +17131,13 @@ render_ai_geometry(dom) {
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.6rem;margin-bottom:0.85rem;flex-shrink:0;">
           <div id="lp-filter-tabs" style="display:flex;gap:0.4rem;flex-wrap:wrap;"></div>
           <div style="display:flex;gap:0.45rem;align-items:center;flex-wrap:wrap;">
-            ${assignedClasses.length > 1 ? `
-              <select id="lp-class-filter" style="height:34px;padding:0 0.65rem;border-radius:9px;border:1.5px solid #cbd5e1;font-size:0.82rem;font-weight:600;background:#fff;">
-                <option value="all">🏫 Tất cả lớp</option>
-                ${assignedClasses.map(c => `<option value="${c}">Lớp ${c}</option>`).join('')}
+            ${assignedClasses.length >= 1 ? `
+              <select id="lp-class-filter" style="height:34px;padding:0 0.65rem;border-radius:9px;border:1.5px solid #0d9488;font-size:0.82rem;font-weight:700;color:#0f766e;background:#f0fdfa;cursor:pointer;">
+                ${assignedClasses.map(c => {
+                  const cnt = allStudents.filter(s => s.classId === c).length;
+                  return `<option value="${c}" ${roomState.filterClass === c ? 'selected' : ''}>🏫 Phòng Lớp ${c} (${cnt} HS)</option>`;
+                }).join('')}
+                ${assignedClasses.length > 1 ? `<option value="all" ${roomState.filterClass === 'all' ? 'selected' : ''}>🌐 Tổng hợp tất cả (${enrolledStudents.length} HS)</option>` : ''}
               </select>
             ` : ''}
             <input type="text" id="lp-search-input" placeholder="🔍 Tìm tên học sinh..." style="height:34px;padding:0 0.75rem;border-radius:9px;border:1.5px solid #cbd5e1;font-size:0.82rem;min-width:190px;background:#fff;" />
@@ -17004,18 +17151,20 @@ render_ai_geometry(dom) {
         <div style="display:flex;gap:0.6rem;margin-top:0.85rem;flex-shrink:0;align-items:center;flex-wrap:wrap;">
           <button id="lp-refresh" style="padding:0.55rem 1.15rem;background:linear-gradient(135deg,#0891b2,#0369a1);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.84rem;cursor:pointer;">🔄 Đồng bộ ngay</button>
           <button id="lp-log-all" style="padding:0.55rem 1.15rem;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.84rem;cursor:pointer;">📋 Toàn bộ Log Vi Phạm</button>
-          <span style="font-size:0.76rem;color:#64748b;">💡 Mẹo: Khi học sinh vào muộn hoặc vi phạm, bấm <strong>🎙️ Nói nhắc</strong> trên thẻ để nói trực tiếp qua loa máy của em đó.</span>
+          <span style="font-size:0.76rem;color:#64748b;">💡 Mỗi lớp tách thành 1 phòng (~35–50 HS). Chuyển nhanh giữa các lớp ở ô chọn phía trên.</span>
           <button id="lp-close2" style="margin-left:auto;padding:0.55rem 1.2rem;background:#e2e8f0;color:#334155;border:none;border-radius:10px;font-weight:700;font-size:0.84rem;cursor:pointer;">✕ Đóng</button>
         </div>
       </div>`;
     document.body.appendChild(modal);
 
     const buildMergedStudents = () => {
+      const targetClass = roomState.filterClass;
       const attempts = (db.getExamAttempts ? db.getExamAttempts() : []).filter(a => a.examId === examId);
       const localLogs = (db.getExamViolationLogs ? db.getExamViolationLogs(examId) : []);
       const map = new Map();
 
       enrolledStudents.forEach(s => {
+        if (targetClass !== 'all' && s.classId !== targetClass) return;
         map.set(s.id, {
           studentId: s.id,
           studentName: s.name,
@@ -17035,11 +17184,13 @@ render_ai_geometry(dom) {
       });
 
       attempts.forEach(a => {
-        const stu = allStudents.find(s => s.id === a.studentId);
+        const stu = stuById.get(a.studentId);
+        const sClass = (stu && stu.classId) || '';
+        if (targetClass !== 'all' && sClass !== targetClass) return;
         const cur = map.get(a.studentId) || {
           studentId: a.studentId,
           studentName: (stu && stu.name) || a.studentId,
-          classId: (stu && stu.classId) || '',
+          classId: sClass,
           answeredCount: a.totalCount || 0,
           totalCount: a.totalCount || 0,
           violations: [],
@@ -17054,11 +17205,13 @@ render_ai_geometry(dom) {
       });
 
       localLogs.forEach(l => {
-        const stu = allStudents.find(s => s.id === l.studentId);
+        const stu = stuById.get(l.studentId);
+        const sClass = (stu && stu.classId) || '';
+        if (targetClass !== 'all' && sClass !== targetClass) return;
         const cur = map.get(l.studentId) || {
           studentId: l.studentId,
           studentName: (stu && stu.name) || l.studentId,
-          classId: (stu && stu.classId) || '',
+          classId: sClass,
           status: 'not_started',
           violations: [],
           reminders: []
@@ -17080,7 +17233,8 @@ render_ai_geometry(dom) {
           classId: live.classId || prev.classId || '',
           violationCount: Math.max(live.violationCount || 0, prev.violationCount || 0),
           violations: (live.violations && live.violations.length) ? live.violations : (prev.violations || []),
-          lastSnapshot: live.lastSnapshot || prev.lastSnapshot || null
+          lastSnapshot: live.lastSnapshot || live.snapshotUrl || prev.lastSnapshot || null,
+          dualCamSnapshot: live.dualCamSnapshot || live.dualCamSnapshotUrl || prev.dualCamSnapshot || null
         });
       });
 
@@ -17123,7 +17277,7 @@ render_ai_geometry(dom) {
         return `<button class="lp-tab-btn" data-tab="${t.k}" style="padding:0.35rem 0.75rem;border-radius:20px;border:2px solid ${active ? t.fg : 'transparent'};background:${t.bg};color:${t.fg};font-weight:700;font-size:0.78rem;cursor:pointer;transition:all 0.15s;">${t.label}</button>`;
       }).join('');
       tabsEl.querySelectorAll('.lp-tab-btn').forEach(b => {
-        b.onclick = () => { roomState.filterStatus = b.getAttribute('data-tab'); renderRoomUI(); };
+        b.onclick = () => { roomState.filterStatus = b.getAttribute('data-tab'); roomState.page = 1; renderRoomUI(); };
       });
 
       const normKw = String(roomState.searchKeyword || '').toLowerCase().trim();
@@ -17144,8 +17298,25 @@ render_ai_geometry(dom) {
         return;
       }
 
-      gridEl.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:0.85rem;">
-        ${filtered.map(stu => {
+      const pageSize = Math.max(12, Number(roomState.pageSize) || 36);
+      const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+      if (roomState.page > totalPages) roomState.page = totalPages;
+      if (roomState.page < 1) roomState.page = 1;
+      const startIdx = (roomState.page - 1) * pageSize;
+      const pageItems = filtered.slice(startIdx, startIdx + pageSize);
+      const pagerBar = filtered.length > pageSize ? `
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.65rem;padding:0.45rem 0.75rem;background:#e2e8f0;border-radius:10px;font-size:0.78rem;color:#1e293b;">
+          <div>
+            <strong>⚡ Chế độ phòng thi lớn:</strong> Hiển thị <strong>${startIdx + 1}–${Math.min(startIdx + pageItems.length, filtered.length)}</strong> / <strong>${filtered.length}</strong> học sinh (Trang <strong>${roomState.page}/${totalPages}</strong>)
+          </div>
+          <div style="display:flex;align-items:center;gap:0.35rem;">
+            <button type="button" class="lp-page-prev" ${roomState.page <= 1 ? 'disabled' : ''} style="padding:0.28rem 0.65rem;border-radius:7px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-weight:700;opacity:${roomState.page <= 1 ? '0.5' : '1'};">◀ Trước</button>
+            <button type="button" class="lp-page-next" ${roomState.page >= totalPages ? 'disabled' : ''} style="padding:0.28rem 0.65rem;border-radius:7px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-weight:700;opacity:${roomState.page >= totalPages ? '0.5' : '1'};">Sau ▶</button>
+          </div>
+        </div>` : '';
+
+      gridEl.innerHTML = `${pagerBar}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:0.85rem;">
+        ${pageItems.map(stu => {
           const borderCol = stu.violationCount > 0 ? '#ef4444' : stu.isLate ? '#f59e0b' : stu.status === 'online' ? '#10b981' : stu.status === 'submitted' ? '#3b82f6' : '#cbd5e1';
           const statusBadge = stu.status === 'online'
             ? `<span style="background:#dcfce7;color:#15803d;padding:0.15rem 0.5rem;border-radius:10px;font-size:0.7rem;font-weight:700;">🟢 Đang thi</span>`
@@ -17163,9 +17334,16 @@ render_ai_geometry(dom) {
             <div style="background:#fff;border:2px solid ${borderCol};border-radius:14px;padding:0.85rem;display:flex;flex-direction:column;gap:0.42rem;box-shadow:0 4px 12px rgba(0,0,0,0.06);">
               <div style="position:relative;">
                 ${stu.lastSnapshot
-                  ? `<img class="lp-snap-zoom" data-snap="${stu.lastSnapshot}" src="${stu.lastSnapshot}" style="width:100%;height:96px;object-fit:cover;border-radius:8px;border:1px solid ${borderCol};cursor:pointer;display:block;" title="Bấm để phóng to" />`
-                  : `<div style="width:100%;height:70px;background:#f8fafc;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.75rem;color:#94a3b8;">${stu.status === 'online' ? '👨‍🎓' : '📷'}</div>`
+                  ? `<img loading="lazy" class="lp-snap-zoom" data-snap="${stu.lastSnapshot}" src="${stu.lastSnapshot}" style="width:100%;height:96px;object-fit:cover;border-radius:8px;border:1px solid ${borderCol};cursor:pointer;display:block;" title="Bấm để phóng to Camera chính" />`
+                  : (stu.dualCamSnapshot
+                    ? `<img loading="lazy" class="lp-snap-zoom" data-snap="${stu.dualCamSnapshot}" src="${stu.dualCamSnapshot}" style="width:100%;height:96px;object-fit:cover;border-radius:8px;border:1.5px solid #10b981;cursor:pointer;display:block;" title="Bấm để phóng to Camera phụ điện thoại" />`
+                    : `<div style="width:100%;height:70px;background:#f8fafc;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.75rem;color:#94a3b8;">${stu.status === 'online' ? '👨‍🎓' : '📷'}</div>`)
                 }
+                ${(stu.lastSnapshot && stu.dualCamSnapshot)
+                  ? `<img loading="lazy" class="lp-snap-zoom" data-snap="${stu.dualCamSnapshot}" src="${stu.dualCamSnapshot}" style="position:absolute;bottom:5px;right:5px;width:54px;height:40px;object-fit:cover;border-radius:6px;border:2px solid #10b981;box-shadow:0 2px 8px rgba(0,0,0,0.45);cursor:pointer;" title="Camera phụ (điện thoại) — Bấm để phóng to" />`
+                  : ''
+                }
+                ${stu.dualCamConnected ? `<span style="position:absolute;bottom:5px;left:5px;background:#059669;color:#fff;font-size:0.64rem;font-weight:800;padding:0.12rem 0.4rem;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.25);">📱 Cam phụ LIVE</span>` : ''}
                 ${stu.isLate ? `<span style="position:absolute;top:5px;left:5px;background:#f59e0b;color:#fff;font-size:0.68rem;font-weight:800;padding:0.15rem 0.45rem;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">⏰ Vào muộn ${stu.lateMinutes}p</span>` : ''}
                 ${stu.violationCount > 0 ? `<span style="position:absolute;top:5px;right:5px;background:#dc2626;color:#fff;font-size:0.68rem;font-weight:800;padding:0.15rem 0.45rem;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">🚨 ${stu.violationCount} lỗi</span>` : ''}
               </div>
@@ -17185,20 +17363,40 @@ render_ai_geometry(dom) {
               ${lastRem ? `<div style="font-size:0.69rem;color:#0f766e;">🎙️ Đã nhắc ${lastRem.ackedAt ? '(✓ HS đã nghe)' : '(⏳ Chờ xác nhận)'}</div>` : ''}
 
               <div style="display:flex;gap:0.35rem;margin-top:auto;padding-top:0.25rem;">
-                <button class="lp-btn-voice" data-sid="${stu.studentId}" data-sname="${String(stu.studentName || '').replace(/"/g, '&quot;')}" style="flex:1.3;padding:0.38rem 0.45rem;background:linear-gradient(135deg,#0f766e,#0d9488);border:none;border-radius:8px;font-size:0.73rem;font-weight:700;color:#fff;cursor:pointer;" title="Nói trực tiếp bằng Micro hoặc gửi nhắc nhở tới em này">🎙️ Nói nhắc</button>
+                <button class="lp-btn-voice" data-sid="${stu.studentId}" data-cid="${stu.classId || (roomState.filterClass !== 'all' ? roomState.filterClass : '')}" data-sname="${String(stu.studentName || '').replace(/"/g, '&quot;')}" style="flex:1.3;padding:0.38rem 0.45rem;background:linear-gradient(135deg,#0f766e,#0d9488);border:none;border-radius:8px;font-size:0.73rem;font-weight:700;color:#fff;cursor:pointer;" title="Nói trực tiếp bằng Micro hoặc gửi nhắc nhở tới em này">🎙️ Nói nhắc</button>
                 <button class="lp-btn-log" style="flex:0.8;padding:0.38rem;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;font-size:0.73rem;font-weight:700;color:#dc2626;cursor:pointer;">📋 Log</button>
-                ${(stu.status === 'online' || stu.status === 'disconnected') ? `<button class="lp-btn-lock" data-sid="${stu.studentId}" data-sname="${String(stu.studentName || '').replace(/"/g, '&quot;')}" style="padding:0.38rem 0.45rem;background:#1e293b;border:none;border-radius:8px;font-size:0.72rem;font-weight:700;color:#fff;cursor:pointer;" title="Yêu cầu máy học sinh nộp bài ngay">🔒</button>` : ''}
+                ${(stu.status === 'online' || stu.status === 'disconnected') ? `<button class="lp-btn-lock" data-sid="${stu.studentId}" data-cid="${stu.classId || (roomState.filterClass !== 'all' ? roomState.filterClass : '')}" data-sname="${String(stu.studentName || '').replace(/"/g, '&quot;')}" style="padding:0.38rem 0.45rem;background:#1e293b;border:none;border-radius:8px;font-size:0.72rem;font-weight:700;color:#fff;cursor:pointer;" title="Yêu cầu máy học sinh nộp bài ngay">🔒</button>` : ''}
               </div>
             </div>`;
         }).join('')}
       </div>`;
     };
 
+    const scheduleRender = (delayMs) => {
+      if (roomState.renderTimer) return;
+      const wait = delayMs !== undefined ? delayMs : (roomState.liveMap.size > 100 ? 600 : 120);
+      roomState.renderTimer = setTimeout(() => {
+        roomState.renderTimer = null;
+        renderRoomUI();
+      }, wait);
+    };
+
     // Event delegation inside student grid (tránh lỗi ký tự đặc biệt trong tên học sinh)
     modal.querySelector('#lp-student-grid').onclick = (e) => {
+      const prevBtn = e.target.closest('.lp-page-prev');
+      if (prevBtn) {
+        if (roomState.page > 1) { roomState.page--; renderRoomUI(); }
+        return;
+      }
+      const nextBtn = e.target.closest('.lp-page-next');
+      if (nextBtn) {
+        roomState.page++;
+        renderRoomUI();
+        return;
+      }
       const voiceBtn = e.target.closest('.lp-btn-voice');
       if (voiceBtn) {
-        this._openProctorVoiceModal(examId, voiceBtn.getAttribute('data-sid'), voiceBtn.getAttribute('data-sname'));
+        this._openProctorVoiceModal(examId, voiceBtn.getAttribute('data-sid'), voiceBtn.getAttribute('data-sname'), voiceBtn.getAttribute('data-cid') || '');
         return;
       }
       const logBtn = e.target.closest('.lp-btn-log');
@@ -17209,6 +17407,7 @@ render_ai_geometry(dom) {
       const lockBtn = e.target.closest('.lp-btn-lock');
       if (lockBtn) {
         const sid = lockBtn.getAttribute('data-sid');
+        const cid = lockBtn.getAttribute('data-cid') || '';
         const sname = lockBtn.getAttribute('data-sname');
         if (confirm(`🔒 Bạn có chắc chắn muốn THU BÀI NGAY của học sinh ${sname}?`)) {
           fetch('/api/proctor/command', {
@@ -17216,6 +17415,7 @@ render_ai_geometry(dom) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               examId,
+              classId: cid,
               targetStudentId: sid,
               action: 'force_submit',
               reason: 'Giám thị đã thu bài do vi phạm quy chế phòng thi.',
@@ -17232,14 +17432,18 @@ render_ai_geometry(dom) {
     };
 
     const closeDashboard = () => {
+      if (roomState.renderTimer) { clearTimeout(roomState.renderTimer); roomState.renderTimer = null; }
       if (this._teacherProctorES) { try { this._teacherProctorES.close(); } catch (e) {} this._teacherProctorES = null; }
       if (this._teacherProctorPoll) { clearInterval(this._teacherProctorPoll); this._teacherProctorPoll = null; }
       modal.remove();
     };
 
+    const getActiveClassParam = () => (roomState.filterClass && roomState.filterClass !== 'all') ? roomState.filterClass : '';
+
     const fetchRoomSnapshot = async () => {
       try {
-        const res = await fetch(`/api/proctor/room-state?examId=${encodeURIComponent(examId)}&t=${Date.now()}`, { cache: 'no-store' });
+        const cid = getActiveClassParam();
+        const res = await fetch(`/api/proctor/room-state?examId=${encodeURIComponent(examId)}&classId=${encodeURIComponent(cid)}&light=1&t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (data && Array.isArray(data.students)) {
@@ -17255,11 +17459,80 @@ render_ai_geometry(dom) {
       } catch (e) {}
     };
 
+    let sseHealthy = false;
+    const connectTeacherRoom = () => {
+      if (this._teacherProctorES) { try { this._teacherProctorES.close(); } catch (e) {} this._teacherProctorES = null; }
+      sseHealthy = false;
+      const cid = getActiveClassParam();
+      if (typeof EventSource !== 'undefined') {
+        try {
+          const es = new EventSource(`/api/proctor/stream?examId=${encodeURIComponent(examId)}&classId=${encodeURIComponent(cid)}&role=teacher`);
+          this._teacherProctorES = es;
+          es.onopen = () => {
+            sseHealthy = true;
+            const b = modal.querySelector('#lp-sse-badge');
+            if (b) { b.textContent = '🟢 Real-time Live'; b.style.background = '#dcfce7'; b.style.color = '#15803d'; }
+          };
+          es.addEventListener('room_snapshot', (ev) => {
+            try {
+              sseHealthy = true;
+              const d = JSON.parse(ev.data);
+              if (d && Array.isArray(d.students)) {
+                roomState.liveMap.clear();
+                d.students.forEach(s => roomState.liveMap.set(s.studentId, s));
+                scheduleRender(60);
+              }
+            } catch (e) {}
+          });
+          es.addEventListener('student_update', (ev) => {
+            try {
+              const stu = JSON.parse(ev.data);
+              if (stu && stu.studentId) {
+                roomState.liveMap.set(stu.studentId, stu);
+                scheduleRender();
+              }
+            } catch (e) {}
+          });
+          es.addEventListener('room_batch', (ev) => {
+            try {
+              const d = JSON.parse(ev.data);
+              if (d && Array.isArray(d.students)) {
+                d.students.forEach(stu => {
+                  if (stu && stu.studentId) roomState.liveMap.set(stu.studentId, stu);
+                });
+                scheduleRender();
+              }
+            } catch (e) {}
+          });
+          es.addEventListener('student_violation', (ev) => {
+            try {
+              const payload = JSON.parse(ev.data);
+              if (payload && payload.student) {
+                roomState.liveMap.set(payload.student.studentId, payload.student);
+                if (roomState.soundAlert) this._playProctorChime();
+                this.showToast(`🚨 ${payload.student.studentName} vừa vi phạm: ${(payload.violation && payload.violation.reason) || ''}`, 'warning');
+                scheduleRender(100);
+              }
+            } catch (e) {}
+          });
+          es.onerror = () => {
+            sseHealthy = false;
+            const b = modal.querySelector('#lp-sse-badge');
+            if (b) { b.textContent = '🟡 Đồng bộ định kỳ'; b.style.background = '#fef3c7'; b.style.color = '#b45309'; }
+          };
+        } catch (e) {}
+      }
+    };
+
     modal.querySelector('#lp-close').onclick = closeDashboard;
     modal.querySelector('#lp-close2').onclick = closeDashboard;
     modal.querySelector('#lp-log-all').onclick = () => this.showViolationLogModal(examId, exam.title);
     modal.querySelector('#lp-refresh').onclick = fetchRoomSnapshot;
-    modal.querySelector('#lp-broadcast-all').onclick = () => this._openProctorVoiceModal(examId, 'ALL', 'Toàn bộ học sinh trong phòng thi');
+    modal.querySelector('#lp-broadcast-all').onclick = () => {
+      const cid = getActiveClassParam();
+      const targetLabel = cid ? `Toàn bộ học sinh Phòng Lớp ${cid}` : 'Toàn bộ học sinh các lớp';
+      this._openProctorVoiceModal(examId, 'ALL', targetLabel, cid || 'ALL_CLASSES');
+    };
     modal.querySelector('#lp-toggle-sound').onclick = (e) => {
       roomState.soundAlert = !roomState.soundAlert;
       e.target.textContent = roomState.soundAlert ? '🔔 Chuông: BẬT' : '🔕 Chuông: TẮT';
@@ -17269,7 +17542,7 @@ render_ai_geometry(dom) {
       fetch('/api/proctor/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ examId, lateThresholdMinutes: mins, openTime: exam.openTime || null })
+        body: JSON.stringify({ examId, classId: getActiveClassParam(), lateThresholdMinutes: mins, openTime: exam.openTime || null })
       }).then(r => r.json()).then(data => {
         if (data && Array.isArray(data.students)) {
           roomState.liveMap.clear();
@@ -17279,11 +17552,26 @@ render_ai_geometry(dom) {
       }).catch(() => {});
     };
     const clsFilter = modal.querySelector('#lp-class-filter');
-    if (clsFilter) clsFilter.onchange = (e) => { roomState.filterClass = e.target.value; renderRoomUI(); };
-    modal.querySelector('#lp-search-input').oninput = (e) => { roomState.searchKeyword = e.target.value; renderRoomUI(); };
+    if (clsFilter) {
+      clsFilter.onchange = (e) => {
+        roomState.filterClass = e.target.value;
+        roomState.page = 1;
+        roomState.liveMap.clear();
+        const subEl = modal.querySelector('#lp-room-subtitle');
+        if (subEl) {
+          subEl.innerHTML = roomState.filterClass !== 'all'
+            ? ` | 🛡️ Đang xem: <strong style="color:#0f766e;">Phòng Lớp ${roomState.filterClass}</strong>`
+            : (assignedClasses.length ? ` | Lớp: <strong>${assignedClasses.join(', ')}</strong>` : '');
+        }
+        renderRoomUI();
+        connectTeacherRoom();
+        fetchRoomSnapshot();
+      };
+    }
+    modal.querySelector('#lp-search-input').oninput = (e) => { roomState.searchKeyword = e.target.value; roomState.page = 1; renderRoomUI(); };
     modal.onclick = e => { if (e.target === modal) closeDashboard(); };
 
-    // Đẩy cấu hình openTime ban đầu lên room + mở kênh SSE giáo viên
+    // Đẩy cấu hình openTime ban đầu lên room + mở kênh SSE giáo viên theo phòng lớp đang chọn
     if (exam.openTime) {
       fetch('/api/proctor/config', {
         method: 'POST',
@@ -17292,51 +17580,14 @@ render_ai_geometry(dom) {
       }).catch(() => {});
     }
 
-    if (typeof EventSource !== 'undefined') {
-      try {
-        const es = new EventSource(`/api/proctor/stream?examId=${encodeURIComponent(examId)}&role=teacher`);
-        this._teacherProctorES = es;
-        es.addEventListener('room_snapshot', (ev) => {
-          try {
-            const d = JSON.parse(ev.data);
-            if (d && Array.isArray(d.students)) {
-              roomState.liveMap.clear();
-              d.students.forEach(s => roomState.liveMap.set(s.studentId, s));
-              renderRoomUI();
-            }
-          } catch (e) {}
-        });
-        es.addEventListener('student_update', (ev) => {
-          try {
-            const stu = JSON.parse(ev.data);
-            if (stu && stu.studentId) {
-              roomState.liveMap.set(stu.studentId, stu);
-              renderRoomUI();
-            }
-          } catch (e) {}
-        });
-        es.addEventListener('student_violation', (ev) => {
-          try {
-            const payload = JSON.parse(ev.data);
-            if (payload && payload.student) {
-              roomState.liveMap.set(payload.student.studentId, payload.student);
-              if (roomState.soundAlert) this._playProctorChime();
-              this.showToast(`🚨 ${payload.student.studentName} vừa vi phạm: ${(payload.violation && payload.violation.reason) || ''}`, 'warning');
-              renderRoomUI();
-            }
-          } catch (e) {}
-        });
-        es.onerror = () => {
-          const b = modal.querySelector('#lp-sse-badge');
-          if (b) { b.textContent = '🟡 Đồng bộ định kỳ'; b.style.background = '#fef3c7'; b.style.color = '#b45309'; }
-        };
-      } catch (e) {}
-    }
-
     renderRoomUI();
+    connectTeacherRoom();
     fetchRoomSnapshot();
+    let pollTick = 0;
     this._teacherProctorPoll = setInterval(() => {
       if (!document.getElementById('live-proctor-dashboard')) { closeDashboard(); return; }
+      pollTick++;
+      if (sseHealthy && roomState.liveMap.size > 100 && pollTick % 3 !== 0) return;
       fetchRoomSnapshot();
     }, 8000);
   }
@@ -17473,6 +17724,12 @@ render_ai_geometry(dom) {
     let secondsLeft = timeLimitSec > 0 ? timeLimitSec : 999999;
     let timerInterval = null;
     let micInterval = null;
+    let micAudioCtx = null;
+    let dualCamCheckInterval = null;
+    let dualCamWarnTimer = null;
+    let dualCamBc = null;
+    let dualCamLastLocalTs = 0;
+    window._dualCamConnected = false;
     let faceInterval = null;
     let micSpeakTimer = 0;
     let faceAbsentTimer = 0;
@@ -17482,6 +17739,20 @@ render_ai_geometry(dom) {
     const overlay = document.createElement('div');
     overlay.id = 'exam-session-overlay';
     overlay.style.cssText = 'position:fixed;inset:0;background:#f1f5f9;z-index:99999;display:flex;flex-direction:column;overflow:hidden;font-family:var(--font-body);';
+
+    const updateDualCamUI = (connected) => {
+      const effectiveConn = !!connected || (dualCamLastLocalTs > 0 && Date.now() - dualCamLastLocalTs <= 20000);
+      window._dualCamConnected = effectiveConn;
+      const dualStatus = overlay.querySelector('#dual-cam-status');
+      const panel = overlay.querySelector('#dual-cam-qr-panel');
+      if (effectiveConn) {
+        if (dualStatus) dualStatus.innerHTML = '<span style="color:#34d399;font-weight:800;">🟢 Camera phụ đã kết nối!</span>';
+        if (panel) panel.style.borderColor = '#10b981';
+      } else {
+        if (dualStatus) dualStatus.innerHTML = '<span style="color:#fbbf24;">⏳ Chờ điện thoại kết nối...</span>';
+        if (panel) panel.style.borderColor = '#f59e0b';
+      }
+    };
 
     const formatTime = (s) => {
       const m = Math.floor(s/60), ss = s%60;
@@ -17746,9 +18017,13 @@ render_ai_geometry(dom) {
     if ((exam.examType || '').toLowerCase() === 'ck') {
       const qrImg = overlay.querySelector('#dual-cam-qr-img');
       const dualStatus = overlay.querySelector('#dual-cam-status');
+      const dualStudentId = String(this._examStudentId || this.currentUser?.id || '').trim();
+      const dualStuObj = (db.getStudents ? db.getStudents() : []).find(s => s.id === dualStudentId) || {};
+      const dualClassId = String(dualStuObj.classId || this.currentUser?.classId || '').trim();
+      const dualStudentName = String(dualStuObj.name || this.currentUser?.name || dualStudentId || 'hs').trim();
       if (qrImg) {
-        // Tạo URL trang cam.html với tham số phòng thi
-        const camUrl = `${location.protocol}//${location.host}/cam.html?room=${encodeURIComponent(exam.id || 'exam')}&name=${encodeURIComponent(this.currentUser?.name || 'hs')}&t=${Date.now()}`;
+        // Tạo URL trang cam.html kèm room, cid (classId), sid (studentId) và name
+        const camUrl = `${location.protocol}//${location.host}/cam.html?room=${encodeURIComponent(exam.id || 'exam')}&cid=${encodeURIComponent(dualClassId)}&sid=${encodeURIComponent(dualStudentId)}&name=${encodeURIComponent(dualStudentName)}&t=${Date.now()}`;
         // Dùng QR API công khai (offline fallback: chỉ hiện text URL)
         const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(camUrl)}&size=120x120&format=png&qzone=1&color=0f172a`;
         const img = document.createElement('img');
@@ -17765,24 +18040,45 @@ render_ai_geometry(dom) {
         qrImg.innerHTML = '';
         qrImg.appendChild(img);
 
-        // Kiểm tra kết nối camera phụ định kỳ mỗi 5 giây
-        let dualCamCheckInterval = setInterval(() => {
-          if (!this.isProctoringActive || isSubmitting) { clearInterval(dualCamCheckInterval); return; }
-          // Kiểm tra thông qua global cameraStreamStore nếu server đang chạy
-          if (typeof window._dualCamConnected !== 'undefined') {
-            if (window._dualCamConnected) {
-              if (dualStatus) dualStatus.innerHTML = '<span style="color:#34d399;font-weight:800;">🟢 Camera phụ đã kết nối!</span>';
-              const panel = overlay.querySelector('#dual-cam-qr-panel');
-              if (panel) panel.style.borderColor = '#10b981';
-            } else {
-              if (dualStatus) dualStatus.innerHTML = '<span style="color:#fbbf24;">⏳ Chờ điện thoại kết nối...</span>';
-            }
+        if (typeof BroadcastChannel !== 'undefined') {
+          try {
+            dualCamBc = new BroadcastChannel('lms_remote_cam');
+            dualCamBc.onmessage = (ev) => {
+              const d = ev && ev.data;
+              if (!d || d.type !== 'frame') return;
+              if (d.examId && String(d.examId) !== String(exam.id)) return;
+              if (d.studentId && dualStudentId && String(d.studentId) !== dualStudentId) return;
+              dualCamLastLocalTs = Date.now();
+              updateDualCamUI(true);
+            };
+          } catch (e) {}
+        }
+
+        const pollDualCamServerStatus = () => {
+          if (!this.isProctoringActive || isSubmitting) return;
+          if (typeof fetch === 'undefined' || !exam.id || !dualStudentId || isPreviewMode) {
+            updateDualCamUI(false);
+            return;
           }
-        }, 5000);
+          fetch(`/api/proctor/dualcam/status?examId=${encodeURIComponent(exam.id)}&classId=${encodeURIComponent(dualClassId)}&studentId=${encodeURIComponent(dualStudentId)}&t=${Date.now()}`, { cache: 'no-store' })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+              if (!this.isProctoringActive || isSubmitting) return;
+              if (data && data.connected !== undefined) updateDualCamUI(!!data.connected);
+            })
+            .catch(() => updateDualCamUI(false));
+        };
+
+        // Kiểm tra kết nối camera phụ định kỳ mỗi 4 giây
+        dualCamCheckInterval = setInterval(() => {
+          if (!this.isProctoringActive || isSubmitting) { clearInterval(dualCamCheckInterval); dualCamCheckInterval = null; return; }
+          pollDualCamServerStatus();
+        }, 4000);
 
         // Cảnh báo sau 90 giây nếu chưa kết nối camera phụ (Cuối Kỳ)
-        setTimeout(() => {
-          if (!this.isProctoringActive || !window._dualCamConnected) {
+        dualCamWarnTimer = setTimeout(() => {
+          if (!this.isProctoringActive || isSubmitting) return;
+          if (!window._dualCamConnected) {
             if (dualStatus) dualStatus.innerHTML = '<span style="color:#ef4444;font-weight:800;">⚠️ Chưa kết nối camera phụ!</span>';
             this.showToast('⚠️ Kỳ thi Cuối Kỳ yêu cầu Camera phụ! Vui lòng dùng điện thoại quét mã QR ở góc phải màn hình.', 'warning');
           }
@@ -18099,7 +18395,7 @@ render_ai_geometry(dom) {
         : 0;
       const correct = Math.round(earnedPoints * 100) / 100; // dùng để hiển thị
 
-      const isTrial = exam.mode === 'thi_thu';
+      const isTrial = (exam.mode === 'thi_thu' || exam.examMode === 'practice');
       const targetCol = exam.targetGradeColumn || 'TX1';
 
       // Save attempt
@@ -18161,6 +18457,12 @@ render_ai_geometry(dom) {
       // Stop all monitors
       if (timerInterval) clearInterval(timerInterval);
       if (micInterval) clearInterval(micInterval);
+      if (micAudioCtx) { try { micAudioCtx.close(); } catch(e) {} micAudioCtx = null; }
+      if (dualCamCheckInterval) { clearInterval(dualCamCheckInterval); dualCamCheckInterval = null; }
+      if (dualCamWarnTimer) { clearTimeout(dualCamWarnTimer); dualCamWarnTimer = null; }
+      if (dualCamBc) { try { dualCamBc.close(); } catch(e) {} dualCamBc = null; }
+      window._dualCamConnected = false;
+      window._isSystemSpeakingToStudent = false;
       if (faceInterval) clearInterval(faceInterval);
       if (stream) stream.getTracks().forEach(t => t.stop());
       this._examSessionStream = null;
@@ -18265,7 +18567,8 @@ render_ai_geometry(dom) {
           return c.toDataURL('image/jpeg', 0.6);
         } catch (e) { return null; }
       },
-      onForceSubmit: () => submitExam(true)
+      onForceSubmit: () => submitExam(true),
+      onDualCamStatus: (connected) => updateDualCamUI(connected)
     });
 
     if (timeLimitSec > 0) {
@@ -18630,12 +18933,14 @@ render_ai_geometry(dom) {
     });
 
     // 🎤 Mic VAD Proctoring — Bandpass Filter 300Hz–3400Hz chuyên lọc giọng người
-    // Phân biệt chính xác tiếng nói gian lận với tiếng quạt / bàn phím / rè mic
-    if (exam.enableMic && stream && stream.getAudioTracks().length > 0) {
+    // Chỉ chạy độc lập khi không bật ProctorCameraAI (tránh chạy trùng 2 Mic VAD khi bật cả Camera + Mic)
+    const _useProctorCameraAI = !!(exam.enableCamera && stream && window.ProctorCameraAI && overlay.querySelector('#exam-pip-video'));
+    if (exam.enableMic && !_useProctorCameraAI && stream && stream.getAudioTracks().length > 0) {
       try {
         const AudioCtxCls = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtxCls) throw new Error('No AudioContext');
         const audioCtx = new AudioCtxCls();
+        micAudioCtx = audioCtx;
         const sampleRate = audioCtx.sampleRate;
         const micSrc = audioCtx.createMediaStreamSource(stream);
 
@@ -18669,6 +18974,10 @@ render_ai_geometry(dom) {
         const doStartMic = () => {
           micInterval = setInterval(() => {
             if (!this.isProctoringActive) return;
+            if (window._isSystemSpeakingToStudent || (Date.now() - (window._lastSystemSpeakEndTs || 0) < 2500)) {
+              speechAccum = 0;
+              return;
+            }
             micAnalyser.getByteFrequencyData(freqBuf);
 
             let totalEnergy = 0;
@@ -18740,7 +19049,7 @@ render_ai_geometry(dom) {
           status: camSt,
           stream: stream,
           studentName: studentName,
-          enableMic: exam.enableMic !== false,
+          enableMic: !!exam.enableMic,
           enableFullscreen: true,
           onViolation: (reason, snapshot) => {
             handleViolation(reason);
@@ -18757,6 +19066,7 @@ render_ai_geometry(dom) {
         this.isProctoringActive = false;
         window._isExamFilePickerActive = false;
         window._isExamInputActive = false;
+        window._isSystemSpeakingToStudent = false;
         if (this._currentProctorAI) {
           this._currentProctorAI.stop();
           this._currentProctorAI = null;
@@ -18764,6 +19074,11 @@ render_ai_geometry(dom) {
         this._stopStudentProctorClient();
         if (timerInterval)   clearInterval(timerInterval);
         if (micInterval)     clearInterval(micInterval);
+        if (micAudioCtx)     { try { micAudioCtx.close(); } catch(e) {} micAudioCtx = null; }
+        if (dualCamCheckInterval) { clearInterval(dualCamCheckInterval); dualCamCheckInterval = null; }
+        if (dualCamWarnTimer) { clearTimeout(dualCamWarnTimer); dualCamWarnTimer = null; }
+        if (dualCamBc)       { try { dualCamBc.close(); } catch(e) {} dualCamBc = null; }
+        window._dualCamConnected = false;
         document.removeEventListener('keydown', kbHandler, true);
         document.removeEventListener('fullscreenchange', fsHandler);
         document.removeEventListener('webkitfullscreenchange', fsHandler);
@@ -25431,7 +25746,7 @@ render_ai_geometry(dom) {
                 const attempts = (typeof db !== 'undefined' && db.getExamAttempts) ? db.getExamAttempts() : [];
                 const myAttempts = attempts.filter(a => a.examId === exam.id && a.studentId === studentId);
                 const hasTaken = myAttempts.length > 0;
-                const maxAttempts = exam.maxAttempts || 1;
+                const maxAttempts = (exam.maxAttempts !== undefined && exam.maxAttempts !== null && exam.maxAttempts !== '') ? Number(exam.maxAttempts) : 1;
                 const attemptsDone = myAttempts.length;
                 const attemptsLeft = maxAttempts === 0 ? null : (maxAttempts - attemptsDone);
                 const bestScore = hasTaken ? Math.max(...myAttempts.map(a => a.score || 0)) : null;
@@ -26082,7 +26397,7 @@ render_ai_geometry(dom) {
               const now = new Date();
               const myAttempts = attempts.filter(a => a.examId === exam.id && a.studentId === studentId);
               const hasTaken = myAttempts.length > 0;
-              const maxAttempts = exam.maxAttempts || 1;
+              const maxAttempts = (exam.maxAttempts !== undefined && exam.maxAttempts !== null && exam.maxAttempts !== '') ? Number(exam.maxAttempts) : 1;
               const attemptsDone = myAttempts.length;
               const attemptsLeft = maxAttempts === 0 ? null : (maxAttempts - attemptsDone);
               const bestScore = hasTaken ? Math.max(...myAttempts.map(a => a.score || 0)) : null;

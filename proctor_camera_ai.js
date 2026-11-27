@@ -383,6 +383,10 @@
         // Phân tích âm thanh theo thời gian thực (Lọc tiếng mưa / quạt gió vs Giọng nói người)
         _analyzeAudioFrame() {
             if (!this.analyser || !this.audioData) return false;
+            if (window._isSystemSpeakingToStudent || (Date.now() - (window._lastSystemSpeakEndTs || 0) < 2500)) {
+                this.voiceStreak = 0;
+                return false;
+            }
             this.analyser.getByteFrequencyData(this.audioData);
 
             let totalEnergy = 0;
@@ -1241,7 +1245,18 @@
                         const source = this.audioCtx.createBufferSource();
                         source.buffer = this._decodedBuffers[audioKey];
                         source.connect(this.audioCtx.destination);
+                        window._isSystemSpeakingToStudent = true;
+                        source.onended = () => {
+                            window._isSystemSpeakingToStudent = false;
+                            window._lastSystemSpeakEndTs = Date.now();
+                        };
                         source.start(0);
+                        setTimeout(() => {
+                            if (window._isSystemSpeakingToStudent) {
+                                window._isSystemSpeakingToStudent = false;
+                                window._lastSystemSpeakEndTs = Date.now();
+                            }
+                        }, 6000);
                         return;
                     } catch (_) {}
                 }
@@ -1252,12 +1267,28 @@
                         const el = this._voiceAudioElements[audioKey];
                         el.currentTime = 0;
                         el.volume = 1.0;
+                        window._isSystemSpeakingToStudent = true;
+                        el.onended = () => {
+                            window._isSystemSpeakingToStudent = false;
+                            window._lastSystemSpeakEndTs = Date.now();
+                        };
+                        el.onerror = () => {
+                            window._isSystemSpeakingToStudent = false;
+                            window._lastSystemSpeakEndTs = Date.now();
+                        };
                         const p = el.play();
                         if (p !== undefined) {
                             p.catch(() => {
+                                window._isSystemSpeakingToStudent = false;
                                 this._speakWithNativeTTS(spokenText);
                             });
                         }
+                        setTimeout(() => {
+                            if (window._isSystemSpeakingToStudent) {
+                                window._isSystemSpeakingToStudent = false;
+                                window._lastSystemSpeakEndTs = Date.now();
+                            }
+                        }, 6000);
                         return;
                     } catch (_) {}
                 }
@@ -1289,8 +1320,18 @@
                     }
                 }
 
+                window._isSystemSpeakingToStudent = true;
+                const clearSpeak = () => {
+                    window._isSystemSpeakingToStudent = false;
+                    window._lastSystemSpeakEndTs = Date.now();
+                };
+                utterance.onend = clearSpeak;
+                utterance.onerror = clearSpeak;
+                setTimeout(clearSpeak, 8000);
                 window.speechSynthesis.speak(utterance);
-            } catch (_) {}
+            } catch (_) {
+                window._isSystemSpeakingToStudent = false;
+            }
         }
 
         stop() {

@@ -2087,7 +2087,7 @@ class LMSDatabase {
           }
 
           // 4. Các mảng dữ liệu nghiệp vụ: Nhận trực tiếp từ máy chủ
-          ['parents', 'exams', 'questions', 'assignments', 'submissions', 'lessons', 'uploadedFiles', 'users', 'examAttempts', 'attendance'].forEach(k => {
+          ['parents', 'exams', 'questions', 'assignments', 'submissions', 'lessons', 'uploadedFiles', 'users', 'examAttempts', 'examViolationLogs', 'attendance'].forEach(k => {
             if (Array.isArray(remoteState[k])) {
               // Remote state is truth
             } else {
@@ -3744,10 +3744,14 @@ class LMSDatabase {
     const idx = this.state.exams.findIndex(e => String(e.id) === String(realId));
     if (idx !== -1) {
       this.state.exams[idx] = { ...this.state.exams[idx], ...data };
+      this.save();
+      return true;
     } else if (data) {
       this.state.exams.unshift({ ...data, id: realId || ('exam_' + Date.now()) });
+      this.save();
+      return true;
     }
-    this.save();
+    return false;
   }
 
   getExamAttempts() { return this.state.examAttempts || []; }
@@ -3966,16 +3970,6 @@ class LMSDatabase {
     );
   }
 
-  /** Cập nhật thông tin đề thi */
-  updateExam(examId, updates) {
-    const idx = (this.state.exams || []).findIndex(e => e.id === examId);
-    if (idx !== -1) {
-      this.state.exams[idx] = { ...this.state.exams[idx], ...updates };
-      this.save();
-      return true;
-    }
-    return false;
-  }
 
   /** Lấy tất cả lượt thi của một đề */
   getExamAttemptsByExam(examId) {
