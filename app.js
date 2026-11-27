@@ -466,12 +466,25 @@ class LMSApp {
         this.currentUser = sessionUser;
         this.authenticatedUserRole = sessionRole || sessionUser.role || 'teacher';
         this.currentRole = this.authenticatedUserRole;
-        this.currentView = (this.authenticatedUserRole === 'student' ? 'study' : (this.authenticatedUserRole === 'parent' ? 'parent_grades' : 'info'));
+        const defaultRoleView = (this.authenticatedUserRole === 'student' ? 'study' : (this.authenticatedUserRole === 'parent' ? 'parent_grades' : 'info'));
+        
+        // Kiểm tra URL hash ban đầu (nếu người dùng F5 hoặc truy cập trực tiếp bằng link)
+        let initView = defaultRoleView;
+        if (typeof window !== 'undefined' && window.location.hash) {
+          const hashClean = window.location.hash.replace(/^#/, '').split('/')[0];
+          if (hashClean && this.isMenuAllowedForRole(hashClean)) {
+            initView = hashClean;
+          }
+        }
+        this.currentView = initView;
 
         if (loginOverlay) loginOverlay.style.display = 'none';
         this.showHeaderForUser(this.currentUser, this.authenticatedUserRole);
         this.renderSidebar();
-        this.switchView(this.currentView);
+        this.switchView(this.currentView, false);
+        if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
+          window.history.replaceState({ view: this.currentView }, '', '#' + this.currentView);
+        }
       } else {
         this.currentUser = null;
         this.authenticatedUserRole = null;
@@ -483,7 +496,7 @@ class LMSApp {
       // Secondary fallback to guarantee info view on initial open
       setTimeout(() => {
         if (!document.getElementById('viewport') || !document.getElementById('viewport').firstElementChild) {
-          this.switchView('info');
+          this.switchView(this.currentView || 'info', false);
         }
       }, 100);
     };
@@ -510,6 +523,43 @@ class LMSApp {
         if (btn) {
           const view = btn.getAttribute('data-view');
           if (view) this.switchView(view);
+        }
+      });
+    }
+
+    // Lắng nghe sự kiện nút Back / Forward trên trình duyệt
+    if (typeof window !== 'undefined') {
+      window.addEventListener('popstate', (e) => {
+        // 1. Tự động đóng các modal / popup dialog đang mở (nếu có)
+        const openModals = document.querySelectorAll('.modal, [id$="-modal"], #user-profile-modal, div[id*="modal"]');
+        openModals.forEach(m => {
+          if (m && m.id !== 'login-overlay') {
+            if (typeof m.remove === 'function') m.remove();
+            else m.style.display = 'none';
+          }
+        });
+
+        // 2. Lấy view mục tiêu từ history state hoặc URL hash
+        let targetView = (e.state && e.state.view) ? e.state.view : null;
+        if (!targetView && window.location.hash) {
+          targetView = window.location.hash.replace(/^#/, '').split('/')[0];
+        }
+        if (!targetView) {
+          const defaultView = { admin: 'info', teacher: 'lessons', student: 'study', parent: 'parent_grades' };
+          targetView = defaultView[this.currentRole] || 'info';
+        }
+
+        // 3. Nếu người dùng đang đăng nhập và view hợp lệ thì điều hướng lùi/tiến trang
+        if (this.currentUser && targetView && this.isMenuAllowedForRole(targetView)) {
+          this.switchView(targetView, false, e.state);
+        }
+      });
+
+      // Lắng nghe hashchange hỗ trợ điều hướng trên mọi trình duyệt
+      window.addEventListener('hashchange', () => {
+        const hashView = window.location.hash ? window.location.hash.replace(/^#/, '').split('/')[0] : null;
+        if (this.currentUser && hashView && hashView !== this.currentView && this.isMenuAllowedForRole(hashView)) {
+          this.switchView(hashView, false);
         }
       });
     }
@@ -903,8 +953,8 @@ class LMSApp {
     });
   }
 
-  switchView(view) {
-    if (typeof db !== 'undefined' && db.syncFromServer) {
+  switchView(view, pushHistory = true, subState = null) {
+    if (typeof db !== 'undefined' && db && db.syncFromServer) {
       db.syncFromServer();
     }
     if (!this.isMenuAllowedForRole(view)) {
@@ -916,11 +966,32 @@ class LMSApp {
     try { if (typeof this.stopBackgroundMusic === 'function') this.stopBackgroundMusic(); } catch (e) {}
     this.currentView = view;
 
-    // Reset sub-subject navigation states when switching views
-    this.currentStudentStudySubject = null;
-    this.currentStudentAssignmentSubject = null;
-    this.currentStudentExamSubject = null;
-    this.currentStudentPracticeSubject = null;
+    // Reset hoặc phục hồi trạng thái môn học phụ
+    if (subState && typeof subState === 'object') {
+      this.currentStudentStudySubject = subState.studySubject || null;
+      this.currentStudentAssignmentSubject = subState.assignmentSubject || null;
+      this.currentStudentExamSubject = subState.examSubject || null;
+      this.currentStudentPracticeSubject = subState.practiceSubject || null;
+    } else {
+      this.currentStudentStudySubject = null;
+      this.currentStudentAssignmentSubject = null;
+      this.currentStudentExamSubject = null;
+      this.currentStudentPracticeSubject = null;
+    }
+
+    // Tích hợp History API: Đẩy vào stack trình duyệt để nút Back / Forward hoạt động chuẩn xác
+    if (pushHistory && typeof window !== 'undefined' && window.history && window.history.pushState) {
+      const targetHash = '#' + view;
+      if (window.location.hash !== targetHash) {
+        window.history.pushState({
+          view: view,
+          studySubject: this.currentStudentStudySubject,
+          assignmentSubject: this.currentStudentAssignmentSubject,
+          examSubject: this.currentStudentExamSubject,
+          practiceSubject: this.currentStudentPracticeSubject
+        }, '', targetHash);
+      }
+    }
 
     document.querySelectorAll('#nav-menu .nav-btn').forEach(btn => {
       if (btn.getAttribute('data-view') === view) {
@@ -23634,6 +23705,9 @@ render_ai_geometry(dom) {
         card.onmouseleave = () => { card.style.transform = ''; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.04)'; };
         card.onclick = () => {
           this.currentStudentStudySubject = card.getAttribute('data-sub-id');
+          if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+            window.history.pushState({ view: 'study', studySubject: this.currentStudentStudySubject }, '', '#study/' + this.currentStudentStudySubject);
+          }
           this.render_study(dom);
         };
       });
@@ -24238,6 +24312,9 @@ render_ai_geometry(dom) {
         card.onmouseleave = () => { card.style.transform = ''; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.04)'; };
         card.onclick = () => {
           this.currentStudentAssignmentSubject = card.getAttribute('data-sub-id');
+          if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+            window.history.pushState({ view: 'student_assignments', assignmentSubject: this.currentStudentAssignmentSubject }, '', '#student_assignments/' + this.currentStudentAssignmentSubject);
+          }
           this.render_student_assignments(dom);
         };
       });
@@ -24409,6 +24486,9 @@ render_ai_geometry(dom) {
         card.onmouseleave = () => { card.style.transform = ''; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.04)'; };
         card.onclick = () => {
           this.currentStudentExamSubject = card.getAttribute('data-sub-id');
+          if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+            window.history.pushState({ view: 'student_exams', examSubject: this.currentStudentExamSubject }, '', '#student_exams/' + this.currentStudentExamSubject);
+          }
           this.render_student_exams(dom);
         };
       });
@@ -24623,6 +24703,9 @@ render_ai_geometry(dom) {
         card.onmouseleave = () => { card.style.transform = ''; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.04)'; };
         card.onclick = () => {
           this.currentStudentPracticeSubject = card.getAttribute('data-sub-id');
+          if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+            window.history.pushState({ view: 'quizizz_practice', practiceSubject: this.currentStudentPracticeSubject }, '', '#quizizz_practice/' + this.currentStudentPracticeSubject);
+          }
           this.render_quizizz_practice(dom);
         };
       });
@@ -25105,6 +25188,9 @@ render_ai_geometry(dom) {
         card.onmouseleave = () => { card.style.transform = ''; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.04)'; };
         card.onclick = () => {
           this.currentGradingSubject = card.getAttribute('data-sub-id');
+          if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+            window.history.pushState({ view: 'grades', gradingSubject: this.currentGradingSubject }, '', '#grades/' + this.currentGradingSubject);
+          }
           this.render_grades(dom);
         };
       });
@@ -29994,7 +30080,7 @@ LMSApp.prototype.render_ai_picker = function(dom) {
 LMSApp.prototype.initSchoolYearSwitcher = function() {
     if (typeof document === 'undefined') return;
 
-    const currentYear = (typeof db !== 'undefined' && db.getSelectedSchoolYear)
+    const currentYear = (typeof db !== 'undefined' && db && db.getSelectedSchoolYear)
       ? db.getSelectedSchoolYear()
       : ((typeof localStorage !== 'undefined' && localStorage.getItem('THCS_LMS_SELECTED_YEAR')) || '2026-2027');
 
@@ -30021,7 +30107,7 @@ LMSApp.prototype.initSchoolYearSwitcher = function() {
 
     // 4. Đồng bộ menu dropdown chọn năm học kèm dấu tích năm đang chọn
     const menu = document.getElementById('custom-year-menu');
-    if (menu && typeof db !== 'undefined' && db.getAcademicYearsList) {
+    if (menu && typeof db !== 'undefined' && db && db.getAcademicYearsList) {
       const years = db.getAcademicYearsList();
       if (Array.isArray(years) && years.length > 0) {
         menu.innerHTML = years.map(y => {
@@ -30040,14 +30126,14 @@ LMSApp.prototype.render_years = function(dom) {
     if (!dom) dom = document.getElementById('viewport');
     if (!dom) return;
 
-    const yearsList = (typeof db !== 'undefined' && db.getAcademicYearsList) ? db.getAcademicYearsList() : [];
-    const currentSelectedYear = (typeof db !== 'undefined' && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2026-2027';
+    const yearsList = (typeof db !== 'undefined' && db && db.getAcademicYearsList) ? db.getAcademicYearsList() : [];
+    const currentSelectedYear = (typeof db !== 'undefined' && db && db.getSelectedSchoolYear) ? db.getSelectedSchoolYear() : '2026-2027';
 
     dom.innerHTML = '<div style="padding:1.25rem; font-family:var(--font-body); animation:fadeIn 0.25s ease-out; max-width:1250px; margin:0 auto;"><div class="glass-card" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:18px; padding:1.5rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; box-shadow:0 4px 15px rgba(0,0,0,0.04);"><div><div style="display:inline-flex; align-items:center; gap:0.4rem; background:#dbeafe; border:1.5px solid #93c5fd; color:#1e40af; font-weight:700; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.8rem; margin-bottom:0.4rem;">📅 QUẢN LÝ VÀ CHUYỂN ĐỔI NĂM HỌC</div><h2 style="margin:0; font-family:var(--font-title); font-weight:700; font-size:1.4rem; color:#1e293b;">Danh Sách Năm Học & Xem Dữ Liệu Cũ</h2><p style="margin:0.2rem 0 0 0; font-size:0.85rem; color:#475569; font-weight:400;">Chuyển đổi năm học để tra cứu toàn bộ hồ sơ, bảng điểm và học sinh của các năm học cũ</p></div></div></div>';
 };
 
 LMSApp.prototype.renderHistoricalYearBanner = function(dom) {
-    if (typeof db === 'undefined' || !db.getSelectedSchoolYear) return;
+    if (typeof db === 'undefined' || !db || !db.getSelectedSchoolYear) return;
     const selectedYear = db.getSelectedSchoolYear();
     let currentActiveYear = '2026-2027';
     if (db.state && Array.isArray(db.state.academicYears)) {
@@ -30084,7 +30170,7 @@ LMSApp.prototype.selectYearCustom = function(yearId) {
       }
     } catch (e) {}
 
-    if (typeof db !== 'undefined' && db.setSelectedSchoolYear) {
+    if (typeof db !== 'undefined' && db && db.setSelectedSchoolYear) {
       db.setSelectedSchoolYear(yearId);
     }
     this.initSchoolYearSwitcher();
