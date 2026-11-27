@@ -2017,27 +2017,98 @@ class LMSDatabase {
       if (res.ok) {
         const remoteState = await res.json();
         if (remoteState && typeof remoteState === 'object' && (remoteState.schoolInfo || remoteState.subjects || remoteState.exams || remoteState.teachers)) {
-          // Bảo toàn và hợp nhất dữ liệu hai chiều (Two-Way Safe Merge)
-          const mergeArray = (key) => {
-            if (this.state && Array.isArray(this.state[key]) && this.state[key].length > 0) {
-              if (!Array.isArray(remoteState[key]) || remoteState[key].length === 0) {
-                remoteState[key] = this.state[key];
-              } else {
-                const map = new Map();
-                remoteState[key].forEach(item => { if (item && item.id) map.set(String(item.id), item); });
-                this.state[key].forEach(item => {
-                  if (item && item.id && !map.has(String(item.id))) {
-                    remoteState[key].push(item);
-                    map.set(String(item.id), item);
-                  }
-                });
-              }
-            } else if (!Array.isArray(remoteState[key])) {
-              remoteState[key] = Array.isArray(this.state && this.state[key]) ? this.state[key] : (INITIAL_STATE[key] ? JSON.parse(JSON.stringify(INITIAL_STATE[key])) : []);
-            }
-          };
+          
+          // NGUYÊN TẮC ĐỒNG BỘ CHUẨN (SAFE SINGLE-SOURCE-OF-TRUTH MERGE):
+          // Máy chủ là nguồn chuẩn duy nhất (Master Source). Không gom rác từ localStorage của trình duyệt cũ đẩy lên Server gây nhân đôi.
+          const normStr = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
 
-          ['teachers', 'students', 'parents', 'classesList', 'exams', 'questions', 'assignments', 'submissions', 'lessons', 'uploadedFiles', 'users'].forEach(k => mergeArray(k));
+          // 1. Đồng bộ và khử trùng lặp Giáo viên
+          const hasServerTeachers = Array.isArray(remoteState.teachers) && remoteState.teachers.length > 0;
+          const hasLocalTeachers = this.state && Array.isArray(this.state.teachers) && this.state.teachers.length > 0;
+          if (hasServerTeachers) {
+            // Server đã có giáo viên -> Lấy Server làm gốc, hợp nhất thông tin bổ sung nếu có
+            const tMap = new Map();
+            remoteState.teachers.forEach(t => {
+              if (!t || !t.name) return;
+              const k = (t.code ? ('code:' + String(t.code).trim().toUpperCase()) : '') || ('name:' + normStr(t.name));
+              tMap.set(k, t);
+            });
+            if (hasLocalTeachers) {
+              this.state.teachers.forEach(lt => {
+                if (!lt || !lt.name) return;
+                const k = (lt.code ? ('code:' + String(lt.code).trim().toUpperCase()) : '') || ('name:' + normStr(lt.name));
+                if (!tMap.has(k)) {
+                  // Chỉ bổ sung nếu là giáo viên hoàn toàn mới tạo ở máy này
+                  tMap.set(k, lt);
+                } else {
+                  // Đã có -> chỉ gộp thêm lớp hoặc môn chưa có, không tạo bản ghi mới
+                  const st = tMap.get(k);
+                  if (Array.isArray(lt.classes)) st.classes = [...new Set([...(st.classes || []), ...lt.classes])];
+                  if (Array.isArray(lt.subjects)) st.subjects = [...new Set([...(st.subjects || []), ...lt.subjects])];
+                }
+              });
+            }
+            remoteState.teachers = Array.from(tMap.values());
+          } else if (hasLocalTeachers) {
+            remoteState.teachers = this.state.teachers;
+          }
+
+          // 2. Đồng bộ và khử trùng lặp Lớp học
+          const hasServerClasses = Array.isArray(remoteState.classesList) && remoteState.classesList.length > 0;
+          const hasLocalClasses = this.state && Array.isArray(this.state.classesList) && this.state.classesList.length > 0;
+          const cMap = new Map();
+          const addCls = (c) => {
+            if (!c) return;
+            const rName = String(c.name || c.id || '').replace(/^Lớp\s*/i, '').trim();
+            const nKey = rName.toUpperCase();
+            if (!nKey || cMap.has(nKey)) return;
+            const m = nKey.match(/\d+/);
+            const gNum = m ? m[0] : (c.grade ? String(c.grade).match(/\d+/)?.[0] || '6' : '6');
+            cMap.set(nKey, {
+              id: nKey,
+              name: rName,
+              grade: 'Khối ' + gNum,
+              homeroomTeacher: c.homeroomTeacher || 'Chưa phân công'
+            });
+          };
+          if (hasServerClasses) remoteState.classesList.forEach(addCls);
+          if (hasLocalClasses) this.state.classesList.forEach(addCls);
+          remoteState.classesList = Array.from(cMap.values()).sort((a,b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+          remoteState.classes = remoteState.classesList;
+
+          // 3. Đồng bộ và khử trùng lặp Học sinh
+          const hasServerStudents = Array.isArray(remoteState.students) && remoteState.students.length > 0;
+          const hasLocalStudents = this.state && Array.isArray(this.state.students) && this.state.students.length > 0;
+          if (hasServerStudents) {
+            const sMap = new Map();
+            remoteState.students.forEach(s => {
+              if (!s || !s.name) return;
+              const code = s.studentCode || s.code || '';
+              const cName = String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
+              const k = code ? ('code:' + code.toUpperCase()) : ('nc:' + normStr(s.name) + '_' + cName);
+              sMap.set(k, s);
+            });
+            if (hasLocalStudents) {
+              this.state.students.forEach(ls => {
+                if (!ls || !ls.name) return;
+                const code = ls.studentCode || ls.code || '';
+                const cName = String(ls.classId || ls.className || ls.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
+                const k = code ? ('code:' + code.toUpperCase()) : ('nc:' + normStr(ls.name) + '_' + cName);
+                if (!sMap.has(k)) sMap.set(k, ls);
+              });
+            }
+            remoteState.students = Array.from(sMap.values());
+          } else if (hasLocalStudents) {
+            remoteState.students = this.state.students;
+          }
+
+          // 4. Các mảng dữ liệu khác
+          ['parents', 'exams', 'questions', 'assignments', 'submissions', 'lessons', 'uploadedFiles', 'users'].forEach(k => {
+            if (!Array.isArray(remoteState[k]) || remoteState[k].length === 0) {
+              if (this.state && Array.isArray(this.state[k])) remoteState[k] = this.state[k];
+              else remoteState[k] = [];
+            }
+          });
 
           // Đảm bảo không bao giờ bị mất danh mục môn học, năm học, khối lớp
           Object.keys(INITIAL_STATE).forEach(key => {
@@ -2128,7 +2199,7 @@ class LMSDatabase {
     if (this.state.academicYears === undefined) {
       this.state.academicYears = [
         {
-          id: 'year_2026_2027',
+          id: '2026-2027',
           name: 'Năm học 2026 - 2027',
           isCurrent: true,
           current: true,
@@ -2136,7 +2207,7 @@ class LMSDatabase {
           hk2: { startDate: '2027-01-16', endDate: '2027-05-31', status: 'upcoming' }
         },
         {
-          id: 'year_2025_2026',
+          id: '2025-2026',
           name: 'Năm học 2025 - 2026',
           isCurrent: false,
           current: false,
@@ -2341,6 +2412,170 @@ class LMSDatabase {
     this._migrateDemoTeachersAndStudents();
     this._migrateDemoClasses();
     this._migrateRemainingDemoData();
+    this.cleanupDuplicateEntities();
+  }
+
+  // =========================================================================
+  // 🧹 KHỬ TRÙNG LẶP THỰC THỂ DỮ LIỆU TỰ ĐỘNG (DEDUPLICATION ENGINE)
+  // =========================================================================
+  cleanupDuplicateEntities() {
+    if (!this.state || typeof this.state !== 'object') return;
+    this.cleanupDuplicateClasses();
+    this.cleanupDuplicateTeachers();
+    this.cleanupDuplicateStudents();
+    this.cleanupDuplicateAcademicYears();
+  }
+
+  cleanupDuplicateClasses() {
+    if (!this.state) return;
+    const list = Array.isArray(this.state.classesList) ? this.state.classesList : (Array.isArray(this.state.classes) ? this.state.classes : []);
+    const map = new Map();
+    list.forEach(c => {
+      if (!c) return;
+      const rawName = String(c.name || c.id || '').replace(/^Lớp\s*/i, '').trim();
+      const norm = rawName.toUpperCase();
+      if (!norm) return;
+
+      let gradeNum = '6';
+      const m = norm.match(/\d+/);
+      if (m) gradeNum = m[0];
+      else if (c.grade) {
+        const gm = String(c.grade).match(/\d+/);
+        if (gm) gradeNum = gm[0];
+      }
+      const cleanGrade = 'Khối ' + gradeNum;
+      const homeroom = c.homeroomTeacher && c.homeroomTeacher !== 'Chưa phân công' ? c.homeroomTeacher : null;
+
+      if (!map.has(norm)) {
+        map.set(norm, {
+          id: norm,
+          name: rawName,
+          grade: cleanGrade,
+          homeroomTeacher: homeroom || 'Chưa phân công'
+        });
+      } else {
+        const ex = map.get(norm);
+        if ((!ex.homeroomTeacher || ex.homeroomTeacher === 'Chưa phân công') && homeroom) {
+          ex.homeroomTeacher = homeroom;
+        }
+      }
+    });
+
+    const sortedClasses = Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+    );
+    this.state.classesList = sortedClasses;
+    this.state.classes = sortedClasses.map(c => ({
+      id: c.name,
+      name: c.name,
+      grade: parseInt(String(c.grade).replace(/\D/g, '')) || 6,
+      homeroomTeacher: c.homeroomTeacher || 'Chưa phân công'
+    }));
+  }
+
+  cleanupDuplicateTeachers() {
+    if (!this.state || !Array.isArray(this.state.teachers)) return;
+    const map = new Map();
+    const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
+
+    this.state.teachers.forEach(t => {
+      if (!t || !t.name) return;
+      const nName = norm(t.name);
+      if (!nName) return;
+      const code = t.code ? String(t.code).trim().toUpperCase() : '';
+      const key = code ? ('code:' + code) : ('name:' + nName);
+
+      if (!map.has(key)) {
+        const subList = Array.isArray(t.subjects) && t.subjects.length > 0 ? t.subjects : (t.subjectId ? [t.subjectId] : []);
+        const classList = Array.isArray(t.classes) ? t.classes : [];
+        map.set(key, { ...t, subjects: subList, classes: classList });
+      } else {
+        const ex = map.get(key);
+        if (!ex.code && code) ex.code = code;
+        if (!ex.phone && t.phone) ex.phone = t.phone;
+        if (!ex.email && t.email) ex.email = t.email;
+        if (!ex.dob && t.dob) ex.dob = t.dob;
+        if (!ex.isHomeroom && t.isHomeroom) ex.isHomeroom = t.isHomeroom;
+        if (!ex.username && t.username) ex.username = t.username;
+
+        const tSubs = Array.isArray(t.subjects) && t.subjects.length > 0 ? t.subjects : (t.subjectId ? [t.subjectId] : []);
+        ex.subjects = [...new Set([...(ex.subjects || []), ...tSubs])];
+        ex.subjectId = ex.subjects[0] || ex.subjectId || 'toan';
+
+        const tClasses = Array.isArray(t.classes) ? t.classes : [];
+        ex.classes = [...new Set([...(ex.classes || []), ...tClasses])];
+      }
+    });
+
+    this.state.teachers = Array.from(map.values());
+  }
+
+  cleanupDuplicateStudents() {
+    if (!this.state || !Array.isArray(this.state.students)) return;
+    const map = new Map();
+    const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
+
+    this.state.students.forEach(s => {
+      if (!s || !s.name) return;
+      const nName = norm(s.name);
+      const cClass = String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
+      const code = s.studentCode || s.code || '';
+      const key = code ? ('code:' + code.toUpperCase()) : ('nc:' + nName + '_' + cClass);
+
+      if (!map.has(key)) {
+        map.set(key, s);
+      } else {
+        const ex = map.get(key);
+        if (!ex.studentCode && code) ex.studentCode = code;
+        if (!ex.code && code) ex.code = code;
+        if (!ex.dob && s.dob) ex.dob = s.dob;
+        if (!ex.gender && s.gender) ex.gender = s.gender;
+        if (!ex.phone && s.phone) ex.phone = s.phone;
+        if (!ex.parentPhone && s.parentPhone) ex.parentPhone = s.parentPhone;
+      }
+    });
+
+    this.state.students = Array.from(map.values());
+  }
+
+  cleanupDuplicateAcademicYears() {
+    if (!this.state) return;
+    const rawYears = Array.isArray(this.state.academicYears) ? this.state.academicYears : [];
+    const yearMap = new Map();
+    rawYears.forEach(y => {
+      if (!y) return;
+      const rawId = String(y.id || '').replace('year_', '').replace('_', '-').trim();
+      if (!rawId) return;
+      if (!yearMap.has(rawId)) {
+        yearMap.set(rawId, {
+          id: rawId,
+          name: y.name || ('Năm học ' + rawId),
+          current: !!(y.current || y.isCurrent),
+          isCurrent: !!(y.current || y.isCurrent)
+        });
+      } else {
+        const ex = yearMap.get(rawId);
+        if (y.current || y.isCurrent) {
+          ex.current = true;
+          ex.isCurrent = true;
+        }
+      }
+    });
+
+    if (!yearMap.has('2026-2027')) {
+      yearMap.set('2026-2027', { id: '2026-2027', name: 'Năm học 2026-2027', current: true, isCurrent: true });
+    }
+    if (!yearMap.has('2025-2026')) {
+      yearMap.set('2025-2026', { id: '2025-2026', name: 'Năm học 2025-2026', current: false, isCurrent: false });
+    }
+
+    this.state.academicYears = Array.from(yearMap.values());
+    const selYear = this.state.selectedSchoolYear ? String(this.state.selectedSchoolYear).replace('year_', '').replace('_', '-').trim() : '2026-2027';
+    this.state.selectedSchoolYear = selYear;
+    this.state.academicYears.forEach(y => {
+      y.current = (y.id === selYear);
+      y.isCurrent = (y.id === selYear);
+    });
   }
 
   _migrateTeacherCredentials() {
@@ -2931,7 +3166,21 @@ class LMSDatabase {
     return this.state.teachers;
   }
   addTeacher(teacher) {
-    this.state.teachers.push(teacher);
+    if (!this.state.teachers) this.state.teachers = [];
+    const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
+    const tCode = teacher.code ? String(teacher.code).trim().toUpperCase() : '';
+    const tName = norm(teacher.name);
+    const existingIdx = this.state.teachers.findIndex(t => {
+      if (tCode && t.code && String(t.code).trim().toUpperCase() === tCode) return true;
+      if (tName && norm(t.name) === tName) return true;
+      return false;
+    });
+    if (existingIdx !== -1) {
+      this.state.teachers[existingIdx] = { ...this.state.teachers[existingIdx], ...teacher };
+    } else {
+      this.state.teachers.push(teacher);
+    }
+    this.cleanupDuplicateTeachers();
     this.save();
     this.syncAllUsersFromEntities();
   }
@@ -2939,6 +3188,7 @@ class LMSDatabase {
     const idx = this.state.teachers.findIndex(t => t.id === id);
     if (idx !== -1) {
       this.state.teachers[idx] = { ...this.state.teachers[idx], ...updatedData };
+      this.cleanupDuplicateTeachers();
       this.save();
       this.syncAllUsersFromEntities();
     }
@@ -2946,7 +3196,22 @@ class LMSDatabase {
 
   getStudents() { return this.state.students || []; }
   addStudent(student) {
-    this.state.students.push(student);
+    if (!this.state.students) this.state.students = [];
+    const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
+    const sCode = (student.studentCode || student.code) ? String(student.studentCode || student.code).trim().toUpperCase() : '';
+    const sName = norm(student.name);
+    const sClass = String(student.classId || student.className || student.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
+    const existingIdx = this.state.students.findIndex(s => {
+      if (sCode && (s.studentCode || s.code) && String(s.studentCode || s.code).trim().toUpperCase() === sCode) return true;
+      if (sName && norm(s.name) === sName && String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase() === sClass) return true;
+      return false;
+    });
+    if (existingIdx !== -1) {
+      this.state.students[existingIdx] = { ...this.state.students[existingIdx], ...student };
+    } else {
+      this.state.students.push(student);
+    }
+    this.cleanupDuplicateStudents();
     this.save();
     this.syncAllUsersFromEntities();
   }
@@ -2954,6 +3219,7 @@ class LMSDatabase {
     const idx = this.state.students.findIndex(s => s.id === id);
     if (idx !== -1) {
       this.state.students[idx] = { ...this.state.students[idx], ...updatedData };
+      this.cleanupDuplicateStudents();
       this.save();
       this.syncAllUsersFromEntities();
     }

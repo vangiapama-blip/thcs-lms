@@ -10723,33 +10723,33 @@ render_students(dom) {
         classRows.forEach(row => ws2.addRow(row));
 
         // Data Validation: Dropdown chọn Giới tính (Nam, Nữ) ở cột C
-        for (let r = 2; r <= 500; r++) {
-          ws1.getCell('C' + r).dataValidation = {
-            type: 'list',
-            allowBlank: true,
-            formulae: ['"Nam,Nữ"'],
-            showErrorMessage: true,
-            errorTitle: 'Giới tính không hợp lệ',
-            error: 'Vui lòng chọn Nam hoặc Nữ từ danh sách thả xuống.'
-          };
-        }
+        ws1.dataValidations.add('C2:C500', {
+          type: 'list',
+          allowBlank: true,
+          formulae: ['"Nam,Nữ"'],
+          showErrorMessage: true,
+          errorTitle: 'Giới tính không hợp lệ',
+          error: 'Vui lòng chọn Nam hoặc Nữ từ danh sách thả xuống.'
+        });
 
-        // Data Validation: Dropdown chọn Lớp ở cột E (liên kết sang Sheet Danh_Sach_Lop)
-        const classCount = classRows.length;
-        const classFormula = `Danh_Sach_Lop!$B$2:$B$${classCount + 1}`;
-        for (let r = 2; r <= 500; r++) {
-          ws1.getCell('E' + r).dataValidation = {
-            type: 'list',
-            allowBlank: true,
-            formulae: [classFormula],
-            showErrorMessage: true,
-            errorTitle: 'Lớp học không hợp lệ',
-            error: 'Vui lòng chọn lớp học từ danh sách thả xuống (6A, 6B, 7A...).',
-            showInputMessage: true,
-            promptTitle: 'Chọn Lớp học',
-            prompt: 'Bấm mũi tên thả xuống để chọn lớp học.'
-          };
-        }
+        // Data Validation: Dropdown chọn Lớp ở cột E
+        const classNamesList = classRows.map(r => r[1]).filter(Boolean);
+        const classNamesStr = classNamesList.join(',');
+        const classFormula = classNamesStr.length <= 250
+          ? ('"' + classNamesStr + '"')
+          : `Danh_Sach_Lop!$B$2:$B$${classRows.length + 1}`;
+
+        ws1.dataValidations.add('E2:E500', {
+          type: 'list',
+          allowBlank: true,
+          formulae: [classFormula],
+          showErrorMessage: true,
+          errorTitle: 'Lớp học không hợp lệ',
+          error: 'Vui lòng chọn lớp học từ danh sách thả xuống.',
+          showInputMessage: true,
+          promptTitle: 'Chọn Lớp học',
+          prompt: 'Bấm mũi tên thả xuống để chọn lớp học từ hệ thống.'
+        });
 
         // Định dạng Header nổi bật
         ws1.getRow(1).height = 26;

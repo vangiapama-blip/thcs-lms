@@ -33,12 +33,142 @@ let inMemoryDB = null;
 let isSaving = false;
 let saveScheduled = false;
 
+function sanitizeAndDeduplicate(db) {
+  if (!db || typeof db !== 'object') return db;
+  const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
+
+  // 1. Khử trùng lặp Lớp học (Classes)
+  const rawClasses = Array.isArray(db.classesList) ? db.classesList : (Array.isArray(db.classes) ? db.classes : []);
+  if (rawClasses.length > 0) {
+    const cMap = new Map();
+    rawClasses.forEach(c => {
+      if (!c) return;
+      const rawName = String(c.name || c.id || '').replace(/^Lớp\s*/i, '').trim();
+      const nKey = rawName.toUpperCase();
+      if (!nKey) return;
+      let gradeNum = '6';
+      const m = nKey.match(/\d+/);
+      if (m) gradeNum = m[0];
+      else if (c.grade) {
+        const gm = String(c.grade).match(/\d+/);
+        if (gm) gradeNum = gm[0];
+      }
+      const homeroom = (c.homeroomTeacher && c.homeroomTeacher !== 'Chưa phân công') ? c.homeroomTeacher : null;
+      if (!cMap.has(nKey)) {
+        cMap.set(nKey, {
+          id: nKey,
+          name: rawName,
+          grade: 'Khối ' + gradeNum,
+          homeroomTeacher: homeroom || 'Chưa phân công'
+        });
+      } else {
+        const ex = cMap.get(nKey);
+        if ((!ex.homeroomTeacher || ex.homeroomTeacher === 'Chưa phân công') && homeroom) {
+          ex.homeroomTeacher = homeroom;
+        }
+      }
+    });
+    const sorted = Array.from(cMap.values()).sort((a,b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+    db.classesList = sorted;
+    db.classes = sorted.map(c => ({
+      id: c.name,
+      name: c.name,
+      grade: parseInt(String(c.grade).replace(/\D/g, '')) || 6,
+      homeroomTeacher: c.homeroomTeacher || 'Chưa phân công'
+    }));
+  }
+
+  // 2. Khử trùng lặp Giáo viên (Teachers)
+  if (Array.isArray(db.teachers) && db.teachers.length > 0) {
+    const tMap = new Map();
+    db.teachers.forEach(t => {
+      if (!t || !t.name) return;
+      const nName = norm(t.name);
+      if (!nName) return;
+      const code = t.code ? String(t.code).trim().toUpperCase() : '';
+      const key = code ? ('code:' + code) : ('name:' + nName);
+      if (!tMap.has(key)) {
+        const subList = Array.isArray(t.subjects) && t.subjects.length > 0 ? t.subjects : (t.subjectId ? [t.subjectId] : []);
+        const classList = Array.isArray(t.classes) ? t.classes : [];
+        tMap.set(key, { ...t, subjects: subList, classes: classList });
+      } else {
+        const ex = tMap.get(key);
+        if (!ex.code && code) ex.code = code;
+        if (!ex.phone && t.phone) ex.phone = t.phone;
+        if (!ex.email && t.email) ex.email = t.email;
+        if (!ex.dob && t.dob) ex.dob = t.dob;
+        if (!ex.isHomeroom && t.isHomeroom) ex.isHomeroom = t.isHomeroom;
+        if (!ex.username && t.username) ex.username = t.username;
+
+        const tSubs = Array.isArray(t.subjects) && t.subjects.length > 0 ? t.subjects : (t.subjectId ? [t.subjectId] : []);
+        ex.subjects = [...new Set([...(ex.subjects || []), ...tSubs])];
+        ex.subjectId = ex.subjects[0] || ex.subjectId || 'toan';
+
+        const tClasses = Array.isArray(t.classes) ? t.classes : [];
+        ex.classes = [...new Set([...(ex.classes || []), ...tClasses])];
+      }
+    });
+    db.teachers = Array.from(tMap.values());
+  }
+
+  // 3. Khử trùng lặp Học sinh (Students)
+  if (Array.isArray(db.students) && db.students.length > 0) {
+    const sMap = new Map();
+    db.students.forEach(s => {
+      if (!s || !s.name) return;
+      const nName = norm(s.name);
+      const cClass = String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
+      const code = s.studentCode || s.code || '';
+      const key = code ? ('code:' + code.toUpperCase()) : ('nc:' + nName + '_' + cClass);
+      if (!sMap.has(key)) {
+        sMap.set(key, s);
+      } else {
+        const ex = sMap.get(key);
+        if (!ex.studentCode && code) ex.studentCode = code;
+        if (!ex.code && code) ex.code = code;
+        if (!ex.dob && s.dob) ex.dob = s.dob;
+        if (!ex.gender && s.gender) ex.gender = s.gender;
+        if (!ex.phone && s.phone) ex.phone = s.phone;
+        if (!ex.parentPhone && s.parentPhone) ex.parentPhone = s.parentPhone;
+      }
+    });
+    db.students = Array.from(sMap.values());
+  }
+
+  // 4. Năm học (Academic Years)
+  if (Array.isArray(db.academicYears) && db.academicYears.length > 0) {
+    const yMap = new Map();
+    db.academicYears.forEach(y => {
+      if (!y) return;
+      const rawId = String(y.id || '').replace('year_', '').replace('_', '-').trim();
+      if (!rawId) return;
+      if (!yMap.has(rawId)) {
+        yMap.set(rawId, {
+          id: rawId,
+          name: y.name || ('Năm học ' + rawId),
+          current: !!(y.current || y.isCurrent),
+          isCurrent: !!(y.current || y.isCurrent)
+        });
+      }
+    });
+    if (!yMap.has('2026-2027')) yMap.set('2026-2027', { id: '2026-2027', name: 'Năm học 2026-2027', current: true, isCurrent: true });
+    if (!yMap.has('2025-2026')) yMap.set('2025-2026', { id: '2025-2026', name: 'Năm học 2025-2026', current: false, isCurrent: false });
+    db.academicYears = Array.from(yMap.values());
+    if (db.selectedSchoolYear) {
+      db.selectedSchoolYear = String(db.selectedSchoolYear).replace('year_', '').replace('_', '-').trim();
+    }
+  }
+
+  return db;
+}
+
 function loadDBFromDisk() {
   try {
     if (fs.existsSync(DB_FILE)) {
       const raw = fs.readFileSync(DB_FILE, 'utf8');
       inMemoryDB = JSON.parse(raw);
-      console.log('✅ Central Database loaded into memory.');
+      inMemoryDB = sanitizeAndDeduplicate(inMemoryDB);
+      console.log('✅ Central Database loaded into memory and deduplicated.');
     } else {
       inMemoryDB = {
         schoolInfo: { name: 'TH-THCS AMA TRANG LƠNG', address: 'Dliê Ya, Đắk Lắk' },
@@ -55,6 +185,7 @@ function loadDBFromDisk() {
         attendance: [],
         teachingTools: []
       };
+      inMemoryDB = sanitizeAndDeduplicate(inMemoryDB);
       fs.writeFileSync(DB_FILE, JSON.stringify(inMemoryDB, null, 2), 'utf8');
     }
   } catch (err) {
@@ -516,7 +647,7 @@ const server = http.createServer(async (req, res) => {
       const jsonStr = rawBody.toString('utf8');
       const incomingState = JSON.parse(jsonStr); // Validate JSON
 
-      inMemoryDB = incomingState;
+      inMemoryDB = sanitizeAndDeduplicate(incomingState);
       scheduleDiskFlush(); // Non-blocking async persistence
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
