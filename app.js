@@ -30430,6 +30430,56 @@ LMSApp.prototype.selectYearCustom = function(yearId) {
     this.switchView(this.currentView || 'info');
 };
 
+LMSApp.prototype.forceSyncServer = async function() {
+  if (this.showToast) this.showToast('⏳ Đang kết nối máy chủ để đồng bộ lại 100% CSDL chuẩn...');
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('THCS_LMS_DATABASE_STATE_V2');
+    }
+    if (typeof db !== 'undefined' && db.syncFromServer) {
+      await db.syncFromServer(true);
+    }
+    const tCount = db.getTeachers ? db.getTeachers().length : 0;
+    const cCount = db.getClassesList ? db.getClassesList().length : 0;
+    const sCount = db.getStudents ? db.getStudents().length : 0;
+    if (this.showToast) {
+      this.showToast(`✅ Đã đồng bộ 100% từ Máy chủ: ${cCount} lớp, ${tCount} giáo viên, ${sCount} học sinh!`);
+    }
+    const viewport = document.getElementById('viewport') || document.getElementById('main-viewport');
+    if (this.render_dashboard && viewport) {
+      this.render_dashboard(viewport);
+    }
+  } catch(err) {
+    if (this.showToast) this.showToast('❌ Lỗi đồng bộ máy chủ: ' + err.message, 'danger');
+  }
+};
+
+LMSApp.prototype.pushCurrentStateToServer = async function() {
+  if (!confirm('Bạn có chắc chắn muốn lưu toàn bộ dữ liệu đang hiển thị ở trình duyệt này làm CSDL chuẩn trên máy chủ trung tâm không?')) return;
+  if (this.showToast) this.showToast('⏳ Đang lưu dữ liệu lên máy chủ trung tâm...');
+  try {
+    if (typeof db !== 'undefined' && db.state && typeof fetch !== 'undefined') {
+      const res = await fetch('/api/db/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(db.state)
+      });
+      if (res.ok) {
+        const tCount = db.getTeachers ? db.getTeachers().length : 0;
+        const cCount = db.getClassesList ? db.getClassesList().length : 0;
+        const sCount = db.getStudents ? db.getStudents().length : 0;
+        if (this.showToast) {
+          this.showToast(`✅ Đã lưu CSDL chuẩn lên máy chủ: ${cCount} lớp, ${tCount} GV, ${sCount} HS!`);
+        }
+      } else {
+        throw new Error('Máy chủ phản hồi mã lỗi ' + res.status);
+      }
+    }
+  } catch(err) {
+    if (this.showToast) this.showToast('❌ Lỗi lưu máy chủ: ' + err.message, 'danger');
+  }
+};
+
 LMSApp.prototype.exportTeachersExcel = function() {
   try {
     const teachersList = (typeof db !== 'undefined' && db.getTeachers) ? db.getTeachers() : [];

@@ -474,7 +474,10 @@ function attachRenderMethods(LMSApp) {
           </div>
 
           <div style="display: flex; align-items: center; gap: 0.75rem; position: relative; z-index: 2;">
-            <button onclick="if(window.app && window.app.exportReportsToExcel) window.app.exportReportsToExcel(); else if(window.app) window.app.switchView('reports');" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #0f172a; border: none; padding: 0.75rem 1.4rem; border-radius: 14px; font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 6px 18px rgba(16,185,129,0.3); display: flex; align-items: center; gap: 0.45rem;">
+            <button onclick="if(window.app && window.app.forceSyncServer) window.app.forceSyncServer();" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border: none; padding: 0.75rem 1.3rem; border-radius: 14px; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.3); display: flex; align-items: center; gap: 0.45rem;" title="Làm mới bộ nhớ đệm trình duyệt và đồng bộ ngay 100% dữ liệu chuẩn từ máy chủ trung tâm">
+              <span>🔄 Đồng Bộ Máy Chủ</span>
+            </button>
+            <button onclick="if(window.app && window.app.exportReportsToExcel) window.app.exportReportsToExcel(); else if(window.app) window.app.switchView('reports');" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; padding: 0.75rem 1.4rem; border-radius: 14px; font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 6px 18px rgba(16,185,129,0.3); display: flex; align-items: center; gap: 0.45rem;">
               <span>📥 Xuất Báo Cáo Excel</span>
             </button>
           </div>
