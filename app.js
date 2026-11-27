@@ -9342,37 +9342,39 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
       const headers = ['Mã giáo viên', 'Tên giáo viên', 'Email', 'SĐT', 'Mã môn dạy', 'Danh sách lớp', 'Ngày sinh', 'Tên đăng nhập', 'Mật khẩu'];
 
       // 1. Lấy danh sách môn học trực tiếp từ Quản lý khai báo môn học
-      let declaredSubs = [];
+      const subMap = new Map();
+      const addSubItem = (s) => {
+        if (!s) return;
+        const code = String(s.code || (s.id ? s.id.replace(/^sub_/, '').toUpperCase() : 'TOAN')).toUpperCase();
+        if (!code || subMap.has(code)) return;
+        const name = s.name || code;
+        const periods = (s.periodsPerWeek !== undefined ? s.periodsPerWeek : 2) + ' tiết';
+        const type = s.type || 'Bắt buộc';
+        const grades = s.grades ? (String(s.grades).startsWith('Khối') ? s.grades : ('Khối ' + s.grades)) : 'Khối 6, 7, 8, 9';
+        subMap.set(code, { id: s.id || code.toLowerCase(), code, name, periods, type, grades });
+      };
+
       if (typeof db !== 'undefined') {
-        if (db.state && Array.isArray(db.state.subjectsList) && db.state.subjectsList.length > 0) {
-          declaredSubs = db.state.subjectsList;
-        } else if (db.getSubjects) {
-          declaredSubs = db.getSubjects().map(s => ({
-            id: s.id,
-            code: (s.id || '').toUpperCase(),
-            name: s.name,
-            periodsPerWeek: 2,
-            type: 'Bắt buộc',
-            grades: '6,7,8,9'
-          }));
-        }
+        if (db.state && Array.isArray(db.state.subjectsList)) db.state.subjectsList.forEach(addSubItem);
+        if (db.getSubjects) db.getSubjects().forEach(addSubItem);
       }
-      if (!declaredSubs || declaredSubs.length === 0) {
-        declaredSubs = [
-          { id: 'sub_toan', code: 'TOAN', name: 'Toán học', periodsPerWeek: 4, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_van', code: 'VAN', name: 'Ngữ văn', periodsPerWeek: 4, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_anh', code: 'ANH', name: 'Tiếng Anh', periodsPerWeek: 3, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_khtn', code: 'KHTN', name: 'Khoa học Tự nhiên', periodsPerWeek: 4, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_lsdl', code: 'LSDL', name: 'Lịch sử và Địa lí', periodsPerWeek: 3, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_tin', code: 'TIN', name: 'Tin học', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_gdcd', code: 'GDCD', name: 'Giáo dục công dân', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_cn', code: 'CN', name: 'Công nghệ', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_gdtc', code: 'GDTC', name: 'Giáo dục thể chất', periodsPerWeek: 2, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_nt', code: 'NT', name: 'Nghệ thuật (Âm nhạc, Mĩ thuật)', periodsPerWeek: 2, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_hdtn', code: 'HDTN', name: 'Hoạt động trải nghiệm, hướng nghiệp', periodsPerWeek: 3, type: 'Bắt buộc', grades: '6,7,8,9' },
-          { id: 'sub_gddp', code: 'GDDP', name: 'Nội dung giáo dục địa phương', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' }
-        ];
+      if (subMap.size === 0) {
+        [
+          { code: 'TOAN', name: 'Toán học', periodsPerWeek: 4, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'VAN', name: 'Ngữ văn', periodsPerWeek: 4, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'ANH', name: 'Tiếng Anh', periodsPerWeek: 3, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'KHTN', name: 'Khoa học Tự nhiên', periodsPerWeek: 4, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'LSDL', name: 'Lịch sử và Địa lí', periodsPerWeek: 3, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'TIN', name: 'Tin học', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'GDCD', name: 'Giáo dục công dân', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'CN', name: 'Công nghệ', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'GDTC', name: 'Giáo dục thể chất', periodsPerWeek: 2, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'NT', name: 'Nghệ thuật (Âm nhạc, Mĩ thuật)', periodsPerWeek: 2, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'HDTN', name: 'Hoạt động trải nghiệm, hướng nghiệp', periodsPerWeek: 3, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { code: 'GDDP', name: 'Nội dung giáo dục địa phương', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' }
+        ].forEach(addSubItem);
       }
+      const declaredSubs = Array.from(subMap.values());
 
       // Tiêu đề Sheet 2: Mã môn học
       const subjectHeaders = [
@@ -9386,48 +9388,56 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
       ];
 
       const subjectRows = declaredSubs.map((s, idx) => {
-        const code = (s.code || (s.id ? s.id.replace(/^sub_/, '').toUpperCase() : 'TOAN')).toUpperCase();
-        const name = s.name || code;
-        const periods = (s.periodsPerWeek !== undefined ? s.periodsPerWeek : 2) + ' tiết';
-        const type = s.type || 'Bắt buộc';
-        const grades = s.grades ? ('Khối ' + s.grades) : 'Khối 6, 7, 8, 9';
         return [
           idx + 1,
-          code, // Cột B: MÃ MÔN IN HOA CHUẨN
-          name,
-          periods,
-          type,
-          grades,
-          `Chọn '${code}' trong danh sách thả xuống ở cột E (Sheet Mau_Danh_Sach_Giao_Vien)`
+          s.code, // Cột B: MÃ MÔN IN HOA CHUẨN
+          s.name,
+          s.periods,
+          s.type,
+          s.grades,
+          `Chọn '${s.code}' trong danh sách thả xuống ở cột E (Sheet Mau_Danh_Sach_Giao_Vien)`
         ];
       });
 
-      // 2. Lấy danh sách lớp học trực tiếp từ hệ thống
-      let declaredClasses = [];
+      // 2. Lấy danh sách lớp học trực tiếp từ mọi nguồn trong hệ thống
+      const classMap = new Map();
+      const addClassItem = (item) => {
+        if (!item) return;
+        const rawName = String(item.name || item.id || item).replace(/^Lớp\s*/i, '').trim();
+        const normKey = rawName.toUpperCase();
+        if (!normKey || classMap.has(normKey)) return;
+        const grade = item.grade ? (String(item.grade).startsWith('Khối') ? item.grade : ('Khối ' + item.grade)) : (rawName.match(/\d+/) ? ('Khối ' + rawName.match(/\d+/)[0]) : 'Khối 6');
+        const homeroomTeacher = item.homeroomTeacher || 'Chưa phân công';
+        classMap.set(normKey, { id: normKey, name: rawName, grade, homeroomTeacher });
+      };
+
       if (typeof db !== 'undefined') {
-        if (db.getClassesList && db.getClassesList().length > 0) {
-          declaredClasses = db.getClassesList();
-        } else if (db.getClasses && db.getClasses().length > 0) {
-          declaredClasses = db.getClasses();
-        } else if (db.state && Array.isArray(db.state.classesList) && db.state.classesList.length > 0) {
-          declaredClasses = db.state.classesList;
-        } else if (db.state && Array.isArray(db.state.classes) && db.state.classes.length > 0) {
-          declaredClasses = db.state.classes;
+        const list1 = (db.getClassesList && db.getClassesList()) || [];
+        list1.forEach(addClassItem);
+        const list2 = (db.getClasses && db.getClasses()) || [];
+        list2.forEach(addClassItem);
+        if (db.state && Array.isArray(db.state.classesList)) db.state.classesList.forEach(addClassItem);
+        if (db.state && Array.isArray(db.state.classes)) db.state.classes.forEach(addClassItem);
+        if (db.getStudents) {
+          db.getStudents().forEach(s => {
+            const cName = s.classId || s.className || s.class;
+            if (cName) addClassItem({ name: cName });
+          });
+        }
+        if (db.getTeachers) {
+          db.getTeachers().forEach(t => {
+            if (Array.isArray(t.classes)) t.classes.forEach(c => addClassItem({ name: c }));
+          });
         }
       }
-      if (!declaredClasses || declaredClasses.length === 0) {
+
+      let declaredClasses = Array.from(classMap.values());
+      if (declaredClasses.length === 0) {
         // Fallback danh sách lớp chuẩn THCS Ama Trang Lơng nếu chưa có lớp nào
-        declaredClasses = [
-          { id: '6A1', name: '6A1', grade: '6', homeroomTeacher: 'Chưa phân công' },
-          { id: '6A2', name: '6A2', grade: '6', homeroomTeacher: 'Chưa phân công' },
-          { id: '6A3', name: '6A3', grade: '6', homeroomTeacher: 'Chưa phân công' },
-          { id: '7B1', name: '7B1', grade: '7', homeroomTeacher: 'Chưa phân công' },
-          { id: '7B2', name: '7B2', grade: '7', homeroomTeacher: 'Chưa phân công' },
-          { id: '8C1', name: '8C1', grade: '8', homeroomTeacher: 'Chưa phân công' },
-          { id: '8C2', name: '8C2', grade: '8', homeroomTeacher: 'Chưa phân công' },
-          { id: '9D1', name: '9D1', grade: '9', homeroomTeacher: 'Chưa phân công' },
-          { id: '9D2', name: '9D2', grade: '9', homeroomTeacher: 'Chưa phân công' }
-        ];
+        const defaults = ['6A1', '6A2', '6A3', '6A4', '7B1', '7B2', '7B3', '7B4', '8C1', '8C2', '8C3', '8C4', '9D1', '9D2', '9D3', '9D4'];
+        declaredClasses = defaults.map(name => ({ id: name, name, grade: 'Khối ' + name.charAt(0), homeroomTeacher: 'Chưa phân công' }));
+      } else {
+        declaredClasses.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
       }
 
       // Tiêu đề Sheet 3: Danh sách Lớp học
@@ -9440,15 +9450,12 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
       ];
 
       const classRows = declaredClasses.map((c, idx) => {
-        const cName = String(c.name || c.id || c).replace(/^Lớp\s*/i, '').trim();
-        const cGrade = c.grade ? ('Khối ' + c.grade) : (cName.match(/\d+/) ? ('Khối ' + cName.match(/\d+/)[0]) : '---');
-        const cGvcn = c.homeroomTeacher || 'Chưa phân công';
         return [
           idx + 1,
-          cName, // Cột B: TÊN LỚP CHUẨN
-          cGrade,
-          cGvcn,
-          `Chọn '${cName}' trong danh sách thả xuống ở cột F. Nếu dạy nhiều lớp, có thể nhập cách nhau bởi dấu phẩy (VD: ${cName}, ...)`
+          c.name, // Cột B: TÊN LỚP CHUẨN
+          c.grade,
+          c.homeroomTeacher,
+          `Chọn '${c.name}' trong danh sách thả xuống ở cột F. Nếu dạy nhiều lớp, có thể nhập các lớp cách nhau bởi dấu phẩy (VD: ${c.name}, ...)`
         ];
       });
 
@@ -9518,34 +9525,38 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         classRows.forEach(row => ws3.addRow(row));
 
         // TÍCH HỢP DATA VALIDATION CHO CỘT E (Mã môn dạy) VÀ CỘT F (Danh sách lớp)
-        const subCount = subjectRows.length;
-        const subjectValidationFormula = `Ma_Mon_Hoc!$B$2:$B$${subCount + 1}`;
-        const classCount = classRows.length;
-        const classValidationFormula = `Danh_Sach_Lop!$B$2:$B$${classCount + 1}`;
+        // Chuỗi danh sách mã môn học: "TOAN,VAN,ANH,KHTN,LSDL,TIN,CN,GDCD,GDTC,NT,HDTN,GDDP"
+        const subjectCodesList = subjectRows.map(r => r[1]).filter(Boolean);
+        const subInlineFormula = '"' + subjectCodesList.join(',') + '"';
 
-        for (let r = 2; r <= 500; r++) {
-          // Data validation Cột E: Mã môn dạy
-          ws1.getCell('E' + r).dataValidation = {
-            type: 'list',
-            allowBlank: true,
-            formulae: [subjectValidationFormula],
-            showErrorMessage: false,
-            showInputMessage: true,
-            promptTitle: 'Mã môn giảng dạy',
-            prompt: 'Bấm mũi tên để chọn mã môn học phù hợp từ hệ thống (TOAN, VAN, TIN...).'
-          };
+        // Chuỗi danh sách lớp học: "6A1,6A2,6A3..."
+        const classNamesList = classRows.map(r => r[1]).filter(Boolean);
+        const classNamesStr = classNamesList.join(',');
+        const classValidationFormula = classNamesStr.length <= 250 
+          ? ('"' + classNamesStr + '"')
+          : `Danh_Sach_Lop!$B$2:$B$${classRows.length + 1}`;
 
-          // Data validation Cột F: Danh sách lớp
-          ws1.getCell('F' + r).dataValidation = {
-            type: 'list',
-            allowBlank: true,
-            formulae: [classValidationFormula],
-            showErrorMessage: false,
-            showInputMessage: true,
-            promptTitle: 'Danh sách lớp giảng dạy',
-            prompt: 'Bấm mũi tên để chọn lớp từ hệ thống (VD: 6A1). Có thể nhập nhiều lớp cách nhau bởi dấu phẩy (VD: 6A1, 6A2).'
-          };
-        }
+        // ĐẶT DATA VALIDATION TRỰC TIẾP TRÊN TOÀN BỘ DẢI Ô (E2:E500 và F2:F500)
+        // Lưu ý: Tuyệt đối không loop từng ô vì ExcelJS sẽ sinh ra sqref trùng lặp (E10:E500 & E2:E500) làm Excel bỏ Data Validation
+        ws1.dataValidations.add('E2:E500', {
+          type: 'list',
+          allowBlank: true,
+          formulae: [subInlineFormula],
+          showErrorMessage: false,
+          showInputMessage: true,
+          promptTitle: 'Mã môn giảng dạy',
+          prompt: 'Bấm mũi tên thả xuống để chọn mã môn học phù hợp từ hệ thống (TOAN, VAN, TIN...).'
+        });
+
+        ws1.dataValidations.add('F2:F500', {
+          type: 'list',
+          allowBlank: true,
+          formulae: [classValidationFormula],
+          showErrorMessage: false,
+          showInputMessage: true,
+          promptTitle: 'Danh sách lớp giảng dạy',
+          prompt: 'Bấm mũi tên thả xuống để chọn lớp từ hệ thống (VD: 6A1). Có thể nhập nhiều lớp cách nhau bởi dấu phẩy (VD: 6A1, 6A2).'
+        });
 
         // Định dạng Header nổi bật, rõ ràng
         ws1.getRow(1).height = 26;
