@@ -657,7 +657,7 @@ class LMSApp {
 
       // Default fallback teacher menu items if not explicitly customized
       const defaultTeacherMenuIds = [
-        'lessons', 'questions', 'assignments', 'exams', 'grades', 'grading', 
+        'lessons', 'questions', 'assignments', 'exams', 'proctor_room', 'grades', 'grading', 
         'attendance', 'messages', 'ai_hub'
       ];
 
@@ -713,6 +713,7 @@ class LMSApp {
       { id: 'questions', label: 'Ngân hàng Câu hỏi', icon: '❓' },
       { id: 'assignments', label: 'Giao bài tập', icon: '✍️' },
       { id: 'exams', label: 'Tạo đề kiểm tra', icon: '⏱️' },
+      { id: 'proctor_room', label: 'Phòng Giám Sát Thi', icon: '🛡️' },
       { id: 'grading', label: 'Chấm điểm học sinh', icon: '💯' },
       { id: 'ai_hub', label: 'Trợ lý AI & Kho Game Trường', icon: '🤖' },
       { id: 'attendance', label: 'Điểm danh chuyên cần', icon: '✓' },
@@ -741,6 +742,7 @@ class LMSApp {
       { id: 'questions', label: 'Ngân hàng Câu hỏi', icon: '❓' },
       { id: 'assignments', label: 'Giao bài tập', icon: '✍️' },
       { id: 'exams', label: 'Tạo đề kiểm tra', icon: '⏱️' },
+      { id: 'proctor_room', label: 'Phòng Giám Sát Thi', icon: '🛡️' },
       { id: 'grading', label: 'Chấm điểm học sinh', icon: '💯' },
       { id: 'ai_hub', label: 'Trợ lý AI & Kho Game Trường', icon: '🤖' },
       { id: 'attendance', label: 'Điểm danh chuyên cần', icon: '✓' },
@@ -16741,6 +16743,185 @@ render_ai_geometry(dom) {
       }
       sendVoicePayload({ mode: 'tts', message: msg });
     };
+  }
+
+  render_proctor_room(dom) {
+    if (!dom) dom = document.getElementById('viewport');
+    if (!dom) return;
+
+    const allExams = (db.getExams ? db.getExams() : []).slice().sort((a, b) => {
+      const aAss = ((a.classIds && a.classIds.length) || a.classId) ? 1 : 0;
+      const bAss = ((b.classIds && b.classIds.length) || b.classId) ? 1 : 0;
+      if (bAss !== aAss) return bAss - aAss;
+      return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+    });
+    const subjects = db.getSubjects ? db.getSubjects() : [];
+    const allAttempts = db.getExamAttempts ? db.getExamAttempts() : [];
+    const allStudents = db.getStudents ? db.getStudents() : [];
+
+    if (this._proctorRoomSubFilter === undefined) this._proctorRoomSubFilter = 'all';
+    if (this._proctorRoomStatusFilter === undefined) this._proctorRoomStatusFilter = 'all';
+    if (this._proctorRoomKeyword === undefined) this._proctorRoomKeyword = '';
+
+    const assignedCount = allExams.filter(e => (e.classIds && e.classIds.length > 0) || e.classId).length;
+    const normSub = (s) => String(s || '').toLowerCase().replace(/^sub_/, '');
+
+    const renderList = () => {
+      const kw = String(this._proctorRoomKeyword || '').toLowerCase().trim();
+      const filtered = allExams.filter(ex => {
+        const classes = (ex.classIds || (ex.classId ? [ex.classId] : [])).filter(Boolean);
+        const isAssigned = classes.length > 0;
+        if (this._proctorRoomStatusFilter === 'assigned' && !isAssigned) return false;
+        if (this._proctorRoomStatusFilter === 'draft' && isAssigned) return false;
+        if (this._proctorRoomSubFilter !== 'all' && normSub(ex.subjectId) !== normSub(this._proctorRoomSubFilter)) return false;
+        if (kw) {
+          const hay = `${ex.title || ''} ${classes.join(' ')}`.toLowerCase();
+          if (!hay.includes(kw)) return false;
+        }
+        return true;
+      });
+
+      const listContainer = dom.querySelector('#pr-exam-list');
+      if (!listContainer) return;
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = `
+          <div style="background:#fff;border:1.5px dashed #cbd5e1;border-radius:16px;padding:3rem;text-align:center;color:#64748b;">
+            <div style="font-size:2.5rem;margin-bottom:0.5rem;">🛡️</div>
+            <div style="font-weight:700;font-size:1rem;color:#0f172a;margin-bottom:0.35rem;">Chưa có đề kiểm tra nào phù hợp</div>
+            <div style="font-size:0.86rem;margin-bottom:1rem;">Bạn có thể vào mục <strong>⏱️ Tạo đề kiểm tra</strong> để tạo và giao đề cho học sinh, sau đó vào đây để giám sát trực tuyến.</div>
+            <button id="pr-goto-exams" style="padding:0.55rem 1.2rem;background:#2563eb;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;">⏱️ Tới Tạo đề kiểm tra</button>
+          </div>`;
+        const btnGo = listContainer.querySelector('#pr-goto-exams');
+        if (btnGo) btnGo.onclick = () => this.switchView('exams');
+        return;
+      }
+
+      listContainer.innerHTML = filtered.map(ex => {
+        const classes = (ex.classIds || (ex.classId ? [ex.classId] : [])).filter(Boolean);
+        const isAssigned = classes.length > 0;
+        const subObj = subjects.find(s => normSub(s.id) === normSub(ex.subjectId));
+        const subName = subObj ? subObj.name : (ex.subjectId || 'Môn học');
+        const enrolledTotal = isAssigned ? allStudents.filter(s => classes.includes(s.classId)).length : 0;
+        const attemptsCount = allAttempts.filter(a => a.examId === ex.id).length;
+        const logsCount = (db.getExamViolationLogs ? db.getExamViolationLogs(ex.id) : []).length;
+        const fmtT = (dt) => dt ? new Date(dt).toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+
+        return `
+          <div class="glass-card" style="padding:1.15rem 1.25rem;border-radius:16px;border:1.5px solid ${isAssigned ? '#99f6e4' : '#e2e8f0'};background:#ffffff;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 4px 14px rgba(0,0,0,0.04);">
+            <div style="flex:1;min-width:260px;">
+              <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.4rem;">
+                <span style="font-weight:700;font-size:1.02rem;color:#0f172a;font-family:var(--font-title);">${ex.title || 'Đề kiểm tra'}</span>
+                <span style="background:#eff6ff;color:#1d4ed8;padding:0.15rem 0.55rem;border-radius:10px;font-size:0.74rem;font-weight:600;">📚 ${subName}</span>
+                ${isAssigned
+                  ? `<span style="background:#dcfce7;color:#15803d;padding:0.15rem 0.6rem;border-radius:10px;font-size:0.74rem;font-weight:700;">🟢 Đã giao (${classes.join(', ')})</span>`
+                  : `<span style="background:#fff7ed;color:#c2410c;padding:0.15rem 0.6rem;border-radius:10px;font-size:0.74rem;font-weight:700;">📝 Bản nháp (Chưa giao)</span>`}
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:0.4rem;font-size:0.78rem;color:#475569;align-items:center;">
+                <span>⏱️ ${ex.timeLimit ? ex.timeLimit + ' phút' : 'Không giới hạn'}</span>
+                ${ex.openTime ? `<span>| 🟢 Mở: ${fmtT(ex.openTime)}</span>` : ''}
+                ${ex.closeTime ? `<span>| 🔴 Đóng: ${fmtT(ex.closeTime)}</span>` : ''}
+                ${isAssigned ? `<span>| 👥 Sĩ số: <strong>${enrolledTotal}</strong></span>` : ''}
+                <span>| 📊 Đã nộp: <strong>${attemptsCount}</strong></span>
+                <span>| 🚨 Log vi phạm: <strong style="color:${logsCount > 0 ? '#dc2626' : '#475569'};">${logsCount}</strong></span>
+              </div>
+              <div id="pr-live-stats-${ex.id}" style="margin-top:0.45rem;font-size:0.78rem;color:#0f766e;font-weight:600;">⏳ Đang kiểm tra phòng thi Live...</div>
+            </div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+              ${!isAssigned ? `<button class="pr-btn-assign" data-exam-id="${ex.id}" style="padding:0.55rem 0.95rem;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.84rem;cursor:pointer;">🚀 Giao Bài</button>` : ''}
+              <button class="pr-btn-open" data-exam-id="${ex.id}" style="padding:0.6rem 1.2rem;background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.88rem;cursor:pointer;box-shadow:0 4px 12px rgba(13,148,136,0.3);display:inline-flex;align-items:center;gap:0.4rem;">
+                <span>🛡️</span> Vào Phòng Giám Sát Live
+              </button>
+            </div>
+          </div>`;
+      }).join('');
+
+      listContainer.querySelectorAll('.pr-btn-open').forEach(btn => {
+        btn.onclick = () => this.showLiveProctoringDashboard(btn.getAttribute('data-exam-id'));
+      });
+      listContainer.querySelectorAll('.pr-btn-assign').forEach(btn => {
+        btn.onclick = () => {
+          if (typeof this.showAssignExamModal === 'function') {
+            this.showAssignExamModal(btn.getAttribute('data-exam-id'), dom);
+          }
+        };
+      });
+
+      // Nạp trạng thái Real-time của từng đề đang mở từ máy chủ
+      if (typeof fetch !== 'undefined') {
+        filtered.forEach(ex => {
+          fetch(`/api/proctor/room-state?examId=${encodeURIComponent(ex.id)}&t=${Date.now()}`, { cache: 'no-store' })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+              const badgeEl = dom.querySelector(`#pr-live-stats-${ex.id}`);
+              if (!badgeEl || !data || !Array.isArray(data.students)) return;
+              const online = data.students.filter(s => s.status === 'online').length;
+              const late = data.students.filter(s => s.isLate).length;
+              const viol = data.students.filter(s => s.violationCount > 0).length;
+              const sub = data.students.filter(s => s.status === 'submitted').length;
+              if (data.students.length === 0) {
+                badgeEl.innerHTML = `<span style="color:#64748b;font-weight:500;">Chưa có thí sinh nào đang kết nối trực tiếp vào phòng thi này.</span>`;
+              } else {
+                badgeEl.innerHTML = `🟢 Đang thi: <strong>${online}</strong> | ⏰ Vào muộn: <strong style="color:${late > 0 ? '#b45309' : '#0f766e'};">${late}</strong> | 🚨 Vi phạm: <strong style="color:${viol > 0 ? '#dc2626' : '#0f766e'};">${viol}</strong> | ✅ Đã nộp: <strong>${sub}</strong>`;
+              }
+            }).catch(() => {});
+        });
+      }
+    };
+
+    dom.innerHTML = `
+      <div style="padding:1.25rem;font-family:var(--font-body);animation:fadeIn 0.25s ease-out;">
+        <div class="glass-card" style="background:linear-gradient(135deg,#ffffff 0%,#f0fdfa 100%);border:1.5px solid #99f6e4;border-radius:18px;padding:1.4rem;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;box-shadow:0 4px 15px rgba(13,148,136,0.08);">
+          <div>
+            <div style="display:inline-flex;align-items:center;gap:0.4rem;background:#ccfbf1;color:#0f766e;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.78rem;font-weight:700;margin-bottom:0.4rem;">
+              🛡️ HỆ THỐNG COI THI & NHẮC NHỞ TRỰC TIẾP REAL-TIME
+            </div>
+            <h2 style="margin:0;font-family:var(--font-title);font-weight:700;font-size:1.45rem;color:#0f172a;">
+              🛡️ Phòng Giám Sát Học Sinh Thi
+            </h2>
+            <p style="margin:0.25rem 0 0 0;font-size:0.86rem;color:#475569;">
+              Theo dõi tên học sinh đang thi, phát hiện vào muộn, cảnh báo vi phạm tức thì và nói nhắc trực tiếp qua loa máy học sinh.
+            </p>
+          </div>
+          <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+            <div style="background:#fff;border:1.5px solid #cbd5e1;padding:0.55rem 1rem;border-radius:12px;text-align:center;">
+              <div style="font-size:1.3rem;font-weight:800;color:#0f766e;">${assignedCount}</div>
+              <div style="font-size:0.72rem;color:#64748b;font-weight:600;">ĐỀ ĐÃ GIAO</div>
+            </div>
+            <div style="background:#fff;border:1.5px solid #cbd5e1;padding:0.55rem 1rem;border-radius:12px;text-align:center;">
+              <div style="font-size:1.3rem;font-weight:800;color:#2563eb;">${allExams.length}</div>
+              <div style="font-size:0.72rem;color:#64748b;font-weight:600;">TỔNG ĐỀ THI</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;background:#f8fafc;padding:0.9rem 1rem;border-radius:14px;border:1.5px solid #cbd5e1;margin-bottom:1.15rem;">
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+            <select id="pr-status-filter" style="height:38px;padding:0 0.75rem;border-radius:9px;border:1.5px solid #cbd5e1;font-weight:600;background:#fff;">
+              <option value="all" ${this._proctorRoomStatusFilter === 'all' ? 'selected' : ''}>📋 Tất cả đề thi</option>
+              <option value="assigned" ${this._proctorRoomStatusFilter === 'assigned' ? 'selected' : ''}>🟢 Đề đã giao cho lớp</option>
+              <option value="draft" ${this._proctorRoomStatusFilter === 'draft' ? 'selected' : ''}>📝 Bản nháp</option>
+            </select>
+            <select id="pr-sub-filter" style="height:38px;padding:0 0.75rem;border-radius:9px;border:1.5px solid #cbd5e1;font-weight:600;background:#fff;">
+              <option value="all" ${this._proctorRoomSubFilter === 'all' ? 'selected' : ''}>📚 Tất cả môn học</option>
+              ${subjects.map(s => `<option value="${s.id}" ${normSub(this._proctorRoomSubFilter) === normSub(s.id) ? 'selected' : ''}>${s.name}</option>`).join('')}
+            </select>
+          </div>
+          <div style="display:flex;gap:0.5rem;flex:1;max-width:380px;">
+            <input type="text" id="pr-search-input" value="${this._proctorRoomKeyword}" placeholder="🔍 Tìm tên đề thi hoặc lớp..." style="flex:1;height:38px;padding:0 0.85rem;border-radius:9px;border:1.5px solid #cbd5e1;font-size:0.88rem;background:#fff;" />
+            <button id="pr-refresh-btn" style="height:38px;padding:0 0.9rem;background:#0f766e;color:#fff;border:none;border-radius:9px;font-weight:700;cursor:pointer;">🔄</button>
+          </div>
+        </div>
+
+        <div id="pr-exam-list" style="display:flex;flex-direction:column;gap:0.85rem;"></div>
+      </div>`;
+
+    dom.querySelector('#pr-status-filter').onchange = (e) => { this._proctorRoomStatusFilter = e.target.value; renderList(); };
+    dom.querySelector('#pr-sub-filter').onchange = (e) => { this._proctorRoomSubFilter = e.target.value; renderList(); };
+    dom.querySelector('#pr-search-input').oninput = (e) => { this._proctorRoomKeyword = e.target.value; renderList(); };
+    dom.querySelector('#pr-refresh-btn').onclick = () => renderList();
+
+    renderList();
   }
 
   showLiveProctoringDashboard(examId) {

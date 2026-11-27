@@ -938,7 +938,8 @@ function attachRenderMethods(LMSApp) {
       { id: 'questions', name: '13. Ngân hàng Câu hỏi' },
       { id: 'assignments', name: '14. Giao bài tập' },
       { id: 'exams', name: '15. Tạo đề kiểm tra' },
-      { id: 'grading', name: '16. Chấm điểm học sinh' },
+      { id: 'proctor_room', name: '16. Phòng Giám Sát Thi' },
+      { id: 'grading', name: '17. Chấm điểm học sinh' },
       { id: 'attendance', name: '18. Điểm danh chuyên cần' },
       { id: 'messages', name: '19. Liên lạc Phụ huynh' },
       { id: 'ai_hub', name: '20. Trợ lý KHBD AI' }
