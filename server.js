@@ -32,6 +32,8 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 let inMemoryDB = null;
 let isSaving = false;
 let saveScheduled = false;
+let dbVersion = Date.now();
+let lastModified = Date.now();
 
 function sanitizeAndDeduplicate(db) {
   if (!db || typeof db !== 'object') return db;
@@ -181,7 +183,11 @@ function loadDBFromDisk() {
       const raw = fs.readFileSync(DB_FILE, 'utf8');
       inMemoryDB = JSON.parse(raw);
       inMemoryDB = sanitizeAndDeduplicate(inMemoryDB);
-      console.log('✅ Central Database loaded into memory and deduplicated.');
+      dbVersion = (inMemoryDB && inMemoryDB._version) ? inMemoryDB._version : Date.now();
+      lastModified = (inMemoryDB && inMemoryDB._lastModified) ? inMemoryDB._lastModified : Date.now();
+      inMemoryDB._version = dbVersion;
+      inMemoryDB._lastModified = lastModified;
+      console.log('✅ Central Database loaded into memory and deduplicated. Version:', dbVersion);
     } else {
       inMemoryDB = {
         schoolInfo: { name: 'TH-THCS AMA TRANG LƠNG', address: 'Dliê Ya, Đắk Lắk' },
@@ -199,6 +205,8 @@ function loadDBFromDisk() {
         teachingTools: []
       };
       inMemoryDB = sanitizeAndDeduplicate(inMemoryDB);
+      inMemoryDB._version = dbVersion;
+      inMemoryDB._lastModified = lastModified;
       fs.writeFileSync(DB_FILE, JSON.stringify(inMemoryDB, null, 2), 'utf8');
     }
   } catch (err) {
@@ -622,6 +630,10 @@ const server = http.createServer(async (req, res) => {
   // =========================================================================
   if (reqPath === '/api/db/state' && req.method === 'GET') {
     try {
+      if (inMemoryDB) {
+        inMemoryDB._version = dbVersion;
+        inMemoryDB._lastModified = lastModified;
+      }
       const dataStr = JSON.stringify(inMemoryDB || {});
       const acceptEncoding = req.headers['accept-encoding'] || '';
 
@@ -634,13 +646,16 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(200, {
               'Content-Type': 'application/json; charset=utf-8',
               'Content-Encoding': 'gzip',
-              'Cache-Control': 'no-cache'
+              'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0'
             });
             res.end(gzipped);
           }
         });
       } else {
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.writeHead(200, {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0'
+        });
         res.end(dataStr);
       }
     } catch (err) {
@@ -648,6 +663,27 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ success: false, error: err.message }));
     }
+    return;
+  }
+
+  // =========================================================================
+  // API 2b: Real-time Central Database Version & Heartbeat (/api/db/version)
+  // =========================================================================
+  if (reqPath === '/api/db/version' && req.method === 'GET') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0'
+    });
+    const counts = {
+      teachers: Array.isArray(inMemoryDB?.teachers) ? inMemoryDB.teachers.length : 0,
+      classes: Array.isArray(inMemoryDB?.classesList) ? inMemoryDB.classesList.length : (Array.isArray(inMemoryDB?.classes) ? inMemoryDB.classes.length : 0),
+      students: Array.isArray(inMemoryDB?.students) ? inMemoryDB.students.length : 0
+    };
+    res.end(JSON.stringify({
+      version: dbVersion,
+      lastModified: lastModified,
+      counts: counts
+    }));
     return;
   }
 
@@ -661,12 +697,48 @@ const server = http.createServer(async (req, res) => {
       const incomingState = JSON.parse(jsonStr); // Validate JSON
 
       inMemoryDB = sanitizeAndDeduplicate(incomingState);
+      dbVersion++;
+      lastModified = Date.now();
+      inMemoryDB._version = dbVersion;
+      inMemoryDB._lastModified = lastModified;
+
       scheduleDiskFlush(); // Non-blocking async persistence
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ success: true, timestamp: Date.now() }));
+      res.end(JSON.stringify({ success: true, version: dbVersion, timestamp: lastModified }));
     } catch (err) {
       console.error('API Save State error:', err);
+      res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: false, error: err.message }));
+    }
+    return;
+  }
+
+  // =========================================================================
+  // API 3b: Clear / Reset Core Database (/api/db/clear)
+  // =========================================================================
+  if (reqPath === '/api/db/clear' && req.method === 'POST') {
+    try {
+      if (inMemoryDB) {
+        inMemoryDB.teachers = [];
+        inMemoryDB.students = [];
+        inMemoryDB.classes = [];
+        inMemoryDB.classesList = [];
+        inMemoryDB.parents = [];
+        inMemoryDB.submissions = [];
+        inMemoryDB.examAttempts = [];
+        inMemoryDB.attendance = [];
+        inMemoryDB._clearedAt = Date.now();
+        dbVersion++;
+        lastModified = Date.now();
+        inMemoryDB._version = dbVersion;
+        inMemoryDB._lastModified = lastModified;
+        scheduleDiskFlush();
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ success: true, version: dbVersion, timestamp: lastModified }));
+    } catch (err) {
+      console.error('API Clear State error:', err);
       res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ success: false, error: err.message }));
     }

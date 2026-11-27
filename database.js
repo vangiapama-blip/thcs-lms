@@ -1995,13 +1995,19 @@ class LMSDatabase {
   constructor() {
     this.state = null;
     this.init();
+    this._lastSyncedVersion = 0;
+    this._lastSyncedTime = 0;
+    this._isSyncing = false;
     if (typeof window !== 'undefined') {
       setTimeout(() => this.syncFromServer(), 100);
+      this.startRealtimeSync();
     }
   }
 
   async syncFromServer(forceRefresh = false) {
     if (typeof fetch === 'undefined') return;
+    if (this._isSyncing) return;
+    this._isSyncing = true;
     try {
       // Nếu máy vừa mới phục hồi file sao lưu trong vòng 30 giây, ưu tiên đẩy local lên server thay vì bị server ghi đè ngược
       if (this.state && this.state._restoredAt && (Date.now() - this.state._restoredAt < 30000)) {
@@ -2011,88 +2017,82 @@ class LMSDatabase {
           body: JSON.stringify(this.state),
           keepalive: true
         }).catch(() => {});
+        this._isSyncing = false;
         return;
       }
-      const res = await fetch('/api/db/state');
+      const res = await fetch('/api/db/state?t=' + Date.now(), { cache: 'no-store' });
       if (res.ok) {
         const remoteState = await res.json();
-        if (remoteState && typeof remoteState === 'object' && (remoteState.schoolInfo || remoteState.subjects || remoteState.exams || remoteState.teachers)) {
+        if (remoteState && typeof remoteState === 'object') {
           
           // NGUYÊN TẮC ĐỒNG BỘ CHUẨN (SINGLE SOURCE OF TRUTH - MASTER SOURCE):
-          // Máy chủ là nguồn chuẩn duy nhất. Khi Máy chủ đã có dữ liệu, mọi trình duyệt (Chrome, Cốc Cốc, Edge...)
-          // PHẢI nhận 100% dữ liệu từ máy chủ. TUYỆT ĐỐI KHÔNG gom rác/dữ liệu cũ từ localStorage của trình duyệt vào máy chủ.
+          // Máy chủ là nguồn chuẩn duy nhất.
+          // Bất kể máy chủ đang có dữ liệu hay vừa bị xóa trắng (0 lớp, 0 GV, 0 HS),
+          // MỌI TRÌNH DUYỆT (Chrome, Cốc Cốc, Edge...) PHẢI nhận 100% dữ liệu từ máy chủ.
+          // TUYỆT ĐỐI KHÔNG gom rác hay hồi sinh dữ liệu cũ từ LocalStorage đè lên máy chủ.
           const normStr = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
 
-          const hasServerTeachers = Array.isArray(remoteState.teachers) && remoteState.teachers.length > 0;
-          const hasServerClasses = (Array.isArray(remoteState.classesList) && remoteState.classesList.length > 0) || (Array.isArray(remoteState.classes) && remoteState.classes.length > 0);
-          const hasServerStudents = Array.isArray(remoteState.students) && remoteState.students.length > 0;
-          const serverHasCoreData = hasServerTeachers || hasServerClasses || hasServerStudents;
-
-          if (serverHasCoreData) {
-            // 1. Giáo viên: Lấy 100% từ máy chủ (khử trùng lặp nội bộ máy chủ nếu có)
-            if (hasServerTeachers) {
-              const tMap = new Map();
-              remoteState.teachers.forEach(t => {
-                if (!t || !t.name) return;
-                const k = (t.code ? ('code:' + String(t.code).trim().toUpperCase()) : '') || ('id:' + String(t.id).trim().toLowerCase()) || ('name:' + normStr(t.name));
-                if (!tMap.has(k)) tMap.set(k, t);
-              });
-              remoteState.teachers = Array.from(tMap.values());
-            }
-
-            // 2. Lớp học: Lấy 100% từ máy chủ
-            if (hasServerClasses) {
-              const rawCls = Array.isArray(remoteState.classesList) && remoteState.classesList.length > 0 ? remoteState.classesList : (remoteState.classes || []);
-              const cMap = new Map();
-              rawCls.forEach(c => {
-                if (!c) return;
-                const rName = String(c.name || c.id || '').replace(/^Lớp\s*/i, '').trim();
-                const nKey = rName.toUpperCase();
-                if (!nKey || cMap.has(nKey)) return;
-                const m = nKey.match(/\d+/);
-                const gNum = m ? m[0] : (c.grade ? String(c.grade).match(/\d+/)?.[0] || '6' : '6');
-                cMap.set(nKey, {
-                  id: nKey,
-                  name: rName,
-                  grade: 'Khối ' + gNum,
-                  homeroomTeacher: c.homeroomTeacher || 'Chưa phân công'
-                });
-              });
-              remoteState.classesList = Array.from(cMap.values()).sort((a,b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
-              remoteState.classes = remoteState.classesList;
-            }
-
-            // 3. Học sinh: Lấy 100% từ máy chủ
-            if (hasServerStudents) {
-              const sMap = new Map();
-              remoteState.students.forEach(s => {
-                if (!s || !s.name) return;
-                const code = (s.studentCode || s.code) ? String(s.studentCode || s.code).trim().toUpperCase() : '';
-                const sid = s.id ? String(s.id).trim().toUpperCase() : '';
-                const sDob = s.dob ? String(s.dob).trim() : '';
-                const cName = String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
-                const k = code ? ('code:' + code) : (sid ? ('id:' + sid) : ('nc:' + normStr(s.name) + '_' + cName + '_' + sDob));
-                if (!sMap.has(k)) sMap.set(k, s);
-              });
-              remoteState.students = Array.from(sMap.values());
-            }
+          // 1. Giáo viên: Nhận 100% từ máy chủ (khử trùng lặp nội bộ máy chủ nếu có)
+          if (Array.isArray(remoteState.teachers)) {
+            const tMap = new Map();
+            remoteState.teachers.forEach(t => {
+              if (!t || !t.name) return;
+              const k = (t.code ? ('code:' + String(t.code).trim().toUpperCase()) : '') || ('id:' + String(t.id).trim().toLowerCase()) || ('name:' + normStr(t.name));
+              if (!tMap.has(k)) tMap.set(k, t);
+            });
+            remoteState.teachers = Array.from(tMap.values());
           } else {
-            // Máy chủ chưa có dữ liệu (lần đầu cài đặt) -> Khởi tạo máy chủ từ local nếu có
-            if (this.state) {
-              if (Array.isArray(this.state.teachers) && this.state.teachers.length > 0) remoteState.teachers = this.state.teachers;
-              if (Array.isArray(this.state.classesList) && this.state.classesList.length > 0) {
-                remoteState.classesList = this.state.classesList;
-                remoteState.classes = this.state.classesList;
-              }
-              if (Array.isArray(this.state.students) && this.state.students.length > 0) remoteState.students = this.state.students;
-            }
+            remoteState.teachers = [];
           }
 
-          // 4. Các mảng dữ liệu khác
-          ['parents', 'exams', 'questions', 'assignments', 'submissions', 'lessons', 'uploadedFiles', 'users'].forEach(k => {
-            if (!Array.isArray(remoteState[k]) || remoteState[k].length === 0) {
-              if (this.state && Array.isArray(this.state[k])) remoteState[k] = this.state[k];
-              else remoteState[k] = [];
+          // 2. Lớp học: Nhận 100% từ máy chủ
+          const rawCls = Array.isArray(remoteState.classesList) ? remoteState.classesList : (Array.isArray(remoteState.classes) ? remoteState.classes : []);
+          const cMap = new Map();
+          rawCls.forEach(c => {
+            if (!c) return;
+            const rName = String(c.name || c.id || '').replace(/^Lớp\s*/i, '').trim();
+            const nKey = rName.toUpperCase();
+            if (!nKey || cMap.has(nKey)) return;
+            let gradeNum = '6';
+            const m = nKey.match(/\d+/);
+            if (m) gradeNum = m[0];
+            else if (c.grade) {
+              const gm = String(c.grade).match(/\d+/);
+              if (gm) gradeNum = gm[0];
+            }
+            cMap.set(nKey, {
+              id: nKey,
+              name: rName,
+              grade: 'Khối ' + gradeNum,
+              homeroomTeacher: c.homeroomTeacher || 'Chưa phân công'
+            });
+          });
+          remoteState.classesList = Array.from(cMap.values()).sort((a,b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+          remoteState.classes = remoteState.classesList;
+
+          // 3. Học sinh: Nhận 100% từ máy chủ
+          if (Array.isArray(remoteState.students)) {
+            const sMap = new Map();
+            remoteState.students.forEach(s => {
+              if (!s || !s.name) return;
+              const code = (s.studentCode || s.code) ? String(s.studentCode || s.code).trim().toUpperCase() : '';
+              const sid = s.id ? String(s.id).trim().toUpperCase() : '';
+              const sDob = s.dob ? String(s.dob).trim() : '';
+              const cName = String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
+              const k = code ? ('code:' + code) : (sid ? ('id:' + sid) : ('nc:' + normStr(s.name) + '_' + cName + '_' + sDob));
+              if (!sMap.has(k)) sMap.set(k, s);
+            });
+            remoteState.students = Array.from(sMap.values());
+          } else {
+            remoteState.students = [];
+          }
+
+          // 4. Các mảng dữ liệu nghiệp vụ: Nhận trực tiếp từ máy chủ
+          ['parents', 'exams', 'questions', 'assignments', 'submissions', 'lessons', 'uploadedFiles', 'users', 'examAttempts', 'attendance'].forEach(k => {
+            if (Array.isArray(remoteState[k])) {
+              // Remote state is truth
+            } else {
+              remoteState[k] = [];
             }
           });
 
@@ -2106,32 +2106,33 @@ class LMSDatabase {
           // Bảo toàn năm học đã chọn và đồng bộ hai chiều giữa Server và LocalStorage
           const localSavedYear = (typeof localStorage !== 'undefined' && localStorage.getItem('THCS_LMS_SELECTED_YEAR'));
           if (localSavedYear) {
-            this.state.selectedSchoolYear = localSavedYear;
             remoteState.selectedSchoolYear = localSavedYear;
-          } else if (remoteState.selectedSchoolYear) {
-            this.state.selectedSchoolYear = remoteState.selectedSchoolYear;
-            try {
-              if (typeof localStorage !== 'undefined') {
-                localStorage.setItem('THCS_LMS_SELECTED_YEAR', remoteState.selectedSchoolYear);
-              }
-            } catch (e) {}
-          } else {
-            this.state.selectedSchoolYear = '2025-2026';
+          } else if (!remoteState.selectedSchoolYear) {
             remoteState.selectedSchoolYear = '2025-2026';
           }
+
+          this._lastSyncedVersion = remoteState._version || Date.now();
+          this._lastSyncedTime = remoteState._lastModified || Date.now();
 
           this.state = remoteState;
           this.initUserGroupsAndPermissions();
           try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
+
           if (typeof window !== 'undefined' && window.app) {
             try { if (window.app.initSchoolYearSwitcher) window.app.initSchoolYearSwitcher(); } catch(e) {}
             try { if (window.app.renderSidebar) window.app.renderSidebar(); } catch(e) {}
             // Cập nhật lại giao diện ngay lập tức để đồng bộ các thẻ thống kê KPI toàn trường
             try {
-              const curView = window.app.currentView || 'dashboard';
-              const viewport = document.getElementById('viewport') || document.getElementById('main-viewport');
-              if (viewport && window.app.render_dashboard && (curView === 'dashboard' || curView === 'info')) {
-                window.app.render_dashboard(viewport);
+              if (forceRefresh) {
+                if (typeof window.app.refreshCurrentView === 'function') {
+                  window.app.refreshCurrentView();
+                } else {
+                  const curView = window.app.currentView || 'dashboard';
+                  const viewport = document.getElementById('viewport') || document.getElementById('main-viewport');
+                  if (viewport && window.app.render_dashboard && (curView === 'dashboard' || curView === 'info')) {
+                    window.app.render_dashboard(viewport);
+                  }
+                }
               }
             } catch(e) {}
           }
@@ -2140,7 +2141,60 @@ class LMSDatabase {
       }
     } catch(err) {
       console.log('ℹ️ Server offline, using local state.');
+    } finally {
+      this._isSyncing = false;
     }
+  }
+
+  // =========================================================================
+  // ⚡ HỆ THỐNG ĐỒNG BỘ THỜI GIAN THỰC ĐA TRÌNH DUYỆT (REAL-TIME HEARTBEAT SYNC)
+  // =========================================================================
+  startRealtimeSync() {
+    if (typeof window === 'undefined' || typeof fetch === 'undefined') return;
+    if (this._realtimeTimer) clearInterval(this._realtimeTimer);
+
+    // 1. Nhịp tim kiểm tra phiên bản máy chủ mỗi 2.5 giây (Cực nhẹ, < 100 bytes)
+    this._realtimeTimer = setInterval(async () => {
+      if (this._isSyncing) return;
+      try {
+        const res = await fetch('/api/db/version?t=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) {
+          const info = await res.json();
+          if (info && info.version && this._lastSyncedVersion && info.version > this._lastSyncedVersion) {
+            console.log('🔄 Phát hiện thay đổi dữ liệu trên máy chủ (v' + info.version + ' > v' + this._lastSyncedVersion + '). Tự động đồng bộ...');
+            await this.syncFromServer(true);
+          }
+        }
+      } catch (e) {}
+    }, 2500);
+
+    // 2. Tự động kiểm tra ngay khi người dùng chuyển qua lại giữa các cửa sổ trình duyệt (Edge <-> Chrome <-> Cốc Cốc)
+    window.addEventListener('focus', async () => {
+      if (this._isSyncing) return;
+      try {
+        const res = await fetch('/api/db/version?t=' + Date.now(), { cache: 'no-store' });
+        if (res.ok) {
+          const info = await res.json();
+          if (info && info.version && info.version !== this._lastSyncedVersion) {
+            console.log('⚡ Chuyển cửa sổ trình duyệt: Đồng bộ phiên bản mới nhất từ máy chủ...');
+            await this.syncFromServer(true);
+          }
+        }
+      } catch (e) {}
+    });
+
+    // 3. Kênh truyền tin trực tiếp tức thì giữa các tab của cùng trình duyệt (BroadcastChannel)
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        const bc = new BroadcastChannel('thcs_lms_channel');
+        bc.onmessage = async (msg) => {
+          if (msg && msg.data && (msg.data.type === 'DATA_CHANGED' || msg.data.type === 'DATA_CLEARED')) {
+            console.log('⚡ Nhận tín hiệu thay đổi dữ liệu từ tab khác trong cùng trình duyệt...');
+            await this.syncFromServer(true);
+          }
+        };
+      }
+    } catch(e) {}
   }
 
   async uploadFile(file) {
@@ -2940,18 +2994,96 @@ class LMSDatabase {
     }
 
     // Asynchronously debounced sync to Central Server (Real-time 150ms)
-    if (typeof fetch !== 'undefined' && this.state) {
+    const doServerSave = async () => {
+      if (typeof fetch === 'undefined' || !this.state) return;
+      try {
+        const res = await fetch('/api/db/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.state),
+          keepalive: true
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.version) {
+            this._lastSyncedVersion = data.version;
+            this._lastSyncedTime = data.timestamp || Date.now();
+          }
+        }
+      } catch(e) {}
+
+      // Broadcast tức thì tới các tab khác của cùng trình duyệt
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const bc = new BroadcastChannel('thcs_lms_channel');
+          bc.postMessage({ type: 'DATA_CHANGED', timestamp: Date.now() });
+          bc.close();
+        }
+      } catch(e) {}
+    };
+
+    if (immediate) {
       if (this._syncTimer) clearTimeout(this._syncTimer);
-      this._syncTimer = setTimeout(() => {
+      return doServerSave();
+    } else {
+      if (this._syncTimer) clearTimeout(this._syncTimer);
+      this._syncTimer = setTimeout(doServerSave, 150);
+    }
+  }
+
+  // =========================================================================
+  // 🧹 XÓA TRẮNG TOÀN DIỆN MÁY CHỦ & MỌI TRÌNH DUYỆT (CENTRALIZED DATA WIPE)
+  // =========================================================================
+  async clearCoreData() {
+    if (!this.state) return;
+    this.state.teachers = [];
+    this.state.students = [];
+    this.state.classesList = [];
+    this.state.classes = [];
+    this.state.parents = [];
+    this.state.submissions = [];
+    this.state.examAttempts = [];
+    this.state.attendance = [];
+    this.state._clearedAt = Date.now();
+    this.state._lastModified = Date.now();
+
+    try {
+      localStorage.setItem(DB_KEY, JSON.stringify(this.state));
+    } catch (e) {}
+
+    if (typeof fetch !== 'undefined') {
+      try {
+        const res = await fetch('/api/db/clear', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.version) {
+            this._lastSyncedVersion = data.version;
+            this._lastSyncedTime = data.timestamp || Date.now();
+          }
+        }
+      } catch (e) {
         try {
-          fetch('/api/db/save', {
+          await fetch('/api/db/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(this.state)
-          }).catch(() => {});
-        } catch(e) {}
-      }, 150);
+            body: JSON.stringify(this.state),
+            keepalive: true
+          });
+        } catch(err) {}
+      }
     }
+
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        const bc = new BroadcastChannel('thcs_lms_channel');
+        bc.postMessage({ type: 'DATA_CLEARED', timestamp: Date.now() });
+        bc.close();
+      }
+    } catch(e) {}
   }
 
   resetToDefault() {

@@ -1011,6 +1011,26 @@ class LMSApp {
     }
   }
 
+  // Tự động làm mới màn hình hiện tại khi nhận được tín hiệu đồng bộ từ máy chủ
+  refreshCurrentView() {
+    const isEditing = document.activeElement && (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName));
+    const isModalOpen = document.querySelector('.modal.show, .swal2-container, .modal-backdrop, .dialog-open, [role="dialog"]');
+    if (isEditing || isModalOpen) {
+      this._hasPendingRefresh = true;
+      return;
+    }
+    this._hasPendingRefresh = false;
+    const view = this.currentView || 'dashboard';
+    const viewport = document.getElementById('viewport') || document.getElementById('main-viewport');
+    if (viewport) {
+      if (typeof this[`render_${view}`] === 'function') {
+        this[`render_${view}`](viewport);
+      } else if (typeof this.switchView === 'function') {
+        this.switchView(view, false);
+      }
+    }
+  }
+
   showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -28177,16 +28197,20 @@ if (inpFile) {
 
 const btnClearDb = dom.querySelector('#btn-clear-and-reset-db');
 if (btnClearDb) {
-  btnClearDb.onclick = () => {
-    if (confirm('⚠️ BẠN CÓ CHẮC CHẮN MUỐN XÓA TOÀN BỘ DỮ LIỆU ĐỂ NẠP LẠI TỪ ĐẦU?\n\nToàn bộ học sinh, giáo viên, lớp học cũ trên trình duyệt này sẽ được dọn sạch để bạn nạp file mới chuẩn xác!')) {
+  btnClearDb.onclick = async () => {
+    if (confirm('⚠️ BẠN CÓ CHẮC CHẮN MUỐN XÓA TOÀN BỘ DỮ LIỆU ĐỂ NẠP LẠI TỪ ĐẦU?\n\nToàn bộ học sinh, giáo viên, lớp học cũ trên TOÀN HỆ THỐNG (máy chủ và tất cả các trình duyệt) sẽ được dọn sạch để bạn nạp file mới chuẩn xác!')) {
       if (typeof db !== 'undefined') {
-        db.state.students = [];
-        db.state.teachers = [];
-        db.state.classesList = [];
-        db.state.classes = [];
-        db.save();
-        this.showToast('🧹 Đã xóa trắng dữ liệu thành công! Giờ bạn có thể nạp lại file mới.');
-        setTimeout(() => window.location.reload(), 600);
+        if (typeof db.clearCoreData === 'function') {
+          await db.clearCoreData();
+        } else {
+          db.state.students = [];
+          db.state.teachers = [];
+          db.state.classesList = [];
+          db.state.classes = [];
+          db.save(true);
+        }
+        this.showToast('🧹 Đã xóa trắng dữ liệu máy chủ thành công! Mọi trình duyệt đang mở sẽ tự động làm mới.');
+        setTimeout(() => window.location.reload(), 500);
       }
     }
   };
