@@ -296,6 +296,140 @@ function sanitizeFilename(str) {
     .replace(/_+/g, '_');
 }
 
+// =========================================================================
+// 🛡️ LIVE EXAM PROCTORING ROOM ENGINE (SSE + VOICE ALERT RELAY)
+// =========================================================================
+const proctorRooms = new Map();
+
+function getOrCreateProctorRoom(examId) {
+  const id = String(examId || '').trim();
+  if (!id) return null;
+  if (!proctorRooms.has(id)) {
+    proctorRooms.set(id, {
+      examId: id,
+      lateThresholdMinutes: 5,
+      openTime: null,
+      students: new Map(),
+      teacherClients: new Set(),
+      studentClients: new Map(),
+      createdAt: Date.now()
+    });
+  }
+  return proctorRooms.get(id);
+}
+
+function computeLateInfo(joinedAtMs, openTimeStr, thresholdMin) {
+  if (!openTimeStr || !joinedAtMs) return { isLate: false, lateMinutes: 0 };
+  const openMs = new Date(openTimeStr).getTime();
+  if (isNaN(openMs)) return { isLate: false, lateMinutes: 0 };
+  const grace = Math.max(0, Number(thresholdMin) || 0) * 60000;
+  if (joinedAtMs > openMs + grace) {
+    return {
+      isLate: true,
+      lateMinutes: Math.max(1, Math.round((joinedAtMs - openMs) / 60000))
+    };
+  }
+  return { isLate: false, lateMinutes: 0 };
+}
+
+function serializeProctorStudent(st, now = Date.now()) {
+  let effectiveStatus = st.status || 'online';
+  if (effectiveStatus === 'online' && st.lastHeartbeat && (now - st.lastHeartbeat > 18000)) {
+    effectiveStatus = 'disconnected';
+  }
+  return {
+    studentId: st.studentId,
+    studentName: st.studentName,
+    classId: st.classId || '',
+    status: effectiveStatus,
+    joinedAt: st.joinedAt,
+    lastHeartbeat: st.lastHeartbeat,
+    isLate: !!st.isLate,
+    lateMinutes: st.lateMinutes || 0,
+    answeredCount: st.answeredCount || 0,
+    totalCount: st.totalCount || 0,
+    violationCount: st.violationCount || 0,
+    violations: (st.violations || []).slice(-10),
+    lastSnapshot: st.lastSnapshot || null,
+    camActive: !!st.camActive,
+    micActive: !!st.micActive,
+    submittedAt: st.submittedAt || null,
+    score: st.score !== undefined ? st.score : null,
+    reminders: (st.reminders || []).slice(-10)
+  };
+}
+
+function serializeProctorRoom(room) {
+  const now = Date.now();
+  const students = Array.from(room.students.values()).map(st => serializeProctorStudent(st, now));
+  return {
+    examId: room.examId,
+    lateThresholdMinutes: room.lateThresholdMinutes,
+    openTime: room.openTime,
+    students,
+    serverTime: now
+  };
+}
+
+function broadcastProctorTeachers(room, eventType, payload) {
+  if (!room || !room.teacherClients || room.teacherClients.size === 0) return;
+  const msg = `event: ${eventType}\ndata: ${JSON.stringify(payload)}\n\n`;
+  room.teacherClients.forEach(clientRes => {
+    try { clientRes.write(msg); } catch (e) {}
+  });
+}
+
+function pushProctorStudentAlert(room, targetStudentId, alertObj) {
+  if (!room) return 0;
+  const targets = (targetStudentId === 'ALL')
+    ? Array.from(room.students.keys())
+    : [String(targetStudentId)];
+  let deliveredCount = 0;
+
+  targets.forEach(sid => {
+    const st = room.students.get(sid);
+    if (st) {
+      if (!st.reminders) st.reminders = [];
+      st.reminders.push({
+        id: alertObj.id,
+        mode: alertObj.mode,
+        message: alertObj.message,
+        teacherName: alertObj.teacherName,
+        timestamp: alertObj.timestamp,
+        ackedAt: null
+      });
+      if (st.reminders.length > 20) st.reminders.shift();
+
+      if (!st.pendingAlerts) st.pendingAlerts = [];
+      st.pendingAlerts.push(alertObj);
+      if (st.pendingAlerts.length > 5) st.pendingAlerts.shift();
+    }
+
+    const clients = room.studentClients.get(sid);
+    if (clients && clients.size > 0) {
+      const msg = `event: proctor_alert\ndata: ${JSON.stringify(alertObj)}\n\n`;
+      clients.forEach(cRes => {
+        try { cRes.write(msg); deliveredCount++; } catch (e) {}
+      });
+    }
+  });
+  return deliveredCount;
+}
+
+async function readJsonBody(req, maxBytes = 4 * 1024 * 1024) {
+  const raw = await getRequestBody(req, maxBytes);
+  if (!raw || raw.length === 0) return {};
+  return JSON.parse(raw.toString('utf8'));
+}
+
+function sendJson(res, statusCode, obj) {
+  res.writeHead(statusCode, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0'
+  });
+  res.end(JSON.stringify(obj));
+}
+
 const server = http.createServer(async (req, res) => {
   const urlParts = req.url.split('?');
   const reqPath = urlParts[0];
@@ -563,6 +697,331 @@ const server = http.createServer(async (req, res) => {
     } catch(e) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
+  // =========================================================================
+  // 🛡️ API PHÒNG GIÁM SÁT THI REAL-TIME (/api/proctor/*)
+  // =========================================================================
+  if (reqPath === '/api/proctor/stream' && req.method === 'GET') {
+    const params = new URLSearchParams(urlParts[1] || '');
+    const examId = params.get('examId') || '';
+    const role = params.get('role') || 'student';
+    const studentId = params.get('studentId') || '';
+    const room = getOrCreateProctorRoom(examId);
+    if (!room) {
+      sendJson(res, 400, { success: false, error: 'Missing examId' });
+      return;
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
+      'Access-Control-Allow-Origin': '*'
+    });
+
+    if (role === 'teacher') {
+      room.teacherClients.add(res);
+      res.write(`event: room_snapshot\ndata: ${JSON.stringify(serializeProctorRoom(room))}\n\n`);
+    } else if (studentId) {
+      if (!room.studentClients.has(studentId)) room.studentClients.set(studentId, new Set());
+      room.studentClients.get(studentId).add(res);
+      const st = room.students.get(studentId);
+      if (st && Array.isArray(st.pendingAlerts) && st.pendingAlerts.length > 0) {
+        st.pendingAlerts.forEach(al => {
+          res.write(`event: proctor_alert\ndata: ${JSON.stringify(al)}\n\n`);
+        });
+      }
+    }
+
+    const pingTimer = setInterval(() => {
+      try { res.write(': ping\n\n'); } catch (e) {}
+    }, 20000);
+
+    req.on('close', () => {
+      clearInterval(pingTimer);
+      if (role === 'teacher') {
+        room.teacherClients.delete(res);
+      } else if (studentId && room.studentClients.has(studentId)) {
+        room.studentClients.get(studentId).delete(res);
+      }
+    });
+    return;
+  }
+
+  if (reqPath === '/api/proctor/room-state' && req.method === 'GET') {
+    const params = new URLSearchParams(urlParts[1] || '');
+    const examId = params.get('examId') || '';
+    const room = getOrCreateProctorRoom(examId);
+    if (!room) { sendJson(res, 400, { success: false, error: 'Missing examId' }); return; }
+    sendJson(res, 200, { success: true, ...serializeProctorRoom(room) });
+    return;
+  }
+
+  if (reqPath === '/api/proctor/config' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const room = getOrCreateProctorRoom(body.examId);
+      if (!room) { sendJson(res, 400, { success: false, error: 'Missing examId' }); return; }
+      if (body.lateThresholdMinutes !== undefined) {
+        room.lateThresholdMinutes = Math.max(0, Number(body.lateThresholdMinutes) || 0);
+      }
+      if (body.openTime) room.openTime = body.openTime;
+      room.students.forEach(st => {
+        const info = computeLateInfo(st.joinedAt, room.openTime, room.lateThresholdMinutes);
+        st.isLate = info.isLate;
+        st.lateMinutes = info.lateMinutes;
+      });
+      broadcastProctorTeachers(room, 'room_snapshot', serializeProctorRoom(room));
+      sendJson(res, 200, { success: true, ...serializeProctorRoom(room) });
+    } catch (e) {
+      sendJson(res, 400, { success: false, error: e.message });
+    }
+    return;
+  }
+
+  if (reqPath === '/api/proctor/join' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const room = getOrCreateProctorRoom(body.examId);
+      const sid = String(body.studentId || '').trim();
+      if (!room || !sid) { sendJson(res, 400, { success: false, error: 'Missing examId or studentId' }); return; }
+      if (body.openTime && !room.openTime) room.openTime = body.openTime;
+      const now = Date.now();
+      const prev = room.students.get(sid);
+      const joinedAt = (prev && prev.joinedAt) ? prev.joinedAt : now;
+      const lateInfo = body.isPreviewMode
+        ? { isLate: false, lateMinutes: 0 }
+        : computeLateInfo(joinedAt, body.openTime || room.openTime, room.lateThresholdMinutes);
+
+      const st = {
+        studentId: sid,
+        studentName: body.studentName || (prev && prev.studentName) || sid,
+        classId: body.classId || (prev && prev.classId) || '',
+        status: 'online',
+        joinedAt,
+        lastHeartbeat: now,
+        isLate: lateInfo.isLate,
+        lateMinutes: lateInfo.lateMinutes,
+        answeredCount: prev ? (prev.answeredCount || 0) : 0,
+        totalCount: Number(body.totalCount) || (prev ? prev.totalCount : 0),
+        violationCount: prev ? (prev.violationCount || 0) : 0,
+        violations: prev ? (prev.violations || []) : [],
+        lastSnapshot: prev ? prev.lastSnapshot : null,
+        camActive: !!body.camActive,
+        micActive: !!body.micActive,
+        submittedAt: null,
+        score: null,
+        reminders: prev ? (prev.reminders || []) : [],
+        pendingAlerts: prev ? (prev.pendingAlerts || []) : []
+      };
+      room.students.set(sid, st);
+      const serialized = serializeProctorStudent(st, now);
+      broadcastProctorTeachers(room, 'student_update', serialized);
+      sendJson(res, 200, { success: true, student: serialized });
+    } catch (e) {
+      sendJson(res, 400, { success: false, error: e.message });
+    }
+    return;
+  }
+
+  if (reqPath === '/api/proctor/heartbeat' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req, 1024 * 1024);
+      const room = getOrCreateProctorRoom(body.examId);
+      const sid = String(body.studentId || '').trim();
+      if (!room || !sid) { sendJson(res, 400, { success: false }); return; }
+      const now = Date.now();
+      let st = room.students.get(sid);
+      if (!st) {
+        st = {
+          studentId: sid,
+          studentName: body.studentName || sid,
+          classId: body.classId || '',
+          status: 'online',
+          joinedAt: now,
+          lastHeartbeat: now,
+          isLate: false,
+          lateMinutes: 0,
+          answeredCount: 0,
+          totalCount: Number(body.totalCount) || 0,
+          violationCount: 0,
+          violations: [],
+          lastSnapshot: null,
+          reminders: [],
+          pendingAlerts: []
+        };
+        room.students.set(sid, st);
+      }
+      if (st.status !== 'submitted') st.status = 'online';
+      st.lastHeartbeat = now;
+      if (body.answeredCount !== undefined) st.answeredCount = Number(body.answeredCount) || 0;
+      if (body.totalCount !== undefined) st.totalCount = Number(body.totalCount) || st.totalCount;
+      if (body.camActive !== undefined) st.camActive = !!body.camActive;
+      if (body.micActive !== undefined) st.micActive = !!body.micActive;
+      if (body.snapshot) st.lastSnapshot = body.snapshot;
+
+      const serialized = serializeProctorStudent(st, now);
+      broadcastProctorTeachers(room, 'student_update', serialized);
+      const pendingAlerts = Array.isArray(st.pendingAlerts) ? st.pendingAlerts : [];
+      sendJson(res, 200, { success: true, pendingAlerts });
+    } catch (e) {
+      sendJson(res, 400, { success: false, error: e.message });
+    }
+    return;
+  }
+
+  if (reqPath === '/api/proctor/violation' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req, 2 * 1024 * 1024);
+      const room = getOrCreateProctorRoom(body.examId);
+      const sid = String(body.studentId || '').trim();
+      if (!room || !sid) { sendJson(res, 400, { success: false }); return; }
+      const now = Date.now();
+      let st = room.students.get(sid);
+      if (!st) {
+        st = {
+          studentId: sid,
+          studentName: body.studentName || sid,
+          classId: body.classId || '',
+          status: 'online',
+          joinedAt: now,
+          lastHeartbeat: now,
+          isLate: false,
+          lateMinutes: 0,
+          answeredCount: 0,
+          totalCount: 0,
+          violationCount: 0,
+          violations: [],
+          lastSnapshot: null,
+          reminders: [],
+          pendingAlerts: []
+        };
+        room.students.set(sid, st);
+      }
+      st.lastHeartbeat = now;
+      st.violationCount = Math.max((st.violationCount || 0) + 1, Number(body.violationCount) || 0);
+      const vEntry = {
+        id: `viol_${now}_${Math.floor(Math.random() * 1000)}`,
+        reason: body.reason || 'Vi phạm quy chế phòng thi',
+        timestamp: body.timestamp || new Date().toISOString(),
+        snapshot: body.snapshot || null
+      };
+      if (!st.violations) st.violations = [];
+      st.violations.push(vEntry);
+      if (st.violations.length > 15) {
+        st.violations = st.violations.map((v, idx) => idx < st.violations.length - 8 ? { ...v, snapshot: null } : v);
+      }
+      if (body.snapshot) st.lastSnapshot = body.snapshot;
+
+      const serialized = serializeProctorStudent(st, now);
+      broadcastProctorTeachers(room, 'student_violation', { student: serialized, violation: vEntry });
+      sendJson(res, 200, { success: true, student: serialized });
+    } catch (e) {
+      sendJson(res, 400, { success: false, error: e.message });
+    }
+    return;
+  }
+
+  if (reqPath === '/api/proctor/submit' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const room = getOrCreateProctorRoom(body.examId);
+      const sid = String(body.studentId || '').trim();
+      if (!room || !sid) { sendJson(res, 400, { success: false }); return; }
+      const st = room.students.get(sid);
+      if (st) {
+        st.status = 'submitted';
+        st.submittedAt = body.submitTime || new Date().toISOString();
+        st.score = body.score !== undefined ? body.score : st.score;
+        if (body.totalCount !== undefined) st.answeredCount = Number(body.totalCount) || st.answeredCount;
+        broadcastProctorTeachers(room, 'student_update', serializeProctorStudent(st));
+      }
+      sendJson(res, 200, { success: true });
+    } catch (e) {
+      sendJson(res, 400, { success: false, error: e.message });
+    }
+    return;
+  }
+
+  if (reqPath === '/api/proctor/voice-alert' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req, 4 * 1024 * 1024);
+      const room = getOrCreateProctorRoom(body.examId);
+      if (!room || !body.targetStudentId) {
+        sendJson(res, 400, { success: false, error: 'Missing examId or targetStudentId' });
+        return;
+      }
+      const alertObj = {
+        id: `alt_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+        examId: room.examId,
+        targetStudentId: String(body.targetStudentId),
+        mode: body.mode || (body.audioDataUrl ? 'voice' : 'tts'),
+        message: body.message || '',
+        audioDataUrl: body.audioDataUrl || null,
+        teacherName: body.teacherName || 'Giám thị phòng thi',
+        timestamp: Date.now()
+      };
+      const delivered = pushProctorStudentAlert(room, body.targetStudentId, alertObj);
+      broadcastProctorTeachers(room, 'room_snapshot', serializeProctorRoom(room));
+      sendJson(res, 200, { success: true, alertId: alertObj.id, delivered });
+    } catch (e) {
+      sendJson(res, 400, { success: false, error: e.message });
+    }
+    return;
+  }
+
+  if (reqPath === '/api/proctor/ack' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const room = getOrCreateProctorRoom(body.examId);
+      const sid = String(body.studentId || '').trim();
+      const alertId = String(body.alertId || '').trim();
+      if (!room || !sid) { sendJson(res, 400, { success: false }); return; }
+      const st = room.students.get(sid);
+      if (st) {
+        if (Array.isArray(st.pendingAlerts)) {
+          st.pendingAlerts = st.pendingAlerts.filter(a => a.id !== alertId);
+        }
+        if (Array.isArray(st.reminders)) {
+          const rem = st.reminders.find(r => r.id === alertId);
+          if (rem) rem.ackedAt = Date.now();
+        }
+        broadcastProctorTeachers(room, 'student_update', serializeProctorStudent(st));
+      }
+      sendJson(res, 200, { success: true });
+    } catch (e) {
+      sendJson(res, 400, { success: false, error: e.message });
+    }
+    return;
+  }
+
+  if (reqPath === '/api/proctor/command' && req.method === 'POST') {
+    try {
+      const body = await readJsonBody(req);
+      const room = getOrCreateProctorRoom(body.examId);
+      if (!room || !body.targetStudentId || !body.action) {
+        sendJson(res, 400, { success: false, error: 'Missing required fields' });
+        return;
+      }
+      const cmdObj = {
+        id: `cmd_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+        examId: room.examId,
+        targetStudentId: String(body.targetStudentId),
+        mode: 'command',
+        action: body.action, // 'force_submit'
+        message: body.reason || 'Giám thị yêu cầu kết thúc bài thi ngay lập tức.',
+        teacherName: body.teacherName || 'Giám thị phòng thi',
+        timestamp: Date.now()
+      };
+      const delivered = pushProctorStudentAlert(room, body.targetStudentId, cmdObj);
+      broadcastProctorTeachers(room, 'room_snapshot', serializeProctorRoom(room));
+      sendJson(res, 200, { success: true, alertId: cmdObj.id, delivered });
+    } catch (e) {
+      sendJson(res, 400, { success: false, error: e.message });
     }
     return;
   }
