@@ -8322,7 +8322,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
                     <div id="teacher-subject-dropdown-${t.id}" class="teacher-subject-dropdown-menu" style="display: none; position: absolute; top: 110%; left: 0; z-index: 105; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 0.85rem 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15); min-width: 230px; flex-direction: column; gap: 0.65rem;">
                       <div style="font-size: 0.75rem; font-weight: 800; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.35rem; display: flex; justify-content: space-between; align-items: center;">
                         <span>Tích Chọn Các Môn Dạy:</span>
-                        <span style="background: #dcfce7; color: #166534; padding: 0.1rem 0.45rem; border-radius: 10px; font-size: 0.75rem; font-weight:800;">${tSubIds.length} môn</span>
+                        <span id="teacher-subject-count-${t.id}" style="background: #dcfce7; color: #166534; padding: 0.1rem 0.45rem; border-radius: 10px; font-size: 0.75rem; font-weight:800;">${tSubIds.length} môn</span>
                       </div>
                       
                       <div style="display: flex; flex-direction: column; gap: 0.35rem; max-height: 200px; overflow-y: auto;">
@@ -8338,7 +8338,10 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
                       </div>
 
                       <div style="border-top: 1px solid #f1f5f9; padding-top: 0.5rem; margin-top: 0.2rem; display:flex; gap:0.4rem;">
-                        <button class="btn btn-secondary btn-sm btn-open-teacher-assign" data-teacher-id="${t.id}" style="flex:1; font-weight: 700; font-family: var(--font-title); padding: 0.45rem; font-size: 0.8rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem; box-shadow: 0 4px 10px rgba(16,185,129,0.25);" title="Phân công chuyên sâu">
+                        <button type="button" class="btn btn-secondary btn-sm btn-close-teacher-subject-menu" data-teacher-id="${t.id}" style="font-weight: 700; font-family: var(--font-title); padding: 0.45rem 0.75rem; font-size: 0.8rem; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.25rem;" title="Đóng bảng chọn môn">
+                          ✓ Xong
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm btn-open-teacher-assign" data-teacher-id="${t.id}" style="flex:1; font-weight: 700; font-family: var(--font-title); padding: 0.45rem; font-size: 0.8rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.35rem; box-shadow: 0 4px 10px rgba(16,185,129,0.25);" title="Phân công lớp giảng dạy">
                           📋 Phân công lớp
                         </button>
                       </div>
@@ -8644,7 +8647,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
       };
     });
 
-    // Multi-subject Checkbox Change handler
+    // Multi-subject Checkbox Change handler - Giữ nguyên bảng chọn để giáo viên tích chọn nhiều môn
     dom.querySelectorAll('.chk-teacher-subject').forEach(chk => {
       chk.onchange = (e) => {
         e.stopPropagation();
@@ -8652,7 +8655,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         const sId = chk.getAttribute('data-subject-id');
         const isChecked = chk.checked;
 
-        const teacher = db.getTeacherById ? db.getTeacherById(tId) : db.state.teachers.find(t => t.id === tId);
+        const teacher = db.getTeacherById ? db.getTeacherById(tId) : (db.state && db.state.teachers ? db.state.teachers.find(t => t.id === tId) : null);
         if (teacher) {
           if (!Array.isArray(teacher.subjects)) {
             teacher.subjects = teacher.subjectId ? [teacher.subjectId] : [];
@@ -8665,13 +8668,59 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           teacher.subjectId = teacher.subjects[0] || '';
           db.save();
 
-          const subObj = db.getSubjects().find(s => s.id === sId);
+          // 1. Cập nhật trực tiếp style của nhãn checkbox (không đóng bảng chọn)
+          const label = chk.closest('label');
+          if (label) {
+            label.style.fontWeight = isChecked ? '800' : '600';
+            label.style.background = isChecked ? '#f0fdf4' : '#ffffff';
+            label.style.color = isChecked ? '#166534' : '#334155';
+            label.style.borderColor = isChecked ? '#86efac' : '#e2e8f0';
+          }
+
+          // 2. Cập nhật số lượng môn trên header của popover dropdown
+          const countBadge = dom.querySelector(`#teacher-subject-count-${tId}`);
+          if (countBadge) {
+            countBadge.textContent = `${teacher.subjects.length} môn`;
+          }
+
+          // 3. Cập nhật nhãn của nút toggle ngoài bảng môn phụ trách
+          const toggleBtn = dom.querySelector(`.btn-toggle-teacher-subject-menu[data-teacher-id="${tId}"]`);
+          if (toggleBtn) {
+            const btnSpan = toggleBtn.querySelector('span');
+            if (btnSpan) {
+              const allSubs = db.getSubjects ? db.getSubjects() : [];
+              const assignedSubObjs = allSubs.filter(s => teacher.subjects.includes(s.id));
+              let btnLabel = '📚 Chọn môn (0)';
+              if (assignedSubObjs.length === 1) {
+                btnLabel = `📚 ${assignedSubObjs[0].name}`;
+              } else if (assignedSubObjs.length === 2) {
+                btnLabel = `📚 ${assignedSubObjs[0].name}, ${assignedSubObjs[1].name}`;
+              } else if (assignedSubObjs.length >= 3) {
+                btnLabel = `📚 ${assignedSubObjs.length} môn phụ trách`;
+              }
+              btnSpan.textContent = btnLabel;
+            }
+          }
+
+          const subObj = (db.getSubjects ? db.getSubjects() : []).find(s => s.id === sId);
           const subName = subObj ? subObj.name : sId;
           if (this.showToast) {
-            this.showToast(isChecked ? `✅ Đã thêm môn "${subName}" cho GV ${teacher.name}!` : `ℹ️ Đã bỏ môn "${subName}" khỏi GV ${teacher.name}!`);
+            this.showToast(isChecked ? `✅ Đã chọn môn "${subName}" cho GV ${teacher.name}!` : `ℹ️ Đã bỏ môn "${subName}" khỏi GV ${teacher.name}!`);
           }
-          this.render_teachers(dom);
         }
+      };
+    });
+
+    // Nút "✓ Xong" đóng bảng chọn môn
+    dom.querySelectorAll('.btn-close-teacher-subject-menu').forEach(btn => {
+      btn.onclick = (e) => {
+        if (e && e.stopPropagation) e.stopPropagation();
+        const tId = btn.getAttribute('data-teacher-id');
+        const menu = dom.querySelector(`#teacher-subject-dropdown-${tId}`);
+        const toggleBtn = dom.querySelector(`.btn-toggle-teacher-subject-menu[data-teacher-id="${tId}"]`);
+        const chevron = toggleBtn ? toggleBtn.querySelector('.chevron-icon-sub') : null;
+        if (menu) menu.style.display = 'none';
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
       };
     });
 
@@ -8758,10 +8807,18 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
       };
     });
 
-    // Individual Open Assignment Modal Button
+    // Individual Open Assignment Modal Button - Đóng popover chọn môn/lớp và mở modal phân công
     dom.querySelectorAll('.btn-open-teacher-assign').forEach(btn => {
-      btn.onclick = () => {
+      btn.onclick = (e) => {
+        if (e && e.stopPropagation) e.stopPropagation();
         const tId = btn.getAttribute('data-teacher-id');
+        // Đóng dropdown chọn môn hoặc chọn lớp nếu đang mở
+        const subMenu = dom.querySelector(`#teacher-subject-dropdown-${tId}`);
+        const classMenu = dom.querySelector(`#teacher-class-dropdown-${tId}`);
+        if (subMenu) subMenu.style.display = 'none';
+        if (classMenu) classMenu.style.display = 'none';
+        dom.querySelectorAll('.chevron-icon-sub, .chevron-icon').forEach(ch => ch.style.transform = 'rotate(0deg)');
+
         this.showTeacherAssignmentModal(tId, dom);
       };
     });
@@ -8899,8 +8956,13 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         selectedClasses.push(cb.value);
       });
 
+      const curSubs = Array.isArray(teacher.subjects) && teacher.subjects.length > 0 ? [...teacher.subjects] : (teacher.subjectId ? [teacher.subjectId] : []);
+      if (newSubjectId && !curSubs.includes(newSubjectId)) {
+        curSubs.unshift(newSubjectId);
+      }
       db.updateTeacher(teacher.id, {
         subjectId: newSubjectId,
+        subjects: curSubs,
         isHomeroom: newHomeroom,
         classes: selectedClasses
       });
@@ -9227,15 +9289,17 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
 
         <div style="background:#ecfdf5; border:1.5px solid #a7f3d0; padding:1.1rem; border-radius:12px; margin-bottom:1.25rem; text-align:left;">
           <div style="font-weight: 600; color:#047857; margin-bottom:0.4rem; font-size:0.95rem; display:flex; align-items:center; gap:0.4rem;">
-            <span>📄</span> Tải tệp mẫu Excel chuẩn giáo viên (2 Sheet - Có Data Validation chọn môn):
+            <span>📄</span> Tải tệp mẫu Excel chuẩn giáo viên (3 Sheet - Có Data Validation chọn Môn & Lớp từ hệ thống):
           </div>
           <p style="font-size:0.85rem; color:#065f46; margin:0 0 0.75rem 0; line-height:1.45;">
-            Tệp mẫu Excel định dạng <strong>.xlsx</strong> bao gồm 2 Sheet tiện lợi:<br>
-            • <strong>Sheet 1 (Mau_Danh_Sach_Giao_Vien):</strong> Cột <em>Mã môn dạy</em> có sẵn mũi tên chọn thả xuống (Data Validation) các mã môn chuẩn lấy từ Quản lý môn học: <code>TOAN</code>, <code>VAN</code>, <code>ANH</code>, <code>KHTN</code>, <code>LSDL</code>, <code>GDCD</code>, <code>TIN</code>, <code>CN</code>, <code>GDTC</code>, <code>NT</code>, <code>HDTN</code>, <code>GDDP</code>.<br>
-            • <strong>Sheet 2 (Ma_Mon_Hoc):</strong> Bảng tra cứu toàn bộ danh mục mã môn học trích xuất trực tiếp từ <em>Quản lý khai báo môn học</em>.
+            Tệp mẫu Excel định dạng <strong>.xlsx</strong> bao gồm 3 Sheet tiện lợi được liên kết trực tiếp từ hệ thống:<br>
+            • <strong>Sheet 1 (Mau_Danh_Sach_Giao_Vien):</strong> Cột <em>Mã môn dạy</em> và Cột <em>Danh sách lớp</em> đều có sẵn danh sách chọn thả xuống (Data Validation).<br>
+            • <strong>Sheet 2 (Ma_Mon_Hoc):</strong> Bảng tra cứu danh mục mã môn học chuẩn trích xuất từ <em>Khai báo môn học</em> (<code>TOAN</code>, <code>VAN</code>, <code>ANH</code>, <code>KHTN</code>, <code>LSDL</code>, <code>TIN</code>...).<br>
+            • <strong>Sheet 3 (Danh_Sach_Lop):</strong> Bảng tra cứu toàn bộ danh sách lớp học hiện hành của nhà trường trích xuất trực tiếp từ hệ thống.<br>
+            <em>* Lưu ý: Đối với Cột F (Danh sách lớp), bạn có thể bấm mũi tên chọn 1 lớp hoặc nhập nhiều lớp cách nhau bằng dấu phẩy (VD: <code>6A1, 6A2</code>).</em>
           </p>
           <button id="btn-download-teacher-excel-template" class="btn btn-secondary btn-sm" style="font-weight: 500; font-family:var(--font-title); padding:0.55rem 1.15rem; background:linear-gradient(135deg,#059669 0%,#10b981 100%); color:#fff; border:none; border-radius:8px; cursor:pointer; box-shadow:0 4px 12px rgba(16,185,129,0.25); display:inline-flex; align-items:center; gap:0.4rem;">
-            <span>📥</span> Tải tệp mẫu Excel (Data Validation chọn môn TOAN, VAN, TIN...)
+            <span>📥</span> Tải tệp mẫu Excel (Data Validation chọn Môn & Lớp từ hệ thống)
           </button>
         </div>
 
@@ -9273,18 +9337,11 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
 
     modal.querySelector('#close-teacher-excel-modal-btn').onclick = () => modal.remove();
 
-    // Download Sample Template handler (2 Sheets: Danh sách giáo viên + Mã môn học kèm Data Validation)
+    // Download Sample Template handler (3 Sheets: Danh sách giáo viên + Mã môn học + Danh sách lớp kèm Data Validation)
     modal.querySelector('#btn-download-teacher-excel-template').onclick = () => {
       const headers = ['Mã giáo viên', 'Tên giáo viên', 'Email', 'SĐT', 'Mã môn dạy', 'Danh sách lớp', 'Ngày sinh', 'Tên đăng nhập', 'Mật khẩu'];
-      // Mẫu dữ liệu sử dụng đúng các Mã môn chuẩn: TOAN, VAN, TIN, ANH...
-      const sampleData = [
-        ['GV001', 'Nguyễn Thị Hương', 'huong.nt@school.edu.vn', '0987654321', 'TOAN', '6A, 6B, 7A', '15/08/1988', 'thcsamtl_huongnt', 'gv123456'],
-        ['GV002', 'Trần Hải Nam', 'nam.th@school.edu.vn', '0912345678', 'VAN', '6A, 7A, 8A', '20/11/1985', 'thcsamtl_namth', 'gv123456'],
-        ['GV003', 'Lê Hoàng Yến', 'yen.lh@school.edu.vn', '0934567890', 'TIN', '6A, 6B, 7A, 8A', '05/03/1992', 'thcsamtl_yenlh', 'gv123456'],
-        ['GV004', 'Phạm Minh Đức', 'duc.pm@school.edu.vn', '0945678901', 'ANH', '7A, 7B, 8A, 9A', '12/10/1990', 'thcsamtl_ducpm', 'gv123456']
-      ];
 
-      // Lấy danh sách môn học trực tiếp từ Quản lý khai báo môn học
+      // 1. Lấy danh sách môn học trực tiếp từ Quản lý khai báo môn học
       let declaredSubs = [];
       if (typeof db !== 'undefined') {
         if (db.state && Array.isArray(db.state.subjectsList) && db.state.subjectsList.length > 0) {
@@ -9300,8 +9357,24 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           }));
         }
       }
+      if (!declaredSubs || declaredSubs.length === 0) {
+        declaredSubs = [
+          { id: 'sub_toan', code: 'TOAN', name: 'Toán học', periodsPerWeek: 4, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_van', code: 'VAN', name: 'Ngữ văn', periodsPerWeek: 4, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_anh', code: 'ANH', name: 'Tiếng Anh', periodsPerWeek: 3, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_khtn', code: 'KHTN', name: 'Khoa học Tự nhiên', periodsPerWeek: 4, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_lsdl', code: 'LSDL', name: 'Lịch sử và Địa lí', periodsPerWeek: 3, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_tin', code: 'TIN', name: 'Tin học', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_gdcd', code: 'GDCD', name: 'Giáo dục công dân', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_cn', code: 'CN', name: 'Công nghệ', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_gdtc', code: 'GDTC', name: 'Giáo dục thể chất', periodsPerWeek: 2, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_nt', code: 'NT', name: 'Nghệ thuật (Âm nhạc, Mĩ thuật)', periodsPerWeek: 2, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_hdtn', code: 'HDTN', name: 'Hoạt động trải nghiệm, hướng nghiệp', periodsPerWeek: 3, type: 'Bắt buộc', grades: '6,7,8,9' },
+          { id: 'sub_gddp', code: 'GDDP', name: 'Nội dung giáo dục địa phương', periodsPerWeek: 1, type: 'Bắt buộc', grades: '6,7,8,9' }
+        ];
+      }
 
-      // Tiêu đề Sheet 2: Trực tiếp lấy cột MÃ MÔN chuẩn (TOAN, VAN, ANH, KHTN, LSDL, GDCD, TIN, CN, GDTC, NT, HDTN, GDDP)
+      // Tiêu đề Sheet 2: Mã môn học
       const subjectHeaders = [
         'STT',
         'Mã môn (Chọn vào cột E)',
@@ -9313,7 +9386,6 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
       ];
 
       const subjectRows = declaredSubs.map((s, idx) => {
-        // Mã môn chuẩn trong Khai báo môn học: TOAN, VAN, ANH, KHTN, LSDL, GDCD, TIN, CN, GDTC, NT, HDTN, GDDP
         const code = (s.code || (s.id ? s.id.replace(/^sub_/, '').toUpperCase() : 'TOAN')).toUpperCase();
         const name = s.name || code;
         const periods = (s.periodsPerWeek !== undefined ? s.periodsPerWeek : 2) + ' tiết';
@@ -9330,7 +9402,70 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         ];
       });
 
-      // Ưu tiên sử dụng ExcelJS để tạo file có Data Validation (mũi tên chọn môn thả xuống)
+      // 2. Lấy danh sách lớp học trực tiếp từ hệ thống
+      let declaredClasses = [];
+      if (typeof db !== 'undefined') {
+        if (db.getClassesList && db.getClassesList().length > 0) {
+          declaredClasses = db.getClassesList();
+        } else if (db.getClasses && db.getClasses().length > 0) {
+          declaredClasses = db.getClasses();
+        } else if (db.state && Array.isArray(db.state.classesList) && db.state.classesList.length > 0) {
+          declaredClasses = db.state.classesList;
+        } else if (db.state && Array.isArray(db.state.classes) && db.state.classes.length > 0) {
+          declaredClasses = db.state.classes;
+        }
+      }
+      if (!declaredClasses || declaredClasses.length === 0) {
+        // Fallback danh sách lớp chuẩn THCS Ama Trang Lơng nếu chưa có lớp nào
+        declaredClasses = [
+          { id: '6A1', name: '6A1', grade: '6', homeroomTeacher: 'Chưa phân công' },
+          { id: '6A2', name: '6A2', grade: '6', homeroomTeacher: 'Chưa phân công' },
+          { id: '6A3', name: '6A3', grade: '6', homeroomTeacher: 'Chưa phân công' },
+          { id: '7B1', name: '7B1', grade: '7', homeroomTeacher: 'Chưa phân công' },
+          { id: '7B2', name: '7B2', grade: '7', homeroomTeacher: 'Chưa phân công' },
+          { id: '8C1', name: '8C1', grade: '8', homeroomTeacher: 'Chưa phân công' },
+          { id: '8C2', name: '8C2', grade: '8', homeroomTeacher: 'Chưa phân công' },
+          { id: '9D1', name: '9D1', grade: '9', homeroomTeacher: 'Chưa phân công' },
+          { id: '9D2', name: '9D2', grade: '9', homeroomTeacher: 'Chưa phân công' }
+        ];
+      }
+
+      // Tiêu đề Sheet 3: Danh sách Lớp học
+      const classHeaders = [
+        'STT',
+        'Tên lớp (Chọn vào cột F)',
+        'Khối',
+        'Giáo viên chủ nhiệm',
+        'Hướng dẫn'
+      ];
+
+      const classRows = declaredClasses.map((c, idx) => {
+        const cName = String(c.name || c.id || c).replace(/^Lớp\s*/i, '').trim();
+        const cGrade = c.grade ? ('Khối ' + c.grade) : (cName.match(/\d+/) ? ('Khối ' + cName.match(/\d+/)[0]) : '---');
+        const cGvcn = c.homeroomTeacher || 'Chưa phân công';
+        return [
+          idx + 1,
+          cName, // Cột B: TÊN LỚP CHUẨN
+          cGrade,
+          cGvcn,
+          `Chọn '${cName}' trong danh sách thả xuống ở cột F. Nếu dạy nhiều lớp, có thể nhập cách nhau bởi dấu phẩy (VD: ${cName}, ...)`
+        ];
+      });
+
+      // Mẫu dữ liệu sử dụng đúng các Mã môn và Lớp thực tế từ hệ thống
+      const c1 = classRows[0] ? classRows[0][1] : '6A1';
+      const c2 = classRows[1] ? classRows[1][1] : '6A2';
+      const c3 = classRows[2] ? classRows[2][1] : '7B1';
+      const c4 = classRows[3] ? classRows[3][1] : '8C1';
+
+      const sampleData = [
+        ['GV001', 'Nguyễn Thị Hương', 'huong.nt@school.edu.vn', '0987654321', 'TOAN', `${c1}, ${c2}`, '15/08/1988', 'thcsamtl_huongnt', 'gv123456'],
+        ['GV002', 'Trần Hải Nam', 'nam.th@school.edu.vn', '0912345678', 'VAN', `${c1}, ${c3}`, '20/11/1985', 'thcsamtl_namth', 'gv123456'],
+        ['GV003', 'Lê Hoàng Yến', 'yen.lh@school.edu.vn', '0934567890', 'TIN', `${c2}, ${c3}`, '05/03/1992', 'thcsamtl_yenlh', 'gv123456'],
+        ['GV004', 'Phạm Minh Đức', 'duc.pm@school.edu.vn', '0945678901', 'ANH', `${c3}, ${c4}`, '12/10/1990', 'thcsamtl_ducpm', 'gv123456']
+      ];
+
+      // Ưu tiên sử dụng ExcelJS để tạo file có Data Validation (mũi tên chọn môn và chọn lớp thả xuống)
       if (typeof ExcelJS !== 'undefined') {
         const wb = new ExcelJS.Workbook();
         wb.creator = 'THCS Ama Trang Lơng';
@@ -9346,7 +9481,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           { header: 'Email', key: 'email', width: 28 },
           { header: 'SĐT', key: 'phone', width: 16 },
           { header: 'Mã môn dạy', key: 'subject', width: 18 },
-          { header: 'Danh sách lớp', key: 'classes', width: 22 },
+          { header: 'Danh sách lớp', key: 'classes', width: 24 },
           { header: 'Ngày sinh', key: 'dob', width: 16 },
           { header: 'Tên đăng nhập', key: 'username', width: 24 },
           { header: 'Mật khẩu', key: 'password', width: 16 }
@@ -9369,25 +9504,46 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           { header: 'Khối áp dụng', key: 'grades', width: 20 },
           { header: 'Hướng dẫn', key: 'guide', width: 65 }
         ];
-
         subjectRows.forEach(row => ws2.addRow(row));
 
-        // TÍCH HỢP DATA VALIDATION CHO CỘT E (Mã môn dạy)
-        // Mũi tên thả xuống lấy trực tiếp từ cột B Sheet Ma_Mon_Hoc (chứa TOAN, VAN, ANH, KHTN...)
+        // Sheet 3: Danh sách Lớp học
+        const ws3 = wb.addWorksheet('Danh_Sach_Lop', { views: [{ showGridLines: true }] });
+        ws3.columns = [
+          { header: 'STT', key: 'stt', width: 6 },
+          { header: 'Tên lớp (Chọn vào cột F)', key: 'className', width: 26 },
+          { header: 'Khối', key: 'grade', width: 14 },
+          { header: 'Giáo viên chủ nhiệm', key: 'homeroomTeacher', width: 28 },
+          { header: 'Hướng dẫn', key: 'guide', width: 75 }
+        ];
+        classRows.forEach(row => ws3.addRow(row));
+
+        // TÍCH HỢP DATA VALIDATION CHO CỘT E (Mã môn dạy) VÀ CỘT F (Danh sách lớp)
         const subCount = subjectRows.length;
-        const validationFormula = `Ma_Mon_Hoc!$B$2:$B$${subCount + 1}`;
+        const subjectValidationFormula = `Ma_Mon_Hoc!$B$2:$B$${subCount + 1}`;
+        const classCount = classRows.length;
+        const classValidationFormula = `Danh_Sach_Lop!$B$2:$B$${classCount + 1}`;
 
         for (let r = 2; r <= 500; r++) {
+          // Data validation Cột E: Mã môn dạy
           ws1.getCell('E' + r).dataValidation = {
             type: 'list',
             allowBlank: true,
-            formulae: [validationFormula],
-            showErrorMessage: true,
-            errorTitle: 'Mã môn học không hợp lệ',
-            error: 'Vui lòng bấm mũi tên để chọn mã môn từ danh sách thả xuống (TOAN, VAN, ANH, KHTN, LSDL, GDCD, TIN, CN, GDTC, NT, HDTN, GDDP).',
+            formulae: [subjectValidationFormula],
+            showErrorMessage: false,
             showInputMessage: true,
             promptTitle: 'Mã môn giảng dạy',
-            prompt: 'Bấm mũi tên thả xuống để chọn mã môn học phù hợp (TOAN, VAN, TIN...).'
+            prompt: 'Bấm mũi tên để chọn mã môn học phù hợp từ hệ thống (TOAN, VAN, TIN...).'
+          };
+
+          // Data validation Cột F: Danh sách lớp
+          ws1.getCell('F' + r).dataValidation = {
+            type: 'list',
+            allowBlank: true,
+            formulae: [classValidationFormula],
+            showErrorMessage: false,
+            showInputMessage: true,
+            promptTitle: 'Danh sách lớp giảng dạy',
+            prompt: 'Bấm mũi tên để chọn lớp từ hệ thống (VD: 6A1). Có thể nhập nhiều lớp cách nhau bởi dấu phẩy (VD: 6A1, 6A2).'
           };
         }
 
@@ -9406,6 +9562,13 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
         });
 
+        ws3.getRow(1).height = 26;
+        ws3.getRow(1).eachCell(cell => {
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF7C3AED' } };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+
         wb.xlsx.writeBuffer().then(buffer => {
           const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           const url = URL.createObjectURL(blob);
@@ -9416,7 +9579,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           a.click();
           document.body.removeChild(a);
           setTimeout(() => URL.revokeObjectURL(url), 1000);
-          this.showToast('📥 Đã tải tệp mẫu Excel có Data Validation (Mã môn: TOAN, VAN, TIN...)!');
+          this.showToast('📥 Đã tải tệp mẫu Excel có Data Validation (Môn học & Lớp học từ hệ thống)!');
         }).catch(err => {
           console.error('Lỗi xuất ExcelJS:', err);
           this.showToast('Lỗi xuất tệp Excel, vui lòng thử lại!', 'danger');
@@ -9432,7 +9595,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           { wch: 28 }, // Email
           { wch: 16 }, // SĐT
           { wch: 16 }, // Mã môn dạy
-          { wch: 20 }, // Danh sách lớp
+          { wch: 22 }, // Danh sách lớp
           { wch: 15 }, // Ngày sinh
           { wch: 22 }, // Tên đăng nhập
           { wch: 16 }  // Mật khẩu
@@ -9460,12 +9623,23 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           { wch: 65 }  // Hướng dẫn
         ];
 
+        // Sheet 3: Danh sách Lớp học
+        const ws3 = XLSX.utils.aoa_to_sheet([classHeaders, ...classRows]);
+        ws3['!cols'] = [
+          { wch: 6 },  // STT
+          { wch: 26 }, // Tên lớp (Chọn vào cột F)
+          { wch: 14 }, // Khối
+          { wch: 28 }, // GVCN
+          { wch: 75 }  // Hướng dẫn
+        ];
+
         XLSX.utils.book_append_sheet(wb, ws1, 'Mau_Danh_Sach_Giao_Vien');
         XLSX.utils.book_append_sheet(wb, ws2, 'Ma_Mon_Hoc');
+        XLSX.utils.book_append_sheet(wb, ws3, 'Danh_Sach_Lop');
 
         const fileName = 'Mau_Danh_Sach_Giao_Vien_THCS.xlsx';
         XLSX.writeFile(wb, fileName);
-        this.showToast('📥 Đã tải tệp mẫu Excel giáo viên (.xlsx) chuẩn 2 Sheet!');
+        this.showToast('📥 Đã tải tệp mẫu Excel giáo viên (.xlsx) chuẩn 3 Sheet (Môn & Lớp)!');
       } else {
         // Fallback CSV
         let csvContent = '\uFEFF' + headers.map(h => `"${h}"`).join(',') + '\r\n';
@@ -9509,17 +9683,17 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           if (typeof XLSX !== 'undefined' && isExcelBinary) {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            // Tự động tìm Sheet chứa dữ liệu giáo viên, bỏ qua Sheet Ma_Mon_Hoc
+            // Tự động tìm Sheet chứa dữ liệu giáo viên, bỏ qua Sheet Ma_Mon_Hoc và Danh_Sach_Lop
             let targetSheetName = workbook.SheetNames[0];
             for (const sName of workbook.SheetNames) {
               const lower = sName.toLowerCase();
-              if (lower.includes('giao_vien') || lower.includes('giaovien') || lower.includes('teacher') || lower.includes('danh_sach')) {
+              if ((lower.includes('giao_vien') || lower.includes('giaovien') || lower.includes('teacher') || lower.includes('mau_danh_sach')) && !lower.includes('lop') && !lower.includes('ma_mon')) {
                 targetSheetName = sName;
                 break;
               }
             }
-            if (targetSheetName.toLowerCase().includes('ma_mon') && workbook.SheetNames.length > 1) {
-              targetSheetName = workbook.SheetNames.find(s => !s.toLowerCase().includes('ma_mon')) || workbook.SheetNames[1];
+            if ((targetSheetName.toLowerCase().includes('ma_mon') || targetSheetName.toLowerCase().includes('danh_sach_lop') || targetSheetName.toLowerCase().includes('lop')) && workbook.SheetNames.length > 1) {
+              targetSheetName = workbook.SheetNames.find(s => !s.toLowerCase().includes('ma_mon') && !s.toLowerCase().includes('lop')) || workbook.SheetNames[0];
             }
             const worksheet = workbook.Sheets[targetSheetName];
             parsed = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
@@ -9584,34 +9758,39 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
             const email = getVal('Email', 'email');
             const phone = getVal('SĐT', 'Số điện thoại', 'Điện thoại', 'Phone', 'SDT');
             
-            // Xử lý thông minh Mã môn dạy từ Sheet Ma_Mon_Hoc (chấp nhận id, code, tên môn)
+            // Xử lý thông minh Mã môn dạy từ Sheet Ma_Mon_Hoc (chấp nhận id, code, tên môn, hỗ trợ chọn nhiều môn)
             const rawSubInput = getVal('Mã môn dạy', 'Môn phụ trách', 'Môn dạy', 'Môn', 'Subject');
-            let subjectId = 'toan';
+            let parsedSubjectIds = [];
             if (rawSubInput) {
-              const val = String(rawSubInput).trim().toLowerCase().replace(/^sub_/, '');
               const allSubs = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
               const declSubs = (typeof db !== 'undefined' && db.state && db.state.subjectsList) ? db.state.subjectsList : [];
-
-              const matchId = allSubs.find(s => s.id.toLowerCase() === val || s.id.toLowerCase().replace(/^sub_/, '') === val);
-              if (matchId) {
-                subjectId = matchId.id.replace(/^sub_/, '');
-              } else {
-                const matchCode = declSubs.find(s => (s.code && s.code.toLowerCase() === val) || (s.id && s.id.toLowerCase().replace(/^sub_/, '') === val));
-                if (matchCode) {
-                  subjectId = (matchCode.id || matchCode.code).toLowerCase().replace(/^sub_/, '');
+              const tokens = String(rawSubInput).split(/[,;+/]+/).map(s => s.trim()).filter(Boolean);
+              
+              tokens.forEach(tok => {
+                const val = tok.toLowerCase().replace(/^sub_/, '');
+                const matchId = allSubs.find(s => s.id.toLowerCase() === val || s.id.toLowerCase().replace(/^sub_/, '') === val);
+                if (matchId) {
+                  parsedSubjectIds.push(matchId.id.replace(/^sub_/, ''));
                 } else {
-                  const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
-                  const valNorm = norm(rawSubInput);
-                  const matchName = allSubs.find(s => norm(s.name) === valNorm || norm(s.name).includes(valNorm) || valNorm.includes(norm(s.name)))
-                    || declSubs.find(s => norm(s.name) === valNorm || norm(s.name).includes(valNorm) || valNorm.includes(norm(s.name)));
-                  if (matchName) {
-                    subjectId = (matchName.id || matchName.code).toLowerCase().replace(/^sub_/, '');
+                  const matchCode = declSubs.find(s => (s.code && s.code.toLowerCase() === val) || (s.id && s.id.toLowerCase().replace(/^sub_/, '') === val));
+                  if (matchCode) {
+                    parsedSubjectIds.push((matchCode.id || matchCode.code).toLowerCase().replace(/^sub_/, ''));
                   } else {
-                    subjectId = val;
+                    const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+                    const valNorm = norm(tok);
+                    const matchName = allSubs.find(s => norm(s.name) === valNorm || norm(s.name).includes(valNorm) || valNorm.includes(norm(s.name)))
+                      || declSubs.find(s => norm(s.name) === valNorm || norm(s.name).includes(valNorm) || valNorm.includes(norm(s.name)));
+                    if (matchName) {
+                      parsedSubjectIds.push((matchName.id || matchName.code).toLowerCase().replace(/^sub_/, ''));
+                    } else {
+                      parsedSubjectIds.push(val);
+                    }
                   }
                 }
-              }
+              });
             }
+            if (parsedSubjectIds.length === 0) parsedSubjectIds = ['toan'];
+            const subjectId = parsedSubjectIds[0] || 'toan';
 
             const classesStr = getVal('Danh sách lớp', 'Phân công lớp dạy', 'Lớp dạy', 'Lớp', 'Classes');
             const dob = getVal('Ngày sinh', 'DOB') || '';
@@ -9635,7 +9814,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
                 if (cur) {
                   const mergedClasses = [...new Set([...(cur.classes || []), ...parsedClasses])];
                   const curSubs = Array.isArray(cur.subjects) && cur.subjects.length ? cur.subjects : (cur.subjectId ? [cur.subjectId] : []);
-                  const mergedSubs = [...new Set([...curSubs, subjectId].filter(Boolean))];
+                  const mergedSubs = [...new Set([...curSubs, ...parsedSubjectIds].filter(Boolean))];
                   db.updateTeacher(cur.id, { classes: mergedClasses, subjects: mergedSubs, subjectId: mergedSubs[0] || cur.subjectId });
                 }
                 return;
@@ -9659,8 +9838,11 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
                   db.updateTeacher(existing.id, { code: teacherCode });
                 }
                 if (selectedMode === 'import_update') {
+                  const curSubs = Array.isArray(existing.subjects) && existing.subjects.length ? existing.subjects : (existing.subjectId ? [existing.subjectId] : []);
+                  const nextSubs = parsedSubjectIds.length > 0 ? parsedSubjectIds : curSubs;
                   db.updateTeacher(existing.id, {
-                    subjectId: subjectId || existing.subjectId,
+                    subjectId: nextSubs[0] || subjectId || existing.subjectId,
+                    subjects: nextSubs,
                     classes: parsedClasses.length > 0 ? parsedClasses : existing.classes,
                     dob: dob || existing.dob || '',
                     phone: phone || existing.phone,
@@ -9680,7 +9862,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
                   email,
                   phone,
                   subjectId,
-                  subjects: subjectId ? [subjectId] : [],
+                  subjects: parsedSubjectIds.length > 0 ? parsedSubjectIds : (subjectId ? [subjectId] : []),
                   classes: parsedClasses,
                   dob,
                   isHomeroom: null
