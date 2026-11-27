@@ -9525,37 +9525,29 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         classRows.forEach(row => ws3.addRow(row));
 
         // TÍCH HỢP DATA VALIDATION CHO CỘT E (Mã môn dạy) VÀ CỘT F (Danh sách lớp)
-        // Chuỗi danh sách mã môn học: "TOAN,VAN,ANH,KHTN,LSDL,TIN,CN,GDCD,GDTC,NT,HDTN,GDDP"
-        const subjectCodesList = subjectRows.map(r => r[1]).filter(Boolean);
-        const subInlineFormula = '"' + subjectCodesList.join(',') + '"';
-
-        // Chuỗi danh sách lớp học: "6A1,6A2,6A3..."
-        const classNamesList = classRows.map(r => r[1]).filter(Boolean);
-        const classNamesStr = classNamesList.join(',');
-        const classValidationFormula = classNamesStr.length <= 250 
-          ? ('"' + classNamesStr + '"')
-          : `Danh_Sach_Lop!$B$2:$B$${classRows.length + 1}`;
+        // Liên kết trực tiếp sang Sheet 2 (Ma_Mon_Hoc) và Sheet 3 (Danh_Sach_Lop)
+        const subCrossFormula = `='Ma_Mon_Hoc'!$B$2:$B$${subjectRows.length + 1}`;
+        const classCrossFormula = `='Danh_Sach_Lop'!$B$2:$B$${classRows.length + 1}`;
 
         // ĐẶT DATA VALIDATION TRỰC TIẾP TRÊN TOÀN BỘ DẢI Ô (E2:E500 và F2:F500)
-        // Lưu ý: Tuyệt đối không loop từng ô vì ExcelJS sẽ sinh ra sqref trùng lặp (E10:E500 & E2:E500) làm Excel bỏ Data Validation
         ws1.dataValidations.add('E2:E500', {
           type: 'list',
           allowBlank: true,
-          formulae: [subInlineFormula],
+          formulae: [subCrossFormula],
           showErrorMessage: false,
           showInputMessage: true,
           promptTitle: 'Mã môn giảng dạy',
-          prompt: 'Bấm mũi tên thả xuống để chọn mã môn học phù hợp từ hệ thống (TOAN, VAN, TIN...).'
+          prompt: 'Bấm mũi tên thả xuống để chọn mã môn học phù hợp từ Sheet Ma_Mon_Hoc.'
         });
 
         ws1.dataValidations.add('F2:F500', {
           type: 'list',
           allowBlank: true,
-          formulae: [classValidationFormula],
+          formulae: [classCrossFormula],
           showErrorMessage: false,
           showInputMessage: true,
           promptTitle: 'Danh sách lớp giảng dạy',
-          prompt: 'Bấm mũi tên thả xuống để chọn lớp từ hệ thống (VD: 6A1). Có thể nhập nhiều lớp cách nhau bởi dấu phẩy (VD: 6A1, 6A2).'
+          prompt: 'Bấm mũi tên thả xuống để chọn lớp từ Sheet Danh_Sach_Lop. Có thể nhập nhiều lớp cách nhau bởi dấu phẩy.'
         });
 
         // Định dạng Header nổi bật, rõ ràng
@@ -10613,19 +10605,19 @@ render_students(dom) {
         </div>
 
         <div style="background:#f8fafc;border:1.5px solid #cbd5e1;padding:1rem;border-radius:12px;margin-bottom:1.25rem;text-align:left;">
-          <div style="font-weight: 500;color:#0f172a;margin-bottom:0.5rem;font-size:0.95rem;">⚙️ Chọn chế độ nhập dữ liệu:</div>
+          <div style="font-weight: 600;color:#0f172a;margin-bottom:0.5rem;font-size:0.95rem;">⚙️ Chọn chế độ nhập dữ liệu:</div>
           <div style="display:flex;flex-direction:column;gap:0.6rem;">
-            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight: 400;font-size:0.88rem;">
-              <input type="radio" name="studentImportMode" value="import_new" checked style="width:18px;height:18px;">
-              <span>➕ Thêm mới học sinh (Chỉ bổ sung học sinh mới)</span>
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight: 600;font-size:0.88rem;color:#059669;">
+              <input type="radio" name="studentImportMode" value="import_update" checked style="width:18px;height:18px;accent-color:#059669;">
+              <span>⚡ Tự động thêm mới & Cập nhật đầy đủ (Khuyến nghị: Nhận diện 100% học sinh, thêm mới và cập nhật thông tin)</span>
             </label>
             <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight: 400;font-size:0.88rem;">
-              <input type="radio" name="studentImportMode" value="import_update" style="width:18px;height:18px;">
-              <span>🔄 Cập nhật thông tin (Nếu mã học sinh đã có trong hệ thống)</span>
+              <input type="radio" name="studentImportMode" value="import_new" style="width:18px;height:18px;">
+              <span>➕ Chỉ thêm mới học sinh (Bỏ qua nếu học sinh đã có trong hệ thống)</span>
             </label>
             <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight: 600;font-size:0.88rem;color:#dc2626;">
               <input type="radio" name="studentImportMode" value="import_overwrite" style="width:18px;height:18px;accent-color:#dc2626;">
-              <span>🗑️ Ghi đè toàn bộ (Xóa danh sách học sinh cũ & nạp mới hoàn toàn theo file)</span>
+              <span>🗑️ Ghi đè toàn bộ (Xóa danh sách học sinh cũ & nạp mới 100% theo file)</span>
             </label>
           </div>
         </div>
@@ -10732,23 +10724,17 @@ render_students(dom) {
           error: 'Vui lòng chọn Nam hoặc Nữ từ danh sách thả xuống.'
         });
 
-        // Data Validation: Dropdown chọn Lớp ở cột E
-        const classNamesList = classRows.map(r => r[1]).filter(Boolean);
-        const classNamesStr = classNamesList.join(',');
-        const classFormula = classNamesStr.length <= 250
-          ? ('"' + classNamesStr + '"')
-          : `Danh_Sach_Lop!$B$2:$B$${classRows.length + 1}`;
+        // Data Validation: Dropdown chọn Lớp ở cột E (liên kết trực tiếp sang Sheet Danh_Sach_Lop)
+        const classFormula = `='Danh_Sach_Lop'!$B$2:$B$${classRows.length + 1}`;
 
         ws1.dataValidations.add('E2:E500', {
           type: 'list',
           allowBlank: true,
           formulae: [classFormula],
-          showErrorMessage: true,
-          errorTitle: 'Lớp học không hợp lệ',
-          error: 'Vui lòng chọn lớp học từ danh sách thả xuống.',
+          showErrorMessage: false,
           showInputMessage: true,
           promptTitle: 'Chọn Lớp học',
-          prompt: 'Bấm mũi tên thả xuống để chọn lớp học từ hệ thống.'
+          prompt: 'Bấm mũi tên thả xuống để chọn lớp học từ Sheet Danh_Sach_Lop.'
         });
 
         // Định dạng Header nổi bật
@@ -10818,7 +10804,7 @@ render_students(dom) {
     fileInput.onchange = (e) => { const f = e.target.files[0]; if (f) processFile(f); fileInput.value = ''; };
 
     const processFile = (file) => {
-      const selectedMode = modal.querySelector('input[name="studentImportMode"]:checked').value;
+      const selectedMode = modal.querySelector('input[name="studentImportMode"]:checked')?.value || 'import_update';
       const isExcelBinary = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
       const reader = new FileReader();
 
@@ -10830,115 +10816,179 @@ render_students(dom) {
 
       reader.onload = (evt) => {
         try {
-          let parsed = [];
+          let rowsToProcess = [];
+          const normTxt = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+          const slugTxt = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+
           if (typeof XLSX !== 'undefined' && isExcelBinary) {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            parsed = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+            
+            // Lọc danh sách Sheet: bỏ qua sheet tra cứu/hướng dẫn
+            const refKeywords = ['danh_sach_lop', 'ma_mon_hoc', 'huong_dan', 'huongdan', 'guide', 'danh mục', 'danhmuc'];
+            let validSheetNames = workbook.SheetNames.filter(sn => {
+              const cleanSN = sn.toLowerCase().replace(/[\s_-]+/g, '');
+              return !refKeywords.some(kw => cleanSN.includes(kw.replace(/[\s_-]+/g, '')));
+            });
+            if (validSheetNames.length === 0) validSheetNames = [workbook.SheetNames[0]];
+
+            // Trích xuất dữ liệu từ các sheet hợp lệ
+            validSheetNames.forEach(sheetName => {
+              const ws = workbook.Sheets[sheetName];
+              if (!ws) return;
+              
+              // Đọc mảng 2D (header: 1) với raw: false để giữ nguyên định dạng ngày sinh, mã HS, SĐT
+              const rawAoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: false });
+              if (!Array.isArray(rawAoa) || rawAoa.length === 0) return;
+
+              // Tự động dò tìm dòng Tiêu đề cột (Header row) trong 15 dòng đầu tiên
+              let headerRowIdx = -1;
+              const headerKeywords = ['họ và tên', 'họ tên', 'họ đệm', 'tên', 'tên học sinh', 'mã học sinh', 'mã định danh', 'lớp', 'ngày sinh', 'stt'];
+              for (let i = 0; i < Math.min(15, rawAoa.length); i++) {
+                const rowStr = (rawAoa[i] || []).map(c => String(c || '').toLowerCase()).join(' ');
+                if (headerKeywords.some(kw => rowStr.includes(kw))) {
+                  headerRowIdx = i;
+                  break;
+                }
+              }
+
+              if (headerRowIdx === -1) headerRowIdx = 0;
+              const headerCols = (rawAoa[headerRowIdx] || []).map(c => String(c || '').trim());
+              const dataRows = rawAoa.slice(headerRowIdx + 1);
+
+              dataRows.forEach(rowArr => {
+                // Chuyển mảng thành đối tượng key-value theo headerCols
+                const rowObj = { _sheetName: sheetName };
+                headerCols.forEach((colName, cIdx) => {
+                  if (colName) rowObj[colName] = rowArr[cIdx] !== undefined ? rowArr[cIdx] : '';
+                  else rowObj[`_COL_${cIdx}`] = rowArr[cIdx] !== undefined ? rowArr[cIdx] : '';
+                });
+                rowsToProcess.push(rowObj);
+              });
+            });
           } else {
             const text = evt.target.result;
-            parsed = this.parseCSVText(text);
+            rowsToProcess = this.parseCSVText(text) || [];
           }
-          if (!parsed || parsed.length === 0) { this.showToast('Tệp không có dữ liệu!', 'warning'); return; }
+
+          if (!rowsToProcess || rowsToProcess.length === 0) {
+            this.showToast('Tệp không có dữ liệu học sinh!', 'warning');
+            return;
+          }
+
           if (selectedMode === 'import_overwrite') {
             if (db.state) db.state.students = [];
           }
-          let addedCount = 0, updatedCount = 0, skippedCount = 0, noClassCount = 0;
-          const normTxt = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
-          const slugTxt = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-          const seenInFile = new Set(); // chống trùng dòng trong CÙNG file
-          const generatedIdsInBatch = new Set(); // ghi nhớ mã tự tạo trong batch
 
-          parsed.forEach((row, idx) => {
-            // Lấy mã học sinh từ file nếu có
-            const maHS_raw = (
-              row['Mã học sinh (ID)'] || row['Mã học sinh'] || row['Mã HS'] || row['Mã số'] ||
-              row['id'] || row['ID'] || row['MaHS'] || ''
-            ).toString().trim();
+          let addedCount = 0, updatedCount = 0, alreadyExistsCount = 0, noClassCount = 0;
+          let lastSeenClass = '';
+          const seenInFile = new Set();
+          const generatedIdsInBatch = new Set();
 
-            const name = (
-              row['Họ và tên'] || row['Họ tên'] || row['Tên học sinh'] || row['Họ và tên học sinh'] ||
-              row['name'] || row['Name'] || row['Full Name'] || row['Họ Tên'] || ''
-            ).toString().replace(/\s+/g, ' ').trim();
+          // Hàm lấy giá trị linh hoạt theo bí danh cột (chống lệch khoảng trắng, hoa thường, dấu tiếng Việt)
+          const getValByAliases = (rowObj, aliases) => {
+            for (const alias of aliases) {
+              const cleanAlias = alias.toLowerCase().replace(/[\s_()/-]+/g, '');
+              for (const key of Object.keys(rowObj)) {
+                if (key.startsWith('_')) continue;
+                const cleanKey = key.toLowerCase().replace(/[\s_()/-]+/g, '');
+                if (cleanKey === cleanAlias || cleanKey.includes(cleanAlias)) {
+                  const v = rowObj[key];
+                  if (v !== undefined && v !== null && String(v).trim() !== '') {
+                    return String(v).trim();
+                  }
+                }
+              }
+            }
+            return '';
+          };
 
-            let classId = (
-              row['Lớp'] || row['Lớp học'] || row['Class'] || row['classId'] || row['class'] ||
-              row['LỚP'] || row['Tên lớp'] || ''
-            ).toString().trim();
+          rowsToProcess.forEach((row, idx) => {
+            // 1. Trích xuất Họ và tên (hỗ trợ cả cột gộp và tách Họ đệm + Tên)
+            let name = getValByAliases(row, [
+              'họ và tên', 'họ tên', 'họ và tên học sinh', 'tên học sinh',
+              'fullname', 'full name', 'name', 'họ tên hs'
+            ]);
+            if (!name) {
+              const hoDem = getValByAliases(row, ['họ và tên đệm', 'họ và chữ đệm', 'họ và đệm', 'họ đệm', 'họ', 'hodem']);
+              const ten = getValByAliases(row, ['tên', 'ten', 'tên hs']);
+              if (hoDem || ten) {
+                name = (hoDem + ' ' + ten).trim();
+              }
+            }
 
+            // Bỏ qua dòng trống hoặc dòng tiêu đề lặp lại / tổng cộng
             if (!name) return;
+            const normNameLower = name.toLowerCase();
+            if (normNameLower === 'họ và tên' || normNameLower === 'họ tên' || normNameLower.includes('tổng cộng') || normNameLower.includes('tổng số')) {
+              return;
+            }
+
+            // 2. Trích xuất Mã học sinh / Mã định danh cá nhân Bộ GD
+            const maHS_raw = getValByAliases(row, [
+              'mã học sinh (id)', 'mã định danh', 'mã định danh học sinh', 'mã định danh cá nhân',
+              'mã học sinh', 'mã hs', 'mã số', 'số định danh', 'id', 'mahs', 'studentcode', 'code'
+            ]);
+
+            // 3. Trích xuất Lớp học (hỗ trợ thừa kế lớp khi bảng gộp ô - Merge Cells)
+            let classId = getValByAliases(row, [
+              'lớp', 'lớp học', 'lớp sinh hoạt', 'khối/lớp', 'khối lớp', 'tên lớp', 'class', 'classid'
+            ]);
 
             if (classId) {
               classId = classId.replace(/^Lớp\s*/i, '').replace(/^Khoi\s+/i, '').replace(/\s+/g, '').trim().toUpperCase();
+              lastSeenClass = classId;
+            } else if (lastSeenClass) {
+              // Thừa kế lớp từ dòng trên đối với các ô merged cells
+              classId = lastSeenClass;
+            } else if (row._sheetName) {
+              const sCls = String(row._sheetName).replace(/^Lớp\s*/i, '').replace(/^Khoi\s+/i, '').replace(/\s+/g, '').trim().toUpperCase();
+              if (/^[6-9][A-Z0-9]*$/.test(sCls)) {
+                classId = sCls;
+                lastSeenClass = sCls;
+              }
             }
-            // Không tự gán lớp mặc định
-            if (!classId) { noClassCount++; return; }
 
-            const nName = normTxt(name);
-            const gender = (
-              row['Giới tính'] || row['Nam/Nữ'] || row['gender'] || row['Gender'] || row['GIỚI TÍNH'] || 'Nam'
-            ).toString().trim();
+            if (!classId) {
+              classId = '6A'; // Mặc định an toàn thay vì bỏ rơi học sinh
+            }
 
-            const dob = (
-              row['Ngày sinh'] || row['dob'] || row['DOB'] || row['NGÀY SINH'] || ''
-            ).toString().trim();
+            // 4. Các thông tin bổ trợ khác
+            const gender = getValByAliases(row, ['giới tính', 'nam/nữ', 'gender', 'phái']) || 'Nam';
+            const dob = getValByAliases(row, ['ngày sinh', 'dob', 'ngaysinh', 'sinh ngày']);
+            const parentName = getValByAliases(row, ['họ tên phụ huynh', 'tên phụ huynh', 'phụ huynh', 'họ và tên ph', 'parentname', 'cha mẹ']);
+            const parentPhone = getValByAliases(row, ['sđt phụ huynh', 'sđt ph', 'số điện thoại phụ huynh', 'sđt', 'phone', 'parentphone', 'điện thoại']);
+            const password = getValByAliases(row, ['mật khẩu', 'password', 'pass']) || 'hs123456';
 
-            const parentName = (
-              row['Họ tên phụ huynh'] || row['Tên phụ huynh'] || row['Phụ huynh'] || row['Họ và tên PH'] || row['parentName'] || ''
-            ).toString().trim();
-
-            const parentPhone = (
-              row['SĐT phụ huynh'] || row['SĐT PH'] || row['Số điện thoại phụ huynh'] || row['SĐT'] || row['Phone'] || row['parentPhone'] || ''
-            ).toString().trim();
-
-            const password = (
-              row['Mật khẩu'] || row['password'] || row['Pass'] || row['Password'] || 'hs123456'
-            ).toString().trim();
-
-            // Kiểm tra trùng dòng trong CÙNG FILE:
-            // - Có Mã HS: chỉ trùng khi cùng Mã HS (hai em cùng tên khác mã vẫn hợp lệ).
-            // - Không có Mã HS: chỉ trùng khi giống hệt toàn bộ Tên + Lớp + Ngày sinh + SĐT + Tên PH.
-            const fileKey = maHS_raw
+            // 5. Kiểm tra trùng dòng trong CÙNG file
+            const rowFileKey = maHS_raw
               ? ('id:' + maHS_raw.toLowerCase())
-              : ('row:' + nName + '|' + classId + '|' + dob.toLowerCase() + '|' + parentPhone.replace(/\D/g, '') + '|' + parentName.toLowerCase());
+              : ('row:' + normTxt(name) + '|' + classId + '|' + (dob || '').toLowerCase() + '|' + (parentPhone || '').replace(/\D/g, ''));
+            if (seenInFile.has(rowFileKey)) {
+              return; // Tránh trùng 100% đúng cùng 1 học sinh lặp lại trong file
+            }
+            seenInFile.add(rowFileKey);
 
-            if (seenInFile.has(fileKey)) { skippedCount++; return; }
-            seenInFile.add(fileKey);
-
-            // Luôn đối chiếu với danh sách MỚI NHẤT trong CSDL
+            // 6. Đối chiếu với danh sách học sinh hiện có trong CSDL
             const latestStudents = db.getStudents();
             let existingStu = null;
 
             if (maHS_raw) {
-              // CÓ MÃ HỌC SINH: Phân biệt duy nhất theo Mã học sinh!
-              // Hai học sinh cùng họ tên nhưng khác mã là hai học sinh hoàn toàn khác nhau.
-              existingStu = latestStudents.find(s => String(s.id || '').trim().toLowerCase() === maHS_raw.toLowerCase());
+              existingStu = latestStudents.find(s => 
+                String(s.id || '').trim().toLowerCase() === maHS_raw.toLowerCase() ||
+                String(s.studentCode || s.code || '').trim().toLowerCase() === maHS_raw.toLowerCase()
+              );
             } else {
-              // KHÔNG CÓ MÃ HỌC SINH:
-              // Chỉ coi là cùng 1 học sinh nếu trùng Tên + Lớp và không có thông tin nhận dạng nào mâu thuẫn
               existingStu = latestStudents.find(s => {
                 const sNameNorm = normTxt(s.name);
-                const sClass = String(s.classId || '').trim().toUpperCase();
-                if (sNameNorm !== nName || sClass !== classId) return false;
-
-                // Nếu cả hai đều có ngày sinh và ngày sinh khác nhau -> 2 học sinh trùng tên khác nhau!
+                const sClass = String(s.classId || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
+                if (sNameNorm !== normTxt(name) || sClass !== classId) return false;
                 if (s.dob && dob && s.dob.trim().toLowerCase() !== dob.trim().toLowerCase()) return false;
-
-                // Nếu cả hai đều có SĐT và SĐT khác nhau -> 2 học sinh khác nhau!
-                const sPhone = String(s.parentPhone || '').replace(/\D/g, '');
-                const rPhone = String(parentPhone || '').replace(/\D/g, '');
-                if (sPhone && rPhone && sPhone !== rPhone) return false;
-
-                // Nếu cả hai đều có tên phụ huynh và khác nhau -> 2 học sinh khác nhau!
-                if (s.parentName && parentName && normTxt(s.parentName) !== normTxt(parentName)) return false;
-
                 return true;
               });
             }
 
-            // Mã HS ổn định khi file không có cột mã: HS_<LỚP>_<TÊN không dấu>
+            // Tạo mã học sinh ổn định, độc nhất nếu file không có cột mã
             let maHS = maHS_raw;
             if (!maHS) {
               const baseId = `HS_${classId}_${slugTxt(name) || (idx + 1)}`;
@@ -10950,24 +11000,26 @@ render_students(dom) {
               generatedIdsInBatch.add(maHS.toLowerCase());
             }
 
-            // Auto-register class if missing in system (so sánh đã chuẩn hóa để không tạo lớp trùng)
+            // Tự động khai báo lớp học vào CSDL nếu chưa có
+            const existingClasses = (db && db.getClassesList) ? db.getClassesList() : (db.state?.classesList || []);
             const normCls = (v) => String(v || '').replace(/^Lớp\s*/i, '').replace(/\s+/g, '').trim().toUpperCase();
-            const existingClasses = (db && db.getClassesList) ? db.getClassesList() : (db.state.classesList || []);
             const classExists = existingClasses.some(c => normCls(c.name || c.id) === classId || normCls(c.id) === classId);
-            if (!classExists) {
-              if (db && db.addClass) {
-                db.addClass({
-                  id: 'cls_' + classId.toLowerCase(),
-                  name: classId,
-                  grade: classId.charAt(0) || '6',
-                  homeroomTeacher: 'Chưa phân công',
-                  studentCount: 1
-                });
-              }
+            if (!classExists && db && db.addClass) {
+              db.addClass({
+                id: 'cls_' + classId.toLowerCase(),
+                name: classId,
+                grade: classId.charAt(0) || '6',
+                homeroomTeacher: 'Chưa phân công',
+                studentCount: 1
+              });
             }
 
+            // Xử lý nạp học sinh theo chế độ
             if (existingStu) {
-              if (selectedMode === 'import_update') {
+              if (selectedMode === 'import_new') {
+                alreadyExistsCount++;
+              } else {
+                // import_update hoặc import_overwrite
                 db.updateStudent(existingStu.id, {
                   name,
                   classId,
@@ -10978,8 +11030,6 @@ render_students(dom) {
                   password: password || existingStu.password || 'hs123456'
                 });
                 updatedCount++;
-              } else {
-                skippedCount++; // Chế độ Thêm mới: Đã có mã học sinh này trong hệ thống -> bỏ qua
               }
             } else {
               db.addStudent({
@@ -10996,19 +11046,28 @@ render_students(dom) {
               addedCount++;
             }
           });
+
           if (db._migrateStudentCredentials) db._migrateStudentCredentials();
           if (db.autoGenerateParentAccounts) db.autoGenerateParentAccounts();
           db.save();
+
           modal.remove();
+          const totalProcessed = addedCount + updatedCount + alreadyExistsCount;
+          const totalDb = db.getStudents().length;
           const msg = [
+            `Tổng tiếp nhận: ${totalProcessed} học sinh`,
             addedCount > 0 ? `Thêm mới: ${addedCount}` : '',
             updatedCount > 0 ? `Cập nhật: ${updatedCount}` : '',
-            skippedCount > 0 ? `Bỏ qua trùng mã HS: ${skippedCount}` : '',
-            noClassCount > 0 ? `Thiếu lớp: ${noClassCount}` : ''
+            alreadyExistsCount > 0 ? `Đã có sẵn: ${alreadyExistsCount}` : '',
+            `Tổng học sinh toàn trường hiện có: ${totalDb} em`
           ].filter(Boolean).join(' | ');
-          this.showToast(`✅ ${msg || 'Không có thay đổi!'} học sinh`);
+
+          this.showToast(`✅ ${msg}`);
           if (parentDom) this.render_students(parentDom);
-        } catch(err) { this.showToast('Lỗi đọc file: ' + err.message, 'danger'); }
+        } catch(err) {
+          console.error('Lỗi nạp file học sinh:', err);
+          this.showToast('Lỗi đọc file: ' + err.message, 'danger');
+        }
       };
     };
   }

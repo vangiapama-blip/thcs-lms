@@ -1761,10 +1761,10 @@ const INITIAL_STATE = {
     email: 'amatranglong.thcs@daklak.edu.vn'
   },
   academicYears: [
-    { id: '2026-2027', name: 'Năm học 2026-2027', current: true, isCurrent: true },
-    { id: '2025-2026', name: 'Năm học 2025-2026', current: false, isCurrent: false }
+    { id: '2025-2026', name: 'Năm học 2025-2026', current: true, isCurrent: true },
+    { id: '2026-2027', name: 'Năm học 2026-2027', current: false, isCurrent: false }
   ],
-  selectedSchoolYear: '2026-2027',
+  selectedSchoolYear: '2025-2026',
   semesters: [
     { id: 'HK1', name: 'Học kỳ I', current: true },
     { id: 'HK2', name: 'Học kỳ II', current: false }
@@ -2081,19 +2081,23 @@ class LMSDatabase {
           const hasLocalStudents = this.state && Array.isArray(this.state.students) && this.state.students.length > 0;
           if (hasServerStudents) {
             const sMap = new Map();
-            remoteState.students.forEach(s => {
+            remoteState.students.forEach((s, idx) => {
               if (!s || !s.name) return;
-              const code = s.studentCode || s.code || '';
+              const code = (s.studentCode || s.code) ? String(s.studentCode || s.code).trim().toUpperCase() : '';
+              const sid = s.id ? String(s.id).trim().toUpperCase() : '';
+              const sDob = s.dob ? String(s.dob).trim() : '';
               const cName = String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
-              const k = code ? ('code:' + code.toUpperCase()) : ('nc:' + normStr(s.name) + '_' + cName);
+              const k = code ? ('code:' + code) : (sid ? ('id:' + sid) : ('nc:' + normStr(s.name) + '_' + cName + '_' + sDob));
               sMap.set(k, s);
             });
             if (hasLocalStudents) {
-              this.state.students.forEach(ls => {
+              this.state.students.forEach((ls, idx) => {
                 if (!ls || !ls.name) return;
-                const code = ls.studentCode || ls.code || '';
+                const code = (ls.studentCode || ls.code) ? String(ls.studentCode || ls.code).trim().toUpperCase() : '';
+                const sid = ls.id ? String(ls.id).trim().toUpperCase() : '';
+                const sDob = ls.dob ? String(ls.dob).trim() : '';
                 const cName = String(ls.classId || ls.className || ls.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
-                const k = code ? ('code:' + code.toUpperCase()) : ('nc:' + normStr(ls.name) + '_' + cName);
+                const k = code ? ('code:' + code) : (sid ? ('id:' + sid) : ('nc:' + normStr(ls.name) + '_' + cName + '_' + sDob));
                 if (!sMap.has(k)) sMap.set(k, ls);
               });
             }
@@ -2118,18 +2122,20 @@ class LMSDatabase {
           });
 
           // Bảo toàn năm học đã chọn và đồng bộ hai chiều giữa Server và LocalStorage
-          const localSavedYear = (typeof localStorage !== 'undefined' && localStorage.getItem('THCS_LMS_SELECTED_YEAR')) || (this.state && this.state.selectedSchoolYear);
-          if (remoteState.selectedSchoolYear) {
+          const localSavedYear = (typeof localStorage !== 'undefined' && localStorage.getItem('THCS_LMS_SELECTED_YEAR'));
+          if (localSavedYear) {
+            this.state.selectedSchoolYear = localSavedYear;
+            remoteState.selectedSchoolYear = localSavedYear;
+          } else if (remoteState.selectedSchoolYear) {
             this.state.selectedSchoolYear = remoteState.selectedSchoolYear;
             try {
               if (typeof localStorage !== 'undefined') {
                 localStorage.setItem('THCS_LMS_SELECTED_YEAR', remoteState.selectedSchoolYear);
               }
             } catch (e) {}
-          } else if (localSavedYear) {
-            remoteState.selectedSchoolYear = localSavedYear;
           } else {
-            remoteState.selectedSchoolYear = '2026-2027';
+            this.state.selectedSchoolYear = '2025-2026';
+            remoteState.selectedSchoolYear = '2025-2026';
           }
 
           this.state = remoteState;
@@ -2515,12 +2521,24 @@ class LMSDatabase {
     const map = new Map();
     const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
 
-    this.state.students.forEach(s => {
+    this.state.students.forEach((s, idx) => {
       if (!s || !s.name) return;
       const nName = norm(s.name);
       const cClass = String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
-      const code = s.studentCode || s.code || '';
-      const key = code ? ('code:' + code.toUpperCase()) : ('nc:' + nName + '_' + cClass);
+      const code = (s.studentCode || s.code) ? String(s.studentCode || s.code).trim().toUpperCase() : '';
+      const sid = s.id ? String(s.id).trim().toUpperCase() : '';
+      const sDob = s.dob ? String(s.dob).trim() : '';
+
+      let key = '';
+      if (code) {
+        key = 'code:' + code;
+      } else if (sid) {
+        key = 'id:' + sid;
+      } else if (sDob) {
+        key = 'ncd:' + nName + '_' + cClass + '_' + sDob;
+      } else {
+        key = 'raw_' + idx;
+      }
 
       if (!map.has(key)) {
         map.set(key, s);
@@ -2857,7 +2875,7 @@ class LMSDatabase {
         }
       }
       if (!this.state.selectedSchoolYear) {
-        this.state.selectedSchoolYear = '2026-2027';
+        this.state.selectedSchoolYear = '2025-2026';
       }
     }
     return this.state.selectedSchoolYear;
@@ -2884,14 +2902,25 @@ class LMSDatabase {
       });
     }
     if (this.save) this.save();
+
+    // Đồng bộ tức thì lên Server
+    if (typeof fetch !== 'undefined') {
+      try {
+        fetch('/api/db/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.state)
+        }).catch(() => {});
+      } catch(e) {}
+    }
   }
 
   getAcademicYearsList() {
     if (!this.state) this.state = {};
     if (!this.state.academicYears || !Array.isArray(this.state.academicYears) || this.state.academicYears.length === 0) {
       this.state.academicYears = [
-        { id: '2026-2027', name: 'Năm học 2026-2027', current: true, isCurrent: true },
-        { id: '2025-2026', name: 'Năm học 2025-2026', current: false, isCurrent: false }
+        { id: '2025-2026', name: 'Năm học 2025-2026', current: true, isCurrent: true },
+        { id: '2026-2027', name: 'Năm học 2026-2027', current: false, isCurrent: false }
       ];
     }
     return this.state.academicYears;
@@ -3198,12 +3227,16 @@ class LMSDatabase {
   addStudent(student) {
     if (!this.state.students) this.state.students = [];
     const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
+    const sId = student.id ? String(student.id).trim().toUpperCase() : '';
     const sCode = (student.studentCode || student.code) ? String(student.studentCode || student.code).trim().toUpperCase() : '';
     const sName = norm(student.name);
     const sClass = String(student.classId || student.className || student.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
+    const sDob = String(student.dob || '').trim();
+
     const existingIdx = this.state.students.findIndex(s => {
+      if (sId && s.id && String(s.id).trim().toUpperCase() === sId) return true;
       if (sCode && (s.studentCode || s.code) && String(s.studentCode || s.code).trim().toUpperCase() === sCode) return true;
-      if (sName && norm(s.name) === sName && String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase() === sClass) return true;
+      if (sName && sDob && s.dob && norm(s.name) === sName && String(s.dob).trim() === sDob && String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase() === sClass) return true;
       return false;
     });
     if (existingIdx !== -1) {
@@ -3211,15 +3244,11 @@ class LMSDatabase {
     } else {
       this.state.students.push(student);
     }
-    this.cleanupDuplicateStudents();
-    this.save();
-    this.syncAllUsersFromEntities();
   }
   updateStudent(id, updatedData) {
     const idx = this.state.students.findIndex(s => s.id === id);
     if (idx !== -1) {
       this.state.students[idx] = { ...this.state.students[idx], ...updatedData };
-      this.cleanupDuplicateStudents();
       this.save();
       this.syncAllUsersFromEntities();
     }

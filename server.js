@@ -114,12 +114,25 @@ function sanitizeAndDeduplicate(db) {
   // 3. Khử trùng lặp Học sinh (Students)
   if (Array.isArray(db.students) && db.students.length > 0) {
     const sMap = new Map();
-    db.students.forEach(s => {
+    db.students.forEach((s, idx) => {
       if (!s || !s.name) return;
       const nName = norm(s.name);
       const cClass = String(s.classId || s.className || s.class || '').replace(/^Lớp\s*/i, '').trim().toUpperCase();
-      const code = s.studentCode || s.code || '';
-      const key = code ? ('code:' + code.toUpperCase()) : ('nc:' + nName + '_' + cClass);
+      const code = (s.studentCode || s.code) ? String(s.studentCode || s.code).trim().toUpperCase() : '';
+      const sid = s.id ? String(s.id).trim().toUpperCase() : '';
+      const sDob = s.dob ? String(s.dob).trim() : '';
+
+      let key = '';
+      if (code) {
+        key = 'code:' + code;
+      } else if (sid) {
+        key = 'id:' + sid;
+      } else if (sDob) {
+        key = 'ncd:' + nName + '_' + cClass + '_' + sDob;
+      } else {
+        key = 'raw_' + idx;
+      }
+
       if (!sMap.has(key)) {
         sMap.set(key, s);
       } else {
