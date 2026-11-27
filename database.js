@@ -2971,7 +2971,7 @@ class LMSDatabase {
     return this.state.academicYears;
   }
 
-  save() {
+  save(immediate = false) {
     try {
       localStorage.setItem(DB_KEY, JSON.stringify(this.state));
     } catch (e) {
