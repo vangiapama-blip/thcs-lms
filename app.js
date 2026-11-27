@@ -9700,7 +9700,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         reader.readAsText(file, 'UTF-8');
       }
 
-      reader.onload = (evt) => {
+      reader.onload = async (evt) => {
         try {
           let parsed = [];
           if (typeof XLSX !== 'undefined' && isExcelBinary) {
@@ -9709,8 +9709,8 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
             // Tự động tìm Sheet chứa dữ liệu giáo viên, bỏ qua Sheet Ma_Mon_Hoc và Danh_Sach_Lop
             let targetSheetName = workbook.SheetNames[0];
             for (const sName of workbook.SheetNames) {
-              const lower = sName.toLowerCase();
-              if ((lower.includes('giao_vien') || lower.includes('giaovien') || lower.includes('teacher') || lower.includes('mau_danh_sach')) && !lower.includes('lop') && !lower.includes('ma_mon')) {
+              const lower = sName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+              if ((lower.includes('giao_vien') || lower.includes('giaovien') || lower.includes('teacher') || lower.includes('mau_danh_sach') || lower.includes('danh_sach')) && !lower.includes('lop') && !lower.includes('ma_mon')) {
                 targetSheetName = sName;
                 break;
               }
@@ -9719,7 +9719,33 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
               targetSheetName = workbook.SheetNames.find(s => !s.toLowerCase().includes('ma_mon') && !s.toLowerCase().includes('lop')) || workbook.SheetNames[0];
             }
             const worksheet = workbook.Sheets[targetSheetName];
-            parsed = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+
+            // Tự động dò tìm dòng Tiêu đề cột (Header row) trong 15 dòng đầu tiên (chống lỗi do dòng tiêu đề/khoảng trống)
+            const rawAoa = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', raw: false });
+            if (Array.isArray(rawAoa) && rawAoa.length > 0) {
+              let headerRowIdx = -1;
+              const headerKeywords = ['họ và tên', 'họ tên', 'tên giáo viên', 'tên gv', 'mã giáo viên', 'mã gv', 'mã môn', 'môn dạy', 'lớp dạy', 'danh sách lớp', 'stt'];
+              for (let i = 0; i < Math.min(15, rawAoa.length); i++) {
+                const rowStr = (rawAoa[i] || []).map(c => String(c || '').toLowerCase()).join(' ');
+                if (headerKeywords.some(kw => rowStr.includes(kw))) {
+                  headerRowIdx = i;
+                  break;
+                }
+              }
+              if (headerRowIdx === -1) headerRowIdx = 0;
+              const headerCols = (rawAoa[headerRowIdx] || []).map(c => String(c || '').trim());
+              const dataRows = rawAoa.slice(headerRowIdx + 1);
+              dataRows.forEach(rowArr => {
+                const rowObj = {};
+                headerCols.forEach((colName, cIdx) => {
+                  if (colName) rowObj[colName] = rowArr[cIdx] !== undefined ? rowArr[cIdx] : '';
+                  else rowObj[`_COL_${cIdx}`] = rowArr[cIdx] !== undefined ? rowArr[cIdx] : '';
+                });
+                parsed.push(rowObj);
+              });
+            } else {
+              parsed = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+            }
           } else {
             const text = evt.target.result;
             parsed = this.parseCSVText(text);
@@ -9899,19 +9925,21 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
             }
           });
 
-          db.save();
+          if (typeof db.save === 'function') {
+            await db.save(true);
+          }
           modal.remove();
 
           if (selectedMode === 'import_update') {
-            this.showToast(`Import thành công: Đã cập nhật ${updatedCount} giáo viên, thêm mới ${addedCount} giáo viên!`);
+            this.showToast(`✅ Import thành công: Đã cập nhật ${updatedCount} giáo viên, thêm mới ${addedCount} giáo viên!`);
           } else {
-            this.showToast(`Import thành công: Đã thêm mới ${addedCount} giáo viên vào hệ thống!${skippedCount ? ` (Bỏ qua ${skippedCount} giáo viên đã có)` : ''}`);
+            this.showToast(`✅ Import thành công: Đã thêm mới ${addedCount} giáo viên vào hệ thống!${skippedCount ? ` (Bỏ qua ${skippedCount} giáo viên đã có)` : ''}`);
           }
 
           this.render_teachers(dom);
         } catch (err) {
-          console.error('CSV parse error:', err);
-          this.showToast('Lỗi đọc tệp Excel/CSV. Vui lòng sử dụng tệp mẫu chuẩn!', 'danger');
+          console.error('CSV/Excel parse error:', err);
+          this.showToast('Lỗi đọc tệp Excel/CSV: ' + (err.message || 'Vui lòng kiểm tra lại cấu trúc tệp!'), 'danger');
         }
       };
 
@@ -23173,15 +23201,46 @@ render_ai_geometry(dom) {
         reader.readAsText(file, 'UTF-8');
       }
 
-      reader.onload = (evt) => {
+      reader.onload = async (evt) => {
         try {
           let parsed = [];
           if (typeof XLSX !== 'undefined' && isExcelBinary) {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheetName = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheetName];
-            parsed = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+            let targetSheetName = workbook.SheetNames[0];
+            for (const sName of workbook.SheetNames) {
+              const lower = sName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+              if ((lower.includes('lop') || lower.includes('class') || lower.includes('danh_sach_lop')) && !lower.includes('giao_vien') && !lower.includes('hoc_sinh')) {
+                targetSheetName = sName;
+                break;
+              }
+            }
+            const worksheet = workbook.Sheets[targetSheetName];
+            const rawAoa = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', raw: false });
+            if (Array.isArray(rawAoa) && rawAoa.length > 0) {
+              let headerRowIdx = -1;
+              const headerKeywords = ['tên lớp', 'lớp', 'khối', 'gvcn', 'giáo viên chủ nhiệm', 'stt'];
+              for (let i = 0; i < Math.min(15, rawAoa.length); i++) {
+                const rowStr = (rawAoa[i] || []).map(c => String(c || '').toLowerCase()).join(' ');
+                if (headerKeywords.some(kw => rowStr.includes(kw))) {
+                  headerRowIdx = i;
+                  break;
+                }
+              }
+              if (headerRowIdx === -1) headerRowIdx = 0;
+              const headerCols = (rawAoa[headerRowIdx] || []).map(c => String(c || '').trim());
+              const dataRows = rawAoa.slice(headerRowIdx + 1);
+              dataRows.forEach(rowArr => {
+                const rowObj = {};
+                headerCols.forEach((colName, cIdx) => {
+                  if (colName) rowObj[colName] = rowArr[cIdx] !== undefined ? rowArr[cIdx] : '';
+                  else rowObj[`_COL_${cIdx}`] = rowArr[cIdx] !== undefined ? rowArr[cIdx] : '';
+                });
+                parsed.push(rowObj);
+              });
+            } else {
+              parsed = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+            }
           } else {
             const text = evt.target.result;
             parsed = this.parseCSVText(text);
@@ -23198,7 +23257,7 @@ render_ai_geometry(dom) {
 
           parsed.forEach((row, idx) => {
             let className = (
-              row['Tên lớp'] || row['Lớp'] || row['Tên Lớp'] || row['Class'] || row['name'] || row['Name'] || ''
+              row['Tên lớp'] || row['Lớp'] || row['Tên Lớp'] || row['Class'] || row['name'] || row['Name'] || row['Lớp học'] || row['Tên lớp học'] || ''
             ).toString().trim();
 
             if (!className) return;
@@ -23209,7 +23268,7 @@ render_ai_geometry(dom) {
             ).toString().trim();
 
             const homeroomTeacher = (
-              row['Giáo viên chủ nhiệm'] || row['GVCN'] || row['Giáo viên CN'] || row['homeroomTeacher'] || row['Teacher'] || 'Chưa phân công'
+              row['Giáo viên chủ nhiệm'] || row['GVCN'] || row['Giáo viên CN'] || row['homeroomTeacher'] || row['Teacher'] || row['Chủ nhiệm'] || 'Chưa phân công'
             ).toString().trim();
 
             const existingIdx = currentClasses.findIndex(c => c.name.toUpperCase() === className.toUpperCase());
@@ -23238,12 +23297,15 @@ render_ai_geometry(dom) {
             }
           });
 
-          db.save();
+          if (typeof db.save === 'function') await db.save(true);
           modal.remove();
           const msg = [addedCount > 0 ? `Thêm mới: ${addedCount}` : '', updatedCount > 0 ? `Cập nhật: ${updatedCount}` : ''].filter(Boolean).join(' | ');
           this.showToast(`✅ ${msg || 'Không có thay đổi!'} lớp học`);
           if (parentDom) this.render_classes(parentDom);
-        } catch(err) { this.showToast('Lỗi đọc file: ' + err.message, 'danger'); }
+        } catch(err) {
+          console.error('Lỗi đọc file lớp học:', err);
+          this.showToast('Lỗi đọc file: ' + err.message, 'danger');
+        }
       };
     };
   }
