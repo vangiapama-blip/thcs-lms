@@ -9358,7 +9358,20 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
     modal.querySelector('#close-teacher-excel-modal-btn').onclick = () => modal.remove();
 
     // Download Sample Template handler (3 Sheets: Danh sách giáo viên + Mã môn học + Danh sách lớp kèm Data Validation)
-    modal.querySelector('#btn-download-teacher-excel-template').onclick = () => {
+    modal.querySelector('#btn-download-teacher-excel-template').onclick = async () => {
+      // Đảm bảo ExcelJS luôn luôn sẵn sàng (nếu chưa có thì tự tải từ CDN)
+      if (typeof ExcelJS === 'undefined') {
+        try {
+          await new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+            s.onload = () => resolve(true);
+            s.onerror = () => resolve(false);
+            document.head.appendChild(s);
+          });
+        } catch(e) {}
+      }
+
       const headers = ['Mã giáo viên', 'Tên giáo viên', 'Email', 'SĐT', 'Mã môn dạy', 'Danh sách lớp', 'Ngày sinh', 'Tên đăng nhập', 'Mật khẩu'];
 
       // 1. Lấy danh sách môn học trực tiếp từ Quản lý khai báo môn học
@@ -9410,7 +9423,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
       const subjectRows = declaredSubs.map((s, idx) => {
         return [
           idx + 1,
-          s.code, // Cột B: MÃ MÔN IN HOA CHUẨN
+          s.code,
           s.name,
           s.periods,
           s.type,
@@ -9453,14 +9466,12 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
 
       let declaredClasses = Array.from(classMap.values());
       if (declaredClasses.length === 0) {
-        // Fallback danh sách lớp chuẩn THCS Ama Trang Lơng nếu chưa có lớp nào
         const defaults = ['6A1', '6A2', '6A3', '6A4', '7B1', '7B2', '7B3', '7B4', '8C1', '8C2', '8C3', '8C4', '9D1', '9D2', '9D3', '9D4'];
         declaredClasses = defaults.map(name => ({ id: name, name, grade: 'Khối ' + name.charAt(0), homeroomTeacher: 'Chưa phân công' }));
       } else {
         declaredClasses.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
       }
 
-      // Tiêu đề Sheet 3: Danh sách Lớp học
       const classHeaders = [
         'STT',
         'Tên lớp (Chọn vào cột F)',
@@ -9472,14 +9483,13 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
       const classRows = declaredClasses.map((c, idx) => {
         return [
           idx + 1,
-          c.name, // Cột B: TÊN LỚP CHUẨN
+          c.name,
           c.grade,
           c.homeroomTeacher,
           `Chọn '${c.name}' trong danh sách thả xuống ở cột F. Nếu dạy nhiều lớp, có thể nhập các lớp cách nhau bởi dấu phẩy (VD: ${c.name}, ...)`
         ];
       });
 
-      // Mẫu dữ liệu sử dụng đúng các Mã môn và Lớp thực tế từ hệ thống
       const c1 = classRows[0] ? classRows[0][1] : '6A1';
       const c2 = classRows[1] ? classRows[1][1] : '6A2';
       const c3 = classRows[2] ? classRows[2][1] : '7B1';
@@ -9492,7 +9502,6 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         ['GV004', 'Phạm Minh Đức', 'duc.pm@school.edu.vn', '0945678901', 'ANH', `${c3}, ${c4}`, '12/10/1990', 'thcsamtl_ducpm', 'gv123456']
       ];
 
-      // Ưu tiên sử dụng ExcelJS để tạo file có Data Validation (mũi tên chọn môn và chọn lớp thả xuống)
       if (typeof ExcelJS !== 'undefined') {
         const wb = new ExcelJS.Workbook();
         wb.creator = 'THCS Ama Trang Lơng';
@@ -9516,7 +9525,6 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
 
         sampleData.forEach(row => ws1.addRow(row));
 
-        // Ép kiểu chuỗi Text (@) cho SĐT và Mã GV để không bị lỗi lũy thừa 9.88E+08
         ws1.getColumn('D').numFmt = '@';
         ws1.getColumn('A').numFmt = '@';
 
@@ -9544,16 +9552,14 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         ];
         classRows.forEach(row => ws3.addRow(row));
 
-        // TÍCH HỢP DATA VALIDATION CHO CỘT E (Mã môn dạy) VÀ CỘT F (Danh sách lớp)
-        // Liên kết trực tiếp sang Sheet 2 (Ma_Mon_Hoc) và Sheet 3 (Danh_Sach_Lop)
-        const subCrossFormula = `'Ma_Mon_Hoc'!$B$2:$B${subjectRows.length + 1}`;
-        const classCrossFormula = `'Danh_Sach_Lop'!$B$2:$B${classRows.length + 1}`;
+        // ĐẶT DEFINED NAMES (NAMED RANGES) CHUẨN ĐỂ EXCEL HIỂN THỊ MŨI TÊN DROPDOWN THẢ XUỐNG TỪ SHEET KHÁC
+        wb.definedNames.add(`'Ma_Mon_Hoc'!$B$2:$B${subjectRows.length + 1}`, 'DS_Ma_Mon');
+        wb.definedNames.add(`'Danh_Sach_Lop'!$B$2:$B${classRows.length + 1}`, 'DS_Ten_Lop');
 
-        // ĐẶT DATA VALIDATION TRỰC TIẾP TRÊN TOÀN BỘ DẢI Ô (E2:E500 và F2:F500)
         ws1.dataValidations.add('E2:E500', {
           type: 'list',
           allowBlank: true,
-          formulae: [subCrossFormula],
+          formulae: ['=DS_Ma_Mon'],
           showErrorMessage: false,
           showInputMessage: true,
           promptTitle: 'Mã môn giảng dạy',
@@ -9563,7 +9569,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         ws1.dataValidations.add('F2:F500', {
           type: 'list',
           allowBlank: true,
-          formulae: [classCrossFormula],
+          formulae: ['=DS_Ten_Lop'],
           showErrorMessage: false,
           showInputMessage: true,
           promptTitle: 'Danh sách lớp giảng dạy',
@@ -10077,6 +10083,13 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
               addedCount++;
             }
           });
+
+          // Đánh dấu thời điểm import để bảo vệ dữ liệu không bị máy chủ đè ngược
+          if (db.state) {
+            db.state._importedAt = Date.now();
+            db.state._lastModified = Date.now();
+            db.state._version = (db.state._version || 0) + 1;
+          }
 
           // Lưu tức thì lên máy chủ trung tâm và đồng bộ mọi phiên
           if (typeof db.save === 'function') {
@@ -10935,13 +10948,13 @@ render_students(dom) {
           error: 'Vui lòng chọn Nam hoặc Nữ từ danh sách thả xuống.'
         });
 
-        // Data Validation: Dropdown chọn Lớp ở cột E (liên kết trực tiếp sang Sheet Danh_Sach_Lop)
-        const classFormula = `'Danh_Sach_Lop'!$B$2:$B${classRows.length + 1}`;
+        // Data Validation: Dropdown chọn Lớp ở cột E (sử dụng Defined Names chuẩn Excel)
+        wb.definedNames.add(`'Danh_Sach_Lop'!$B$2:$B${classRows.length + 1}`, 'DS_Lop_Hoc');
 
         ws1.dataValidations.add('E2:E500', {
           type: 'list',
           allowBlank: true,
-          formulae: [classFormula],
+          formulae: ['=DS_Lop_Hoc'],
           showErrorMessage: false,
           showInputMessage: true,
           promptTitle: 'Chọn Lớp học',

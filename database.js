@@ -2006,16 +2006,23 @@ class LMSDatabase {
 
   async syncFromServer(forceRefresh = false) {
     if (typeof fetch === 'undefined') return;
-    if (this._isSyncing) return;
+    if (this._isSyncing || this._isSaving) return;
     this._isSyncing = true;
     try {
-      // Nếu máy vừa mới phục hồi file sao lưu trong vòng 30 giây, ưu tiên đẩy local lên server thay vì bị server ghi đè ngược
-      if (this.state && this.state._restoredAt && (Date.now() - this.state._restoredAt < 30000)) {
+      // 1. Kiểm tra trạng thái nạp dữ liệu gần nhất: ưu tiên bảo vệ dữ liệu vừa import / phục hồi
+      const isRecentlyModified = (this.state && this.state._importedAt && (Date.now() - this.state._importedAt < 60000)) ||
+                                 (this.state && this.state._restoredAt && (Date.now() - this.state._restoredAt < 60000));
+
+      if (this.state && isRecentlyModified) {
         fetch('/api/db/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.state),
-          keepalive: true
+          body: JSON.stringify(this.state)
+        }).then(r => r.json()).then(data => {
+          if (data && data.version) {
+            this._lastSyncedVersion = data.version;
+            this._lastSyncedTime = data.timestamp || Date.now();
+          }
         }).catch(() => {});
         this._isSyncing = false;
         return;
@@ -2114,7 +2121,20 @@ class LMSDatabase {
           this._lastSyncedVersion = remoteState._version || Date.now();
           this._lastSyncedTime = remoteState._lastModified || Date.now();
 
-          this.state = remoteState;
+          // Nếu server trả về 0 giáo viên nhưng local vừa có dữ liệu giáo viên hợp lệ, bảo vệ local và re-save
+          const localTCount = Array.isArray(this.state && this.state.teachers) ? this.state.teachers.length : 0;
+          const remoteTCount = Array.isArray(remoteState.teachers) ? remoteState.teachers.length : 0;
+          if (localTCount > 0 && remoteTCount === 0) {
+            console.warn('⚠️ Server returned 0 teachers while local has ' + localTCount + ' teachers. Retaining local teachers & saving to server.');
+            remoteState.teachers = this.state.teachers;
+            fetch('/api/db/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.state)
+            }).catch(() => {});
+          }
+
+                    this.state = remoteState;
           this.initUserGroupsAndPermissions();
           try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
 
@@ -2996,21 +3016,30 @@ class LMSDatabase {
     // Asynchronously debounced sync to Central Server (Real-time 150ms)
     const doServerSave = async () => {
       if (typeof fetch === 'undefined' || !this.state) return;
+      if (this._isSaving) return;
+      this._isSaving = true;
       try {
         const res = await fetch('/api/db/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.state),
-          keepalive: true
+          body: JSON.stringify(this.state)
         });
         if (res.ok) {
           const data = await res.json();
           if (data && data.version) {
             this._lastSyncedVersion = data.version;
             this._lastSyncedTime = data.timestamp || Date.now();
+            if (this.state) {
+              this.state._version = data.version;
+              this.state._lastModified = data.timestamp || Date.now();
+            }
           }
         }
-      } catch(e) {}
+      } catch(e) {
+        console.warn('Server save warning:', e);
+      } finally {
+        this._isSaving = false;
+      }
 
       // Broadcast tức thì tới các tab khác của cùng trình duyệt
       try {
@@ -3056,8 +3085,7 @@ class LMSDatabase {
         const res = await fetch('/api/db/clear', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          keepalive: true
-        });
+          });
         if (res.ok) {
           const data = await res.json();
           if (data && data.version) {
@@ -3071,8 +3099,7 @@ class LMSDatabase {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(this.state),
-            keepalive: true
-          });
+            });
         } catch(err) {}
       }
     }
@@ -3105,8 +3132,7 @@ class LMSDatabase {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(this.state),
-            keepalive: true
-          }).catch(() => {});
+            }).catch(() => {});
         }
         return true;
       }
