@@ -412,8 +412,11 @@ function attachRenderMethods(LMSApp) {
     const teachersCount = teachersList.length;
     const studentsList = db.getStudents ? db.getStudents() : [];
     const studentsCount = studentsList.length;
-    // Thống kê động theo dữ liệu thực tế (không dùng số mẫu)
-    const uniqueGrades = [...new Set(classesList.map(c => String(c.grade || ((c.name || '').match(/\d+/) || [''])[0] || '')).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
+    // Thống kê động theo dữ liệu thực tế (chuẩn hóa số khối để không bị lặp 'Khối 9' và '9')
+    const uniqueGrades = [...new Set(classesList.map(c => {
+      const m = String(c.grade || '').match(/\d+/) || String(c.name || '').match(/\d+/);
+      return m ? m[0] : '';
+    }).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
     const gradesCount = uniqueGrades.length;
     const gradesLabel = gradesCount > 0 ? ('Khối ' + uniqueGrades.join(', ')) : 'Chưa có khối lớp';
     const classNamesLabel = classesCount > 0 ? classesList.map(c => c.name || c.id).join(', ') : 'Chưa có lớp học';
