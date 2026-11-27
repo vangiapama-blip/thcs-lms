@@ -2014,17 +2014,9 @@ class LMSDatabase {
                                  (this.state && this.state._restoredAt && (Date.now() - this.state._restoredAt < 60000));
 
       if (this.state && isRecentlyModified) {
-        fetch('/api/db/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.state)
-        }).then(r => r.json()).then(data => {
-          if (data && data.version) {
-            this._lastSyncedVersion = data.version;
-            this._lastSyncedTime = data.timestamp || Date.now();
-          }
-        }).catch(() => {});
-        this._isSyncing = false;
+        if (!this._lastSyncedVersion || this.state._version !== this._lastSyncedVersion) {
+          this.save(true);
+        }
         return;
       }
       const res = await fetch('/api/db/state?t=' + Date.now(), { cache: 'no-store' });
@@ -2121,20 +2113,23 @@ class LMSDatabase {
           this._lastSyncedVersion = remoteState._version || Date.now();
           this._lastSyncedTime = remoteState._lastModified || Date.now();
 
-          // Nếu server trả về 0 giáo viên nhưng local vừa có dữ liệu giáo viên hợp lệ, bảo vệ local và re-save
+          // Chỉ bảo vệ danh sách giáo viên cục bộ nếu vừa import/khôi phục gần đây hơn thời điểm xóa trên server
           const localTCount = Array.isArray(this.state && this.state.teachers) ? this.state.teachers.length : 0;
           const remoteTCount = Array.isArray(remoteState.teachers) ? remoteState.teachers.length : 0;
-          if (localTCount > 0 && remoteTCount === 0) {
-            console.warn('⚠️ Server returned 0 teachers while local has ' + localTCount + ' teachers. Retaining local teachers & saving to server.');
+          const localImportedAt = (this.state && this.state._importedAt) || 0;
+          const remoteClearedAt = remoteState._clearedAt || 0;
+          if (localTCount > 0 && remoteTCount === 0 && localImportedAt > remoteClearedAt && (Date.now() - localImportedAt < 120000)) {
+            console.warn('⚠️ Server returned 0 teachers while local recently imported ' + localTCount + ' teachers. Retaining local teachers & saving to server.');
             remoteState.teachers = this.state.teachers;
+            remoteState._importedAt = localImportedAt;
             fetch('/api/db/save', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(this.state)
+              body: JSON.stringify(remoteState)
             }).catch(() => {});
           }
 
-                    this.state = remoteState;
+          this.state = remoteState;
           this.initUserGroupsAndPermissions();
           try { localStorage.setItem(DB_KEY, JSON.stringify(this.state)); } catch(e) {}
 
@@ -3016,39 +3011,55 @@ class LMSDatabase {
     // Asynchronously debounced sync to Central Server (Real-time 150ms)
     const doServerSave = async () => {
       if (typeof fetch === 'undefined' || !this.state) return;
-      if (this._isSaving) return;
-      this._isSaving = true;
-      try {
-        const res = await fetch('/api/db/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.state)
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.version) {
-            this._lastSyncedVersion = data.version;
-            this._lastSyncedTime = data.timestamp || Date.now();
-            if (this.state) {
-              this.state._version = data.version;
-              this.state._lastModified = data.timestamp || Date.now();
-            }
-          }
+      if (this._isSaving) {
+        this._saveQueued = true;
+        if (this._activeSavePromise) {
+          try { await this._activeSavePromise; } catch (e) {}
         }
-      } catch(e) {
-        console.warn('Server save warning:', e);
-      } finally {
-        this._isSaving = false;
+        return;
       }
-
-      // Broadcast tức thì tới các tab khác của cùng trình duyệt
-      try {
-        if (typeof BroadcastChannel !== 'undefined') {
-          const bc = new BroadcastChannel('thcs_lms_channel');
-          bc.postMessage({ type: 'DATA_CHANGED', timestamp: Date.now() });
-          bc.close();
+      this._isSaving = true;
+      const runSave = (async () => {
+        try {
+          do {
+            this._saveQueued = false;
+            const res = await fetch('/api/db/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.state)
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.version) {
+                this._lastSyncedVersion = data.version;
+                this._lastSyncedTime = data.timestamp || Date.now();
+                if (this.state) {
+                  this.state._version = data.version;
+                  this.state._lastModified = data.timestamp || Date.now();
+                }
+              }
+            } else {
+              console.warn('Server save HTTP error:', res.status);
+            }
+          } while (this._saveQueued);
+        } catch(e) {
+          console.warn('Server save warning:', e);
+        } finally {
+          this._isSaving = false;
+          this._activeSavePromise = null;
         }
-      } catch(e) {}
+
+        // Broadcast tức thì tới các tab khác của cùng trình duyệt
+        try {
+          if (typeof BroadcastChannel !== 'undefined') {
+            const bc = new BroadcastChannel('thcs_lms_channel');
+            bc.postMessage({ type: 'DATA_CHANGED', timestamp: Date.now() });
+            bc.close();
+          }
+        } catch(e) {}
+      })();
+      this._activeSavePromise = runSave;
+      return runSave;
     };
 
     if (immediate) {
@@ -3343,7 +3354,7 @@ class LMSDatabase {
     if (!this.state.teachers) this.state.teachers = [];
     return this.state.teachers;
   }
-  addTeacher(teacher) {
+  addTeacher(teacher, skipSave = false) {
     if (!this.state.teachers) this.state.teachers = [];
     const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().replace(/\s+/g, ' ').trim();
     const tCode = teacher.code ? String(teacher.code).trim().toUpperCase() : '';
@@ -3358,17 +3369,21 @@ class LMSDatabase {
     } else {
       this.state.teachers.push(teacher);
     }
-    this.cleanupDuplicateTeachers();
-    this.save();
-    this.syncAllUsersFromEntities();
-  }
-  updateTeacher(id, updatedData) {
-    const idx = this.state.teachers.findIndex(t => t.id === id);
-    if (idx !== -1) {
-      this.state.teachers[idx] = { ...this.state.teachers[idx], ...updatedData };
+    if (!skipSave) {
       this.cleanupDuplicateTeachers();
       this.save();
       this.syncAllUsersFromEntities();
+    }
+  }
+  updateTeacher(id, updatedData, skipSave = false) {
+    const idx = this.state.teachers.findIndex(t => t.id === id);
+    if (idx !== -1) {
+      this.state.teachers[idx] = { ...this.state.teachers[idx], ...updatedData };
+      if (!skipSave) {
+        this.cleanupDuplicateTeachers();
+        this.save();
+        this.syncAllUsersFromEntities();
+      }
     }
   }
 

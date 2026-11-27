@@ -7205,6 +7205,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
     fileInput.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
+      fileInput.value = '';
 
       modal._nativeFile = file;
       const fName = file.name;
@@ -9553,8 +9554,8 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
         classRows.forEach(row => ws3.addRow(row));
 
         // ĐẶT DEFINED NAMES (NAMED RANGES) CHUẨN ĐỂ EXCEL HIỂN THỊ MŨI TÊN DROPDOWN THẢ XUỐNG TỪ SHEET KHÁC
-        wb.definedNames.add(`'Ma_Mon_Hoc'!$B$2:$B${subjectRows.length + 1}`, 'DS_Ma_Mon');
-        wb.definedNames.add(`'Danh_Sach_Lop'!$B$2:$B${classRows.length + 1}`, 'DS_Ten_Lop');
+        wb.definedNames.add(`'Ma_Mon_Hoc'!$B$2:$B$${subjectRows.length + 1}`, 'DS_Ma_Mon');
+        wb.definedNames.add(`'Danh_Sach_Lop'!$B$2:$B$${classRows.length + 1}`, 'DS_Ten_Lop');
 
         ws1.dataValidations.add('E2:E500', {
           type: 'list',
@@ -10045,7 +10046,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
 
             if (existing) {
               if (tData.code && !existing.code) {
-                db.updateTeacher(existing.id, { code: tData.code });
+                db.updateTeacher(existing.id, { code: tData.code }, true);
               }
               if (selectedMode === 'import_update') {
                 const curSubs = Array.isArray(existing.subjects) && existing.subjects.length ? existing.subjects : (existing.subjectId ? [existing.subjectId] : []);
@@ -10059,7 +10060,7 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
                   email: tData.email || existing.email,
                   username: tData.customUsername || existing.username,
                   password: tData.customPassword || existing.password
-                });
+                }, true);
                 updatedCount++;
               } else {
                 skippedCount++;
@@ -10079,10 +10080,14 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
               };
               tempTeacher.username = tData.customUsername || (db.generateUniqueTeacherUsername ? db.generateUniqueTeacherUsername(tempTeacher) : `thcsamtl_${tempTeacher.id}`);
               tempTeacher.password = tData.customPassword || 'gv123456';
-              db.addTeacher(tempTeacher);
+              db.addTeacher(tempTeacher, true);
               addedCount++;
             }
           });
+
+          // Dọn trùng lặp & đồng bộ tài khoản đúng 1 lần sau khi nạp hàng loạt
+          if (typeof db.cleanupDuplicateTeachers === 'function') db.cleanupDuplicateTeachers();
+          if (typeof db.syncAllUsersFromEntities === 'function') db.syncAllUsersFromEntities();
 
           // Đánh dấu thời điểm import để bảo vệ dữ liệu không bị máy chủ đè ngược
           if (db.state) {
@@ -10949,7 +10954,7 @@ render_students(dom) {
         });
 
         // Data Validation: Dropdown chọn Lớp ở cột E (sử dụng Defined Names chuẩn Excel)
-        wb.definedNames.add(`'Danh_Sach_Lop'!$B$2:$B${classRows.length + 1}`, 'DS_Lop_Hoc');
+        wb.definedNames.add(`'Danh_Sach_Lop'!$B$2:$B$${classRows.length + 1}`, 'DS_Lop_Hoc');
 
         ws1.dataValidations.add('E2:E500', {
           type: 'list',
@@ -11038,7 +11043,7 @@ render_students(dom) {
         reader.readAsText(file, 'UTF-8');
       }
 
-      reader.onload = (evt) => {
+      reader.onload = async (evt) => {
         try {
           let rowsToProcess = [];
           const normTxt = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -11273,7 +11278,12 @@ render_students(dom) {
 
           if (db._migrateStudentCredentials) db._migrateStudentCredentials();
           if (db.autoGenerateParentAccounts) db.autoGenerateParentAccounts();
-          db.save();
+          if (db.state) {
+            db.state._importedAt = Date.now();
+            db.state._lastModified = Date.now();
+            db.state._version = (db.state._version || 0) + 1;
+          }
+          await db.save(true);
 
           modal.remove();
           const totalProcessed = addedCount + updatedCount + alreadyExistsCount;
