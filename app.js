@@ -9546,8 +9546,8 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
 
         // TÍCH HỢP DATA VALIDATION CHO CỘT E (Mã môn dạy) VÀ CỘT F (Danh sách lớp)
         // Liên kết trực tiếp sang Sheet 2 (Ma_Mon_Hoc) và Sheet 3 (Danh_Sach_Lop)
-        const subCrossFormula = `='Ma_Mon_Hoc'!$B$2:$B$${subjectRows.length + 1}`;
-        const classCrossFormula = `='Danh_Sach_Lop'!$B$2:$B$${classRows.length + 1}`;
+        const subCrossFormula = `'Ma_Mon_Hoc'!$B$2:$B${subjectRows.length + 1}`;
+        const classCrossFormula = `'Danh_Sach_Lop'!$B$2:$B${classRows.length + 1}`;
 
         // ĐẶT DATA VALIDATION TRỰC TIẾP TRÊN TOÀN BỘ DẢI Ô (E2:E500 và F2:F500)
         ws1.dataValidations.add('E2:E500', {
@@ -9706,25 +9706,33 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           if (typeof XLSX !== 'undefined' && isExcelBinary) {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            // Tự động tìm Sheet chứa dữ liệu giáo viên, bỏ qua Sheet Ma_Mon_Hoc và Danh_Sach_Lop
+
+            // Tìm sheet chứa danh sách giáo viên: loại trừ các sheet danh mục phụ
+            const cleanSheet = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]/g, '');
             let targetSheetName = workbook.SheetNames[0];
+
             for (const sName of workbook.SheetNames) {
-              const lower = sName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-              if ((lower.includes('giao_vien') || lower.includes('giaovien') || lower.includes('teacher') || lower.includes('mau_danh_sach') || lower.includes('danh_sach')) && !lower.includes('lop') && !lower.includes('ma_mon')) {
+              const cs = cleanSheet(sName);
+              if ((cs.includes('giaovien') || cs.includes('teacher') || cs.includes('canbo') || cs.includes('danhsach') || cs.includes('maudanhsach')) && !cs.includes('lop') && !cs.includes('mamon') && !cs.includes('huongdan')) {
                 targetSheetName = sName;
                 break;
               }
             }
-            if ((targetSheetName.toLowerCase().includes('ma_mon') || targetSheetName.toLowerCase().includes('danh_sach_lop') || targetSheetName.toLowerCase().includes('lop')) && workbook.SheetNames.length > 1) {
-              targetSheetName = workbook.SheetNames.find(s => !s.toLowerCase().includes('ma_mon') && !s.toLowerCase().includes('lop')) || workbook.SheetNames[0];
+            if ((cleanSheet(targetSheetName).includes('mamon') || cleanSheet(targetSheetName).includes('danhsachlop') || cleanSheet(targetSheetName).includes('lop') || cleanSheet(targetSheetName).includes('huongdan')) && workbook.SheetNames.length > 1) {
+              targetSheetName = workbook.SheetNames.find(s => !cleanSheet(s).includes('mamon') && !cleanSheet(s).includes('lop') && !cleanSheet(s).includes('huongdan')) || workbook.SheetNames[0];
             }
+
             const worksheet = workbook.Sheets[targetSheetName];
 
-            // Tự động dò tìm dòng Tiêu đề cột (Header row) trong 15 dòng đầu tiên (chống lỗi do dòng tiêu đề/khoảng trống)
+            // Tự động dò tìm dòng Tiêu đề cột (Header row) trong 15 dòng đầu tiên (chống lỗi do banner, dòng trống)
             const rawAoa = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '', raw: false });
             if (Array.isArray(rawAoa) && rawAoa.length > 0) {
               let headerRowIdx = -1;
-              const headerKeywords = ['họ và tên', 'họ tên', 'tên giáo viên', 'tên gv', 'mã giáo viên', 'mã gv', 'mã môn', 'môn dạy', 'lớp dạy', 'danh sách lớp', 'stt'];
+              const headerKeywords = [
+                'họ và tên', 'họ tên', 'họ đệm', 'tên giáo viên', 'tên cán bộ', 'tên gv', 'tên',
+                'mã giáo viên', 'mã gv', 'mã cán bộ', 'mã số', 'mã định danh',
+                'mã môn', 'môn dạy', 'lớp dạy', 'danh sách lớp', 'stt'
+              ];
               for (let i = 0; i < Math.min(15, rawAoa.length); i++) {
                 const rowStr = (rawAoa[i] || []).map(c => String(c || '').toLowerCase()).join(' ');
                 if (headerKeywords.some(kw => rowStr.includes(kw))) {
@@ -9748,13 +9756,266 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
             }
           } else {
             const text = evt.target.result;
-            parsed = this.parseCSVText(text);
+            parsed = this.parseCSVText(text) || [];
           }
+
           if (!parsed || parsed.length === 0) {
-            this.showToast('Tệp Excel/CSV không có dữ liệu hợp lệ!', 'warning');
+            this.showToast('⚠️ Tệp Excel/CSV không có dữ liệu để xử lý!', 'warning');
             return;
           }
 
+          // Hàm chuẩn hóa key tiếng Việt (xử lý triệt để đ/Đ và khoảng trắng)
+          const cleanKey = (k) => String(k || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'd')
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '');
+
+          const isHeaderOrSummary = (val) => {
+            const norm = cleanKey(val);
+            return !norm ||
+              norm === 'hovaten' || norm === 'hoten' || norm === 'tengiaovien' || norm === 'magiaovien' || norm === 'stt' ||
+              norm.includes('tongcong') || norm.includes('tongso') || norm.includes('danhsach');
+          };
+
+          // 1. Trích xuất Họ và tên (hỗ trợ cả cột gộp và 2 cột tách: Họ đệm + Tên)
+          const extractName = (row) => {
+            const fullAliases = [
+              'hovaten', 'hoten', 'hovatengiaovien', 'tengiaovien', 'hotengv',
+              'tencanbo', 'hovatencanbo', 'giaovien', 'fullname', 'name'
+            ];
+            for (const rk in row) {
+              const ck = cleanKey(rk);
+              if (fullAliases.includes(ck)) {
+                const val = String(row[rk] || '').trim();
+                if (val && !isHeaderOrSummary(val)) return val;
+              }
+            }
+
+            let hoDem = '';
+            let ten = '';
+            const hoAliases = ['hodem', 'hovachudem', 'hovatendem', 'holot', 'ho', 'hovadem'];
+            const tenAliases = ['ten', 'tengv', 'tengiaovien'];
+
+            for (const rk in row) {
+              const ck = cleanKey(rk);
+              if (ck.includes('ma') || ck.includes('dangnhap') || ck.includes('matkhau') || ck.includes('email') || ck.includes('sdt') || ck.includes('lop') || ck.includes('mon')) {
+                continue;
+              }
+              if (!hoDem && hoAliases.includes(ck)) {
+                hoDem = String(row[rk] || '').trim();
+              }
+              if (!ten && (tenAliases.includes(ck) || ck === 'ten')) {
+                ten = String(row[rk] || '').trim();
+              }
+            }
+
+            if (hoDem || ten) {
+              const combined = `${hoDem} ${ten}`.replace(/\s+/g, ' ').trim();
+              if (combined && !isHeaderOrSummary(combined)) return combined;
+            }
+
+            // Fallback tìm kiếm gần đúng (loại trừ các cột nhạy cảm)
+            for (const rk in row) {
+              const ck = cleanKey(rk);
+              if (ck.includes('dangnhap') || ck.includes('matkhau') || ck.includes('truong') || ck.includes('mon') || ck.includes('lop') || ck.includes('ma')) {
+                continue;
+              }
+              if (ck.includes('giaovien') || ck.includes('canbo') || ck.includes('hoten')) {
+                const val = String(row[rk] || '').trim();
+                if (val && !isHeaderOrSummary(val)) return val;
+              }
+            }
+            return '';
+          };
+
+          // 2. Trích xuất Mã giáo viên (loại trừ cột mã môn, mã lớp, mã hs)
+          const extractTeacherCode = (row) => {
+            const codeAliases = ['magiaovien', 'magv', 'masogv', 'masogiaovien', 'magiaovienid', 'magvcb', 'macanbo', 'macb', 'teachercode', 'code', 'id'];
+            for (const rk in row) {
+              const ck = cleanKey(rk);
+              if (ck.includes('mon') || ck.includes('lop') || ck.includes('hs') || ck.includes('hocsinh')) continue;
+              if (codeAliases.includes(ck)) {
+                const val = String(row[rk] || '').trim();
+                if (val && !isHeaderOrSummary(val)) {
+                  return val.replace(/\s+/g, '').toUpperCase();
+                }
+              }
+            }
+            return '';
+          };
+
+          // 3. Trích xuất Mã môn dạy (chấp nhận code, id, tên môn GDPT 2018, hỗ trợ nhiều môn)
+          const extractSubjects = (row) => {
+            const subAliases = ['mamonday', 'mamon', 'monphutrach', 'monday', 'monhoc', 'mon', 'subject', 'subjects'];
+            let rawSub = '';
+            for (const rk in row) {
+              const ck = cleanKey(rk);
+              if (subAliases.includes(ck)) {
+                rawSub = String(row[rk] || '').trim();
+                if (rawSub) break;
+              }
+            }
+            if (!rawSub) {
+              for (const rk in row) {
+                const ck = cleanKey(rk);
+                if (ck.includes('mon') && !ck.includes('magv') && !ck.includes('lop')) {
+                  rawSub = String(row[rk] || '').trim();
+                  if (rawSub) break;
+                }
+              }
+            }
+
+            const allSubs = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
+            const declSubs = (typeof db !== 'undefined' && db.state && Array.isArray(db.state.subjectsList)) ? db.state.subjectsList : [];
+
+            const parsedIds = [];
+            if (rawSub) {
+              const tokens = rawSub.split(/[,;+/]+/).map(s => s.trim()).filter(Boolean);
+              tokens.forEach(tok => {
+                const val = tok.toLowerCase().replace(/^sub_/, '');
+                const matchId = allSubs.find(s => s.id.toLowerCase() === val || s.id.toLowerCase().replace(/^sub_/, '') === val);
+                if (matchId) {
+                  parsedIds.push(matchId.id.replace(/^sub_/, ''));
+                } else {
+                  const matchCode = declSubs.find(s => (s.code && s.code.toLowerCase() === val) || (s.id && s.id.toLowerCase().replace(/^sub_/, '') === val));
+                  if (matchCode) {
+                    parsedIds.push((matchCode.id || matchCode.code).toLowerCase().replace(/^sub_/, ''));
+                  } else {
+                    const normTok = cleanKey(tok);
+                    const matchName = allSubs.find(s => cleanKey(s.name) === normTok || cleanKey(s.name).includes(normTok) || normTok.includes(cleanKey(s.name)))
+                      || declSubs.find(s => cleanKey(s.name) === normTok || cleanKey(s.name).includes(normTok) || normTok.includes(cleanKey(s.name)));
+                    if (matchName) {
+                      parsedIds.push((matchName.id || matchName.code).toLowerCase().replace(/^sub_/, ''));
+                    } else {
+                      parsedIds.push(val);
+                    }
+                  }
+                }
+              });
+            }
+            if (parsedIds.length === 0) parsedIds.push('toan');
+            return [...new Set(parsedIds)];
+          };
+
+          // 4. Trích xuất Danh sách lớp giảng dạy
+          const extractClasses = (row) => {
+            const classAliases = ['danhsachlop', 'phanconglopday', 'lopday', 'lopgiangday', 'lop', 'classes', 'class'];
+            let rawClass = '';
+            for (const rk in row) {
+              const ck = cleanKey(rk);
+              if (classAliases.includes(ck)) {
+                rawClass = String(row[rk] || '').trim();
+                if (rawClass) break;
+              }
+            }
+            if (!rawClass) {
+              for (const rk in row) {
+                const ck = cleanKey(rk);
+                if (ck.includes('lop') && !ck.includes('mon') && !ck.includes('gv')) {
+                  rawClass = String(row[rk] || '').trim();
+                  if (rawClass) break;
+                }
+              }
+            }
+            if (!rawClass) return [];
+            const list = rawClass.split(/[,;\s]+/)
+              .map(c => c.trim().replace(/^Lớp\s*/i, '').replace(/^Khoi\s*/i, '').trim().toUpperCase())
+              .filter(Boolean);
+            return [...new Set(list)];
+          };
+
+          // BƯỚC 1: TRÍCH XUẤT TOÀN BỘ GIÁO VIÊN HỢP LỆ VÀO BỘ NHỚ TẠM (CHƯA ĐỤNG CSDL)
+          const validTeachers = [];
+          const seenInFileMap = new Map();
+          const reservedCodes = parsed.map(extractTeacherCode).filter(Boolean);
+
+          parsed.forEach(row => {
+            const name = extractName(row);
+            if (!name) return; // Bỏ qua dòng không có tên hợp lệ
+
+            const teacherCode = extractTeacherCode(row);
+            const parsedSubjects = extractSubjects(row);
+            const subjectId = parsedSubjects[0] || 'toan';
+            const parsedClasses = extractClasses(row);
+
+            // Tự động bổ sung các lớp mới vào CSDL nếu chưa có
+            if (typeof db !== 'undefined' && parsedClasses.length > 0) {
+              if (!db.state.classesList) db.state.classesList = [];
+              parsedClasses.forEach(clsName => {
+                const exists = db.state.classesList.some(c => (c.name || '').toUpperCase() === clsName.toUpperCase());
+                if (!exists) {
+                  const gradeNum = clsName.match(/\d+/);
+                  const gradeStr = gradeNum ? `Khối ${gradeNum[0]}` : 'Khối 6';
+                  db.state.classesList.push({
+                    id: `cls_${clsName.toLowerCase()}_${Date.now()}`,
+                    name: clsName,
+                    grade: gradeStr,
+                    homeroomTeacher: 'Chưa phân công'
+                  });
+                }
+              });
+            }
+
+            // Đọc các trường mở rộng
+            let email = '';
+            let phone = '';
+            let dob = '';
+            let customUsername = '';
+            let customPassword = '';
+
+            for (const rk in row) {
+              const ck = cleanKey(rk);
+              const val = String(row[rk] || '').trim();
+              if (!val) continue;
+              if (!email && (ck === 'email' || ck.includes('email') || ck.includes('thudientu'))) email = val;
+              if (!phone && (ck === 'sdt' || ck === 'phone' || ck.includes('dienthoai') || ck.includes('sodienthoai'))) phone = val;
+              if (!dob && (ck === 'ngaysinh' || ck === 'dob' || ck.includes('ngaysinh') || ck.includes('sinhngay'))) dob = val;
+              if (!customUsername && (ck.includes('tendangnhap') || ck.includes('username') || ck.includes('taikhoan'))) customUsername = val;
+              if (!customPassword && (ck.includes('matkhau') || ck.includes('password'))) customPassword = val;
+            }
+
+            const normName = cleanKey(name);
+            const fileKey = teacherCode ? ('code:' + teacherCode) : ('name:' + normName);
+
+            // Nếu cùng một giáo viên xuất hiện ở nhiều dòng -> gộp lớp và môn học
+            if (seenInFileMap.has(fileKey)) {
+              const targetIdx = seenInFileMap.get(fileKey);
+              const cur = validTeachers[targetIdx];
+              cur.classes = [...new Set([...(cur.classes || []), ...parsedClasses])];
+              cur.subjects = [...new Set([...(cur.subjects || []), ...parsedSubjects])];
+              if (!cur.email && email) cur.email = email;
+              if (!cur.phone && phone) cur.phone = phone;
+              if (!cur.dob && dob) cur.dob = dob;
+              return;
+            }
+
+            const teacherObj = {
+              code: teacherCode,
+              name: name.replace(/\s+/g, ' ').trim(),
+              email,
+              phone,
+              subjectId,
+              subjects: parsedSubjects,
+              classes: parsedClasses,
+              dob,
+              customUsername,
+              customPassword: customPassword || 'gv123456'
+            };
+
+            seenInFileMap.set(fileKey, validTeachers.length);
+            validTeachers.push(teacherObj);
+          });
+
+          // BƯỚC 2: BẢO VỆ DỮ LIỆU - NẾU KHÔNG CÓ GIÁO VIÊN HỢP LỆ THÌ DỪNG LẠI NGAY
+          if (validTeachers.length === 0) {
+            this.showToast('⚠️ Không tìm thấy giáo viên nào hợp lệ trong tệp! Vui lòng kiểm tra lại cột Họ và tên (hoặc Họ đệm + Tên).', 'warning');
+            return;
+          }
+
+          // BƯỚC 3: ÁP DỤNG CHẾ ĐỘ NHẬP DỮ LIỆU ĐÃ CHỌN
           if (selectedMode === 'import_overwrite') {
             if (db.state) db.state.teachers = [];
           }
@@ -9762,187 +10023,89 @@ Lời giải: Nước là thành phần chủ yếu cấu tạo nên tế bào, 
           let addedCount = 0;
           let updatedCount = 0;
           let skippedCount = 0;
-          const seenInFile = new Map(); // khóa (mã GV hoặc tên chuẩn hóa) -> id, chống nhân đôi trong cùng file
 
-          // Mã giáo viên: chỉ khớp CHÍNH XÁC tên cột (tránh khớp nhầm cột "Tên giáo viên")
-          const codeKeys = ['Mã giáo viên', 'Mã GV', 'Mã số GV', 'Mã số giáo viên', 'MaGV', 'code', 'Teacher code'];
-          const nkCode = (k) => String(k).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]/g, '');
-          const wantedCodeKeys = codeKeys.map(nkCode);
-          const readTeacherCode = (row) => {
-            for (const rk in row) {
-              if (wantedCodeKeys.includes(nkCode(rk)) && row[rk] !== undefined && row[rk] !== null && String(row[rk]).trim()) {
-                return String(row[rk]).replace(/\s+/g, '').toUpperCase();
-              }
+          validTeachers.forEach(tData => {
+            const latestTeachers = db.getTeachers();
+            const normName = cleanKey(tData.name);
+            const normEmail = (tData.email || '').trim().toLowerCase();
+
+            let existing = null;
+            if (tData.code) {
+              existing = latestTeachers.find(t => String(t.code || '').trim().toUpperCase() === tData.code)
+                || latestTeachers.find(t => !t.code && (cleanKey(t.name) === normName || (normEmail && String(t.email || '').trim().toLowerCase() === normEmail)));
+            } else {
+              existing = latestTeachers.find(t => cleanKey(t.name) === normName || (normEmail && String(t.email || '').trim().toLowerCase() === normEmail));
             }
-            return '';
-          };
-          // Giữ chỗ các mã có sẵn trong file để mã tự sinh không bị trùng
-          const reservedCodes = parsed.map(readTeacherCode).filter(Boolean);
 
-          parsed.forEach(row => {
-            // Support exact keys, normalized keys, and loose aliases
-            const getVal = (...keys) => {
-              for (const k of keys) {
-                if (row[k] !== undefined && row[k] !== null && String(row[k]).trim()) return String(row[k]).trim();
-                const norm = k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
-                if (row[norm] !== undefined && row[norm] !== null && String(row[norm]).trim()) return String(row[norm]).trim();
+            if (existing) {
+              if (tData.code && !existing.code) {
+                db.updateTeacher(existing.id, { code: tData.code });
               }
-              // Fallback search through all row keys
-              for (const rk in row) {
-                if (wantedCodeKeys.includes(nkCode(rk))) continue; // không lấy nhầm cột Mã GV
-                const rkNorm = rk.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
-                for (const k of keys) {
-                  const kNorm = k.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
-                  if (rkNorm.includes(kNorm) || kNorm.includes(rkNorm)) {
-                    if (row[rk] !== undefined && row[rk] !== null && String(row[rk]).trim()) return String(row[rk]).trim();
-                  }
-                }
-              }
-              return '';
-            };
-
-            const teacherCode = readTeacherCode(row);
-
-            const name = getVal('Tên giáo viên', 'Họ và tên Giáo viên', 'Họ và tên', 'Tên cán bộ', 'Tên', 'Name', 'Giáo viên');
-            const email = getVal('Email', 'email');
-            const phone = getVal('SĐT', 'Số điện thoại', 'Điện thoại', 'Phone', 'SDT');
-            
-            // Xử lý thông minh Mã môn dạy từ Sheet Ma_Mon_Hoc (chấp nhận id, code, tên môn, hỗ trợ chọn nhiều môn)
-            const rawSubInput = getVal('Mã môn dạy', 'Môn phụ trách', 'Môn dạy', 'Môn', 'Subject');
-            let parsedSubjectIds = [];
-            if (rawSubInput) {
-              const allSubs = (typeof db !== 'undefined' && db.getSubjects) ? db.getSubjects() : [];
-              const declSubs = (typeof db !== 'undefined' && db.state && db.state.subjectsList) ? db.state.subjectsList : [];
-              const tokens = String(rawSubInput).split(/[,;+/]+/).map(s => s.trim()).filter(Boolean);
-              
-              tokens.forEach(tok => {
-                const val = tok.toLowerCase().replace(/^sub_/, '');
-                const matchId = allSubs.find(s => s.id.toLowerCase() === val || s.id.toLowerCase().replace(/^sub_/, '') === val);
-                if (matchId) {
-                  parsedSubjectIds.push(matchId.id.replace(/^sub_/, ''));
-                } else {
-                  const matchCode = declSubs.find(s => (s.code && s.code.toLowerCase() === val) || (s.id && s.id.toLowerCase().replace(/^sub_/, '') === val));
-                  if (matchCode) {
-                    parsedSubjectIds.push((matchCode.id || matchCode.code).toLowerCase().replace(/^sub_/, ''));
-                  } else {
-                    const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
-                    const valNorm = norm(tok);
-                    const matchName = allSubs.find(s => norm(s.name) === valNorm || norm(s.name).includes(valNorm) || valNorm.includes(norm(s.name)))
-                      || declSubs.find(s => norm(s.name) === valNorm || norm(s.name).includes(valNorm) || valNorm.includes(norm(s.name)));
-                    if (matchName) {
-                      parsedSubjectIds.push((matchName.id || matchName.code).toLowerCase().replace(/^sub_/, ''));
-                    } else {
-                      parsedSubjectIds.push(val);
-                    }
-                  }
-                }
-              });
-            }
-            if (parsedSubjectIds.length === 0) parsedSubjectIds = ['toan'];
-            const subjectId = parsedSubjectIds[0] || 'toan';
-
-            const classesStr = getVal('Danh sách lớp', 'Phân công lớp dạy', 'Lớp dạy', 'Lớp', 'Classes');
-            const dob = getVal('Ngày sinh', 'DOB') || '';
-            const customUsername = getVal('Tên đăng nhập', 'Username', 'Tai khoản');
-            const customPassword = getVal('Mật khẩu', 'Password', 'Mat khau') || 'gv123456';
-
-            const parsedClasses = classesStr ? classesStr.split(/[,;\s]+/).map(c => c.trim().replace(/^Lớp/i, '').trim().toUpperCase()).filter(Boolean) : [];
-
-            if (name) {
-              // Chuẩn hóa: bỏ khoảng trắng thừa, không phân biệt hoa thường
-              const normName = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
-              const nName = normName(name);
-              const nEmail = String(email || '').trim().toLowerCase();
-
-              // 1) Giáo viên đã xuất hiện ở dòng trước trong CÙNG file -> gộp lớp/môn, không tạo mới
-              //    Có Mã GV -> phân biệt theo mã (2 GV trùng tên khác mã vẫn là 2 người)
-              const fileKey = teacherCode ? ('code:' + teacherCode) : ('name:' + nName);
-              const seenId = seenInFile.get(fileKey);
-              if (seenId) {
-                const cur = db.getTeachers().find(t => String(t.id) === String(seenId));
-                if (cur) {
-                  const mergedClasses = [...new Set([...(cur.classes || []), ...parsedClasses])];
-                  const curSubs = Array.isArray(cur.subjects) && cur.subjects.length ? cur.subjects : (cur.subjectId ? [cur.subjectId] : []);
-                  const mergedSubs = [...new Set([...curSubs, ...parsedSubjectIds].filter(Boolean))];
-                  db.updateTeacher(cur.id, { classes: mergedClasses, subjects: mergedSubs, subjectId: mergedSubs[0] || cur.subjectId });
-                }
-                return;
-              }
-
-              // 2) Đối chiếu với danh sách hiện có (luôn lấy danh sách mới nhất)
-              const latestTeachers = db.getTeachers();
-              let existing = null;
-              if (teacherCode) {
-                // Ưu tiên khớp theo Mã GV; nếu chưa có, chỉ khớp theo tên/email với GV CHƯA có mã
-                existing = latestTeachers.find(t => String(t.code || '').trim().toUpperCase() === teacherCode)
-                  || latestTeachers.find(t => !t.code && (normName(t.name) === nName || (nEmail && String(t.email || '').trim().toLowerCase() === nEmail)));
+              if (selectedMode === 'import_update') {
+                const curSubs = Array.isArray(existing.subjects) && existing.subjects.length ? existing.subjects : (existing.subjectId ? [existing.subjectId] : []);
+                const nextSubs = tData.subjects.length > 0 ? tData.subjects : curSubs;
+                db.updateTeacher(existing.id, {
+                  subjectId: nextSubs[0] || tData.subjectId || existing.subjectId,
+                  subjects: nextSubs,
+                  classes: tData.classes.length > 0 ? tData.classes : existing.classes,
+                  dob: tData.dob || existing.dob || '',
+                  phone: tData.phone || existing.phone,
+                  email: tData.email || existing.email,
+                  username: tData.customUsername || existing.username,
+                  password: tData.customPassword || existing.password
+                });
+                updatedCount++;
               } else {
-                existing = latestTeachers.find(t => normName(t.name) === nName || (nEmail && String(t.email || '').trim().toLowerCase() === nEmail));
+                skippedCount++;
               }
-
-              if (existing) {
-                seenInFile.set(fileKey, existing.id);
-                // GV cũ chưa có mã -> gán mã từ file (cả 2 chế độ)
-                if (teacherCode && !existing.code) {
-                  db.updateTeacher(existing.id, { code: teacherCode });
-                }
-                if (selectedMode === 'import_update') {
-                  const curSubs = Array.isArray(existing.subjects) && existing.subjects.length ? existing.subjects : (existing.subjectId ? [existing.subjectId] : []);
-                  const nextSubs = parsedSubjectIds.length > 0 ? parsedSubjectIds : curSubs;
-                  db.updateTeacher(existing.id, {
-                    subjectId: nextSubs[0] || subjectId || existing.subjectId,
-                    subjects: nextSubs,
-                    classes: parsedClasses.length > 0 ? parsedClasses : existing.classes,
-                    dob: dob || existing.dob || '',
-                    phone: phone || existing.phone,
-                    email: email || existing.email,
-                    username: customUsername || existing.username,
-                    password: customPassword || existing.password
-                  });
-                  updatedCount++;
-                } else {
-                  skippedCount++; // Chế độ Thêm mới: GV đã có -> bỏ qua, không nhân đôi
-                }
-              } else {
-                const tempTeacher = {
-                  id: `gv_${Date.now()}_${Math.floor(Math.random()*100000)}`,
-                  code: teacherCode || this._nextTeacherCode(reservedCodes),
-                  name: name.replace(/\s+/g, ' ').trim(),
-                  email,
-                  phone,
-                  subjectId,
-                  subjects: parsedSubjectIds.length > 0 ? parsedSubjectIds : (subjectId ? [subjectId] : []),
-                  classes: parsedClasses,
-                  dob,
-                  isHomeroom: null
-                };
-                tempTeacher.username = customUsername || (db.generateUniqueTeacherUsername ? db.generateUniqueTeacherUsername(tempTeacher) : `thcsamtl_${tempTeacher.id}`);
-                tempTeacher.password = customPassword || 'gv123456';
-                db.addTeacher(tempTeacher);
-                seenInFile.set(fileKey, tempTeacher.id);
-                addedCount++;
-              }
+            } else {
+              const tempTeacher = {
+                id: `gv_${Date.now()}_${Math.floor(Math.random()*100000)}`,
+                code: tData.code || this._nextTeacherCode(reservedCodes),
+                name: tData.name,
+                email: tData.email,
+                phone: tData.phone,
+                subjectId: tData.subjectId,
+                subjects: tData.subjects,
+                classes: tData.classes,
+                dob: tData.dob,
+                isHomeroom: null
+              };
+              tempTeacher.username = tData.customUsername || (db.generateUniqueTeacherUsername ? db.generateUniqueTeacherUsername(tempTeacher) : `thcsamtl_${tempTeacher.id}`);
+              tempTeacher.password = tData.customPassword || 'gv123456';
+              db.addTeacher(tempTeacher);
+              addedCount++;
             }
           });
 
+          // Lưu tức thì lên máy chủ trung tâm và đồng bộ mọi phiên
           if (typeof db.save === 'function') {
             await db.save(true);
           }
+
           modal.remove();
 
+          // Tự động xóa bộ lọc tìm kiếm để người dùng nhìn thấy đầy đủ toàn bộ giáo viên vừa nhập
+          this.teacherSubjectFilter = 'all';
+          this.teacherSearchKeyword = '';
+
+          // Thông báo kết quả trung thực, rõ ràng
           if (selectedMode === 'import_update') {
-            this.showToast(`✅ Import thành công: Đã cập nhật ${updatedCount} giáo viên, thêm mới ${addedCount} giáo viên!`);
+            this.showToast(`✅ Import thành công: Cập nhật ${updatedCount} giáo viên | Thêm mới ${addedCount} giáo viên | Tổng cộng: ${db.getTeachers().length} giáo viên.`);
+          } else if (selectedMode === 'import_overwrite') {
+            this.showToast(`✅ Ghi đè thành công: Đã nạp ${addedCount} giáo viên từ tệp vào hệ thống | Tổng cộng: ${db.getTeachers().length} giáo viên.`);
           } else {
-            this.showToast(`✅ Import thành công: Đã thêm mới ${addedCount} giáo viên vào hệ thống!${skippedCount ? ` (Bỏ qua ${skippedCount} giáo viên đã có)` : ''}`);
+            this.showToast(`✅ Import thành công: Thêm mới ${addedCount} giáo viên${skippedCount ? ` (Bỏ qua ${skippedCount} giáo viên đã có)` : ''} | Tổng: ${db.getTeachers().length} giáo viên.`);
           }
 
-          this.render_teachers(dom);
+          // Vẽ lại danh sách giáo viên trong viewport hiện tại
+          const targetViewport = document.getElementById('viewport') || dom;
+          this.render_teachers(targetViewport);
         } catch (err) {
           console.error('CSV/Excel parse error:', err);
           this.showToast('Lỗi đọc tệp Excel/CSV: ' + (err.message || 'Vui lòng kiểm tra lại cấu trúc tệp!'), 'danger');
         }
       };
-
     };
   }
 
@@ -10773,7 +10936,7 @@ render_students(dom) {
         });
 
         // Data Validation: Dropdown chọn Lớp ở cột E (liên kết trực tiếp sang Sheet Danh_Sach_Lop)
-        const classFormula = `='Danh_Sach_Lop'!$B$2:$B$${classRows.length + 1}`;
+        const classFormula = `'Danh_Sach_Lop'!$B$2:$B${classRows.length + 1}`;
 
         ws1.dataValidations.add('E2:E500', {
           type: 'list',
